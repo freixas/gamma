@@ -16,8 +16,8 @@
  */
 package gamma.execution.lcode;
 
-import gamma.execution.HCodeEngine;
 import gamma.value.Coordinate;
+import gamma.value.Frame;
 import gamma.value.Line;
 
 /**
@@ -29,6 +29,7 @@ public class LineStruct extends Struct
 
     static Coordinate min = new Coordinate(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY);
     static Coordinate max = new Coordinate(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+
     public Line line;
     public boolean lineSet = false;
     public Coordinate clipBL = min;
@@ -36,5 +37,13 @@ public class LineStruct extends Struct
 
     public LineStruct()
     {
+    }
+
+    @Override
+    public void relativeTo(Frame prime)
+    {
+        line = line.relativeTo(prime);
+        clipBL = prime.toFrame(clipBL);
+        clipUR = prime.toFrame(clipUR);
     }
 }

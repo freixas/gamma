@@ -17,8 +17,8 @@
 package gamma.value;
 
 import gamma.ProgrammingException;
-import gamma.value.Coordinate;
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.ListIterator;
 
 /**
@@ -31,7 +31,7 @@ public class Worldline
     private final double tauInit;
     private final double dInit;
 
-    private final LinkedList<WorldlineSegment> segments;
+    private final ArrayList<WorldlineSegment> segments;
     private WorldlineSegment lastSegment = null;
 
     public Worldline(WInitializer initializer)
@@ -40,7 +40,7 @@ public class Worldline
         this.tauInit = initializer.getTau();
         this.dInit =  initializer.getD();
 
-        segments = new LinkedList<>();
+        segments = new ArrayList<>();
     }
 
     public void addSegment(WorldlineSegment.LimitType type, double delta, double a, double v)

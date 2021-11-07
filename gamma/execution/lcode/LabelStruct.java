@@ -17,7 +17,9 @@
 package gamma.execution.lcode;
 
 import gamma.execution.HCodeEngine;
+import gamma.math.Lorentz;
 import gamma.value.Coordinate;
+import gamma.value.Frame;
 
 /**
  *
@@ -32,5 +34,12 @@ public class LabelStruct extends Struct
 
     public LabelStruct()
     {
+    }
+
+    @Override
+    public void relativeTo(Frame prime)
+    {
+        location = prime.toFrame(location);
+        rotation = Lorentz.toPrimeAngle(rotation, prime.getV());
     }
 }

@@ -16,10 +16,10 @@
  */
 package gamma.execution.lcode;
 
-import gamma.execution.HCodeEngine;
 import static gamma.execution.lcode.LineStruct.max;
 import static gamma.execution.lcode.LineStruct.min;
 import gamma.value.Coordinate;
+import gamma.value.Frame;
 import gamma.value.Observer;
 
 /**
@@ -35,5 +35,13 @@ public class WorldlineStruct extends Struct
 
     public WorldlineStruct()
     {
+    }
+
+    @Override
+    public void relativeTo(Frame prime)
+    {
+        observer = observer.relativeTo(prime);
+        clipBL = prime.toFrame(clipBL);
+        clipUR = prime.toFrame(clipUR);
     }
 }

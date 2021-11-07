@@ -30,6 +30,9 @@ public class Observer
 {
     private final Worldline worldline;
 
+    private final WInitializer initializer;
+    private final ArrayList<WSegment> segments;
+
     /**
      * Create an observer.
      *
@@ -41,10 +44,13 @@ public class Observer
      */
     public Observer(WInitializer initializer, ArrayList<WSegment> segments)
     {
+        this.initializer = initializer;
+        this.segments = segments;
+
         worldline = new Worldline(initializer);
 
         if (segments.size() < 1) {
-            
+
             // Create a default segment
 
             segments.add(new WSegment(0, 0, WorldlineSegment.LimitType.NONE, Double.NaN));
@@ -70,7 +76,23 @@ public class Observer
                 worldline.addFinalSegment(wSegment.getA(), wSegment.getV());
             }
         }
+    }
 
+    /**
+     * Create a new version of this observer that is relative to the given
+     * frame rather than relative to the rest frame.
+     *
+     * @param prime The frame to be relative to.
+     * @return The new observer.
+     */
+    public Observer relativeTo(Frame prime)
+    {
+        ArrayList<WSegment> segs = new ArrayList<>();
+        Iterator<WSegment> iter = segs.iterator();
+        while (iter.hasNext()) {
+            segs.add(iter.next().relativeTo(prime));
+        }
+        return new Observer(initializer.relativeTo(prime), segs);
     }
 
     // **********************************************************

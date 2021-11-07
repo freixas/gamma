@@ -87,33 +87,6 @@ public final class Util
         return Math.log((x + 1.0) / (x - 1.0)) / 2;
     }
 
-    /**
-     * Convert a velocity to an x axis angle in radians.
-     *
-     * @param v The velocity as a percentage of the speed of light.
-     * @return The x axis angle in radians.
-     */
-    static public double vToXAngle(double v)
-    {
-	return Math.atan(v);
-    }
-
-    /**
-     * Convert a velocity to an t axis angle in radians.
-     *
-     * @param v The velocity as a percentage of the speed of light.
-     * @return The t axis angle in radians.
-     */
-    static public double vToTAngle(double v)
-    {
-	double angle = Math.atan(v);
-	if (angle >= 0) {
-	    return Math.PI / 2 - angle;
-	}
-	else {
-	    return -Math.PI / 2 - angle;
-	}
-    }
 
     /**
      * Get the sign of a number

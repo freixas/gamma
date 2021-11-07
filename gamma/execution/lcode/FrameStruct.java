@@ -32,4 +32,10 @@ public class FrameStruct extends Struct
         this.frame = HCodeEngine.getDefFrame();
     }
 
+    @Override
+    public void relativeTo(Frame prime)
+    {
+        // Do nothing
+    }
+
 }

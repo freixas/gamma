@@ -16,10 +16,7 @@
  */
 package gamma.value;
 
-import gamma.ProgrammingException;
 import gamma.math.OffsetAcceleration;
-import gamma.value.Coordinate;
-import java.util.ListIterator;
 
 
 /**
@@ -157,7 +154,6 @@ public class WorldlineSegment
             this.tau = o.tau;
             this.d = o.d;
         }
-
     }
 
     private final Endpoint min;

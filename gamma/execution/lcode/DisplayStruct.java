@@ -17,7 +17,6 @@
 package gamma.execution.lcode;
 
 import gamma.execution.ExecutionException;
-import gamma.execution.HCodeEngine;
 import gamma.value.Coordinate;
 import gamma.value.Frame;
 import java.awt.Toolkit;
@@ -30,8 +29,8 @@ public class DisplayStruct extends Struct
 {
     static Coordinate originDefault = new Coordinate(0.0, 0.0);
 
-    public int width;
-    public int height;
+    public int width = Struct.INT_NOT_SET;
+    public int height = -Struct.INT_NOT_SET;
     public Coordinate origin = originDefault;
     public double scale = 1.0;
     public double units = 1.0;
@@ -66,6 +65,12 @@ public class DisplayStruct extends Struct
         if (units <= 0.0) {
             throw new ExecutionException("Display units are out of range");
         }
+    }
+
+    @Override
+    public void relativeTo(Frame prime)
+    {
+        // Do nothing
     }
 
 }

@@ -33,4 +33,10 @@ public class GridStruct extends Struct
     {
         this.frame = HCodeEngine.getDefFrame();
     }
+
+    @Override
+    public void relativeTo(Frame prime)
+    {
+        frame = frame.relativeTo(prime);
+    }
 }

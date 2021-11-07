@@ -16,6 +16,7 @@
  */
 package gamma;
 
+import gamma.execution.LCodeEngine;
 import java.io.File;
 import java.util.ListIterator;
 import javafx.collections.ObservableList;
@@ -30,6 +31,7 @@ import javafx.stage.WindowEvent;
 
 import gamma.file.FileWatcher;
 import java.util.Optional;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextArea;
@@ -56,6 +58,8 @@ public final class MainWindow extends Stage
 
     private FileWatcher watcher = null;
     private Thread watcherThread = null;
+
+    private LCodeEngine lCodeEngine = null;
 
     /**
      * Create a main window.
@@ -149,6 +153,9 @@ public final class MainWindow extends Stage
             watcherThread = null;
         }
         file = null;
+
+        if (lCodeEngine != null) lCodeEngine.close();
+        super.close();
     }
 
     /**
@@ -180,7 +187,7 @@ public final class MainWindow extends Stage
      */
     private void locateUIElements()
     {
-        MenuBar menuBar = (MenuBar) getScene().lookup("#menuBar");
+        MenuBar menuBar = (MenuBar)getScene().lookup("#menuBar");
         ObservableList<Menu> menus = menuBar.getMenus();
         ListIterator<Menu> iterMenuBar = menus.listIterator();
 
@@ -230,6 +237,36 @@ public final class MainWindow extends Stage
         }
         return file.getParentFile();
 
+    }
+
+    /**
+     * Set the current LCodeEngine. If a prior engine exists, close it
+     * down.
+     *
+     * @param lCodeEngine The lcode engine to set.
+     */
+    public void setLCodeEngine(LCodeEngine lCodeEngine)
+    {
+        if (this.lCodeEngine != null) this.lCodeEngine.close();
+        this.lCodeEngine = lCodeEngine;
+    }
+
+    /**
+     * Set up and return a canvas.
+     *
+     * @param width The width for the canvas. If -1, use the current width.
+     * @param height The height for the canvas. If -1, use the current height.
+     *
+     * @return The canvas
+     */
+    public Canvas setupCanvas(int width, int height)
+    {
+        Canvas canvas = (Canvas)getScene().lookup("#canvas");
+
+        if (width  >= 0) canvas.setWidth(width);
+        if (height >= 0) canvas.setHeight(height);
+
+        return canvas;
     }
 
     /**

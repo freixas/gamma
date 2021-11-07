@@ -17,6 +17,7 @@
 package gamma.execution.lcode;
 
 import gamma.execution.HCodeEngine;
+import gamma.value.Frame;
 import gamma.value.Polyline;
 
 /**
@@ -30,5 +31,11 @@ public class FillStruct extends Struct
 
     public FillStruct()
     {
+    }
+
+    @Override
+    public void relativeTo(Frame prime)
+    {
+        // Do nothing
     }
 }

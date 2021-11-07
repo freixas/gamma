@@ -74,6 +74,8 @@ public class DiagramEngine
                 HCodeEngine hCodeEngine = new HCodeEngine(hCodes, lCodeEngine);
                 hCodeEngine.execute();
 
+                lCodeEngine.setup();
+
                 // The LCodeEngine should use the display command to set up a new
                 // drawing area in the main window. This should disable any existing
                 // observers on the drawing area and set up new ones.

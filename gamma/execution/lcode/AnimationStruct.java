@@ -18,6 +18,7 @@ package gamma.execution.lcode;
 
 import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
+import gamma.value.Frame;
 
 /**
  *
@@ -46,6 +47,12 @@ public class AnimationStruct extends Struct
         if (speed <= 0.0) {
             throw new ExecutionException("Animation speed is out of range");
         }
+    }
+
+    @Override
+    public void relativeTo(Frame prime)
+    {
+        // Do nothing
     }
 
 }

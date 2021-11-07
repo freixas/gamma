@@ -18,6 +18,7 @@ package gamma.value;
 
 import gamma.math.Lorentz;
 import gamma.math.Util;
+import java.util.Objects;
 
 /**
  *
@@ -80,12 +81,29 @@ public class Frame
         // Find the origin of the axes (where tau is 0)
 
         double distanceToOrigin = tau * scaling;
-        double theta = Util.vToTAngle(v);
+        double theta = Lorentz.vToTAngle(v);
         double signTheta = Util.sign(theta);
 
         origin = new Coordinate(
             x - signTheta * Math.cos(theta) * distanceToOrigin,
             t - signTheta * Math.sin(theta) * distanceToOrigin);
+    }
+
+    /**
+     * Copy constructor.
+     *
+     * @param other The other frame to copy.
+     */
+    public Frame(Frame other)
+    {
+        this.v = other.v;
+        this.origin = new Coordinate(other.origin);
+    }
+
+    private Frame(Coordinate origin, double v)
+    {
+        this.origin = origin;
+        this.v = v;
     }
 
     /**
@@ -135,6 +153,46 @@ public class Frame
     public Coordinate toFrame(Coordinate c)
     {
         return Lorentz.toPrimeFrame(new Coordinate(c.x + origin.x, c.t + origin.t), v);
+    }
+
+    /**
+     * Create a new version of this frame that is relative to the given frame
+     * rather than relative to the rest frame.
+     *
+     * @param prime The frame to be relative to.
+     * @return The new frame.
+     */
+    public Frame relativeTo(Frame prime)
+    {
+        return new Frame(prime.toFrame(origin), Lorentz.vPrime(v, prime.getV()));
+    }
+
+    @Override
+    public int hashCode()
+    {
+        int hash = 3;
+        hash = 19 * hash + Objects.hashCode(this.origin);
+        hash = 19 * hash + (int)(Double.doubleToLongBits(this.v) ^ (Double.doubleToLongBits(this.v) >>> 32));
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Frame other = (Frame)obj;
+        if (Double.doubleToLongBits(this.v) != Double.doubleToLongBits(other.v)) {
+            return false;
+        }
+        return Objects.equals(this.origin, other.origin);
     }
 
 }

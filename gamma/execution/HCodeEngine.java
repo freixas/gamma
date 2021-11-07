@@ -98,7 +98,7 @@ public class HCodeEngine
 
         // Add the default frame
 
-        table.put("defFrame", defFrame);
+        table.put("defFrame", new Frame(defFrame));
         table.protect("defFrame");
     }
 
@@ -150,7 +150,7 @@ public class HCodeEngine
 
     public static Frame getDefFrame()
     {
-        return defFrame;
+        return new Frame(defFrame);
     }
 
     public LCodeEngine getLCodeEngine()

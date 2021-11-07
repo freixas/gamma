@@ -17,6 +17,7 @@
 package gamma.execution.lcode;
 
 import gamma.execution.HCodeEngine;
+import gamma.math.Lorentz;
 import gamma.value.Coordinate;
 import gamma.value.Frame;
 
@@ -34,5 +35,12 @@ public class EventStruct extends Struct
     public EventStruct()
     {
         this.boostTo = HCodeEngine.getDefFrame();
+    }
+
+    @Override
+    public void relativeTo(Frame prime)
+    {
+        coord = prime.toFrame(coord);
+        boostTo = boostTo.relativeTo(prime);
     }
 }

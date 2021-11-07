@@ -16,27 +16,9 @@
  */
 package gamma.file;
 
-import gamma.execution.hcode.HCode;
 import gamma.MainWindow;
-import gamma.ProgrammingException;
 import gamma.execution.*;
-import gamma.execution.lcode.Command;
 import gamma.parser.Parser;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.ListIterator;
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.TextArea;
 
 /**
  * This handler is run when a script is parsed successfully.
@@ -62,34 +44,6 @@ public class ScriptParseCompleteHandler implements Runnable
         DiagramEngine dEngine =
             new DiagramEngine(window, parser.getHCodes(), parser.isAnimated());
         dEngine.execute();
-
-//        // The parser's output is safe for use
-//        // The parser object will not be re-used by any other thread.
-//
-//        debugHCode();
-//
-//        // Begin exection
-//
-//        HCodeEngine hEngine;
-//        LCodeEngine lEngine;
-//        ArrayList<Command> commands;
-//        try {
-//            hEngine = new HCodeEngine(parser.getHCodes());
-//            hEngine.execute();
-//            lEngine = hEngine.getLCodeEngine();
-//            commands = lEngine.getCommands();
-//        }
-//        catch (ProgrammingException e) {
-//            showAlert(AlertType.ERROR, "Programming Error", e.getMessage());
-//        }
-//        catch (Exception e) {
-//            showAlert(AlertType.ERROR, "Runtime Error", e.getMessage());
-//        }
-//
-//        Alert alert = new Alert(AlertType.INFORMATION);
-//        alert.setTitle("Parser Completion");
-//        alert.setContentText("Parsing completed");
-//        alert.showAndWait();
     }
 
 }

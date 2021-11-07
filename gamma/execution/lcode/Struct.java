@@ -17,7 +17,6 @@
 package gamma.execution.lcode;
 
 import gamma.ProgrammingException;
-import gamma.execution.HCodeEngine;
 import gamma.math.Util;
 import gamma.value.Frame;
 import gamma.value.Observer;
@@ -31,8 +30,6 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -42,6 +39,8 @@ public abstract class Struct
 {
     static final HashMap<String, HashMap<String, Field>> allFields = new HashMap<>();
     static final HashMap<String, HashMap<String, Method>> allMethods = new HashMap<>();
+
+    static public final int INT_NOT_SET = -999999999;
 
     static
     {
@@ -84,6 +83,14 @@ public abstract class Struct
         allFields.put("StyleStruct", getFields(StyleStruct.class));
         allMethods.put("StyleStruct", getMethods(StyleStruct.class));
     }
+
+    /**
+     * Make any coordinates, velocities, angles, distances, and durations
+     * relative to the given frame instead of the rest frame.
+     *
+     * @param prime The frame to which things should be relative.
+     */
+    abstract public void relativeTo(Frame prime);
 
     /**
      * Get all the fields in a Struct subclass and put them into a HashMap,

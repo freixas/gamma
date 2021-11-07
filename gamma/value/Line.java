@@ -16,6 +16,7 @@
  */
 package gamma.value;
 
+import gamma.math.Lorentz;
 import gamma.math.Util;
 
 /**
@@ -51,10 +52,10 @@ public class Line
     public Line(AxisType type, Frame frame, double offset)
     {
         if (type == AxisType.X) {
-            initialize(Util.vToXAngle(frame.getV()), frame.toRest(new Coordinate(0, offset)));
+            initialize(Lorentz.vToXAngle(frame.getV()), frame.toRest(new Coordinate(0, offset)));
         }
         else {
-            initialize(Util.vToTAngle(frame.getV()), frame.toRest(new Coordinate(offset, 0)));
+            initialize(Lorentz.vToTAngle(frame.getV()), frame.toRest(new Coordinate(offset, 0)));
         }
     }
 
@@ -68,7 +69,7 @@ public class Line
      */
     public Line(AxisType type, double v, Coordinate point)
     {
-        initialize(Util.vToTAngle(v), point);
+        initialize(Lorentz.vToTAngle(v), point);
     }
 
     /**
@@ -175,6 +176,25 @@ public class Line
         return this.offset;
     }
 
+    /**
+     * Create a new version of this line that is relative to the given frame
+     * rather than relative to the rest frame.
+     *
+     * @param prime The frame to be relative to.
+     * @return The new line.
+     */
+    public Line relativeTo(Frame prime)
+    {
+        return new Line(Lorentz.toPrimeAngle(angle, prime.getV()), prime.toFrame(coord));
+    }
+
+    /**
+     * Intersect this line with another.
+     *
+     * @param other The other line to intersect with.
+     *
+     * @return The intersection or null if none.
+     */
     public Coordinate intersect(Line other)
     {
         if (other != null) {
@@ -227,6 +247,14 @@ public class Line
         return null;
     }
 
+    /**
+     * Intersect one line with another.
+     *
+     * @param line1 The first line.
+     * @param line2 The second line
+     *
+     * @return The intersection or null if none.
+     */
     static public Coordinate intersect(Line line1, Line line2)
     {
         if (line1 != null) {

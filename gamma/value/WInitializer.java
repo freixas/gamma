@@ -16,10 +16,12 @@
  */
 package gamma.value;
 
+import gamma.math.Lorentz;
+
 /**
- * This is a worldline initializer definition structure. It is used to 
+ * This is a worldline initializer definition structure. It is used to
  * initialize a worldline.
- * 
+ *
  * @author Antonio Freixas
  */
 public class WInitializer
@@ -49,6 +51,20 @@ public class WInitializer
     {
         return d;
     }
-    
-    
+
+    /**
+     * Create a new version of this WInitializer that is relative to the
+     * given frame rather than relative to the rest frame.
+     *
+     * @param prime The frame to be relative to.
+     * @return The new initializer.
+     */
+    public WInitializer relativeTo(Frame prime)
+    {
+        return new WInitializer(
+            prime.toFrame(origin),
+            tau,
+            Lorentz.lengthContraction(d, prime.getV()));
+    }
+
 }

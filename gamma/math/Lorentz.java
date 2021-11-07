@@ -24,9 +24,12 @@ import gamma.value.Coordinate;
  */
 public final class Lorentz
 {
+    // We cache the last v and gamma values so as to speed up
+    // the gamma calculation
+
     private static double v = Double.NaN;
-    private static double g;
-    
+    private static double gamma;
+
     // TERMS:
     //   x = proper distance
     //   t = proper time
@@ -40,57 +43,300 @@ public final class Lorentz
     //   Velocity v is constant
     //   Velocities are in fractions of light speed, so the speed of light is 1
     //   If t is in seconds, x is in light seconds, etc.
-    
+
     private Lorentz() {}
-    
+
+    /**
+     * Given (x, t), calculate x' given an inertial frame F' at velocity v. This
+     * is the Lorentz transformation.
+     *
+     * @param x The x value.
+     * @param t The t value
+     * @param v The velocity.
+     *
+     * @return x'.
+     */
     static public double xPrime(double x, double t, double v) {
 	return (x - v * t) * Lorentz.gamma(v);
 
     }
+
+    /**
+     * Given (x, t), calculate t' given an inertial frame F' at velocity v. This
+     * is the Lorentz transformation.
+     *
+     * @param x The x value.
+     * @param t The t value
+     * @param v The velocity.
+     *
+     * @return t'.
+     */
     static public double tPrime(double x, double t, double v) {
 	return (t - v * x) * Lorentz.gamma(v);
     }
 
+    /**
+     * Given (x', t'), calculate x given an inertial frame F' at velocity v.
+     * This is the inverse Lorentz transformation.
+     *
+     * @param xPrime The x value.
+     * @param tPrime The t value
+     * @param v The velocity.
+     *
+     * @return x.
+     */
     static public double x(double xPrime, double tPrime, double v) {
 	return (xPrime + v * tPrime) * Lorentz.gamma(v);
     }
 
+    /**
+     * Given (x', t'), calculate t given an inertial frame F' at velocity v.
+     * This is the inverse Lorentz transformation.
+     *
+     * @param xPrime The x value.
+     * @param tPrime The t value
+     * @param v The velocity.
+     *
+     * @return t.
+     */
     static public double t(double xPrime, double tPrime, double v) {
 	return (tPrime + v * xPrime) * Lorentz.gamma(v);
     }
-    
+
+    /**
+     * Given (x, t), calculate (x', t') given an inertial frame F' at velocity
+     * v. This is the Lorentz transformation.
+     *
+     * @param rest The (x, t) coordinate.
+     * @param v The velocity.
+     *
+     * @return (x', t')
+     */
     static public Coordinate toPrimeFrame(Coordinate rest, double v)
     {
         return new Coordinate(xPrime(rest.x, rest.t, v), tPrime(rest.x, rest.t, v));
     }
 
+    /**
+     * Given (x', t'), calculate (x, t) given an inertial frame F' at velocity
+     * v.This is the Lorentz transformation.
+     *
+     * @param prime The (x', t') coordinate.
+     * @param v The velocity.
+     *
+     * @return (x, t)
+     */
     static public Coordinate toRestFrame(Coordinate prime, double v)
     {
         return new Coordinate(x(prime.x, prime.t, v), t(prime.x, prime.t, v));
     }
 
+    /**
+     * Given an inertial frame F' at velocity v, calculate gamma, 1 / sqrt(1 - v<sup>2</sup>).
+     *
+     * @param v Thevelocity.
+     * @return Gamma.
+     */
     static public double gamma(double v) {
 	if (Double.isNaN(Lorentz.v) || Lorentz.v != v) {
 	    Lorentz.v = v;
-	    Lorentz.g = 1 / Math.sqrt(1 - v*v);
+	    Lorentz.gamma = 1 / Math.sqrt(1 - v*v);
 	}
-	return Lorentz.g;
+	return Lorentz.gamma;
     }
 
+    /**
+     * Given a time tau in inertial frame F' for an observer moving at velocity
+     * v, calculate the matching time t, assuming this observer's tau 0 occurs
+     * when t is 0.
+     *
+     * @param tau The time in frame F', the moving frame.
+     * @param v The velocity of the moving observer
+     *
+     * @return
+     */
     static public double tauToT(double tau, double v) {
 	return tau * Lorentz.gamma(v);
     }
 
+    /**
+     * Given a time t in inertial frame F, calculate the matching time tau for
+     * an observer moving at velocity v, assuming this observer's tau 0 occurs
+     * when t is 0.
+     *
+     * @param t The time in frame F, the rest frame.
+     * @param v The velocity of the moving observer.
+     *
+     * @return Tau for the moving observer.
+     */
     static public double tToTau(double t, double v) {
 	return t / Lorentz.gamma(v);
     }
 
-    static public double lengthContraction(double x, double v) {
-	return x / Lorentz.gamma(v);
+    /**
+     * Given a proper length measured in frame F' at velocity v, calculate
+     * the contracted length in frame F.
+     *
+     * @param length The proper length (in F').
+     * @param v The relative velocity.
+     *
+     * @return The contracted length (in F).
+     */
+    static public double lengthContraction(double length, double v) {
+	return length / Lorentz.gamma(v);
     }
 
-    static public double invLengthContraction(double x, double v) {
-	return x * Lorentz.gamma(v);
+    /**
+     * Given a contracted length measured in frame F, calculate the proper
+     * length in frame F' moving at velocity v.
+     *
+     * @param length The contracted length (in F).
+     * @param v The relative velocity.
+     *
+     * @return The proper length (in F').
+     */
+    static public double invLengthContraction(double length, double v) {
+	return length * Lorentz.gamma(v);
     }
+
+    /**
+     * Given a proper duration measured in frame F' at velocity v, calculate the
+     * dilated duration in frame F.
+     *
+     * @param duration The proper duration (in F').
+     * @param v The relative velocity.
+     *
+     * @return The dilated duration (in F).
+     */
+    static public double timeDilation(double duration, double v) {
+	return duration * Lorentz.gamma(v);
+    }
+
+    /**
+     * Given a dilated duration measured in frame F, calculate the dilated
+     * duration in frame F' moving at velocity v.
+     *
+     * @param duration The dilated duration (in F).
+     * @param v The relative velocity.
+     *
+     * @return The proper duration (in F').
+     */
+    static public double invTimeDilation(double duration, double v) {
+	return duration * Lorentz.gamma(v);
+    }
+
+    /**
+     * Given a velocity v1 relative to frame F, calculate the corresponding
+     * velocity relative to frame F' moving at velocity v.
+     *
+     * @param v1 A velocity relative to frame F.
+     * @param v The velocity of frame F'.
+     *
+     * @return The corresponding velocity in frame F'.
+     */
+    static public double vPrime(double v1, double v)
+    {
+        return (v1 - v) / (1 - (v1 * v));
+    }
+
+    /**
+     * Given a velocity v1 relative to frame F' moving at velocity v, calculate
+     * the corresponding velocity relative to frame F.
+     *
+     * @param v1 A velocity relative to frame F'.
+     * @param v The velocity of frame F'.
+     *
+     * @return The corresponding velocity in frame F.
+     */
+    static public double v(double v1, double v)
+    {
+        return (v1 + v) / (1 + (v1 * v));
+    }
+
+    /**
+     * Convert a velocity to a t axis angle in radians.
+     *
+     * @param v The velocity as a percentage of the speed of light.
+     *
+     * @return The t axis angle in radians.
+     */
+    public static double vToTAngle(double v)
+    {
+        double angle = Math.atan(v);
+        if (angle >= 0) {
+            return (Math.PI / 2) - angle;
+        }
+        else {
+            return (-Math.PI / 2) - angle;
+        }
+    }
+
+    /**
+     * Convert a t axis angle in radians to a velocity.
+     *
+     * @param angle The t axis angle
+     *
+     * @return The velocity.
+     */
+    public static double angleTToV(double angle)
+    {
+        if (angle >= 0) {
+            angle = (Math.PI / 2) - angle;
+        }
+        else {
+            angle = (-Math.PI / 2) - angle;
+        }
+        return Math.tan(angle);
+    }
+
+    /**
+     * Convert a velocity to an x axis angle in radians.
+     *
+     * @param v The velocity as a percentage of the speed of light.
+     *
+     * @return The x axis angle in radians.
+     */
+    public static double vToXAngle(double v)
+    {
+        return Math.atan(v);
+    }
+
+    /**
+     * Convert an x axis angle in radians to a velocity.
+     *
+     * @param angle The x axis angle
+     *
+     * @return The velocity.
+     */
+    public static double angleXToV(double angle)
+    {
+        return Math.tan(angle);
+    }
+
+    public static double toPrimeAngle(double angle, double v)
+    {
+        final double lightAngle = Math.PI / 4;
+
+        // Angle is the angle of light: +/- 45 degrees
+
+        if (angle == lightAngle || angle == -lightAngle) {
+            return angle;
+        }
+
+        // X angle
+
+        else if ((angle >= 0 && angle < lightAngle) ||
+            (angle < 0  && angle > -lightAngle)) {
+            double v1 = angleXToV(angle);
+            double v2 = vPrime(v1, v);
+            return vToXAngle(v2);
+        }
+        else {
+            double v1 = angleTToV(angle);
+            double v2 = vPrime(v1, v);
+            return vToTAngle(v2);
+        }
+    }
+
 
 }

@@ -18,6 +18,7 @@ package gamma.execution.lcode;
 
 import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
+import gamma.value.Frame;
 
 /**
  *
@@ -168,4 +169,10 @@ public class StyleStruct extends Struct
 //            }
 //        }
 //    }
+
+    @Override
+    public void relativeTo(Frame prime)
+    {
+        // Do nothing
+    }
 }

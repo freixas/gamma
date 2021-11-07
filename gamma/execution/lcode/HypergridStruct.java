@@ -17,6 +17,7 @@
 package gamma.execution.lcode;
 
 import gamma.execution.HCodeEngine;
+import gamma.value.Frame;
 
 /**
  *
@@ -31,5 +32,11 @@ public class HypergridStruct extends Struct
 
     public HypergridStruct()
     {
+    }
+
+    @Override
+    public void relativeTo(Frame frame)
+    {
+        // Do nothing
     }
 }

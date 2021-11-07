@@ -35,13 +35,58 @@ public class Coordinate extends ObjectContainer
     }
 
     /**
-     * Copy constructor. This makes a deep copy of the Coordinate object.
+     * Copy constructor.
      *
      * @param other The coordinate to copy.
      */
-    public Coordinate(Coordinate c)
+    public Coordinate(Coordinate other)
     {
-        this(c.x, c.t);
+        this(other.x, other.t);
+    }
+
+    /**
+     * Set this coordinate equal to another coordinate.
+     *
+     * @param x The x coordinate.
+     * @param t The t coordinate
+     */
+    public void setTo(double x, double t)
+    {
+        this.x = x;
+        this.t = t;
+    }
+
+    /**
+     * Set this coordinate equal to another coordinate.
+     *
+     * @param other The coordinate to copy.
+     */
+    public void setTo(Coordinate other)
+    {
+        this.x = other.x;
+        this.t = other.t;
+    }
+
+    /**
+     * Add a coordinate to this one.
+     *
+     * @param other The other coordinate to add.
+     */
+    public void add(Coordinate other)
+    {
+        this.x += other.x;
+        this.t += other.t;
+    }
+
+    /**
+     * Subtract a coordinate from this one.
+     *
+     * @param other The other coordinate to subtract.
+     */
+    public void subtract(Coordinate other)
+    {
+        this.x -= other.x;
+        this.t -= other.t;
     }
 
     @Override
@@ -64,4 +109,33 @@ public class Coordinate extends ObjectContainer
             default -> { /* Do nothing */ }
         }
     }
+
+    @Override
+    public int hashCode()
+    {
+        int hash = 3;
+        hash = 13 * hash + (int)(Double.doubleToLongBits(this.x) ^ (Double.doubleToLongBits(this.x) >>> 32));
+        hash = 13 * hash + (int)(Double.doubleToLongBits(this.t) ^ (Double.doubleToLongBits(this.t) >>> 32));
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Coordinate other = (Coordinate)obj;
+        if (Double.doubleToLongBits(this.x) != Double.doubleToLongBits(other.x)) {
+            return false;
+        }
+        return Double.doubleToLongBits(this.t) == Double.doubleToLongBits(other.t);
+    }
+
 }
