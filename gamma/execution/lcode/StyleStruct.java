@@ -28,7 +28,7 @@ public class StyleStruct extends Struct
 {
     public Color color = new Color(Color.black);
     public Color backgroundColor = new Color(Color.white);
-    public int lineWidth = 2;
+    public int lineThickness = 2;
     public String lineStyle = "solid";
     public String arrow = "none";
     public int diameter = 2;
@@ -41,8 +41,8 @@ public class StyleStruct extends Struct
     public String anchor = "MC";
     public boolean ticks = true;
     public boolean tickLabels = true;
-    public int tickThickness = -9999;          // Use lineWidth
-    public int majorTickThickness = -9999;     // Use lineWidth
+    public int tickThickness = -9999;          // Use lineThickness
+    public int majorTickThickness = -9999;     // Use lineThickness
 
     public StyleStruct()
     {
@@ -52,7 +52,7 @@ public class StyleStruct extends Struct
     {
         this.color = new Color(other.color);
         this.backgroundColor = new Color(Color.white);
-        this.lineWidth = other.lineWidth;
+        this.lineThickness = other.lineThickness;
         this.lineStyle = other.lineStyle;
         this.arrow = other.arrow;
         this.diameter = other.diameter;
@@ -65,13 +65,32 @@ public class StyleStruct extends Struct
         this.anchor = other.anchor;
         this.ticks = other.ticks;
         this.tickLabels = other.tickLabels;
-        this.tickThickness = other.tickThickness;          // Use lineWidth
+        this.tickThickness = other.tickThickness;          // Use lineThickness
         this.majorTickThickness = other.majorTickThickness;
     }
 
-    public void lineWidthRangeCheck()
+    public void lineThicknessRangeCheck()
     {
-        rangeCheck("lineWidth", lineWidth, 1, 20);
+        rangeCheck("lineThickness", lineThickness, 1, 20);
+    }
+
+    public void lineStyleRangeCheck()
+    {
+        if (!lineStyle.equals("solid") &&
+            !lineStyle.equals("dashed") &&
+            !lineStyle.equals("dotted")) {
+            throw new ExecutionException("The value used for property 'lineStyle' is invalid");
+        }
+    }
+
+    public void arrowRangeCheck()
+    {
+        if (!lineStyle.equals("none") &&
+            !lineStyle.equals("both") &&
+            !lineStyle.equals("start") &&
+            !lineStyle.equals("end")) {
+            throw new ExecutionException("The value used for property 'arrow' is invalid");
+        }
     }
 
     public void diameterRangeCheck()
@@ -79,10 +98,51 @@ public class StyleStruct extends Struct
         rangeCheck("diameter", diameter, 1, 20);
     }
 
+    public void eventShapeRangeCheck()
+    {
+        if (!lineStyle.equals("circle") &&
+            !lineStyle.equals("square") &&
+            !lineStyle.equals("diamond") &&
+            !lineStyle.equals("star")) {
+            throw new ExecutionException("The value used for property 'eventShape' is invalid");
+        }
+    }
+
+    public void weightRangeCheck()
+    {
+        if (!lineStyle.equals("normal") &&
+            !lineStyle.equals("bold")) {
+            throw new ExecutionException("The value used for property 'weight' is invalid");
+        }
+    }
+
+    public void slantRangeCheck()
+    {
+        if (!lineStyle.equals("normal") &&
+            !lineStyle.equals("italic")) {
+            throw new ExecutionException("The value used for property 'slant' is invalid");
+        }
+    }
+
     public void sizeRangeCheck()
     {
         if (size < 1) {
             throw new ExecutionException("The value used for property 'size' is out of range");
+        }
+    }
+
+    public void anchorRangeCheck()
+    {
+        if (!lineStyle.equals("UL") &&
+            !lineStyle.equals("UC") &&
+            !lineStyle.equals("UR") &&
+            !lineStyle.equals("ML") &&
+            !lineStyle.equals("MC") &&
+            !lineStyle.equals("MR") &&
+            !lineStyle.equals("BL") &&
+            !lineStyle.equals("BC") &&
+            !lineStyle.equals("BR")) {
+            throw new ExecutionException("The value used for property 'anchor' is invalid");
         }
     }
 
@@ -102,7 +162,7 @@ public class StyleStruct extends Struct
 //    {
 //        styleColor =         new Color((double)PropertyInfo.getPropertyInfo("style", "styleColor").getDefault());
 //        backgroundColor =    new Color((double)PropertyInfo.getPropertyInfo("style", "backgroundColor").getDefault());
-//        lineWidth =          Util.toInt((double)PropertyInfo.getPropertyInfo("style", "lineWidth").getDefault());
+//        lineThickness =          Util.toInt((double)PropertyInfo.getPropertyInfo("style", "lineThickness").getDefault());
 //        lineStyle =          (String)PropertyInfo.getPropertyInfo("style", "lineStyle").getDefault();
 //        arrow =              (String)PropertyInfo.getPropertyInfo("style", "arrow").getDefault();
 //        diameter =           Util.toInt((double)PropertyInfo.getPropertyInfo("style", "diameter").getDefault());
@@ -133,8 +193,8 @@ public class StyleStruct extends Struct
 //                        styleColor = new Color((Double) value);
 //                    case "backgroundColor" ->
 //                        backgroundColor = new Color((Double) value);
-//                    case "lineWidth" ->
-//                        lineWidth = Util.toInt((Double) value);
+//                    case "lineThickness" ->
+//                        lineThickness = Util.toInt((Double) value);
 //                    case "lineStyle" ->
 //                        lineStyle = (String) value;
 //                    case "arrow" ->

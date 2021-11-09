@@ -26,15 +26,82 @@ public class Bounds
     public Coordinate min;
     public Coordinate max;
 
+    public Bounds(double x1, double t1, double x2, double t2)
+    {
+        min = new Coordinate(Math.min(x1, x2), Math.min(t1, t2));
+        max = new Coordinate(Math.max(x1, x2), Math.max(t1, t2));
+    }
+
+    /**
+     * Creating a bounding box. The values given can be for any two
+     * opposing corners. The corners are sort so that the min corner is bottom
+     * left and the max corner is upper right.
+     *
+     * @param a The first corner.
+     * @param b The second corner.
+     */
     public Bounds(Coordinate a, Coordinate b)
     {
         this(a.x, a.t, b.x, b.t);
     }
 
-    public Bounds(double x1, double t1, double x2, double t2)
+    /**
+     * Copy constructor.
+     *
+     * @param other The other bounds to copy.
+     */
+    public Bounds(Bounds other)
     {
-        min = new Coordinate(Math.min(x1, x2), Math.min(t1, t2));
-        max = new Coordinate(Math.max(x1, x2), Math.max(t1, t2));
+        // There's no need to sort as the other bounds will already
+        // be sorted
+
+        this.min.x = other.min.x;
+        this.min.t = other.min.t;
+        this.max.x = other.max.x;
+        this.max.t = other.max.t;
+    }
+
+    /**
+     * Set this bounding box to a new set of corners. The values given can be
+     * for any two opposing corners. The corners are sort so that the min corner
+     * is bottom left and the max corner is upper right.
+     *
+     * @param x1 The x coordinate of the first corner.
+     * @param t1 The t coordinate of the first corner.
+     * @param x2 The x coordinate of the second corner.
+     * @param t2 The t coordinate of the second corner.
+     */
+    public void setTo(double x1, double t1, double x2, double t2)
+    {
+        min.setTo(Math.min(x1, x2), Math.min(t1, t2));
+        max.setTo(Math.max(x1, x2), Math.max(t1, t2));
+    }
+
+    /**
+     * Set this bounding box to a new set of corners. The values given can be
+     * for any two opposing corners. The corners are sort so that the min corner
+     * is bottom left and the max corner is upper right.
+     *
+     * @param a The first corner.
+     * @param b The second corner.
+     */
+    public void setTo(Coordinate a, Coordinate b)
+    {
+        setTo(a.x, a.t, b.x, b.t);
+    }
+
+    /**
+     * Set this bounding box to match another.
+     *
+     * @param other The other bounds to copy.
+     */
+    public void setTo(Bounds other)
+    {
+        // There's no need to sort as the other bounds will already
+        // be sorted
+
+        min.setTo(other.min);
+        max.setTo(other.max);
     }
 
     public Coordinate getMin()
@@ -51,6 +118,7 @@ public class Bounds
      * Returns true if the given point is inside this bounding box.
      *
      * @param c The point.
+     *
      * @return True if the given point is inside this bounding box.
      */
     public boolean inside(Coordinate c)
@@ -63,6 +131,7 @@ public class Bounds
      *
      * @param x The point's x coordinate.
      * @param t The point's t coordinate.
+     *
      * @return True if the given point is inside this bounding box.
      */
     public boolean inside(double x, double t)
@@ -74,6 +143,7 @@ public class Bounds
      * Returns true if the given bounding box intersects with this one.
      *
      * @param other The bounding box to check for intersection.
+     *
      * @return True if they intersect.
      */
     public boolean intersects(Bounds other)
@@ -84,5 +154,63 @@ public class Bounds
             max.t < other.min.t ||
             min.t > other.max.t
         );
+    }
+
+    /**
+     * Returns the bounding box for the intersection of the given bounding box
+     * with this one.
+     *
+     * @param other The bounding box to use for the intersection.
+     *
+     * @return The bounding box for the intersection or null if none.
+     */
+    public Bounds intersect(Bounds other)
+    {
+        if (!intersects(other)) return null;
+        return new Bounds(
+            Math.max(min.x, other.min.x),
+            Math.max(min.t, other.min.t),
+            Math.min(max.x, other.max.t),
+            Math.min(max.t, other.max.t));
+
+    }
+
+    /**
+     * Create a new Bounds object by rotating this one around a given point.
+     *
+     * @param angle The angle in radians by which to rotate (+PI/2 to -PI/2),
+     * @param point The point to rotate around.
+     *
+     * @return The rotated bounding box.
+     */
+    public Bounds rotate(double angle, Coordinate point)
+    {
+        final double sinTheta;
+        final double cosTheta;
+
+        if (angle >= 0) {
+            sinTheta = Math.sin(angle);
+            cosTheta = Math.cos(angle);
+        }
+        else {
+            sinTheta = Math.sin(Math.PI / 2 - angle);
+            cosTheta = Math.cos(Math.PI / 2 - angle);
+        }
+
+        double x1 = min.x;
+        double t1 = min.t;
+        double x2 = max.x;
+        double t2 = max.t;
+
+        Coordinate p1 = new Coordinate(cosTheta * x1 - sinTheta * t1, sinTheta * x1 + cosTheta * t1);
+        Coordinate p2 = new Coordinate(cosTheta * x1 - sinTheta * t2, sinTheta * x1 + cosTheta * t2);
+        Coordinate p3 = new Coordinate(cosTheta * x2 - sinTheta * t2, sinTheta * x2 + cosTheta * t2);
+        Coordinate p4 = new Coordinate(cosTheta * x2 - sinTheta * t1, sinTheta * x2 + cosTheta * t1);
+
+        return new Bounds(
+            Math.min(Math.min(p1.x, p2.x), Math.min(p3.x, p4.x)),
+            Math.min(Math.min(p1.t, p2.t), Math.min(p3.t, p4.t)),
+            Math.max(Math.max(p1.x, p2.x), Math.max(p3.x, p4.x)),
+            Math.max(Math.max(p1.t, p2.t), Math.max(p3.t, p4.t)));
     }
 }

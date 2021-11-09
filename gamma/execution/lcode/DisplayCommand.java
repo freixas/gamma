@@ -16,7 +16,12 @@
  */
 package gamma.execution.lcode;
 
+import gamma.drawing.Dimension;
+import gamma.drawing.T;
 import gamma.execution.LCodeEngine;
+import gamma.math.Util;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 
 /**
  *
@@ -27,7 +32,55 @@ public class DisplayCommand extends CommandExec
     @Override
     public void execute(LCodeEngine engine, Struct cmdStruct, StyleStruct styles)
     {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        // The display command is right after the initial setup, after any
+        // zoom/pan event, and after any resize event
+
+        DisplayStruct struct = (DisplayStruct)cmdStruct;
+
+        Canvas canvas = engine.getCanvas();
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+
+        // We need to make sure we size the window properly.
+        // We will either find both width and height omitted or only one.
+        // If they are both omitted, we will size the drawing area to match
+        // the parent; if only one or the other is omitted, we set it to
+        // the parent's size.
+
+        double width = struct.width;
+        double height = struct.height;
+
+        double canvasWidth = canvas.getWidth();
+        double canvasHeight = canvas.getHeight();
+
+        if (width == Struct.INT_NOT_SET && height == Struct.INT_NOT_SET) {
+            width = canvasWidth;
+            height = canvasHeight;
+        }
+        else if (width == Struct.INT_NOT_SET) {
+            width = canvasWidth;
+            struct.width = Util.toInt(width);
+        }
+        else if (height == Struct.INT_NOT_SET) {
+            height = canvasHeight;
+            struct.height = Util.toInt(height);
+        }
+
+        // Make sure the canvas matches
+
+        if (width != canvasWidth) canvas.setWidth(width);
+        if (height != canvasHeight) canvas.setHeight(height);
+
+        // At this point, the canvas is at the size we want. Fill it with the
+        // background color
+
+        gc.setFill(styles.backgroundColor.getJavaFXColor());
+        gc.fillRect(0, 0, width, height);
+
+        // We need to tell the transform engine that the viewport size
+        // just changed
+
+        T t = engine.getTransform();
+        t.setViewport(new Dimension(width, height));
     }
 
 }

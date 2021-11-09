@@ -16,13 +16,17 @@
  */
 package gamma.execution;
 
+import customfx.ResizableCanvas;
 import gamma.MainWindow;
+import gamma.drawing.Context;
 import gamma.drawing.T;
 import gamma.execution.lcode.*;
 import gamma.value.Frame;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.ListIterator;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.canvas.Canvas;
 
 /**
@@ -31,48 +35,137 @@ import javafx.scene.canvas.Canvas;
  */
 public class LCodeEngine
 {
+    class ListenerStruct
+    {
+
+    }
+
     private final ArrayList<Command> commands;
     private final MainWindow window;
     private Command animationCommand;
     private Command displayCommand;
     private Command frameCommand;
 
-    private boolean resize = false;
-    private Canvas canvas;
+    private ResizableCanvas canvas;
+    private double lastWidth;
+    private double lastHeight;
 
+    private T transform;
+
+    private Context context;
+
+    ChangeListener<Number> sizeListener;
+
+    /**
+     * Create the lcode engine.
+     *
+     * @param window The window into which we will draw.
+     */
     public LCodeEngine(MainWindow window)
     {
         this.window = window;
         this.commands = new ArrayList<>();
 
         this.displayCommand = new Command(new DisplayStruct(), new StyleStruct(), new DisplayCommand());
-        this.displayCommand = new Command(new FrameStruct(), new StyleStruct(), new FrameCommand());
+        this.frameCommand = new Command(new FrameStruct(), new StyleStruct(), new FrameCommand());
+
+        lastWidth = -1.0;
+        lastHeight = -1.0;
     }
 
+    /**
+     * Get the window associated with the diagram we are going to draw.
+     *
+     * @return The associated window.
+     */
     public MainWindow getWindow()
     {
         return window;
     }
 
+    /**
+     * Get the animation command (which is not stored on the lcode list).
+     *
+     * @return The animation command.
+     */
     public Command getAnimationCommand()
     {
         return animationCommand;
     }
 
+    /**
+     * Get the display command  (which is not stored on the lcode list).
+     * @return
+     */
     public Command getDisplayCommand()
     {
         return displayCommand;
     }
 
+    /**
+     * Get the frame command (which is not stored on the lcode list).
+     *
+     * @return The frame command.
+     */
     public Command getFrameCommand()
     {
         return frameCommand;
     }
 
+    /**
+     * Get the canvas on which we will draww. This is only valid after setup()
+     * is called.
+     *
+     * @return The drawing canvas.
+     */
+    public ResizableCanvas getCanvas()
+    {
+        return canvas;
+    }
+
+    /**
+     * Get the graphics transform. This is only valid after setup() is
+     * called.
+     *
+     * @return The graphics transform.
+     */
+    public T getTransform()
+    {
+        return transform;
+    }
+
+    /**
+     * Get the graphics context. This is only valid after setup() is
+     * called.
+     *
+     * @return The graphics context.
+     */
+    public Context getContext()
+    {
+        return context;
+    }
+
+    /**
+     * Get all the commands on the lcode list. This excludes the animation,
+     * display, and frame commands.
+     * <p>
+     * This is a live list. Changes to this list will affect the lcode
+     * execution.
+     *
+     * @return The list of all commands on the lcode list.
+     */
     public ArrayList<Command> getCommands()
     {
         return commands;
     }
+
+    /**
+     * Add a  command to the command list. If the command is animation,
+     * display, or frame, it is stored in the lcode engine, but not on the
+     * command list.
+     *
+     * @param command The command to add.
+     */
 
     public void addCommand(Command command)
     {
@@ -97,30 +190,34 @@ public class LCodeEngine
      */
     public void setup()
     {
+        // Tell the window we are starting it. It will shut down any prior
+        // lcode engine
 
         window.setLCodeEngine(this);
 
-        DisplayStruct dStruct = (DisplayStruct)displayCommand.getCmdStruct();
-        int width = dStruct.width;
-        int height = dStruct.height;
+        // Get the drawing area
 
-        // If width and height are ommitted, always resize to the maximum
-        // available space
+        canvas = window.getCanvas();
 
-        if (width == Struct.INT_NOT_SET && height == Struct.INT_NOT_SET) {
-            resize = true;
-            width = height = -1;
-        }
-        else if (width == Struct.INT_NOT_SET) {
-            width = -1;
-        }
-        else if (height == Struct.INT_NOT_SET) {
-            height = -1;
-        }
+        // Set up our change listeners
 
-        // Add the canvas
+        final LCodeEngine engine = this;
 
-        canvas = window.setupCanvas(width, height);
+        sizeListener = (ObservableValue<? extends Number> ov, Number oldValue, Number newValue) -> {
+            if (engine.lastWidth != canvas.getWidth() || engine.lastHeight != canvas.getHeight()) {
+                engine.execute();
+                engine.lastWidth = canvas.getWidth();
+                engine.lastHeight = canvas.getWidth();
+            }
+        };
+        canvas.widthProperty().addListener(sizeListener);
+
+        // Observer for mouse events
+        // Click and drag for pan
+        // Ctrl + scrollwheel to zoom
+        // Keyboard events
+        // Ctrl +/-  to zoom
+        // Ctrl + 0 to reset zoom and pan
 
         // Use the frame command to revise all the coordinates in the structures.
         // Optimize if we have the default frame
@@ -134,13 +231,37 @@ public class LCodeEngine
             });
         }
 
-        // Set up the drawing transforms
+        // Set up the drawing transforms. The transform is set up here,
+        // but is modified whenever the zoom/pan changes or when the canvas
+        // is resized
 
-        T t = new T(dStruct.origin, dStruct.scale, dStruct.units, canvas.getWidth(), canvas.getHeight());
+        DisplayStruct dStruct = (DisplayStruct)displayCommand.getCmdStruct();
+
+        transform = new T(dStruct.origin, dStruct.scale, dStruct.units, canvas.getWidth(), canvas.getHeight());
+
+        // Create the graphics context
+
+        context = new Context(transform, canvas);
+
+        // Draw the initial display
+
+        execute();
     }
 
+    /**
+     * Execute the lCode.
+     * <p>
+     * This is called after setup() and the after any zoom/pan changes or after
+     * the drawing area is resized.
+     */
     public void execute()
     {
+        // Run the display command
+
+        displayCommand.execute(this);
+
+        // Execute normal commands
+
         ListIterator<Command> iter = commands.listIterator();
         while (iter.hasNext()) {
             iter.next().execute(this);
@@ -154,6 +275,8 @@ public class LCodeEngine
      */
     public void close()
     {
-        // Remove all observables
+        if (canvas != null) {
+            canvas.widthProperty().removeListener(sizeListener);
+        }
     }
 }

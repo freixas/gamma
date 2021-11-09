@@ -34,11 +34,28 @@ public class Frame
     private final Coordinate origin;
     private final double v;
 
+    /**
+     * Create a frame from the instantaneous moving frame (IMF) of some point on
+     * the observer's world line. Since no point on the worldline is given, we
+     * pick the point where tau is 0.
+     *
+     * @param observer The observer from which to create the frame.
+     */
     public Frame(Observer observer)
     {
         this(observer, AtType.TAU, 0.0);
     }
 
+    /**
+     * Create a frame from the instantaneous moving frame (IMF) of some point on
+     * the observer's world line. The point to use is identified by some t, tau,
+     * or d value on the worldline. If d is given, it is possible that no
+     * point will be identified. In this case, a runtime exception will occur.
+     *
+     * @param observer The observer from which to create the frame.
+     * @param type The type: AtType.T, AtType.TAU or AtType.D
+     * @param value The value associated with the type.
+     */
     public Frame(Observer observer, AtType type, double value)
     {
         double x;

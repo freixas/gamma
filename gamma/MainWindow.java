@@ -16,6 +16,7 @@
  */
 package gamma;
 
+import customfx.ResizableCanvas;
 import gamma.execution.LCodeEngine;
 import java.io.File;
 import java.util.ListIterator;
@@ -30,11 +31,10 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 import gamma.file.FileWatcher;
-import java.util.Optional;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextArea;
+import javafx.scene.layout.VBox;
 
 /**
  * This class manages the view / controller / model for one main window. It
@@ -60,6 +60,7 @@ public final class MainWindow extends Stage
     private Thread watcherThread = null;
 
     private LCodeEngine lCodeEngine = null;
+    private ResizableCanvas canvas;
 
     /**
      * Create a main window.
@@ -219,6 +220,8 @@ public final class MainWindow extends Stage
                 }
             }
         }
+
+        canvas = (ResizableCanvas)getScene().lookup("#diagramArea");
     }
 
     /**
@@ -252,20 +255,12 @@ public final class MainWindow extends Stage
     }
 
     /**
-     * Set up and return a canvas.
-     *
-     * @param width The width for the canvas. If -1, use the current width.
-     * @param height The height for the canvas. If -1, use the current height.
+     * Return the canvas.
      *
      * @return The canvas
      */
-    public Canvas setupCanvas(int width, int height)
+    public ResizableCanvas getCanvas()
     {
-        Canvas canvas = (Canvas)getScene().lookup("#canvas");
-
-        if (width  >= 0) canvas.setWidth(width);
-        if (height >= 0) canvas.setHeight(height);
-
         return canvas;
     }
 

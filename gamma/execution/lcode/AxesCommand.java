@@ -16,7 +16,13 @@
  */
 package gamma.execution.lcode;
 
+import customfx.ResizableCanvas;
+import gamma.drawing.Axis;
+import gamma.drawing.Context;
+import gamma.drawing.T;
 import gamma.execution.LCodeEngine;
+import gamma.math.Lorentz;
+import gamma.value.Line;
 
 /**
  *
@@ -31,7 +37,22 @@ public class AxesCommand extends CommandExec
     @Override
     public void execute(LCodeEngine engine, Struct cmdStruct, StyleStruct styles)
     {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Context context = engine.getContext();
+
+        // Draw the X axis
+
+        AxesStruct struct = (AxesStruct)cmdStruct;
+        if (struct.x) {
+            Line line = new Line(Line.AxisType.X, struct.frame);
+            Axis.draw(context, line, struct.positiveOnly, struct.xLabel, styles);
+        }
+
+        // Draw the t axis
+
+        if (struct.t) {
+            Line line = new Line(Line.AxisType.T, struct.frame);
+            Axis.draw(context, line, struct.positiveOnly, struct.tLabel, styles);
+        }
     }
-    
+
 }

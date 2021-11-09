@@ -30,7 +30,7 @@ public class DisplayStruct extends Struct
     static Coordinate originDefault = new Coordinate(0.0, 0.0);
 
     public int width = Struct.INT_NOT_SET;
-    public int height = -Struct.INT_NOT_SET;
+    public int height = Struct.INT_NOT_SET;
     public Coordinate origin = originDefault;
     public double scale = 1.0;
     public double units = 1.0;

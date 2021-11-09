@@ -74,30 +74,18 @@ public class DiagramEngine
                 HCodeEngine hCodeEngine = new HCodeEngine(hCodes, lCodeEngine);
                 hCodeEngine.execute();
 
+                // Set up the lcode engine for this set of lcodes.
+                // This handles the initial drawing and sets up observers to
+                // handle redraws
+
                 lCodeEngine.setup();
-
-                // The LCodeEngine should use the display command to set up a new
-                // drawing area in the main window. This should disable any existing
-                // observers on the drawing area and set up new ones.
-                // It should also disable the video controls.
-
-                // We execute the lCodes once to draw the initial diagram and
-                // let the LCodeEngine set up observers to re-execute the lCodes
-                // whenever the zoom/pan values change or the drawing area resizes
-
-                lCodeEngine.execute();
-
-                // Observer for mouse events
-                // Click and drag for pan
-                // Ctrl + scrollwheel to zoom
-                // Keyboard events
-                // Ctrl +/-  to zoom
-                // Ctrl + 0 to reset zoom and pan
             }
             catch (ExecutionException e) {
+                e.printStackTrace();
                 window.showTextAreaAlert(Alert.AlertType.ERROR, "Runtime Errors", "Runtime Errors", e.getMessage(), true);
             }
             catch (Exception e) {
+                e.printStackTrace();
                 window.showTextAreaAlert(Alert.AlertType.ERROR, "Error", "Error", e.getMessage(), true);
             }
         }

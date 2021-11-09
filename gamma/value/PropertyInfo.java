@@ -38,7 +38,7 @@ public class PropertyInfo
 
         infoTable.put("style-color",              new PropertyInfo(Type.DOUBLE,       Color.black, Double.NaN, Double.NaN));
         infoTable.put("style-backgroundColor",    new PropertyInfo(Type.DOUBLE,       Color.white, Double.NaN, Double.NaN));
-        infoTable.put("style-lineWidth",          new PropertyInfo(Type.DOUBLE,       2,           1,          20));
+        infoTable.put("style-lineThickness",          new PropertyInfo(Type.DOUBLE,       2,           1,          20));
         infoTable.put("style-lineStyle",          new PropertyInfo(Type.STRING_SET,   "solid",     Double.NaN, Double.NaN, "solid, dashed, dotted"));
         infoTable.put("style-arrow",              new PropertyInfo(Type.STRING_SET,   "none",      Double.NaN, Double.NaN, "none, both, start, end"));
         infoTable.put("style-diameter",           new PropertyInfo(Type.DOUBLE,       2,           1,          20));

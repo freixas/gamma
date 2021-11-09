@@ -60,6 +60,17 @@ public class Line
     }
 
     /**
+     * Create a line from a Frame axis.
+     *
+     * @param type The axis to use.
+     * @param frame The frame.
+     */
+    public Line(AxisType type, Frame frame)
+    {
+        this(type, frame.getV(), frame.getOrigin());
+    }
+
+    /**
      * Create a line whose angle is parallel to a t axis for an inertial
      * frame based on a given velocity and which passes through a given point.
      *
@@ -80,7 +91,7 @@ public class Line
      */
     public Line(double angle, Coordinate coord)
     {
-        initialize(Math.toRadians(Util.normalizeAngle180(angle)), coord);
+        initialize(Math.toRadians(Util.normalizeAngle90(angle)), coord);
     }
 
     /**
@@ -101,9 +112,9 @@ public class Line
      * Initialize the line.
      *
      * @param angle The line's angle, in radians, with 0 being parallel to the x
-     * axis. The value should be normalized so it is between 0 (inclusive) and
-     * PI (exclusive)
-     * @param coord
+     * axis. The value should be normalized so it is between PI / 2 (inclusive)
+     * and -PI / 2 (exclusive)
+     * @param coord The coordinate through which the line goes.
      */
     private void initialize(double angle, Coordinate coord)
     {

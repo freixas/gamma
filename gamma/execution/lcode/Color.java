@@ -41,6 +41,8 @@ public class Color
     private final int b;
     private final int a;
 
+    private final javafx.scene.paint.Color javaFXColor;
+
     public Color(double dColor)
     {
         int iColor = Util.toInt(dColor);
@@ -48,6 +50,8 @@ public class Color
         this.g = (iColor >> 16) & 0xFF;
         this.b = (iColor >> 8) & 0xFF;
         this.a = iColor & 0xFF;
+
+        javaFXColor = javafx.scene.paint.Color.rgb(this.r, this.b, this.g, this.a / 255);
     }
 
     public Color(double red, double green, double blue)
@@ -61,6 +65,8 @@ public class Color
         this.g = Util.toInt(green);
         this.b = Util.toInt(blue);
         this.a = Util.toInt(alpha);
+
+        javaFXColor = javafx.scene.paint.Color.rgb(this.r, this.b, this.g, this.a / 255);
     }
 
     public Color(Color other)
@@ -69,6 +75,12 @@ public class Color
         this.g = other.g;
         this.b = other.b;
         this.a = other.a;
+        this.javaFXColor = other.javaFXColor;
+    }
+
+    public javafx.scene.paint.Color getJavaFXColor()
+    {
+        return javaFXColor;
     }
 
     static public double toColorDouble(int red, int green, int blue)
@@ -79,6 +91,11 @@ public class Color
     static public double toColorDouble(int red, int green, int blue, int alpha)
     {
         return (double) ((red & 0xFF) << 24 | (green & 0xFF) << 16 | (blue & 0xFF) << 8 | (alpha & 0xFF));
+    }
+
+    static public javafx.scene.paint.Color toJavaFXColor(double color)
+    {
+        return new Color(color).getJavaFXColor();
     }
 
 }
