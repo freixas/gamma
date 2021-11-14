@@ -84,7 +84,7 @@ public class SymbolTable
     public void put(String symbol, Object value)
     {
         if (protectedSymbols.contains(symbol)) {
-            engine.throwExecutionException("You cannot change the value of '" + symbol + "'");
+            throw new ExecutionException("You cannot change the value of '" + symbol + "'");
         }
         table.put(symbol, value);
     }

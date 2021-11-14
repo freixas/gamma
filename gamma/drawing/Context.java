@@ -16,7 +16,12 @@
  */
 package gamma.drawing;
 
-import customfx.ResizableCanvas;
+import gamma.ProgrammingException;
+import gamma.execution.LCodeEngine;
+import gamma.value.Bounds;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.transform.NonInvertibleTransformException;
 
 /**
  * We need to pass around the context for drawing, which consists of
@@ -27,13 +32,26 @@ import customfx.ResizableCanvas;
  */
 public class Context
 {
-    public final T t;
-    public final ResizableCanvas canvas;
+    public final LCodeEngine engine;
+    public final Canvas canvas;
+    public final GraphicsContext gc;
 
-    public Context(T t, ResizableCanvas canvas)
+    public Context(LCodeEngine engine, Canvas canvas)
     {
-        this.t = t;
+        this.engine = engine;
         this.canvas = canvas;
+        this.gc = canvas.getGraphicsContext2D();
     }
-    
+
+    public Bounds getCanvasBounds()
+    {
+        try {
+            Bounds bounds = new Bounds(0.0, 0.0, canvas.getWidth(), canvas.getHeight());
+            return bounds.transform(gc.getTransform().createInverse());
+        }
+        catch (NonInvertibleTransformException e) {
+            throw new ProgrammingException("Context.getCanvasBounds()", e);
+        }
+    }
+
 }

@@ -17,6 +17,7 @@
 package gamma.execution.hcode;
 
 import gamma.execution.ArgInfo;
+import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
 import gamma.value.PropertyList;
 import gamma.value.Style;
@@ -46,12 +47,7 @@ public class SetStyleHCode extends HCode
         code.clear();
 
         Style style = new Style();
-        try {
-            style.add(properties);
-        }
-        catch (IllegalArgumentException e) {
-            engine.throwExecutionException(e.getMessage());
-        }
+        style.add(properties);
 
         // Use these as the defaults further on
 

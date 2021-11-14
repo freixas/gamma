@@ -16,7 +16,7 @@
  */
 package gamma.execution.lcode;
 
-import gamma.execution.LCodeEngine;
+import gamma.drawing.Context;
 
 /**
  *
@@ -31,7 +31,9 @@ public class Command
     public Command(Struct cmdStruct, StyleStruct styles, CommandExec cmdExec)
     {
         this.cmdStruct = cmdStruct;
+        this.cmdStruct.finalizeValues();
         this.styles = styles;
+        this.styles.finalizeValues();
         this.cmdExec = cmdExec;
     }
 
@@ -50,8 +52,8 @@ public class Command
         return cmdExec;
     }
 
-    public void execute(LCodeEngine engine)
+    public void execute(Context context)
     {
-        cmdExec.execute(engine, cmdStruct, styles);
+        cmdExec.execute(context, cmdStruct, styles);
     }
 }

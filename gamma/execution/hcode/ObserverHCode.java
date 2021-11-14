@@ -17,6 +17,7 @@
 package gamma.execution.hcode;
 
 import gamma.execution.ArgInfo;
+import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
 import gamma.value.Observer;
 import gamma.value.WInitializer;
@@ -64,7 +65,7 @@ public class ObserverHCode extends HCode
             // Check that all segments have a limit except for the last
 
             if (i < numOfSegments && segment.getType() == WorldlineSegment.LimitType.NONE) {
-                engine.throwExecutionException("All worldline segments except the last need a limit");
+                throw new ExecutionException("All worldline segments except the last need a limit");
             }
 
             segments.add(segment);

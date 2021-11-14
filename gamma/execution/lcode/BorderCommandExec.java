@@ -16,18 +16,19 @@
  */
 package gamma.execution.lcode;
 
-import gamma.execution.LCodeEngine;
+import gamma.drawing.Context;
 
 /**
  *
  * @author Antonio Freixas
  */
-public class AnimationCommand extends CommandExec
+public class BorderCommandExec extends CommandExec
 {
+
     @Override
-    public void execute(LCodeEngine engine, Struct cmdStruct, StyleStruct styles)
+    public void execute(Context context, Struct cmdStruct, StyleStruct styles)
     {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        // throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

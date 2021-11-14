@@ -16,8 +16,6 @@
  */
 package gamma.value;
 
-import gamma.value.Coordinate;
-
 /**
  * This is a line segment between two points.
  *
@@ -25,8 +23,13 @@ import gamma.value.Coordinate;
  */
 public class LineSegment
 {
-    private final Coordinate point1;
-    private final Coordinate point2;
+    public Coordinate point1;
+    public Coordinate point2;
+
+    public LineSegment(double x1, double t1, double x2, double t2)
+    {
+        this(new Coordinate(x1, t1), new Coordinate(x2, t2));
+    }
 
     public LineSegment(Coordinate p1, Coordinate p2)
     {

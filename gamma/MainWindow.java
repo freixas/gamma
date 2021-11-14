@@ -16,7 +16,6 @@
  */
 package gamma;
 
-import customfx.ResizableCanvas;
 import gamma.execution.LCodeEngine;
 import java.io.File;
 import java.util.ListIterator;
@@ -34,7 +33,7 @@ import gamma.file.FileWatcher;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextArea;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.Region;
 
 /**
  * This class manages the view / controller / model for one main window. It
@@ -60,7 +59,7 @@ public final class MainWindow extends Stage
     private Thread watcherThread = null;
 
     private LCodeEngine lCodeEngine = null;
-    private ResizableCanvas canvas;
+    private Canvas canvas;
 
     /**
      * Create a main window.
@@ -69,6 +68,7 @@ public final class MainWindow extends Stage
      * @param file The associated script file (may be null).
      * @throws Exception
      */
+    @SuppressWarnings("LeakingThisInConstructor")
     public MainWindow(int ID, File file)
             throws Exception
     {
@@ -221,7 +221,8 @@ public final class MainWindow extends Stage
             }
         }
 
-        canvas = (ResizableCanvas)getScene().lookup("#diagramArea");
+        canvas = (Canvas)getScene().lookup("#diagramArea");
+        canvas.setFocusTraversable(true);
     }
 
     /**
@@ -259,7 +260,7 @@ public final class MainWindow extends Stage
      *
      * @return The canvas
      */
-    public ResizableCanvas getCanvas()
+    public Canvas getCanvas()
     {
         return canvas;
     }

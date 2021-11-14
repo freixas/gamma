@@ -27,7 +27,7 @@ import java.awt.Toolkit;
  */
 public class DisplayStruct extends Struct
 {
-    static Coordinate originDefault = new Coordinate(0.0, 0.0);
+    static Coordinate originDefault = new Coordinate(50.0, 50.0);
 
     public int width = Struct.INT_NOT_SET;
     public int height = Struct.INT_NOT_SET;

@@ -17,6 +17,7 @@
 package gamma.execution.hcode;
 
 import gamma.execution.ArgInfo;
+import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
 import gamma.execution.SymbolTable;
 import java.util.ArrayList;
@@ -43,7 +44,7 @@ public class FetchHCode extends HCode
 
         SymbolTable table = engine.getSymbolTable();
         if (!table.contains(symbol)) {
-            engine.throwExecutionException("Variable '" + symbol + "' is not defined");
+            throw new ExecutionException("Variable '" + symbol + "' is not defined");
         }
         Object value = table.get(symbol);
         code.add(value);

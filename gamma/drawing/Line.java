@@ -16,13 +16,17 @@
  */
 package gamma.drawing;
 
-import customfx.ResizableCanvas;
+import gamma.ProgrammingException;
 import gamma.execution.lcode.StyleStruct;
 import gamma.value.LineSegment;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.scene.Node;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.StrokeLineCap;
+import javafx.scene.transform.NonInvertibleTransformException;
 
 /**
  *
@@ -30,34 +34,96 @@ import javafx.scene.shape.StrokeLineCap;
  */
 public class Line
 {
-    static public void draw(Context context, Node clip, LineSegment segment, double thickness, StyleStruct styles)
+    static public void draw(
+        Context context, Node clip, LineSegment segment,
+        double thickness, String arrow,
+        StyleStruct styles)
     {
-        ResizableCanvas canvas = context.canvas;
-        GraphicsContext gContext = canvas.getGraphicsContext2D();
-        gContext.save();
+        Canvas canvas = context.canvas;
+        GraphicsContext gc = context.gc;
+
+        // Save the current graphics context
+
+        gc.save();
         Node savedClip = canvas.getClip();
 
         if (clip != null) {
             canvas.setClip(clip);
         }
 
-        // For now, we'll assume the stroke style is CENTER
-        gContext.setStroke(styles.color.getJavaFXColor());
-        gContext.setLineWidth(thickness);
-        if (styles.lineStyle.equals("dashed")) {
-            gContext.setLineDashes(5.0, 5.0);
-        }
-        else if (styles.lineStyle.equals("dotted")) {
-            gContext.setLineCap(StrokeLineCap.ROUND);
-            gContext.setLineDashes(1.0, 1.0);
-        }
+        setupLineGc(context, styles);
 
-        gContext.strokeLine(
+        // Draw the line
+
+        gc.strokeLine(
             segment.getPoint1().x, segment.getPoint1().t,
             segment.getPoint2().x, segment.getPoint2().t);
 
+        // Draw the arrowheads
+
+        if (arrow.equals("both") || arrow.equals("start")) {
+            // TO DO
+            // Draw the arrowhead at the start
+        }
+        if (arrow.equals("both") || arrow.equals("end")) {
+            // TO DO
+            // Draw the arrowhead at the end
+        }
+
+        // Restore the original graphics context
+
         canvas.setClip(savedClip);
-        gContext.restore();
+        gc.restore();
     }
 
+    /**
+     * Set up the graphics context for drawing a line. We only set up the
+     * things that can be handled by the graphics context: color, line thickness,
+     * and line style.
+     *
+     * @param context The context.
+     * @param styles The styles structure.
+     */
+    static public void setupLineGc(Context context, StyleStruct styles)
+    {
+        setupLineGc(context, styles.javaFXColor, styles.lineStyle, styles.lineThickness);
+    }
+
+    /**
+     * Set up the graphics context for drawing a line.
+     *
+     * @param context The context.
+     * @param color A JavaFX Color.
+     * @param lineStyle The line style ("solid", "dashed", or "dotted").
+     * @param lineThickness The line thickness in pixels.
+     */
+    static public void setupLineGc(Context context, Color color, String lineStyle, double lineThickness)
+    {
+        try {
+            GraphicsContext gc = context.gc;
+
+            // Set the line color
+
+            gc.setStroke(color);
+
+            // *** NOTE: For now, we'll assume the stroke style is CENTER
+            // Set the line thickness
+
+            gc.setLineWidth(gc.getTransform().inverseDeltaTransform(lineThickness, 0.0).getX());
+
+            // Set the line style
+
+            if (lineStyle.equals("dashed")) {
+                gc.setLineDashes(5.0, 5.0);
+            }
+            else if (lineStyle.equals("dotted")) {
+                gc.setLineCap(StrokeLineCap.ROUND);
+                gc.setLineDashes(1.0, 1.0);
+            }
+        }
+        catch (NonInvertibleTransformException ex) {
+            Logger.getLogger(Line.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
 }

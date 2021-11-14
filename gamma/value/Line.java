@@ -20,7 +20,7 @@ import gamma.math.Lorentz;
 import gamma.math.Util;
 
 /**
- * A line is defined by an angle (in radians) and a point through which
+ * A line is defined by an angle (in degrees) and a point through which
  * the line crosses.
  * <p>
  * A line can be created using other methods, but all are converted to an
@@ -42,25 +42,8 @@ public class Line
     private double offset;
 
     /**
-     * Create a line parallel to a given axis and that crosses the opposite
-     * axis at the given offset.
-     *
-     * @param type The axis type, AxisType.X or AxisType.T
-     * @param frame The frame that defines the axes.
-     * @param offset The offset at which to cross the opposite axis.
-     */
-    public Line(AxisType type, Frame frame, double offset)
-    {
-        if (type == AxisType.X) {
-            initialize(Lorentz.vToXAngle(frame.getV()), frame.toRest(new Coordinate(0, offset)));
-        }
-        else {
-            initialize(Lorentz.vToTAngle(frame.getV()), frame.toRest(new Coordinate(offset, 0)));
-        }
-    }
-
-    /**
-     * Create a line from a Frame axis.
+     * Create a line from a Frame axis that goes through the origin of the
+     * frame.
      *
      * @param type The axis to use.
      * @param frame The frame.
@@ -71,7 +54,20 @@ public class Line
     }
 
     /**
-     * Create a line whose angle is parallel to a t axis for an inertial
+     * Create a line parallel to a given axis and that crosses the opposite
+     * axis at the given offset.
+     *
+     * @param type The axis type, AxisType.X or AxisType.T
+     * @param frame The frame that defines the axes.
+     * @param offset The offset at which to cross the opposite axis.
+     */
+    public Line(AxisType type, Frame frame, double offset)
+    {
+        this(type, frame.getV(), type == AxisType.X ? frame.toRest(new Coordinate(0, offset)) : frame.toRest(new Coordinate(offset, 0)));
+    }
+
+    /**
+     * Create a line whose angle is parallel to an axis for an inertial
      * frame based on a given velocity and which passes through a given point.
      *
      * @param type The axis type, AxisType.X or AxisType.T
@@ -80,7 +76,12 @@ public class Line
      */
     public Line(AxisType type, double v, Coordinate point)
     {
-        initialize(Lorentz.vToTAngle(v), point);
+        if (type == AxisType.X) {
+            initialize(Lorentz.vToXAngle(v), point);
+        }
+        else {
+            initialize(Lorentz.vToTAngle(v), point);
+        }
     }
 
     /**
@@ -91,7 +92,7 @@ public class Line
      */
     public Line(double angle, Coordinate coord)
     {
-        initialize(Math.toRadians(Util.normalizeAngle90(angle)), coord);
+        initialize(Util.normalizeAngle90(angle), coord);
     }
 
     /**
@@ -103,17 +104,17 @@ public class Line
     public Line(Coordinate coord1, Coordinate coord2)
     {
         double rad = Math.atan2(coord2.t - coord1.t, coord2.x - coord1.x);
-        if (rad == Math.PI) angle = 0;
-        if (rad < 0) angle = Math.PI - angle;
-        initialize(rad, new Coordinate(coord1));
+        double degrees = Math.toDegrees(rad);
+        degrees = Util.normalizeAngle90(degrees);
+        initialize(degrees, new Coordinate(coord1));
     }
 
     /**
      * Initialize the line.
      *
-     * @param angle The line's angle, in radians, with 0 being parallel to the x
-     * axis. The value should be normalized so it is between PI / 2 (inclusive)
-     * and -PI / 2 (exclusive)
+     * @param angle The line's angle, in degrees, with 0 being parallel to the x
+     * axis. The value should be normalized so it is between 90 (inclusive)
+     * and -90 (exclusive).
      * @param coord The coordinate through which the line goes.
      */
     private void initialize(double angle, Coordinate coord)
@@ -133,8 +134,7 @@ public class Line
 
         // Vertical lines have slopes of +/- infinity, so we assign +infinity
 
-        this.slope = angle == Math.PI / 2 ? Double.POSITIVE_INFINITY : Math.tan(angle);
-
+        this.slope = angle == 90 ? Double.POSITIVE_INFINITY : Math.tan(Math.toRadians(angle));
 
         // Pre-calculate the slope times the x value (mx1). We'll use this in
         // intersection calculations
@@ -157,9 +157,9 @@ public class Line
     }
 
     /**
-     * Get the angle of the line in radians.
+     * Get the angle of the line in degrees.
      *
-     * @return The angle of the line in radians.
+     * @return The angle of the line in degrees.
      */
     public double getAngle()
     {

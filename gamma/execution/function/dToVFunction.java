@@ -43,13 +43,7 @@ public class dToVFunction extends Function
         double d =          (Double)  code.get(0);
         Observer observer = (Observer)code.get(1);
 
-        try {
-            return observer.dToV(d);
-        }
-        catch (Exception e) {
-            engine.throwExecutionException(e.getMessage());
-            return null;
-        }
+        return observer.dToV(d);
     }
 
     @Override

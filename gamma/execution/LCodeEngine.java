@@ -16,10 +16,9 @@
  */
 package gamma.execution;
 
-import customfx.ResizableCanvas;
 import gamma.MainWindow;
+import gamma.ProgrammingException;
 import gamma.drawing.Context;
-import gamma.drawing.T;
 import gamma.execution.lcode.*;
 import gamma.value.Frame;
 import java.util.ArrayList;
@@ -27,7 +26,14 @@ import java.util.Iterator;
 import java.util.ListIterator;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Label;
+import javafx.scene.input.KeyCode;
+import javafx.scene.text.FontSmoothingType;
+import javafx.scene.transform.Affine;
+import javafx.scene.transform.NonInvertibleTransformException;
 
 /**
  *
@@ -35,26 +41,23 @@ import javafx.scene.canvas.Canvas;
  */
 public class LCodeEngine
 {
-    class ListenerStruct
-    {
-
-    }
-
     private final ArrayList<Command> commands;
     private final MainWindow window;
     private Command animationCommand;
     private Command displayCommand;
     private Command frameCommand;
 
-    private ResizableCanvas canvas;
+    private Canvas canvas;
     private double lastWidth;
     private double lastHeight;
-
-    private T transform;
 
     private Context context;
 
     ChangeListener<Number> sizeListener;
+
+    private double mouseX;
+    private double mouseY;
+    private boolean mouseInside;
 
     /**
      * Create the lcode engine.
@@ -66,11 +69,16 @@ public class LCodeEngine
         this.window = window;
         this.commands = new ArrayList<>();
 
-        this.displayCommand = new Command(new DisplayStruct(), new StyleStruct(), new DisplayCommand());
-        this.frameCommand = new Command(new FrameStruct(), new StyleStruct(), new FrameCommand());
+        this.displayCommand = new Command(new DisplayStruct(), new StyleStruct(), new DisplayCommandExec());
+        this.frameCommand = new Command(new FrameStruct(), new StyleStruct(), new FrameCommandExec());
 
         lastWidth = -1.0;
         lastHeight = -1.0;
+
+        // Not really correct - the mouse might be inside the canvas at
+        // the point the lcode engine is created
+
+        mouseInside = false;
     }
 
     /**
@@ -118,20 +126,9 @@ public class LCodeEngine
      *
      * @return The drawing canvas.
      */
-    public ResizableCanvas getCanvas()
+    public Canvas getCanvas()
     {
         return canvas;
-    }
-
-    /**
-     * Get the graphics transform. This is only valid after setup() is
-     * called.
-     *
-     * @return The graphics transform.
-     */
-    public T getTransform()
-    {
-        return transform;
     }
 
     /**
@@ -157,6 +154,21 @@ public class LCodeEngine
     public ArrayList<Command> getCommands()
     {
         return commands;
+    }
+
+    /**
+     * Return true if the mouse is inside the canvas.
+     *
+     * @return True if the mouse is inside the canvas.
+     */
+    public boolean isMouseInside()
+    {
+        return mouseInside;
+    }
+
+    public void setMouseInside(boolean mouseInside)
+    {
+        this.mouseInside = mouseInside;
     }
 
     /**
@@ -201,23 +213,7 @@ public class LCodeEngine
 
         // Set up our change listeners
 
-        final LCodeEngine engine = this;
-
-        sizeListener = (ObservableValue<? extends Number> ov, Number oldValue, Number newValue) -> {
-            if (engine.lastWidth != canvas.getWidth() || engine.lastHeight != canvas.getHeight()) {
-                engine.execute();
-                engine.lastWidth = canvas.getWidth();
-                engine.lastHeight = canvas.getWidth();
-            }
-        };
-        canvas.widthProperty().addListener(sizeListener);
-
-        // Observer for mouse events
-        // Click and drag for pan
-        // Ctrl + scrollwheel to zoom
-        // Keyboard events
-        // Ctrl +/-  to zoom
-        // Ctrl + 0 to reset zoom and pan
+        addListeners();
 
         // Use the frame command to revise all the coordinates in the structures.
         // Optimize if we have the default frame
@@ -237,11 +233,16 @@ public class LCodeEngine
 
         DisplayStruct dStruct = (DisplayStruct)displayCommand.getCmdStruct();
 
-        transform = new T(dStruct.origin, dStruct.scale, dStruct.units, canvas.getWidth(), canvas.getHeight());
-
         // Create the graphics context
 
-        context = new Context(transform, canvas);
+        context = new Context(this, canvas);
+
+        // Run the display command
+
+        ((DisplayCommandExec)displayCommand.getCmdExec()).initializeCanvas(
+            context,
+            (DisplayStruct)displayCommand.getCmdStruct(),
+            displayCommand.getStyles());
 
         // Draw the initial display
 
@@ -256,15 +257,15 @@ public class LCodeEngine
      */
     public void execute()
     {
-        // Run the display command
+       // Execute the display command
 
-        displayCommand.execute(this);
+        displayCommand.execute(context);
 
         // Execute normal commands
 
         ListIterator<Command> iter = commands.listIterator();
         while (iter.hasNext()) {
-            iter.next().execute(this);
+            iter.next().execute(context);
         }
     }
 
@@ -275,8 +276,221 @@ public class LCodeEngine
      */
     public void close()
     {
-        if (canvas != null) {
-            canvas.widthProperty().removeListener(sizeListener);
+        removeListeners();
+    }
+
+    /**
+     * Add all the listeners needed by this lcode engine. Every listener
+     * added must be removed when this lcode engine is closed.
+     */
+    private void addListeners()
+    {
+        final LCodeEngine engine = this;
+
+        // ************************************************************
+        // *
+        // * RESIZE HANDLER
+        // *
+        // ************************************************************
+
+        sizeListener = (ObservableValue<? extends Number> ov, Number oldValue, Number newValue) -> {
+            if (engine.lastWidth != canvas.getWidth() || engine.lastHeight != canvas.getHeight()) {
+                engine.execute();
+                engine.lastWidth = canvas.getWidth();
+                engine.lastHeight = canvas.getWidth();
+            }
+        };
+        window.widthProperty().addListener(sizeListener);
+
+        // ************************************************************
+        // *
+        // * MOUSE FEEDBACK HANDLER
+        // *
+        // ************************************************************
+
+        Label label = (Label)(window.getScene().lookup("#coordinateArea"));
+
+        canvas.setOnMouseMoved(event -> {
+            displayCoordinates(label, event.getX(), event.getY());
+            engine.setMouseInside(true);
+        });
+
+        canvas.setOnMouseEntered(event -> {
+            displayCoordinates(label, event.getX(), event.getY());
+            engine.setMouseInside(true);
+        });
+
+        canvas.setOnMouseExited(event -> {
+            label.setText("");
+            engine.setMouseInside(false);
+        });
+
+        // ************************************************************
+        // *
+        // * PAN HANDLER
+        // *
+        // ************************************************************
+
+        canvas.setOnMousePressed(event -> {
+            mouseX = event.getX();
+            mouseY = event.getY();
+        });
+
+        canvas.setOnMouseDragged(event -> {
+            try {
+                double deltaX = event.getX() - mouseX;
+                double deltaY = event.getY() - mouseY;
+
+                GraphicsContext gc = context.gc;
+                Affine transform = gc.getTransform();
+                Point2D point = transform.inverseDeltaTransform(deltaX, deltaY);
+                gc.translate(point.getX(), point.getY());
+
+                engine.execute();
+
+                mouseX = event.getX();
+                mouseY = event.getY();
+            }
+            catch (NonInvertibleTransformException e) {
+                throw new ProgrammingException("LCodeEngine.setOnMouseDragged()", e);
+            }
+        });
+
+        // ************************************************************
+        // *
+        // * MOUSE ZOOM HANDLER
+        // *
+        // ************************************************************
+
+        canvas.setOnScroll(event -> {
+            GraphicsContext gc = canvas.getGraphicsContext2D();
+
+            // The Ctrl key must be used
+
+            if (!event.isControlDown()) return;
+
+            double delta = event.getDeltaY();
+            if (delta == 0.0) return;
+
+            Point2D center = new Point2D(event.getX(), event.getY());
+            zoom(center, delta);
+
+            engine.execute();
+        });
+
+        // ************************************************************
+        // *
+        // * KEYBOARD ZOOM HANDLER
+        // *
+        // ************************************************************
+
+        canvas.setOnKeyPressed(event -> {
+
+            // The Ctrl key must be used
+
+            if (!event.isControlDown()) return;
+            if (event.getCode() != KeyCode.PLUS &&
+                event.getCode() != KeyCode.EQUALS &&
+                event.getCode() != KeyCode.MINUS &&
+                event.getCode() != KeyCode.DIGIT0) return;
+
+            // Reset zoom/pan (Ctrl + 0)
+
+            if (event.getCode() == KeyCode.DIGIT0) {
+                ((DisplayCommandExec)displayCommand.getCmdExec()).
+                    setInitialZoomPan(context, ((DisplayStruct)displayCommand.getCmdStruct()));
+            }
+
+            // Zoom in/out (Ctrl + +/-)
+
+            else {
+                Point2D center = new Point2D(canvas.getWidth() / 2.0, canvas.getHeight() / 2.0);
+                zoom(center, event.getCode() == KeyCode.MINUS ? 100.0 : -100.0);
+           }
+
+            engine.execute();
+            if (engine.isMouseInside()) {
+                // displayCoordinates(label, event.getX(), event.getY());
+            }
+        });
+    }
+
+    private void displayCoordinates(Label label, double x, double y)
+    {
+        try {
+            GraphicsContext gc = context.gc;
+            Point2D point
+                = gc.getTransform().inverseTransform(x, y);
+            label.setText(
+                "(" +
+                String.format("%g", point.getX()) +
+                ", " +
+                String.format("%g", point.getY()) +
+                ")");
+        }
+        catch (NonInvertibleTransformException e) {
+            throw new ProgrammingException("LCodeEngine.displayCoordinates()", e);
         }
     }
+
+    /**
+     * Common zoom code.
+     *
+     * @param center The point to zoom around.
+     * @param delta  The zoom amount (+ for zoom in, - for zoom out).
+     */
+    private void zoom(Point2D center, double delta)
+    {
+        try {
+            GraphicsContext gc = context.gc;
+
+            if (delta == 0.0) return;
+
+             Affine transform = gc.getTransform();
+
+             // We want to zoom in from the mouse position when using the
+             // scroll wheel
+
+             Point2D worldCenter = transform.inverseTransform(center);
+
+             // Translate the origin to the center
+
+             gc.translate(worldCenter.getX(), worldCenter.getY());
+
+             // Find out what the current scale is
+
+             Point2D scaleVector = transform.deltaTransform(1D, 0);
+             double curScale = scaleVector.getX();
+
+             // Scale using this rather magic formula
+
+             double zoomExp = 1 + (Math.abs(delta) / 1000.0);
+             double zoomIncr = Math.pow(curScale, zoomExp) / 10.0;
+             if (delta < 0) zoomIncr = -zoomIncr;
+             double scale = (curScale + zoomIncr) / curScale;
+             gc.scale(scale, scale);
+
+             // Translate the origin back to its original position
+
+             gc.translate(-worldCenter.getX(), -worldCenter.getY());
+         }
+         catch (NonInvertibleTransformException e) {
+             throw new ProgrammingException("LCodeEngine.zoom()", e);
+         }
+    }
+
+    /**
+     * Remove all the listeners attached to this lcode engine
+     */
+    private void removeListeners()
+    {
+        window.widthProperty().removeListener(sizeListener);
+        canvas.setOnMouseMoved(null);
+        canvas.setOnMouseExited(null);
+        canvas.setOnMousePressed(null);
+        canvas.setOnMouseDragged(null);
+        canvas.setOnZoom(null);
+        canvas.setOnKeyPressed(null);
+    }
+
 }

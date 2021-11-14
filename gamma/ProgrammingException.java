@@ -20,10 +20,41 @@ package gamma;
  *
  * @author Antonio Freixas
  */
-public class ProgrammingException extends RuntimeException
+public class ProgrammingException extends GammaRuntimeException
 {
     public ProgrammingException(String message)
     {
         super("Programming Error: " + message);
     }
+
+    public ProgrammingException(String message, Throwable cause)
+    {
+        super("Programming error: " +
+              message +
+              (cause != null ?
+                (cause.getLocalizedMessage() != null ? "\nCaused by " + cause.getLocalizedMessage() : "") : ""), cause);
+    }
+
+    public ProgrammingException(Throwable cause)
+    {
+        super(cause);
+    }
+
+//    @Override
+//    public String toString()
+//    {
+//        String str = getLocalizedMessage() == null ? "" : getLocalizedMessage();
+//        Throwable cause = getCause();
+//        while (cause != null) {
+//            if (cause.getLocalizedMessage() != null) {
+//                str += "\nCaused by: " + cause.getLocalizedMessage();
+//            }
+//            else {
+//                str += "\nCaused by: " + cause.getClass();
+//            }
+//            cause = cause.getCause();
+//        }
+//        return str;
+//    }
+
 }

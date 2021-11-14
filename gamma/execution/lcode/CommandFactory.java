@@ -30,18 +30,18 @@ public class CommandFactory
     static final HashMap<String, CommandExec> commandMap = new HashMap<>();
 
     static {
-        commandMap.put("display", new DisplayCommand());
-        commandMap.put("frame", new FrameCommand());
-        commandMap.put("animation", new AnimationCommand());
-        commandMap.put("axes", new AxesCommand());
-        commandMap.put("grid", new GridCommand());
-        commandMap.put("hypergrid", new HypergridCommand());
-        commandMap.put("event", new EventCommand());
-        commandMap.put("line", new LineCommand());
-        commandMap.put("world", new WorldlineCommand());
-        commandMap.put("fill", new FillCommand());
-        commandMap.put("border", new BorderCommand());
-        commandMap.put("label", new LabelCommand());
+        commandMap.put("display", new DisplayCommandExec());
+        commandMap.put("frame", new FrameCommandExec());
+        commandMap.put("animation", new AnimationCommandExec());
+        commandMap.put("axes", new AxesCommandExec());
+        commandMap.put("grid", new GridCommandExec());
+        commandMap.put("hypergrid", new HypergridCommandExec());
+        commandMap.put("event", new EventCommandExec());
+        commandMap.put("line", new LineCommandExec());
+        commandMap.put("world", new WorldlineCommandExec());
+        commandMap.put("fill", new FillCommandExec());
+        commandMap.put("border", new BorderCommandExec());
+        commandMap.put("label", new LabelCommandExec());
     }
 
     public static Command createCommand(HCodeEngine engine, String name, PropertyList properties)

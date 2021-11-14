@@ -28,33 +28,33 @@ public class Tokenizer
     private ArrayList<Token> list = null;
     private File file;
     private final String script;
-    
+
     private int cPtr;
     char c;
     char cNext;
-    
+
     private int lineNumber;
     private int lineNumberStart;
     private int charNumber;
-    
+
     private final String operators = "+-*/^.<>";
     private final String delimiters = ";,:=[]()";
     private final String hexDigits = "01234567890ABCDEFabcdef";
-    
+
     public Tokenizer(File file, String script)
     {
         this.file = file;
-        
+
         // Replace any line ending with a newline
         // \R also catches Form Feed and some other odd line separators
         // Add a null to the end to make it easier to know when we're done.
-        
+
         this.script = script.replaceAll("\\R", "\n") + '\0';
     }
-    
+
     /**
      * Tokenize the script.
-     * 
+     *
      * @return A list of Tokens.
      * @throws ParseException When an invalid token is found.
      */
@@ -63,17 +63,17 @@ public class Tokenizer
         lineNumber = 1;
         lineNumberStart = 0;
         charNumber = 1;
-        
+
         cPtr = 0;
         list = new ArrayList<>();
-        
+
         while ((c = script.charAt(cPtr)) != '\0') {
-            
+
             cNext = script.charAt(cPtr + 1);
             charNumber = cPtr - lineNumberStart + 1;
-            
+
             // Strip comments
-            
+
             if (c == '/' && cNext == '/') {
                 cPtr += 2;
                 stripComment();
@@ -81,67 +81,67 @@ public class Tokenizer
                 cNext = script.charAt(cPtr + 1);
                 charNumber = cPtr - lineNumberStart + 1;
             }
-            
+
             // Count newlines and discard them as whitespace
-            
+
             if (c == '\n') {
                 lineNumber++;
                 cPtr++;
                 lineNumberStart = cPtr;
             }
-            
+
             // Handle delimiters
-            
+
             else if (delimiters.indexOf(c) != -1) {
                 list.add(new Token<>(Token.Type.DELIMITER, c, file, lineNumber, charNumber));
                 cPtr++;
             }
-            
+
             // Handle strings
-            
+
             else if (c == '\'' || c == '"') {
                 list.add(new Token<>(Token.Type.STRING, getString(), file, lineNumber, charNumber));
             }
-            
+
             // Handle names
-            
+
             else if (c == '_' || Character.isLetter(c)) {
                 list.add(new Token<>(Token.Type.NAME, getName(), file, lineNumber, charNumber));
             }
-            
+
             // Handle numbers
-            
-            else if ((c == '#' && isHexDigit(cNext)) || 
-                     (c == '.' && Character.isDigit(cNext))  || 
+
+            else if ((c == '#' && isHexDigit(cNext)) ||
+                     (c == '.' && Character.isDigit(cNext))  ||
                      Character.isDigit(c)) {
                 list.add(new Token<>(Token.Type.NUMBER, getNumber(), file, lineNumber, charNumber));
             }
-            
+
             // Handle operators
-            
+
             else if (operators.indexOf(c) != -1) {
                 list.add(new Token<>(Token.Type.OPERATOR, c, file, lineNumber, charNumber));
                 cPtr++;
             }
-            
+
             // Skip whitespace
-            
+
             else if (Character.isWhitespace(c)) {
                 cPtr++;
             }
-            
+
             // Invalid character
-            
+
             else {
                 throw new ParseException(file, lineNumber, cPtr - lineNumberStart + 1, "Invalid character : '" + c + "'");
             }
         }
-        
+
         list.add(new Token<>(Token.Type.EOF, '\0', file, lineNumber, cPtr - lineNumberStart + 1));
-        
-        return list;        
+
+        return list;
     }
-    
+
     /**
      * Strip a comment.
      * <p>
@@ -152,12 +152,12 @@ public class Tokenizer
     {
         while ((c = script.charAt(cPtr)) != '\0') {
             c = script.charAt(cPtr);
-            if (c == '\n') return; 
+            if (c == '\n') return;
             cPtr++;
         }
-        
+
     }
-    
+
     /**
      * Get a string token.
      * <p>
@@ -169,16 +169,16 @@ public class Tokenizer
     private String getString()
     {
         StringBuilder name = new StringBuilder();
-        
+
         // Determine if the delimiter is a single-quote or a double-quote
-        
+
         char delimiter = script.charAt(cPtr);
         cPtr++;
-        
+
         while ((c = script.charAt(cPtr)) != delimiter && c != '\0') {
-            
+
             // Check for quoting
-            
+
             switch (c) {
                 case '\\' -> {
                     cPtr++;
@@ -207,26 +207,26 @@ public class Tokenizer
                         }
                     }
                 }
-                
+
                 // Check for EOF. If found, just terminate the string
-                
+
                 case '\0' -> {
                     return name.toString();
                 }
-            
+
                 // Everything else is entered as is
-            
+
                 default -> {
                     name.append(c);
                     cPtr++;
                 }
             }
         }
-        
+
         cPtr++;
-        return name.toString();        
+        return name.toString();
     }
-    
+
     /**
      * Get a name token.
      * <p>
@@ -239,14 +239,14 @@ public class Tokenizer
     private String getName()
     {
         StringBuilder name = new StringBuilder();
-        
+
         while (Character.isLetterOrDigit(c = script.charAt(cPtr)) || c == '_') {
             name.append(c);
             cPtr++;
         }
-        return name.toString();        
+        return name.toString();
     }
-    
+
     /**
      * Get a number token.
      * <p>
@@ -263,9 +263,9 @@ public class Tokenizer
         int startCPtr = cPtr;
 
         // Check for color numbers
-        
+
         StringBuilder number = new StringBuilder();
-        
+
         try {
             if (c == '#') {
                 cPtr++;
@@ -276,17 +276,32 @@ public class Tokenizer
 
                 // cPtr should now be pointing to the first non-hex digit.
                 // If we have three digits, convert to 6 by doubling each digit
-                
+
                 if (number.length() == 3) {
                     for (int i = 0; i < 3; i++) {
                         number.insert(i * 2, number.charAt(i * 2));
                     }
                 }
 
-                // If we have six digits, convert to a double
-                
+                // If we have four digits, convert to 8 by doubling each digit
+
+                if (number.length() == 4) {
+                    for (int i = 0; i < 4; i++) {
+                        number.insert(i * 2, number.charAt(i * 2));
+                    }
+                }
+
+                // If we have six digits, add "FF"
+
                 if (number.length() == 6) {
-                    return Integer.valueOf(number.toString(), 16);
+                    number.append("FF");
+                }
+
+                // If we have eight digits, convert to a double
+
+                if (number.length() == 8) {
+                    number.insert(0, "0x");
+                    return Long.decode(number.toString());
                 }
 
                 throw new ParseException(
@@ -294,7 +309,7 @@ public class Tokenizer
             }
 
             // Check for double
-            
+
             while (Character.isDigit(c = script.charAt(cPtr)) || c == '.') {
                 number.append(c);
                 cPtr++;
@@ -302,7 +317,7 @@ public class Tokenizer
 
             // cPtr should now be pointing to the first non-number digit or period
             // Check to make sure we don't have two periods
-            
+
             int p1 = number.indexOf(".");
             int p2 = number.lastIndexOf(".");
             if (p1 != p2) {
@@ -317,9 +332,9 @@ public class Tokenizer
         }
 
     }
-    
+
     private boolean isHexDigit(char c)
     {
-        return hexDigits.indexOf(c) != -1; 
+        return hexDigits.indexOf(c) != -1;
     }
 }

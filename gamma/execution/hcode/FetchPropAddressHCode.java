@@ -17,6 +17,7 @@
 package gamma.execution.hcode;
 
 import gamma.execution.ArgInfo;
+import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
 import gamma.value.Address;
 import gamma.value.ObjectContainer;
@@ -50,7 +51,7 @@ public class FetchPropAddressHCode extends HCode
         // It must exist.
 
         if (!address.exists()) {
-            engine.throwExecutionException("Invalid address");
+            throw new ExecutionException("Invalid address");
         }
         Object value = address.getValue();
 
@@ -58,7 +59,7 @@ public class FetchPropAddressHCode extends HCode
 
         if (!(value instanceof ObjectContainer) ||
             !((ObjectContainer)value).hasProperty(propName)) {
-            engine.throwExecutionException("'" + propName + "' is not a valid property");
+            throw new ExecutionException("'" + propName + "' is not a valid property");
         }
 
         // Convert this value into an address to this property

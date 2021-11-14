@@ -87,7 +87,6 @@ public final class Util
         return Math.log((x + 1.0) / (x - 1.0)) / 2;
     }
 
-
     /**
      * Get the sign of a number
      *
@@ -105,9 +104,34 @@ public final class Util
         return (int) (-Math.signum(d) * Math.ceil(-Math.abs(d) - 0.5));
     }
 
+    static public long toLong(double d)
+    {
+        return (long) (-Math.signum(d) * Math.ceil(-Math.abs(d) - 0.5));
+    }
+
     static public boolean toBoolean(double d)
     {
         return d != 0.0;
+    }
+
+    /**
+     * Given a value and delta, find the smallest string representation of the
+     * value that distinguishes the value from the value + delta.Scientific
+     * notation is allowed.
+     *
+     * @param value The value whose string representation we want.
+     * @param delta The delta value between the given value and the next
+     *
+     * @return The smallest string representation of the value.
+     */
+    static public String doubleToMinSizeString(double value, double delta)
+    {
+        int numOfSigDigits =
+           (int)(Math.abs(Math.floor(Math.log10(Math.abs(value))) - Math.floor(Math.log10(Math.abs(delta)))) + 1.0);
+
+        String value1 = String.format("%" + numOfSigDigits + "f", value);
+        String value2 = String.format("%" + numOfSigDigits + "e", value);
+        return value1.length() < value2.length() ? value1 : value2;
     }
 
 }

@@ -254,32 +254,33 @@ public final class Lorentz
     }
 
     /**
-     * Convert a velocity to a t axis angle in radians.
+     * Convert a velocity to a t axis angle in degrees.
      *
      * @param v The velocity as a percentage of the speed of light.
      *
-     * @return The t axis angle in radians.
+     * @return The t axis angle in degrees.
      */
     public static double vToTAngle(double v)
     {
-        double angle = Math.atan(v);
+        double angle = Math.toDegrees(Math.atan(v));
         if (angle >= 0) {
-            return (Math.PI / 2) - angle;
+            return 90 - angle;
         }
         else {
-            return (-Math.PI / 2) - angle;
+            return -90 - angle;
         }
     }
 
     /**
-     * Convert a t axis angle in radians to a velocity.
+     * Convert a t axis angle in degrees to a velocity.
      *
-     * @param angle The t axis angle
+     * @param angle The t axis angle in degrees.
      *
      * @return The velocity.
      */
     public static double angleTToV(double angle)
     {
+        angle = Math.toRadians(angle);
         if (angle >= 0) {
             angle = (Math.PI / 2) - angle;
         }
@@ -290,47 +291,56 @@ public final class Lorentz
     }
 
     /**
-     * Convert a velocity to an x axis angle in radians.
+     * Convert a velocity to an x axis angle in degrees.
      *
      * @param v The velocity as a percentage of the speed of light.
      *
-     * @return The x axis angle in radians.
+     * @return The x axis angle in degrees.
      */
     public static double vToXAngle(double v)
     {
-        return Math.atan(v);
+        return Math.toDegrees(Math.atan(v));
     }
 
     /**
-     * Convert an x axis angle in radians to a velocity.
+     * Convert an x axis angle in degrees to a velocity.
      *
-     * @param angle The x axis angle
+     * @param angle The x axis angle in degrees.
      *
      * @return The velocity.
      */
     public static double angleXToV(double angle)
     {
-        return Math.tan(angle);
+        return Math.tan(Math.toRadians(angle));
     }
 
+    /**
+     * Convert an angle (in degrees) in the rest frame to the equivalent angle
+     * in the prime frame.
+     *
+     * @param angle The angle in degrees in the rest frame.
+     * @param v The velocity of the prime frame.
+     *
+     * @return The angle in degrees in the prime frame.
+     */
     public static double toPrimeAngle(double angle, double v)
     {
-        final double lightAngle = Math.PI / 4;
+        // Check whether the angle is the angle of light: +/- 45 degrees
 
-        // Angle is the angle of light: +/- 45 degrees
-
-        if (angle == lightAngle || angle == -lightAngle) {
+        if (angle == 45 || angle == -45) {
             return angle;
         }
 
         // X angle
 
-        else if ((angle >= 0 && angle < lightAngle) ||
-            (angle < 0  && angle > -lightAngle)) {
+        else if (angle > -45 && angle < 45) {
             double v1 = angleXToV(angle);
             double v2 = vPrime(v1, v);
             return vToXAngle(v2);
         }
+
+        // T angle
+
         else {
             double v1 = angleTToV(angle);
             double v2 = vPrime(v1, v);

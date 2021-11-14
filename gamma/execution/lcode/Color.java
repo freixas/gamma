@@ -19,11 +19,15 @@ package gamma.execution.lcode;
 import gamma.math.Util;
 
 /**
+ * Gamma's version of a color. This class is immutable.
  *
  * @author Antonio Freixas
  */
 public class Color
 {
+    // Colors as doubles. These go into the symbol table for use by the
+    // users
+
     static public double red =     Color.toColorDouble(0xFF, 0,    0   );
     static public double green =   Color.toColorDouble(0,    0xFF, 0   );
     static public double blue =    Color.toColorDouble(0,    0,    0xFF);
@@ -36,6 +40,20 @@ public class Color
     static public double gray =    Color.toColorDouble(0x88, 0x88, 0x88);
     static public double white =   Color.toColorDouble(0xFF, 0xFF, 0xFF);
 
+    // Colors as Colors. These are for the program's own use
+
+    static public Color redColor =     new Color(Color.red);
+    static public Color greenColor =   new Color(Color.green);
+    static public Color blueColor =    new Color(Color.blue);
+
+    static public Color yellowColor =  new Color(Color.yellow);
+    static public Color magentaColor = new Color(Color.magenta);
+    static public Color cyanColor =    new Color(Color.cyan);
+
+    static public Color blackColor =   new Color(Color.black);
+    static public Color grayColor =    new Color(Color.gray);
+    static public Color whiteColor =   new Color(Color.white);
+
     private final int r;
     private final int g;
     private final int b;
@@ -45,13 +63,13 @@ public class Color
 
     public Color(double dColor)
     {
-        int iColor = Util.toInt(dColor);
-        this.r = (iColor >> 24) & 0xFF;
-        this.g = (iColor >> 16) & 0xFF;
-        this.b = (iColor >> 8) & 0xFF;
-        this.a = iColor & 0xFF;
+        long iColor = Util.toLong(dColor);
+        this.r = (int)((iColor >> 24) & 0xFF);
+        this.g = (int)((iColor >> 16) & 0xFF);
+        this.b = (int)((iColor >> 8) & 0xFF);
+        this.a = (int)(iColor & 0xFF);
 
-        javaFXColor = javafx.scene.paint.Color.rgb(this.r, this.b, this.g, this.a / 255);
+        javaFXColor = javafx.scene.paint.Color.rgb(this.r, this.g, this.b, this.a / 255);
     }
 
     public Color(double red, double green, double blue)
@@ -83,12 +101,12 @@ public class Color
         return javaFXColor;
     }
 
-    static public double toColorDouble(int red, int green, int blue)
+    static public double toColorDouble(long red, long green, long blue)
     {
         return (double) ((red & 0xFF) << 24 | (green & 0xFF) << 16 | (blue & 0xFF) << 8 | 0xFF);
     }
 
-    static public double toColorDouble(int red, int green, int blue, int alpha)
+    static public double toColorDouble(long red, long green, long blue, long alpha)
     {
         return (double) ((red & 0xFF) << 24 | (green & 0xFF) << 16 | (blue & 0xFF) << 8 | (alpha & 0xFF));
     }

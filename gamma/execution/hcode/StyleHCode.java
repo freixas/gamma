@@ -46,12 +46,7 @@ public class StyleHCode extends HCode
         code.clear();
 
         Style style = new Style();
-        try {
-            style.add(properties);
-        }
-        catch (IllegalArgumentException e) {
-            engine.throwExecutionException(e.getMessage());
-        }
+        style.add(properties);
 
         code.add(style);
     }

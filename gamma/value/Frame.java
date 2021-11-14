@@ -102,8 +102,8 @@ public class Frame
         double signTheta = Util.sign(theta);
 
         origin = new Coordinate(
-            x - signTheta * Math.cos(theta) * distanceToOrigin,
-            t - signTheta * Math.sin(theta) * distanceToOrigin);
+            x - signTheta * Math.cos(Math.toRadians(theta)) * distanceToOrigin,
+            t - signTheta * Math.sin(Math.toRadians(theta)) * distanceToOrigin);
     }
 
     /**

@@ -16,42 +16,40 @@
  */
 package gamma.execution.lcode;
 
-import customfx.ResizableCanvas;
 import gamma.drawing.Axis;
 import gamma.drawing.Context;
-import gamma.drawing.T;
-import gamma.execution.LCodeEngine;
-import gamma.math.Lorentz;
 import gamma.value.Line;
 
 /**
  *
  * @author Antonio Freixas
  */
-public class AxesCommand extends CommandExec
+public class AxesCommandExec extends CommandExec
 {
-    public AxesCommand()
+    public AxesCommandExec()
     {
     }
 
     @Override
-    public void execute(LCodeEngine engine, Struct cmdStruct, StyleStruct styles)
+    public void execute(Context context, Struct cmdStruct, StyleStruct styles)
     {
-        Context context = engine.getContext();
+        AxesStruct struct = (AxesStruct)cmdStruct;
+        double v = struct.frame.getV();
+        double v2 = v * v;
+        double tickScale = Math.sqrt(1 + v2) / Math.sqrt(1 - v2);
 
         // Draw the X axis
 
-        AxesStruct struct = (AxesStruct)cmdStruct;
         if (struct.x) {
             Line line = new Line(Line.AxisType.X, struct.frame);
-            Axis.draw(context, line, struct.positiveOnly, struct.xLabel, styles);
+            Axis.draw(context, v, line, tickScale, struct.positiveOnly, struct.xLabel, styles);
         }
 
         // Draw the t axis
 
         if (struct.t) {
             Line line = new Line(Line.AxisType.T, struct.frame);
-            Axis.draw(context, line, struct.positiveOnly, struct.tLabel, styles);
+            Axis.draw(context, v, line, tickScale, struct.positiveOnly, struct.tLabel, styles);
         }
     }
 

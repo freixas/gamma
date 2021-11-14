@@ -17,6 +17,7 @@
 package gamma.execution.hcode;
 
 import gamma.execution.ArgInfo;
+import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
 import gamma.execution.function.Function;
 import java.util.ArrayList;
@@ -43,7 +44,7 @@ public class FunctionHCode extends HCode
 
         Function function = Function.get(funcName);
         if (function == null) {
-            engine.throwExecutionException("Uknown function '" + funcName + "'");
+            throw new ExecutionException("Uknown function '" + funcName + "'");
         }
 
         List<Object> funcCode = code.subList(0, code.size() - 3);
@@ -59,7 +60,7 @@ public class FunctionHCode extends HCode
 
         if (numOfArgs == -1) numOfArgs = funcCode.size();
         if (numOfArgs != funcCode.size()) {
-            engine.throwExecutionException("Incorrect number of arguments for function '" + funcName + "'. Expected " + numOfArgs + ", received " + funcCode.size());
+            throw new ExecutionException("Incorrect number of arguments for function '" + funcName + "'. Expected " + numOfArgs + ", received " + funcCode.size());
         }
 
         funcArgInfo.checkTypes(funcCode);

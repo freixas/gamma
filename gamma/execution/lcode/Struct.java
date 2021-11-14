@@ -85,6 +85,17 @@ public abstract class Struct
     }
 
     /**
+     * Finalize any settings. Some values have defaults that depend on other
+     * values, so this is called after everything has been set by the user.
+     * If a class has a flexible default, it should override this class to
+     * set it.
+     */
+    public void finalizeValues()
+    {
+        // Do nothing by default
+    }
+
+    /**
      * Make any coordinates, velocities, angles, distances, and durations
      * relative to the given frame instead of the rest frame.
      *
@@ -127,10 +138,9 @@ public abstract class Struct
     }
 
     /**
-     * Generic range checking for integer fields. This can be used as a helper
+     * Generic range checking for integer fields.This can be used as a helper
      * method for implementing range checks in subclasses.
      *
-     * @param engine The hcode engine.
      * @param propertyName The name of the property being checked.
      * @param value The property's value.
      * @param min The allowed minimum (Double.NEGATIVE_INFINITY is allowed).
@@ -144,10 +154,9 @@ public abstract class Struct
     }
 
     /**
-     * Generic range checking for double fields. This can be used as a helper
+     * Generic range checking for double fields.This can be used as a helper
      * method for implementing range checks in subclasses.
      *
-     * @param engine The hcode engine.
      * @param propertyName The name of the property being checked.
      * @param value The property's value.
      * @param min The allowed minimum (Double.NEGATIVE_INFINITY is allowed).
@@ -200,7 +209,7 @@ public abstract class Struct
             return cmdStruct;
         }
         catch (ClassNotFoundException | IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException e) {
-            throw new ProgrammingException(e.getMessage());
+            throw new ProgrammingException("Struct.createNewStruct()", e);
         }
     }
 
@@ -270,7 +279,7 @@ public abstract class Struct
             }
         }
         catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            throw new ProgrammingException(e.getMessage());
+            throw new ProgrammingException("Struct.initializeStruct()", e);
         }
     }
 

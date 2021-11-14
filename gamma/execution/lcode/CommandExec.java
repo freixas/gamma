@@ -16,7 +16,7 @@
  */
 package gamma.execution.lcode;
 
-import gamma.execution.LCodeEngine;
+import gamma.drawing.Context;
 
 /**
  *
@@ -24,14 +24,12 @@ import gamma.execution.LCodeEngine;
  */
 public abstract class CommandExec
 {
-
     /**
-     * Execute a command.
-     * 
-     * @param engine The lcode engine.
-     * @param cmdStruct The structure containing the properties for this command
-     * (except the style properties).
-     * @param styles The structure containing the style properties.
+     * Execute this command.
+     *
+     * @param context The graphics context.
+     * @param cmdStruct The associated structure.
+     * @param styles The associated styles
      */
-    abstract public void execute(LCodeEngine engine, Struct cmdStruct, StyleStruct styles);
+    abstract public void execute(Context context, Struct cmdStruct, StyleStruct styles);
 }

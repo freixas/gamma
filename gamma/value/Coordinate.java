@@ -16,6 +16,8 @@
  */
 package gamma.value;
 
+import javafx.geometry.Point2D;
+
 /**
  *
  * @author Antonio Freixas
@@ -42,6 +44,11 @@ public class Coordinate extends ObjectContainer
     public Coordinate(Coordinate other)
     {
         this(other.x, other.t);
+    }
+
+    public Coordinate(Point2D point)
+    {
+        this(point.getX(), point.getY());
     }
 
     /**

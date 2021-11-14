@@ -17,6 +17,7 @@
 package gamma.execution.hcode;
 
 import gamma.execution.ArgInfo;
+import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
 import gamma.value.Address;
 import gamma.value.ObjectPropertyAddress;
@@ -44,6 +45,7 @@ public class AssignHCode extends HCode
     }
 
     @Override
+    @SuppressWarnings("null")
     public void execute(HCodeEngine engine, List<Object> code)
     {
         Object arg1 = code.get(0);
@@ -57,7 +59,7 @@ public class AssignHCode extends HCode
 
         if (address instanceof ObjectPropertyAddress) {
             if (!address.exists() || !address.typeMatches(arg1)) {
-                engine.throwExecutionException("Variable does not exist or is of the wrong type");
+                throw new ExecutionException("Variable does not exist or is of the wrong type");
             }
         }
 
@@ -67,7 +69,7 @@ public class AssignHCode extends HCode
         if (address.exists()) {
             String name = ((SymbolTableAddress)address).getName();
             if (engine.getAnimationSymbolTable().contains(name)) {
-                engine.throwExecutionException("You cannot change the value of an animation variable");
+                throw new ExecutionException("You cannot change the value of an animation variable");
             }
         }
 

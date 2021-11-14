@@ -27,4 +27,29 @@ public class ExecutionException extends RuntimeException
         super("Runtime error: " + message);
     }
 
+    public ExecutionException(String message, Throwable cause)
+    {
+        super("Runtime error: " +
+              message +
+              (cause != null ?
+                (cause.getLocalizedMessage() != null ? "\nCaused by " + cause.getLocalizedMessage() : "") : ""), cause);
+    }
+
+//    @Override
+//    public String toString()
+//    {
+//        String str = getLocalizedMessage() == null ? "" : getLocalizedMessage();
+//        Throwable cause = getCause();
+//        while (cause != null) {
+//            if (cause.getLocalizedMessage() != null) {
+//                str += "\nCaused by: " + cause.getLocalizedMessage();
+//            }
+//            else {
+//                str += "\nCaused by: " + cause.getClass();
+//            }
+//            cause = cause.getCause();
+//        }
+//        return str;
+//    }
+
 }

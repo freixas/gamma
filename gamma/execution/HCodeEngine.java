@@ -16,6 +16,7 @@
  */
 package gamma.execution;
 
+import gamma.GammaRuntimeException;
 import gamma.ProgrammingException;
 import gamma.execution.hcode.HCode;
 import gamma.execution.lcode.Color;
@@ -27,7 +28,6 @@ import gamma.value.Frame;
 import gamma.value.Observer;
 import gamma.value.Style;
 import gamma.value.WInitializer;
-import gamma.value.WSegment;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -180,12 +180,12 @@ public class HCodeEngine
                 throw new ExecutionException("Execution ended but the code stack is not empty");
             }
         }
-        catch (ExecutionException e) {
-            throwExecutionException(e.getMessage());
+        catch (Throwable e) {
+            throwGammaException(e);
         }
-        catch (ProgrammingException e) {
-            throwProgrammingException(e.getMessage());
-        }
+//        catch (ProgrammingException e) {
+//            throwProgrammingException(e);
+//        }
     }
 
     private int executeOneInstruction(int codePtr)
@@ -205,13 +205,13 @@ public class HCodeEngine
             if (codePtr > 0) {
                 Object argN = codes.get(codePtr - 1);
                 if (!(argN instanceof Integer)) {
-                    throwExecutionException("Expected the number of hCode arguments");
+                    throw new ExecutionException("Expected the number of hCode arguments");
                 }
                 numOfArgs = (Integer)argN;
                 n = 1;
             }
             else {
-                throwExecutionException("hCode arguments are missing");
+                throw new ExecutionException("hCode arguments are missing");
             }
         }
 
@@ -219,7 +219,7 @@ public class HCodeEngine
 
         int codeStart = codePtr - numOfArgs - n;
         if (codeStart < 0) {
-            throwExecutionException("Invalid number of hCode arguments");
+            throw new ExecutionException("Invalid number of hCode arguments");
         }
         List<Object> code = codes.subList(codeStart, codeStart + numOfArgs);
 
@@ -246,16 +246,27 @@ public class HCodeEngine
         lCodeEngine.addCommand(command);
     }
 
-    public void throwExecutionException(String message)
-        throws ExecutionException
+    public void throwGammaException(Throwable e)
+        throws GammaRuntimeException
     {
-        throw new ExecutionException(file.getName()+ ":" + lineNumber + ": " + message);
+        if (e instanceof GammaRuntimeException) {
+            throw new GammaRuntimeException(file.getName()+ ":" + lineNumber + ": ", e);
+        }
+        else {
+            throw new GammaRuntimeException(file.getName()+ ":" + lineNumber + ": " + e.getLocalizedMessage(), e);
+        }
     }
 
-    public void throwProgrammingException(String message)
-        throws ProgrammingException
-    {
-        throw new ProgrammingException(file.getName()+ ":" + lineNumber + ": " + message);
-    }
+//    public void throwExecutionException(Throwable e)
+//        throws ExecutionException
+//    {
+//        throw new ExecutionException(file.getName()+ ":" + lineNumber + ": " + e.getLocalizedMessage(), e);
+//    }
+//
+//    public void throwProgrammingException(Throwable e)
+//        throws ProgrammingException
+//    {
+//        throw new ProgrammingException(file.getName()+ ":" + lineNumber + ": " + e.getLocalizedMessage(), e);
+//    }
 
 }

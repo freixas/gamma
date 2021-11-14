@@ -16,6 +16,9 @@
  */
 package gamma.value;
 
+import javafx.geometry.Point2D;
+import javafx.scene.transform.Affine;
+
 /**
  * Create a bounding box.
  *
@@ -104,14 +107,44 @@ public class Bounds
         max.setTo(other.max);
     }
 
+    /**
+     * Get the coordinate for the bottom left corner of the bounds.
+     *
+     * @return The coordinate for the bottom left corner of the bounds.
+     */
     public Coordinate getMin()
     {
         return min;
     }
 
+    /**
+     * Get the coordinate for the upper right corner of the bounds.
+     *
+     * @return The coordinate for the upper right corner of the bounds.
+     */
     public Coordinate getMax()
     {
         return max;
+    }
+
+    /**
+     * Get the width of the bounds.
+     *
+     * @return The width of the bounds.
+     */
+    public double getWidth()
+    {
+        return max.x - min.x;
+    }
+
+    /**
+     * Get the height of the bounds.
+     *
+     * @return The height of the bounds.
+     */
+    public double getHeight()
+    {
+        return max.t - min.t;
     }
 
     /**
@@ -170,47 +203,31 @@ public class Bounds
         return new Bounds(
             Math.max(min.x, other.min.x),
             Math.max(min.t, other.min.t),
-            Math.min(max.x, other.max.t),
+            Math.min(max.x, other.max.x),
             Math.min(max.t, other.max.t));
 
     }
 
     /**
-     * Create a new Bounds object by rotating this one around a given point.
+     * Transform the bounding box to get a new bounding box. The new
+     * box is the bounding box of the transformed box.
      *
-     * @param angle The angle in radians by which to rotate (+PI/2 to -PI/2),
-     * @param point The point to rotate around.
+     * @param transform The transform to apply.
      *
-     * @return The rotated bounding box.
+     * @return The transformed bounds.
      */
-    public Bounds rotate(double angle, Coordinate point)
+    public Bounds transform(Affine transform)
     {
-        final double sinTheta;
-        final double cosTheta;
+        Point2D p1 = transform.transform(min.x, min.t);
+        Point2D p2 = transform.transform(min.x, max.t);
+        Point2D p3 = transform.transform(max.x, min.t);
+        Point2D p4 = transform.transform(max.x, max.t);
 
-        if (angle >= 0) {
-            sinTheta = Math.sin(angle);
-            cosTheta = Math.cos(angle);
-        }
-        else {
-            sinTheta = Math.sin(Math.PI / 2 - angle);
-            cosTheta = Math.cos(Math.PI / 2 - angle);
-        }
-
-        double x1 = min.x;
-        double t1 = min.t;
-        double x2 = max.x;
-        double t2 = max.t;
-
-        Coordinate p1 = new Coordinate(cosTheta * x1 - sinTheta * t1, sinTheta * x1 + cosTheta * t1);
-        Coordinate p2 = new Coordinate(cosTheta * x1 - sinTheta * t2, sinTheta * x1 + cosTheta * t2);
-        Coordinate p3 = new Coordinate(cosTheta * x2 - sinTheta * t2, sinTheta * x2 + cosTheta * t2);
-        Coordinate p4 = new Coordinate(cosTheta * x2 - sinTheta * t1, sinTheta * x2 + cosTheta * t1);
 
         return new Bounds(
-            Math.min(Math.min(p1.x, p2.x), Math.min(p3.x, p4.x)),
-            Math.min(Math.min(p1.t, p2.t), Math.min(p3.t, p4.t)),
-            Math.max(Math.max(p1.x, p2.x), Math.max(p3.x, p4.x)),
-            Math.max(Math.max(p1.t, p2.t), Math.max(p3.t, p4.t)));
+            Math.min(Math.min(p1.getX(), p2.getX()), Math.min(p3.getX(), p4.getX())),
+            Math.min(Math.min(p1.getY(), p2.getY()), Math.min(p3.getY(), p4.getY())),
+            Math.max(Math.max(p1.getX(), p2.getX()), Math.max(p3.getX(), p4.getX())),
+            Math.max(Math.max(p1.getY(), p2.getY()), Math.max(p3.getY(), p4.getY())));
     }
 }

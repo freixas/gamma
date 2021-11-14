@@ -17,6 +17,7 @@
 package gamma.execution.function;
 
 import gamma.execution.ArgInfo;
+import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
 import gamma.value.Coordinate;
 import gamma.value.Line;
@@ -64,7 +65,7 @@ public class intersectFunction extends Function
         }
 
         if (result == null) {
-            engine.throwExecutionException("No intersection found");
+            throw new ExecutionException("intersect() function: No intersection found");
         }
         return result;
 

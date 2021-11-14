@@ -16,9 +16,14 @@
  */
 package gamma.drawing;
 
+import gamma.ProgrammingException;
 import gamma.execution.lcode.StyleStruct;
+import gamma.math.Util;
 import gamma.value.Bounds;
 import gamma.value.Coordinate;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.transform.Affine;
+import javafx.scene.transform.NonInvertibleTransformException;
 
 /**
  *
@@ -26,88 +31,191 @@ import gamma.value.Coordinate;
  */
 public class Axis
 {
-    static final double MIN_MINOR_TICK_MARK_LENGTH = 10.0;
-    static final double MIN_MAJOR_TICK_MARK_LENGTH = 20.0;
+    static final double MIN_MINOR_TICK_MARK_LENGTH = 3.0;
+    static final double MIN_MAJOR_TICK_MARK_LENGTH = 10.0;
+    static final double IDEAL_TICK_SPACING = 10.0;
 
-    public static void draw(Context context, gamma.value.Line line,
-                            boolean positiveOnly, String xLabel,
+    public static void draw(Context context, double v, gamma.value.Line line,
+                            double tickScale, boolean positiveOnly, String xLabel,
                             StyleStruct styles)
     {
-        Coordinate origin = line.getCoordinate();
+        try {
+            GraphicsContext gc = context.gc;
 
-        // Intersect the axis with the viewport.
-        // A line has some thickness. If we have tick marks, we can think of
-        // the line is being thicker, so we can apply the same algorithm
-        // whether a line has tick marks or not.
+            // Save the current graphics context
 
-        // We reverse rotate the line to horizontal around its origin,
-        // which just means that the line is at x = origin.x for any t.
+            gc.save();
 
-        double height = styles.lineThickness;
+            // Set up the gc for line drawing
 
-        // If we have tick marks, the height increases
+            Line.setupLineGc(context, styles);
 
-        if (styles.ticks) {
-            height += MIN_MAJOR_TICK_MARK_LENGTH;
-        }
+            // *********************************************
+            // *** Find out the current scale.           ***
+            // *********************************************
 
-        // The thickness of the line is evenly distributed to either side
+            // We multiply by this scale to convert a from screen units to
+            // world units. We divide by this to go from world units to screen
+            // units.
 
-        double halfHeight = height / 2.0;
+            double viewportScale = gc.getTransform().inverseDeltaTransform(1.0, 0).getX();
 
-        // Create a bounding box for the line
+            // *********************************************
+            // *** Set up the transformed system.        ***
+            // *********************************************
 
-        Bounds lineBounds = new Bounds(
-            origin.x - halfHeight,
-            Double.NEGATIVE_INFINITY,
-            origin.x + halfHeight,
-            Double.POSITIVE_INFINITY);
+            // Rotate the gc so that our line can be drawn horizontal. After
+            // the rotation is applied, the gc transform will transform rotated
+            // world to screen units and screen to rotated world units
 
-        // Reverse rotate the viewport around the line's origin
+            double angle = line.getAngle();
+            Coordinate origin = line.getCoordinate();
+            Affine rotTransform = gc.getTransform();
+            rotTransform.appendRotation(angle, origin.x, origin.t);
+            gc.setTransform(rotTransform);
 
-        double angle = line.getAngle();
-        Bounds rotatedBounds = context.t.getViewportBounds().rotate(-angle, origin);
+            // *********************************************
+            // *** Intersect the axis with the viewport. ***
+            // *********************************************
 
-        // Check whether to draw the line
+            // A line has some thickness. If we have tick marks, we can think of
+            // the line is being thicker, so we can apply the same algorithm
+            // whether a line has tick marks or not.
 
-        Bounds intersection = rotatedBounds.intersect(lineBounds);
+            double height = styles.lineThickness;
 
-        // If there is no intersection, we're done
-        if (intersection == null) {
-            return;
-        }
+            // If we have tick marks, the height increases
 
-        // Now we know approximately where the line lies. 
+            if (styles.ticks) {
+                height += MIN_MAJOR_TICK_MARK_LENGTH;
+            }
 
+            // The thickness of the line is evenly distributed to either side
 
+            double halfHeight = height / 2.0;
 
-	    // We draw tick marks as though the axis were horizontal
-	    // and the ticks vertical and then rotate them into place.
-	    // Axes (and their tick marks) are infinite, so we need to
-	    // limit our drawing just to what intersects the viewport.
-	    // The easiest way to do that is to reverse rotate the
-            // clipping area and intersect that with a bounding box for
-            // the tick marks to find out the area we need to draw.
+            // Convert this from pixel coordinates to world unit coordinates
 
-            // Create a bounding box for the horizontal line
+            double halfHeightMajor = viewportScale * halfHeight;
 
-            double minorTickMarkLength = MIN_MINOR_TICK_MARK_LENGTH + styles.lineThickness;
-            double majorTickMarkLength = MIN_MAJOR_TICK_MARK_LENGTH + styles.lineThickness;
-            double halfMaxHeight = majorTickMarkLength / 2;
+            // Create a bounding box for the line. The bounds should be
+            // specified as though the line has been rotated the same
+            // as the graphics context. This means we need to transform our
+            // origin to screen units and then inverse transform to rotated
+            // world units
 
             Bounds lineBounds = new Bounds(
-                origin.x - halfMaxHeight,
-                Double.NEGATIVE_INFINITY,
-                origin.x + halfMaxHeight,
-                Double.POSITIVE_INFINITY);
+                positiveOnly && v >= 0.0 ? origin.x : Double.NEGATIVE_INFINITY,
+                origin.t - halfHeightMajor,
+                positiveOnly && v < 0.0 ? origin.x : Double.POSITIVE_INFINITY,
+                origin.t + halfHeightMajor);
 
-            Bounds intersection = rotatedBounds.intersect(lineBounds);
+            Bounds rotatedBounds = context.getCanvasBounds();
+            Bounds intersection = lineBounds.intersect(rotatedBounds);
 
             // If there is no intersection, we're done
 
-            if (intersection == null) return;
+            if (intersection == null) {
+                gc.restore();
+                return;
+            }
 
-            // Otherwise, figure out the tick marks to draw
+            // *********************************************
+            // *** Draw the line.                        ***
+            // *********************************************
+
+            // The line is in the bounding box. Draw it
+
+            gc.strokeLine(intersection.min.x, origin.t, intersection.max.x, origin.t);
+
+            // *********************************************
+            // *** Draw the tick marks.                  ***
+            // *********************************************
+
+            // Check for tick marks
+
+            if (!styles.ticks) {
+                gc.restore();
+                return;
+            }
+
+            // Calculate the pixels per world space units
+
+            double pixelWidth = context.canvas.getWidth();
+            double worldUnitsWidth = context.getCanvasBounds().getWidth();
+            double pixelsPerWorldUnit = pixelWidth / worldUnitsWidth;
+
+            // Get the world space units per ideal tick spacing in pixels
+
+            double worldUnitsPerIdealPixelSpacing = IDEAL_TICK_SPACING / pixelsPerWorldUnit;
+
+            // We try to get as close to the ideal spacing as we can, while
+            // keeping the units to powers of 10, The tick spacing is in
+            // world units
+
+            double tickSpacing = Math.pow(10, Math.ceil(Math.log10(worldUnitsPerIdealPixelSpacing)));
+
+            // The faster the velocity, the further apart the tick marks are.
+            // For v = 0, tickScale = 1.0
+            // For v = 1, tickScale = + infinity
+
+            tickSpacing *= tickScale;
+
+            // We need to widen the intersection box to account for the
+            // width of the the tick marks. Note that the width is in pixel
+            // space but the intersection is in world space
+
+            double worldTickThickness = viewportScale * styles.tickThickness;
+            double worldMajorTickThickness = viewportScale * styles.majorTickThickness;
+
+            double padding = Math.max(worldTickThickness, worldMajorTickThickness) / 2.0;
+            padding *= viewportScale;
+
+            intersection.min.x -= padding;
+            intersection.max.x += padding;
+
+            // We'll draw from the minimum of the intersection box to the
+            // maximum
+
+            double halfHeightMinor =
+                viewportScale * (styles.lineThickness + MIN_MINOR_TICK_MARK_LENGTH) / 2;
+
+            // Determine the first tick mark and its value
+
+            double minDistance = intersection.min.x - origin.x;
+            double maxDistance = intersection.max.x;
+
+            double firstTick = minDistance - (minDistance % tickSpacing);
+            int tickNumber = Util.toInt(firstTick / tickSpacing);
+            firstTick += origin.x;
+
+            gc.setLineWidth(worldTickThickness);
+            for (double x = firstTick; x <= maxDistance; x += tickSpacing, tickNumber++) {
+                if (tickNumber != 0) {
+
+                    // Major tick
+
+                    if (tickNumber % 10 == 0.0) {
+                        gc.setLineWidth(worldMajorTickThickness);
+                        gc.strokeLine(x, origin.t - halfHeightMajor, x, origin.t + halfHeightMajor);
+                        gc.setLineWidth(worldTickThickness);
+                    }
+
+                    // Minor tick
+
+                    else {
+                        gc.strokeLine(x, origin.t - halfHeightMinor, x, origin.t + halfHeightMinor);
+                    }
+                }
+            }
+
+            // Restore the original graphics context
+
+            gc.restore();
+        }
+        catch (NonInvertibleTransformException e)
+        {
+            throw new ProgrammingException("Axis.draw()", e);
         }
     }
 }

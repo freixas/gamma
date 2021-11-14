@@ -17,6 +17,7 @@
 package gamma.execution.hcode;
 
 import gamma.execution.ArgInfo;
+import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
 import gamma.value.Address;
 import gamma.value.AnimationVariable;
@@ -54,7 +55,7 @@ public class AnimAssignHCode extends HCode
         // Check for a valid step size
 
         if (stepSize == 0) {
-            engine.throwExecutionException("The step size cannot be zero");
+            throw new ExecutionException("The step size cannot be zero");
         }
 
         // Check that the final value matches the step size
@@ -62,20 +63,20 @@ public class AnimAssignHCode extends HCode
         if (!Double.isNaN(finalValue)) {
             if ((stepSize < 0 && finalValue > initialValue) ||
                 (stepSize > 0 && finalValue < initialValue)) {
-                engine.throwExecutionException("Invalid final value");
+                throw new ExecutionException("Invalid final value");
             }
         }
 
         // Make sure this is a symbol table address
 
         if (!(address instanceof SymbolTableAddress)) {
-            engine.throwExecutionException("An animation variable cannot be assigned to an object");
+            throw new ExecutionException("An animation variable cannot be assigned to an object");
         }
 
         // Check to see if this animation variable has already been defined.
 
         if (address.exists()) {
-            engine.throwExecutionException("This animation variable has already been defined");
+            throw new ExecutionException("This animation variable has already been defined");
         }
 
         // Set the value in the regular symbol table

@@ -17,6 +17,7 @@
 package gamma.execution.function;
 
 import gamma.execution.ArgInfo;
+import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
 import gamma.value.Observer;
 import java.util.ArrayList;
@@ -47,8 +48,7 @@ public class tauToTFunction extends Function
             return observer.tauToT(tau);
         }
         catch (Exception e) {
-            engine.throwExecutionException(e.getMessage());
-            return null;
+            throw new ExecutionException("Error in function tauToT()", e);
         }
     }
 

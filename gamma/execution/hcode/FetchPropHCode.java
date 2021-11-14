@@ -17,6 +17,7 @@
 package gamma.execution.hcode;
 
 import gamma.execution.ArgInfo;
+import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
 import gamma.value.ObjectContainer;
 import java.util.ArrayList;
@@ -46,7 +47,7 @@ public class FetchPropHCode extends HCode
        // Make sure the value has the given property
 
         if (!container.hasProperty(propName)) {
-            engine.throwExecutionException("'" + propName + " is not a valid property");
+            throw new ExecutionException("'" + propName + " is not a valid property");
         }
 
         // Get the property value

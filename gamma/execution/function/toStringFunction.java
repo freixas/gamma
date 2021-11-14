@@ -17,6 +17,7 @@
 package gamma.execution.function;
 
 import gamma.execution.ArgInfo;
+import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
 import gamma.math.Util;
 import java.util.ArrayList;
@@ -44,7 +45,7 @@ public class toStringFunction extends Function
         int digits = Util.toInt((Double)code.get(1));
 
         if (digits < 0) {
-            engine.throwExecutionException("Invalid number of digits in float to string conversion");
+            throw new ExecutionException("Invalid number of digits in float to string conversion");
         }
         return String.format("%f." + digits, d);
     }

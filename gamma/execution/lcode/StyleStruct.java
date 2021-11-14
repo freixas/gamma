@@ -19,6 +19,9 @@ package gamma.execution.lcode;
 import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
 import gamma.value.Frame;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontPosture;
+import javafx.scene.text.FontWeight;
 
 /**
  *
@@ -26,23 +29,27 @@ import gamma.value.Frame;
  */
 public class StyleStruct extends Struct
 {
-    public Color color = new Color(Color.black);
-    public Color backgroundColor = new Color(Color.white);
-    public int lineThickness = 2;
+    public Color color = Color.blackColor;
+    public Color backgroundColor = Color.whiteColor;
+    public double lineThickness = 2.0;
     public String lineStyle = "solid";
     public String arrow = "none";
-    public int diameter = 2;
+    public double eventDiameter = 2.0;
     public String eventShape = "circle";
-    public String font = "Arial";
-    public String weight = "normal";
-    public String slant = "normal";
-    public int size = 10;
-    public int padding = 2;
-    public String anchor = "MC";
+    public String fontFamily = null;
+    public String fontWeigth = "normal";
+    public String fontStyle = "normal";
+    public double fontSize = 10.0;
+    public double textPadding = 2.0;
+    public String textAnchor = "MC";
     public boolean ticks = true;
     public boolean tickLabels = true;
-    public int tickThickness = -9999;          // Use lineThickness
-    public int majorTickThickness = -9999;     // Use lineThickness
+    public double tickThickness = 1.0;
+    public double majorTickThickness = 2.0;
+
+    public javafx.scene.paint.Color javaFXColor;
+    public javafx.scene.paint.Color javaFXBackgroundColor;
+    public Font font;
 
     public StyleStruct()
     {
@@ -50,28 +57,60 @@ public class StyleStruct extends Struct
 
     public StyleStruct(StyleStruct other)
     {
-        this.color = new Color(other.color);
-        this.backgroundColor = new Color(Color.white);
+        this.color = other.color;
+        this.backgroundColor = other.backgroundColor;
         this.lineThickness = other.lineThickness;
         this.lineStyle = other.lineStyle;
         this.arrow = other.arrow;
-        this.diameter = other.diameter;
+        this.eventDiameter = other.eventDiameter;
         this.eventShape = other.eventShape;
-        this.font = other.font;
-        this.weight = other.weight;
-        this.slant = other.slant;
-        this.size = other.size;
-        this.padding = other.padding;
-        this.anchor = other.anchor;
+        this.fontFamily = other.fontFamily;
+        this.fontWeigth = other.fontWeigth;
+        this.fontStyle = other.fontStyle;
+        this.fontSize = other.fontSize;
+        this.textPadding = other.textPadding;
+        this.textAnchor = other.textAnchor;
         this.ticks = other.ticks;
         this.tickLabels = other.tickLabels;
-        this.tickThickness = other.tickThickness;          // Use lineThickness
+        this.tickThickness = other.tickThickness;
         this.majorTickThickness = other.majorTickThickness;
+    }
+
+    @Override
+    public void finalizeValues()
+    {
+        javaFXColor = color.getJavaFXColor();
+        javaFXBackgroundColor = backgroundColor.getJavaFXColor();
+
+        FontWeight weight;
+        switch (fontWeigth) {
+
+            case "bold" -> weight = FontWeight.BOLD;
+            default -> weight = FontWeight.NORMAL;
+        }
+        FontPosture posture;
+        switch (fontStyle) {
+
+            case "italic" -> posture = FontPosture.ITALIC;
+            default -> posture = FontPosture.REGULAR;
+        }
+
+        // I'm not sure that the font() method ever fails
+
+        font = Font.font​(fontFamily, weight, posture, fontSize);
+        if (font == null) {
+            font = Font.font​(null, weight, posture, fontSize);
+            if (font == null) {
+                font = Font.getDefault();
+            }
+        }
     }
 
     public void lineThicknessRangeCheck()
     {
-        rangeCheck("lineThickness", lineThickness, 1, 20);
+        if (lineThickness <= 0.0) {
+            throw new ExecutionException("'lineThickness' must be greater than 0");
+        }
     }
 
     public void lineStyleRangeCheck()
@@ -85,150 +124,89 @@ public class StyleStruct extends Struct
 
     public void arrowRangeCheck()
     {
-        if (!lineStyle.equals("none") &&
-            !lineStyle.equals("both") &&
-            !lineStyle.equals("start") &&
-            !lineStyle.equals("end")) {
+        if (!arrow.equals("none") &&
+            !arrow.equals("both") &&
+            !arrow.equals("start") &&
+            !arrow.equals("end")) {
             throw new ExecutionException("The value used for property 'arrow' is invalid");
         }
     }
 
-    public void diameterRangeCheck()
+    public void eventDiameterRangeCheck()
     {
-        rangeCheck("diameter", diameter, 1, 20);
+        if (eventDiameter <= 0.0) {
+            throw new ExecutionException("'eventDiameter' must be greater than 0");
+        }
     }
 
     public void eventShapeRangeCheck()
     {
-        if (!lineStyle.equals("circle") &&
-            !lineStyle.equals("square") &&
-            !lineStyle.equals("diamond") &&
-            !lineStyle.equals("star")) {
+        if (!eventShape.equals("circle") &&
+            !eventShape.equals("square") &&
+            !eventShape.equals("diamond") &&
+            !eventShape.equals("star")) {
             throw new ExecutionException("The value used for property 'eventShape' is invalid");
         }
     }
 
     public void weightRangeCheck()
     {
-        if (!lineStyle.equals("normal") &&
-            !lineStyle.equals("bold")) {
+        if (!fontWeigth.equals("normal") &&
+            !fontWeigth.equals("bold")) {
             throw new ExecutionException("The value used for property 'weight' is invalid");
         }
     }
 
     public void slantRangeCheck()
     {
-        if (!lineStyle.equals("normal") &&
-            !lineStyle.equals("italic")) {
+        if (!fontStyle.equals("normal") &&
+            !fontStyle.equals("italic")) {
             throw new ExecutionException("The value used for property 'slant' is invalid");
         }
     }
 
-    public void sizeRangeCheck()
+    public void fontSizeRangeCheck()
     {
-        if (size < 1) {
-            throw new ExecutionException("The value used for property 'size' is out of range");
+        if (fontSize <= 0.0) {
+            throw new ExecutionException("'fontSize' must be greater than 0");
+        }
+    }
+
+    public void textPaddingRangeCheck()
+    {
+        if (textPadding < 0.0) {
+            throw new ExecutionException("'lineThickness' must not be negative");
         }
     }
 
     public void anchorRangeCheck()
     {
-        if (!lineStyle.equals("UL") &&
-            !lineStyle.equals("UC") &&
-            !lineStyle.equals("UR") &&
-            !lineStyle.equals("ML") &&
-            !lineStyle.equals("MC") &&
-            !lineStyle.equals("MR") &&
-            !lineStyle.equals("BL") &&
-            !lineStyle.equals("BC") &&
-            !lineStyle.equals("BR")) {
+        if (!textAnchor.equals("UL") &&
+            !textAnchor.equals("UC") &&
+            !textAnchor.equals("UR") &&
+            !textAnchor.equals("ML") &&
+            !textAnchor.equals("MC") &&
+            !textAnchor.equals("MR") &&
+            !textAnchor.equals("BL") &&
+            !textAnchor.equals("BC") &&
+            !textAnchor.equals("BR")) {
             throw new ExecutionException("The value used for property 'anchor' is invalid");
         }
     }
 
-    public void tickThicknessRangeCheck(HCodeEngine engine)
+    public void tickThicknessRangeCheck()
     {
-        if (tickThickness == -9999) return;
-        rangeCheck("tickThickness", tickThickness, 1, 20);
+        if (tickThickness <= 0.0) {
+            throw new ExecutionException("'tickThickness' must be greater than 0");
+        }
     }
 
-    public void majorTickThicknessRangeCheck(HCodeEngine engine)
+    public void majorTickThicknessRangeCheck()
     {
-        if (majorTickThickness == -9999) return;
-        rangeCheck("majorTickThickness", majorTickThickness, 1, 20);
+        if (majorTickThickness <= 0.0) {
+            throw new ExecutionException("'majorTickThickness' must be greater than 0");
+        }
     }
-
-//    public final void setFromPropertyInfo()
-//    {
-//        styleColor =         new Color((double)PropertyInfo.getPropertyInfo("style", "styleColor").getDefault());
-//        backgroundColor =    new Color((double)PropertyInfo.getPropertyInfo("style", "backgroundColor").getDefault());
-//        lineThickness =          Util.toInt((double)PropertyInfo.getPropertyInfo("style", "lineThickness").getDefault());
-//        lineStyle =          (String)PropertyInfo.getPropertyInfo("style", "lineStyle").getDefault();
-//        arrow =              (String)PropertyInfo.getPropertyInfo("style", "arrow").getDefault();
-//        diameter =           Util.toInt((double)PropertyInfo.getPropertyInfo("style", "diameter").getDefault());
-//        eventShape =         (String)PropertyInfo.getPropertyInfo("style", "eventShape").getDefault();
-//        font =               (String)PropertyInfo.getPropertyInfo("style", "font").getDefault();
-//        weight =             (String)PropertyInfo.getPropertyInfo("style", "weight").getDefault();
-//        slant =              (String)PropertyInfo.getPropertyInfo("style", "slant").getDefault();
-//        size =               Util.toInt((double)PropertyInfo.getPropertyInfo("style", "size").getDefault());
-//        padding =            Util.toInt((double)PropertyInfo.getPropertyInfo("style", "padding").getDefault());
-//        anchor =             (String)PropertyInfo.getPropertyInfo("style", "anchor").getDefault();
-//        ticks =              Util.toBoolean((double)PropertyInfo.getPropertyInfo("style", "ticks").getDefault());
-//        tickLabels =         Util.toBoolean((double)PropertyInfo.getPropertyInfo("style", "tickLabels").getDefault());
-//        tickThickness =      Util.toInt((double)PropertyInfo.getPropertyInfo("style", "tickThickness").getDefault());
-//        majorTickThickness = Util.toInt((double)PropertyInfo.getPropertyInfo("style", "majorTickThickness").getDefault());
-//     }
-//
-//    @Override
-//    public void setFromPropertyList(PropertyList list)
-//    {
-//        for (int i = 0; i < list.size(); i++) {
-//            Property property = list.getProperty(i);
-//            String name = property.getName();
-//            PropertyInfo info = PropertyInfo.getPropertyInfo("style", name);
-//            Object value = property.getValue();
-//            if (info != null) {
-//                switch (name) {
-//                    case "styleColor" ->
-//                        styleColor = new Color((Double) value);
-//                    case "backgroundColor" ->
-//                        backgroundColor = new Color((Double) value);
-//                    case "lineThickness" ->
-//                        lineThickness = Util.toInt((Double) value);
-//                    case "lineStyle" ->
-//                        lineStyle = (String) value;
-//                    case "arrow" ->
-//                        arrow = (String) value;
-//                    case "diameter" ->
-//                        diameter = Util.toInt((Double) value);
-//                    case "eventShape" ->
-//                        eventShape = (String) value;
-//                    case "font" ->
-//                        font = (String) value;
-//                    case "weight" ->
-//                        weight = (String) value;
-//                    case "slant" ->
-//                        slant = (String) value;
-//                    case "size" ->
-//                        size = Util.toInt((Double) value);
-//                    case "padding" ->
-//                        padding = Util.toInt((Double) value);
-//                    case "anchor" ->
-//                        anchor = (String) value;
-//                    case "ticks" ->
-//                        ticks = Util.toBoolean((Double) value);
-//                    case "tickLabels" ->
-//                        tickLabels = Util.toBoolean((Double) value);
-//                    case "tickThickness" ->
-//                        tickThickness = Util.toInt((Double) value);
-//                    case "majorTickThickness" ->
-//                        majorTickThickness = Util.toInt((Double) value);
-//                    default -> {
-//                        /* DO NOTHING */ }
-//                }
-//            }
-//        }
-//    }
 
     @Override
     public void relativeTo(Frame prime)

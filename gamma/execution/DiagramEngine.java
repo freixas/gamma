@@ -82,11 +82,15 @@ public class DiagramEngine
             }
             catch (ExecutionException e) {
                 e.printStackTrace();
-                window.showTextAreaAlert(Alert.AlertType.ERROR, "Runtime Errors", "Runtime Errors", e.getMessage(), true);
+                window.showTextAreaAlert(Alert.AlertType.ERROR, "Runtime Errors", "Runtime Errors", e.getLocalizedMessage(), true);
+            }
+            catch (ProgrammingException e) {
+                e.printStackTrace();
+                window.showTextAreaAlert(Alert.AlertType.ERROR, "Internal Errors", "Internal Errors", e.getLocalizedMessage(), true);
             }
             catch (Exception e) {
                 e.printStackTrace();
-                window.showTextAreaAlert(Alert.AlertType.ERROR, "Error", "Error", e.getMessage(), true);
+                window.showTextAreaAlert(Alert.AlertType.ERROR, "Error", "Error", e.getLocalizedMessage(), true);
             }
         }
     }
