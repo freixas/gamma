@@ -22,6 +22,7 @@ import gamma.math.Util;
 import gamma.value.Bounds;
 import gamma.value.Coordinate;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.text.Font;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
 
@@ -36,6 +37,7 @@ public class Axis
     static final double IDEAL_TICK_SPACING = 10.0;
 
     public static void draw(Context context, double v, gamma.value.Line line,
+                            gamma.value.Line.AxisType axisType,
                             double tickScale, boolean positiveOnly, String xLabel,
                             StyleStruct styles)
     {
@@ -66,7 +68,7 @@ public class Axis
 
             // Rotate the gc so that our line can be drawn horizontal. After
             // the rotation is applied, the gc transform will transform rotated
-            // world to screen units and screen to rotated world units
+            // world to screen units and inverse transform screen to rotated world units
 
             double angle = line.getAngle();
             Coordinate origin = line.getCoordinate();
@@ -189,6 +191,48 @@ public class Axis
             int tickNumber = Util.toInt(firstTick / tickSpacing);
             firstTick += origin.x;
 
+            // Set up for tick labels
+
+            String format = null;
+            String anchor = null;
+            double fontAngle= 0.0;
+            int printEvery = 0;
+            double pad = 5.0;
+
+            if (styles.tickLabels) {
+                format = getTickFormat(firstTick, maxDistance);
+                if (angle >= 0) {
+                    if (axisType == gamma.value.Line.AxisType.X) {
+                        anchor = "TC";
+                        fontAngle = -angle;
+                    }
+                    else {
+                        anchor = "MR";
+                        fontAngle = -90;
+                    }
+                }
+                else {
+                    if (axisType == gamma.value.Line.AxisType.X) {
+                        anchor = "TC";
+                        fontAngle = -angle;
+                    }
+                    else {
+                        anchor = "MR";
+                        fontAngle = 90;
+                    }
+                }
+               if (angle == 90.0) {
+                    fontAngle = 90;
+                    anchor = "ML";
+                    pad = 20.0;
+                }
+
+                // Figure out how many labels we should skip depending on label size
+                // and tickSpacing
+
+                printEvery = getLabelSkip(firstTick, maxDistance, tickSpacing * tickScale, format, styles.font, viewportScale);
+            }
+
             gc.setLineWidth(worldTickThickness);
             for (double x = firstTick; x <= maxDistance; x += tickSpacing, tickNumber++) {
                 if (tickNumber != 0) {
@@ -206,6 +250,12 @@ public class Axis
                     else {
                         gc.strokeLine(x, origin.t - halfHeightMinor, x, origin.t + halfHeightMinor);
                     }
+                    if (styles.tickLabels) {
+                        if (tickNumber % printEvery == 0) {
+                            Text.draw(context, x, origin.t, String.format(format, x / tickScale), fontAngle,
+                                      styles.javaFXColor, styles.font, pad, anchor);
+                        }
+                    }
                 }
             }
 
@@ -218,4 +268,38 @@ public class Axis
             throw new ProgrammingException("Axis.draw()", e);
         }
     }
+
+    private static String getTickFormat(double minValue, double maxValue)
+    {
+        minValue = Math.abs(minValue);
+        maxValue = Math.abs(maxValue);
+        minValue = minValue < 2 * Double.MIN_NORMAL ? 0 : Math.floor(Math.log10(minValue));
+        maxValue = maxValue < 2 * Double.MIN_NORMAL ? 0 : Math.floor(Math.log10(maxValue));
+        int significantDigits = (int)Math.max(Math.abs(minValue), Math.abs(maxValue)) + 1;
+        return "%." + significantDigits + "g";
+    }
+
+    private static int getLabelSkip(double minValue, double maxValue, double step, String format, Font font, double scale)
+    {
+        String minString = String.format(format, minValue);
+        javafx.geometry.Bounds minBounds = Text.getTextBounds(minString, font);
+        String maxString = String.format(format, maxValue);
+        javafx.geometry.Bounds maxBounds = Text.getTextBounds(maxString, font);
+
+        double maxWidth = Math.max(minBounds.getWidth(), maxBounds.getWidth()) * scale * 2;
+        double s = maxWidth / step;
+
+        int printEvery;
+        if (s > 50) printEvery = 100;
+        else if (s > 20) printEvery = 50;
+        else if (s > 10) printEvery = 20;
+        else if (s > 5) printEvery = 10;
+        else if (s > 2) printEvery = 5;
+        else if (s > 1) printEvery = 2;
+        else printEvery = 1;
+
+        return printEvery;
+
+    }
+
 }

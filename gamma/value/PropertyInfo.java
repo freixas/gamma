@@ -38,22 +38,21 @@ public class PropertyInfo
 
         infoTable.put("style-color",              new PropertyInfo(Type.DOUBLE,       Color.black, Double.NaN, Double.NaN));
         infoTable.put("style-backgroundColor",    new PropertyInfo(Type.DOUBLE,       Color.white, Double.NaN, Double.NaN));
-        infoTable.put("style-lineThickness",          new PropertyInfo(Type.DOUBLE,       2,           1,          20));
+        infoTable.put("style-lineThickness",      new PropertyInfo(Type.DOUBLE,       1.0,         Double.NaN, Double.NaN));
         infoTable.put("style-lineStyle",          new PropertyInfo(Type.STRING_SET,   "solid",     Double.NaN, Double.NaN, "solid, dashed, dotted"));
         infoTable.put("style-arrow",              new PropertyInfo(Type.STRING_SET,   "none",      Double.NaN, Double.NaN, "none, both, start, end"));
-        infoTable.put("style-diameter",           new PropertyInfo(Type.DOUBLE,       2,           1,          20));
+        infoTable.put("style-eventDiameter",      new PropertyInfo(Type.DOUBLE,       0.0,         Double.NaN, Double.NaN));
         infoTable.put("style-eventShape",         new PropertyInfo(Type.DOUBLE,       "circle",    Double.NaN, Double.NaN, "circle, square, diamond, star"));
-        infoTable.put("style-font",               new PropertyInfo(Type.STRING,       "Arial",     Double.NaN, Double.NaN));
-        infoTable.put("style-weight",             new PropertyInfo(Type.STRING_SET,   "normal",    Double.NaN, Double.NaN, "normal, bold"));
-        infoTable.put("style-slant",              new PropertyInfo(Type.STRING_SET,   "normal",    Double.NaN, Double.NaN, "normal, italic"));
-        infoTable.put("style-size",               new PropertyInfo(Type.DOUBLE,       10,          Double.NaN, Double.NaN));
-        infoTable.put("style-padding",            new PropertyInfo(Type.DOUBLE,       2,           Double.NaN, Double.NaN));
-        infoTable.put("style-anchor",             new PropertyInfo(Type.STRING_SET,   "MC",        Double.NaN, Double.NaN, "UL,UC,UR, ML,MC,MR, BL,BC,BR"));
+        infoTable.put("style-fontFamily",         new PropertyInfo(Type.STRING,       "Arial",     Double.NaN, Double.NaN));
+        infoTable.put("style-fontWeight",         new PropertyInfo(Type.STRING_SET,   "normal",    Double.NaN, Double.NaN, "normal, bold"));
+        infoTable.put("style-fontSlant",          new PropertyInfo(Type.STRING_SET,   "normal",    Double.NaN, Double.NaN, "normal, italic"));
+        infoTable.put("style-fontSize",           new PropertyInfo(Type.DOUBLE,       10.0,        Double.NaN, Double.NaN));
+        infoTable.put("style-textPadding",        new PropertyInfo(Type.DOUBLE,       2.0,         Double.NaN, Double.NaN));
+        infoTable.put("style-textAnchor",         new PropertyInfo(Type.STRING_SET,   "MC",        Double.NaN, Double.NaN, "UL,UC,UR, ML,MC,MR, BL,BC,BR"));
         infoTable.put("style-ticks",              new PropertyInfo(Type.DOUBLE,       1,           Double.NaN, Double.NaN));
         infoTable.put("style-tickLabels",         new PropertyInfo(Type.DOUBLE,       1,           Double.NaN, Double.NaN));
-        infoTable.put("style-tickThickness",      new PropertyInfo(Type.DOUBLE,       2,           1,          20));
-        infoTable.put("style-majorTickThickness", new PropertyInfo(Type.DOUBLE,       2,           1,          20));
-
+        infoTable.put("style-tickThickness",      new PropertyInfo(Type.DOUBLE,       1.0,         Double.NaN, Double.NaN));
+        infoTable.put("style-majorTickThickness", new PropertyInfo(Type.DOUBLE,       2.0,         Double.NaN, Double.NaN));
     }
 
     private final Type type;

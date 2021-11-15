@@ -42,14 +42,14 @@ public class AxesCommandExec extends CommandExec
 
         if (struct.x) {
             Line line = new Line(Line.AxisType.X, struct.frame);
-            Axis.draw(context, v, line, tickScale, struct.positiveOnly, struct.xLabel, styles);
+            Axis.draw(context, v, line, Line.AxisType.X, tickScale, struct.positiveOnly, struct.xLabel, styles);
         }
 
         // Draw the t axis
 
         if (struct.t) {
             Line line = new Line(Line.AxisType.T, struct.frame);
-            Axis.draw(context, v, line, tickScale, struct.positiveOnly, struct.tLabel, styles);
+            Axis.draw(context, v, line, Line.AxisType.T, tickScale, struct.positiveOnly, struct.tLabel, styles);
         }
     }
 

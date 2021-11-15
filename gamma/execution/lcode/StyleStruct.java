@@ -181,9 +181,9 @@ public class StyleStruct extends Struct
 
     public void anchorRangeCheck()
     {
-        if (!textAnchor.equals("UL") &&
-            !textAnchor.equals("UC") &&
-            !textAnchor.equals("UR") &&
+        if (!textAnchor.equals("TL") &&
+            !textAnchor.equals("TC") &&
+            !textAnchor.equals("TR") &&
             !textAnchor.equals("ML") &&
             !textAnchor.equals("MC") &&
             !textAnchor.equals("MR") &&

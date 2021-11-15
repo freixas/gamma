@@ -24,6 +24,7 @@ import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.Region;
+import javafx.scene.paint.Color;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
 
@@ -95,7 +96,7 @@ public class DisplayCommandExec extends CommandExec
 
         // Clear the display area
 
-        clearDisplay(context, styles.backgroundColor);
+        clearDisplay(context, styles.javaFXBackgroundColor);
     }
 
     /**
@@ -226,10 +227,10 @@ public class DisplayCommandExec extends CommandExec
 
     }
 
-    private void clearDisplay(Context context, Color backgroundColor)
+    private void clearDisplay(Context context, Color color)
     {
         Bounds bounds = context.getCanvasBounds();
-        context.gc.setFill(backgroundColor.getJavaFXColor());
+        context.gc.setFill(color);
         context.gc.fillRect(bounds.min.x, bounds.min.t, bounds.getWidth(), bounds.getHeight());
     }
 
