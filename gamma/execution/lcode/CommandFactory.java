@@ -39,8 +39,7 @@ public class CommandFactory
         commandMap.put("event", new EventCommandExec());
         commandMap.put("line", new LineCommandExec());
         commandMap.put("world", new WorldlineCommandExec());
-        commandMap.put("fill", new FillCommandExec());
-        commandMap.put("border", new BorderCommandExec());
+        commandMap.put("path", new PathCommandExec());
         commandMap.put("label", new LabelCommandExec());
     }
 

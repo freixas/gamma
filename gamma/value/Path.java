@@ -14,28 +14,41 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.execution.lcode;
+package gamma.value;
 
-import gamma.execution.HCodeEngine;
-import gamma.value.Frame;
-import gamma.value.Polyline;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  *
  * @author Antonio Freixas
  */
-public class FillStruct extends Struct
+public class Path
 {
-    public Polyline polyline;
-    public boolean polylineSet = false;
+    private final ArrayList<Coordinate> coords;
 
-    public FillStruct()
+    public Path(ArrayList<Coordinate> coords)
     {
+        this.coords = new ArrayList<>();
+        this.coords.addAll(coords);
     }
 
-    @Override
+    public Coordinate get(int index)
+    {
+        return new Coordinate(coords.get(index));
+    }
+
+    public int size()
+    {
+        return coords.size();
+    }
+
     public void relativeTo(Frame prime)
     {
-        // Do nothing
+        for (int i = 0; i < coords.size(); i++) {
+            Coordinate coord = coords.get(i);
+            coord = prime.toFrame(coord);
+            coords.set(i, coord);
+        }
     }
 }

@@ -16,7 +16,6 @@
  */
 package gamma.drawing;
 
-import gamma.ProgrammingException;
 import gamma.execution.lcode.StyleStruct;
 import gamma.value.LineSegment;
 import java.util.logging.Level;
@@ -34,8 +33,14 @@ import javafx.scene.transform.NonInvertibleTransformException;
  */
 public class Line
 {
+
+    static public void draw(Context context, LineSegment segment, StyleStruct styles)
+    {
+        draw(context, segment, styles.lineThickness, styles.arrow, styles);
+    }
+
     static public void draw(
-        Context context, Node clip, LineSegment segment,
+        Context context, LineSegment segment,
         double thickness, String arrow,
         StyleStruct styles)
     {
@@ -46,10 +51,6 @@ public class Line
 
         gc.save();
         Node savedClip = canvas.getClip();
-
-        if (clip != null) {
-            canvas.setClip(clip);
-        }
 
         setupLineGc(context, styles);
 
@@ -99,30 +100,28 @@ public class Line
      */
     static public void setupLineGc(Context context, Color color, String lineStyle, double lineThickness)
     {
-        try {
-            GraphicsContext gc = context.gc;
+        GraphicsContext gc = context.gc;
+        double scale = context.getCurrentScale();
 
-            // Set the line color
+        // Set the line color
 
-            gc.setStroke(color);
+        gc.setStroke(color);
 
-            // *** NOTE: For now, we'll assume the stroke style is CENTER
-            // Set the line thickness
+        // *** NOTE: For now, we'll assume the stroke style is CENTER
+        // Set the line thickness
 
-            gc.setLineWidth(gc.getTransform().inverseDeltaTransform(lineThickness, 0.0).getX());
+        double worldLineThickness = lineThickness * scale;
+        gc.setLineWidth(worldLineThickness);
 
-            // Set the line style
+        // Set the line style
 
-            if (lineStyle.equals("dashed")) {
-                gc.setLineDashes(5.0, 5.0);
-            }
-            else if (lineStyle.equals("dotted")) {
-                gc.setLineCap(StrokeLineCap.ROUND);
-                gc.setLineDashes(1.0, 1.0);
-            }
+        if (lineStyle.equals("dashed")) {
+            double dashLength = 5.0 * scale;
+            gc.setLineDashes(dashLength, dashLength);
         }
-        catch (NonInvertibleTransformException ex) {
-            Logger.getLogger(Line.class.getName()).log(Level.SEVERE, null, ex);
+        else if (lineStyle.equals("dotted")) {
+            gc.setLineCap(StrokeLineCap.ROUND);
+            gc.setLineDashes(worldLineThickness, worldLineThickness);
         }
 
     }

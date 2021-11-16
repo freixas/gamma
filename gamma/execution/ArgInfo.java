@@ -32,7 +32,7 @@ public class ArgInfo
     public enum Type
     {
         INTEGER, DOUBLE, STRING, DOUBLE_OR_STRING, W_INITIALIZER, W_SEGMENT, LIMIT_TYPE,
-        OBSERVER, OBSERVER_OR_FRAME, AT_TYPE, LINE, AXIS_TYPE, POLYLINE, PROPERTY, PROPERTY_LIST, STYLE,
+        OBSERVER, OBSERVER_OR_FRAME, AT_TYPE, LINE, AXIS_TYPE, PATH, PROPERTY, PROPERTY_LIST, STYLE,
         PROPERTY_ELEMENT, COORDINATE, ADDRESS, OBJECT_CONTAINER, LINE_OR_OBSERVER, ANY
     }
 
@@ -79,7 +79,7 @@ public class ArgInfo
                 case AT_TYPE ->             { if (!(obj instanceof Frame.AtType))                           throwTypeError("an 'at' type"); }
                 case LINE ->                { if (!(obj instanceof Line))                                   throwTypeError("a line"); }
                 case AXIS_TYPE ->           { if (!(obj instanceof Line.AxisType))                          throwTypeError("an axis type"); }
-                case POLYLINE ->            { if (!(obj instanceof Polyline))                               throwTypeError("a polyline"); }
+                case PATH ->                { if (!(obj instanceof Path))                                   throwTypeError("a path"); }
                 case PROPERTY ->            { if (!(obj instanceof Property))                               throwTypeError("a property"); }
                 case PROPERTY_LIST ->       { if (!(obj instanceof PropertyList))                           throwTypeError("a property list"); }
                 case STYLE ->               { if (!(obj instanceof Style))                                  throwTypeError("a style"); }

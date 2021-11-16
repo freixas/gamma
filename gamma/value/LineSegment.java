@@ -37,6 +37,12 @@ public class LineSegment
         this.point2 = p2;
     }
 
+    public LineSegment(LineSegment other)
+    {
+        this.point1 = other.point1;
+        this.point2 = other.point2;
+    }
+
     public final Coordinate getPoint1()
     {
         return point1;
@@ -47,5 +53,9 @@ public class LineSegment
         return point2;
     }
 
+    public LineSegment intersect(Bounds bounds)
+    {
+        return bounds.intersect(this);
+    }
 
 }

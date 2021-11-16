@@ -61,7 +61,7 @@ public final class Util
 
     /**
      * Normalize the angle to be in the range -90 - +90.
-     * The range is inclusive of the start and exclusive of the end.
+     * The range is exclusive of the start and inclusive of the end.
      *
      * @param angle The angle to normalize in degrees.
      * @return The normalized angle in degrees.
@@ -69,7 +69,8 @@ public final class Util
     static public double normalizeAngle90(double angle)
     {
         angle = angle + 90;
-        return angle - (Math.floor(angle / 180.0) * 180.0) - 90;
+        angle = angle - (Math.floor(angle / 180.0) * 180.0) - 90;
+        return angle == -90.0 ? 90.0 : angle;
     }
 
     static public double asinh(double x)
@@ -116,7 +117,7 @@ public final class Util
 
     /**
      * Given a value and delta, find the smallest string representation of the
-     * value that distinguishes the value from the value + delta.Scientific
+     * value that distinguishes the value from the value + delta. Scientific
      * notation is allowed.
      *
      * @param value The value whose string representation we want.

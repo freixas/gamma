@@ -18,6 +18,7 @@ package gamma.value;
 
 import gamma.math.Lorentz;
 import gamma.math.Util;
+import javafx.scene.transform.Affine;
 
 /**
  * A line is defined by an angle (in degrees) and a point through which
@@ -134,7 +135,7 @@ public class Line
 
         // Vertical lines have slopes of +/- infinity, so we assign +infinity
 
-        this.slope = angle == 90 ? Double.POSITIVE_INFINITY : Math.tan(Math.toRadians(angle));
+        this.slope = angle == 90.0 ? Double.POSITIVE_INFINITY : Math.tan(Math.toRadians(angle));
 
         // Pre-calculate the slope times the x value (mx1). We'll use this in
         // intersection calculations
@@ -231,6 +232,8 @@ public class Line
             // Then solve for t using the original equation
 
             double x;
+            double t;
+
             if (!Double.isInfinite(this.slope)) {
                 if (!Double.isInfinite(other.slope)) {
 
@@ -244,15 +247,21 @@ public class Line
 
                     x = other.coord.x;
                 }
+                t = this.slope * (x - this.coord.x) + this.coord.t;
             }
             else {
+                if (!Double.isInfinite(other.slope)) {
 
-                // This line is vertical and the other is not
+                    // This line is vertical and the other is not
 
-                x = this.coord.x;
+                    x = this.coord.x;
+                    t = other.slope * (x - other.coord.x) + other.coord.t;
+                }
+                else {
+                    return null;
+                }
             }
 
-            double t = this.slope * (x - this.coord.x) + this.coord.t;
             return new Coordinate(x, t);
         }
         return null;
@@ -272,6 +281,38 @@ public class Line
             return line1.intersect(line2);
         }
         return null;
+    }
+
+    /**
+     * Intersect this line with a bounding box. Return the line segment
+     * that intersects or null if none.
+     *
+     * @param bounds The bounding box.
+     *
+     * @return The line segment that intersects or null if none.
+     */
+    public LineSegment intersect(Bounds bounds)
+    {
+        // Create lines for the edges of the bounding box. If the line is
+        // not vertical, we use the left and right edges. If it is vertical,
+        // we use the top and bottom edges.
+
+        double boundsAngle = 90.0;
+
+        if (Double.isInfinite(slope)) {
+            boundsAngle = 0.0;
+        }
+        Line line1 = new Line(boundsAngle, bounds.min);
+        Line line2 = new Line(boundsAngle, bounds.max);
+
+        // Intersect the line with each edge. There will always be an
+        // intersection
+
+        LineSegment segment = new LineSegment(intersect(line1), intersect(line2));
+
+        // Intersect the line segment with the bounds
+
+        return bounds.intersect(segment);
     }
 
 }

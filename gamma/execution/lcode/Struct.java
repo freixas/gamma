@@ -71,11 +71,8 @@ public abstract class Struct
         allFields.put("WorldlineStruct", getFields(WorldlineStruct.class));
         allMethods.put("WorldlineStruct", getMethods(WorldlineStruct.class));
 
-        allFields.put("FillStruct", getFields(FillStruct.class));
-        allMethods.put("FillStruct", getMethods(FillStruct.class));
-
-        allFields.put("BorderStruct", getFields(BorderStruct.class));
-        allMethods.put("BorderStruct", getMethods(BorderStruct.class));
+        allFields.put("PathStruct", getFields(PathStruct.class));
+        allMethods.put("PathStruct", getMethods(PathStruct.class));
 
         allFields.put("LabelStruct", getFields(LabelStruct.class));
         allMethods.put("LabelStruct", getMethods(LabelStruct.class));

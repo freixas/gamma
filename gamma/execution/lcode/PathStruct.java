@@ -16,41 +16,25 @@
  */
 package gamma.execution.lcode;
 
-import static gamma.execution.lcode.LineStruct.max;
-import static gamma.execution.lcode.LineStruct.min;
-import gamma.value.Bounds;
-import gamma.value.Coordinate;
 import gamma.value.Frame;
-import gamma.value.Observer;
+import gamma.value.Path;
 
 /**
  *
  * @author Antonio Freixas
  */
-public class WorldlineStruct extends Struct
+public class PathStruct extends Struct
 {
-    public Observer observer;
-    public boolean observerSet = false;
-    public Coordinate clipBL = min;
-    public Coordinate clipTR = max;
+    public Path path;
+    public boolean pathSet = false;
 
-    public Bounds bounds;
-
-    public WorldlineStruct()
+    public PathStruct()
     {
-    }
-
-    @Override
-    public void finalizeValues()
-    {
-        bounds = new Bounds(clipBL, clipTR);
     }
 
     @Override
     public void relativeTo(Frame prime)
     {
-        observer = observer.relativeTo(prime);
-        clipBL = prime.toFrame(clipBL);
-        clipTR = prime.toFrame(clipTR);
+        path.relativeTo(prime);
     }
 }

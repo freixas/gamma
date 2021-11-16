@@ -16,6 +16,7 @@
  */
 package gamma.execution.lcode;
 
+import gamma.value.Bounds;
 import gamma.value.Coordinate;
 import gamma.value.Frame;
 import gamma.value.Line;
@@ -33,10 +34,18 @@ public class LineStruct extends Struct
     public Line line;
     public boolean lineSet = false;
     public Coordinate clipBL = min;
-    public Coordinate clipUR = max;
+    public Coordinate clipTR = max;
+
+    public Bounds bounds;
 
     public LineStruct()
     {
+    }
+
+    @Override
+    public void finalizeValues()
+    {
+        bounds = new Bounds(clipBL, clipTR);
     }
 
     @Override
@@ -44,6 +53,6 @@ public class LineStruct extends Struct
     {
         line = line.relativeTo(prime);
         clipBL = prime.toFrame(clipBL);
-        clipUR = prime.toFrame(clipUR);
+        clipTR = prime.toFrame(clipTR);
     }
 }

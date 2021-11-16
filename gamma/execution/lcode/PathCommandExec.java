@@ -14,31 +14,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.value;
+package gamma.execution.lcode;
 
-import java.util.ArrayList;
+import gamma.drawing.Context;
 
 /**
  *
  * @author Antonio Freixas
  */
-public class Polyline
+public class PathCommandExec extends CommandExec
 {
-    private final ArrayList<Coordinate> coords;
-    
-    public Polyline(ArrayList<Coordinate> coords) 
+
+    @Override
+    public void execute(Context context, Struct cmdStruct, StyleStruct styles)
     {
-        this.coords = new ArrayList<>();
-        this.coords.addAll(coords);
+        PathStruct struct = (PathStruct)cmdStruct;
+
+
+
     }
-    
-    public Coordinate get(int index)
-    {
-        return new Coordinate(coords.get(index));
-    }
-    
-    public int size()
-    {
-        return coords.size();
-    }
+
 }

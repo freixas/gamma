@@ -19,6 +19,9 @@ package gamma.drawing;
 import gamma.ProgrammingException;
 import gamma.execution.LCodeEngine;
 import gamma.value.Bounds;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.transform.NonInvertibleTransformException;
@@ -36,18 +39,103 @@ public class Context
     public final Canvas canvas;
     public final GraphicsContext gc;
 
+    public double scale;
+    public Bounds bounds;
+
     public Context(LCodeEngine engine, Canvas canvas)
     {
         this.engine = engine;
         this.canvas = canvas;
         this.gc = canvas.getGraphicsContext2D();
+
+        this.scale = getCurrentScale();
+        this.bounds = getCurrentCanvasBounds();
     }
 
-    public Bounds getCanvasBounds()
+    /**
+     * Return the scale for the canvas. Multiply a screen length by this number
+     * to get corresponding world unit length. This is maintained by the zoom
+     * and pan methods and may not match the actual canvas bounds if local
+     * transforms have been applied.
+     *
+     * @return The canvas scale.
+     */
+    public final double getScale()
+    {
+        return scale;
+    }
+
+    /**
+     * Return the scale for the canvas. Multiply a screen length by this number
+     * to get corresponding world unit length. This returns a scale based on all
+     * the transforms that have been applied to whatever is the current graphics
+     * context. It does not work if any rotations have been applied.
+     *
+     * @return The canvas scale.
+     */
+    public final double getCurrentScale()
     {
         try {
-            Bounds bounds = new Bounds(0.0, 0.0, canvas.getWidth(), canvas.getHeight());
-            return bounds.transform(gc.getTransform().createInverse());
+            Point2D point = gc.getTransform().inverseDeltaTransform(1D, 0D);
+            return point.getX();
+        }
+        catch (NonInvertibleTransformException e) {
+            throw new ProgrammingException("Context.getCurrentScale()", e);
+        }
+    }
+
+    /**
+     * Return the scale for the canvas. Multiply a screen length by this number
+     * to get corresponding world unit length. This returns a scale based on all
+     * the transforms that have been applied to whatever is the current graphics
+     * context. This version works even if the graphics context has been
+     * rotated. However, it assumes the magnitude of the x and y scaling is the
+     * same.
+     *
+     * @return The canvas scale.
+     */
+    public final double getCurrentRotatedScale()
+    {
+        try {
+            Point2D point = gc.getTransform().inverseDeltaTransform(1D, 0D);
+            double a = point.getX();
+            double b = point.getY();
+            return Math.sqrt(a * a + b * b);
+        }
+        catch (NonInvertibleTransformException e) {
+            throw new ProgrammingException("Context.getCurrentScale()", e);
+        }
+    }
+
+    /**
+     * Get a bounding box for the canvas in world units. This is maintained
+     * by the zoom and pan methods and may not match the actual canvas bounds if
+     * local transforms have been applied.
+     *
+     * @return The canvas curBounds.
+     */
+    public final Bounds getCanvasBounds()
+    {
+        return bounds;
+    }
+
+    /**
+     * Get a bounding box for the canvas in world units. This returns
+     * the bounding box that includes all the transforms that have been applied
+     * to whatever is the current graphics context.
+     *
+     * @return The bounding box for the canvas in world units.
+     */
+    public final Bounds getCurrentCanvasBounds()
+    {
+        try {
+            // The bounding box in screen units
+
+            Bounds curBounds = new Bounds(0.0, 0.0, canvas.getWidth(), canvas.getHeight());
+
+            // The inverse transform goes from screen units to world units
+
+            return curBounds.transform(gc.getTransform().createInverse());
         }
         catch (NonInvertibleTransformException e) {
             throw new ProgrammingException("Context.getCanvasBounds()", e);

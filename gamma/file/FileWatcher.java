@@ -92,6 +92,12 @@ public class FileWatcher extends Thread
             e.printStackTrace();
             Platform.runLater(new ScriptParseErrorHandler(window, list));
         }
+
+        // Start a new thread each time
+        
+        FileWatcher watcher = new FileWatcher(file, window);
+        Thread watcherThread = new Thread(watcher);
+        watcherThread.start();
     }
 
     @Override
@@ -106,30 +112,31 @@ public class FileWatcher extends Thread
             Path path = file.toPath().getParent();
             path.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
             while (!isStopped()) {
-                WatchKey key;
                 try {
-                    key = watcher.take();
-                }
-                catch (InterruptedException e) {
-                    return;
-                }
+                    WatchKey key;
+                    try {
+                        key = watcher.take();
+                    }
+                    catch (InterruptedException e) {
+                        continue;
+                    }
 
-                for (WatchEvent<?> event : key.pollEvents()) {
-                    WatchEvent.Kind<?> kind = event.kind();
+                    for (WatchEvent<?> event : key.pollEvents()) {
+                        WatchEvent.Kind<?> kind = event.kind();
 
-                    @SuppressWarnings("unchecked")
-                    Path filename = ((WatchEvent<Path>)event).context();
+                        @SuppressWarnings("unchecked")
+                        Path filename = ((WatchEvent<Path>)event).context();
 
-                    if (kind == StandardWatchEventKinds.ENTRY_MODIFY &&
-                        filename.toString().equals(file.getName())) {
+                        if (kind == StandardWatchEventKinds.ENTRY_MODIFY &&
+                            filename.toString().equals(file.getName())) {
 
-                        doOnChange();
-
-                        boolean valid = key.reset();
-                        if (!valid) {
-                            break;
+                            doOnChange();
                         }
                     }
+                }
+                catch (Exception e) {
+                    list.add(e);
+                    Platform.runLater(new ScriptParseErrorHandler(window, list));
                 }
             }
         }

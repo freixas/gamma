@@ -14,21 +14,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.execution.lcode;
+package gamma.drawing;
 
-import gamma.drawing.Context;
+import gamma.execution.lcode.StyleStruct;
+import javafx.scene.canvas.GraphicsContext;
 
 /**
  *
  * @author Antonio Freixas
  */
-public class FillCommandExec extends CommandExec
+public class Path
 {
-
-    @Override
-    public void execute(Context context, Struct cmdStruct, StyleStruct styles)
+    public static void draw(Context context, Path path, StyleStruct styles)
     {
-        // throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        GraphicsContext gc = context.gc;
+
+
     }
 
 }

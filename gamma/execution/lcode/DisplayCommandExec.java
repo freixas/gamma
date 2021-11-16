@@ -87,6 +87,10 @@ public class DisplayCommandExec extends CommandExec
                 gc.translate(
                     newCenter.getX()- originalCenter.getX(),
                     newCenter.getY()- originalCenter.getY());
+
+                context.scale = context.getCurrentScale();
+                context.bounds = context.getCurrentCanvasBounds();
+
             }
             catch (NonInvertibleTransformException e)
             {
@@ -225,11 +229,13 @@ public class DisplayCommandExec extends CommandExec
         double realScale = Math.min(width, height) / (100.0 / struct.scale);
         gc.scale(realScale, realScale);
 
+        context.scale = context.getCurrentScale();
+        context.bounds = context.getCurrentCanvasBounds();
     }
 
     private void clearDisplay(Context context, Color color)
     {
-        Bounds bounds = context.getCanvasBounds();
+        Bounds bounds = context.bounds;
         context.gc.setFill(color);
         context.gc.fillRect(bounds.min.x, bounds.min.t, bounds.getWidth(), bounds.getHeight());
     }

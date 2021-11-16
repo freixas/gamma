@@ -345,6 +345,8 @@ public class LCodeEngine
                 Affine transform = gc.getTransform();
                 Point2D point = transform.inverseDeltaTransform(deltaX, deltaY);
                 gc.translate(point.getX(), point.getY());
+                context.scale = context.getCurrentScale();
+                context.bounds = context.getCurrentCanvasBounds();
 
                 engine.execute();
 
@@ -364,10 +366,6 @@ public class LCodeEngine
 
         canvas.setOnScroll(event -> {
             GraphicsContext gc = canvas.getGraphicsContext2D();
-
-            // The Ctrl key must be used
-
-            if (!event.isControlDown()) return;
 
             double delta = event.getDeltaY();
             if (delta == 0.0) return;
@@ -405,7 +403,7 @@ public class LCodeEngine
 
             else {
                 Point2D center = new Point2D(canvas.getWidth() / 2.0, canvas.getHeight() / 2.0);
-                zoom(center, event.getCode() == KeyCode.MINUS ? 100.0 : -100.0);
+                zoom(center, event.getCode() == KeyCode.MINUS ? -100.0 : +100.0);
            }
 
             engine.execute();
@@ -467,12 +465,23 @@ public class LCodeEngine
              double zoomExp = 1 + (Math.abs(delta) / 1000.0);
              double zoomIncr = Math.pow(curScale, zoomExp) / 10.0;
              if (delta < 0) zoomIncr = -zoomIncr;
-             double scale = (curScale + zoomIncr) / curScale;
+             double newScale = curScale + zoomIncr;
+
+             // Limit the scaling
+
+             if (newScale > 10000000 || newScale < .001) return;
+
+             // Set the new scale
+
+             double scale = newScale / curScale;
              gc.scale(scale, scale);
 
              // Translate the origin back to its original position
 
              gc.translate(-worldCenter.getX(), -worldCenter.getY());
+
+            context.scale = context.getCurrentScale();
+            context.bounds = context.getCurrentCanvasBounds();
          }
          catch (NonInvertibleTransformException e) {
              throw new ProgrammingException("LCodeEngine.zoom()", e);
@@ -489,7 +498,7 @@ public class LCodeEngine
         canvas.setOnMouseExited(null);
         canvas.setOnMousePressed(null);
         canvas.setOnMouseDragged(null);
-        canvas.setOnZoom(null);
+        canvas.setOnScroll(null);
         canvas.setOnKeyPressed(null);
     }
 

@@ -18,7 +18,7 @@ package gamma.execution.lcode;
 
 import gamma.execution.HCodeEngine;
 import gamma.value.Frame;
-import gamma.value.Polyline;
+import gamma.value.Path;
 
 /**
  *
@@ -26,8 +26,8 @@ import gamma.value.Polyline;
  */
 public class BorderStruct extends Struct
 {
-    public Polyline polyline;
-    public boolean polylineSet = false;
+    public Path path;
+    public boolean pathSet = false;
 
     public BorderStruct()
     {

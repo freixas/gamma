@@ -19,7 +19,7 @@ package gamma.execution.hcode;
 import gamma.execution.ArgInfo;
 import gamma.execution.HCodeEngine;
 import gamma.value.Coordinate;
-import gamma.value.Polyline;
+import gamma.value.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +27,7 @@ import java.util.List;
  *
  * @author Antonio Freixas
  */
-public class PolylineHCode extends HCode
+public class PathHCode extends HCode
 {
     private static final ArgInfo argInfo;
 
@@ -49,7 +49,7 @@ public class PolylineHCode extends HCode
 
         code.clear();
 
-        code.add(new Polyline(coords));
+        code.add(new Path(coords));
     }
 
     @Override

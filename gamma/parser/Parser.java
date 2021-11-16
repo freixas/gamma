@@ -16,6 +16,7 @@
  */
 package gamma.parser;
 
+import gamma.ProgrammingException;
 import gamma.execution.hcode.*;
 import gamma.execution.*;
 import gamma.value.Coordinate;
@@ -403,8 +404,7 @@ public class Parser
             !name.equals("event") &&
             !name.equals("line") &&
             !name.equals("worldline") &&
-            !name.equals("field") &&
-            !name.equals("border") &&
+            !name.equals("path") &&
             !name.equals("label")) {
             throwParseException("Unknown command name '" + name + "'");
         }
@@ -484,8 +484,8 @@ public class Parser
                 case "line" -> {
                     return parseLineObj();
                 }
-                case "polyline" -> {
-                    return parsePolylineObj();
+                case "path" -> {
+                    return parsePathObj();
                 }
                 case "style" -> {
                     return parseStyleObj();
@@ -841,12 +841,12 @@ public class Parser
         return codes;
     }
 
-    private LinkedList<Object> parsePolylineObj() throws ParseException
+    private LinkedList<Object> parsePathObj() throws ParseException
     {
         LinkedList<Object> codes = new LinkedList<>();
 
         // We start knowing that the current token points
-        // to "polyline"
+        // to "path"
 
         int count = 0;
         do {
@@ -856,7 +856,7 @@ public class Parser
         } while (isDelimiter() && getChar() == ',');
 
         codes.add(count);
-        codes.add(new PolylineHCode());
+        codes.add(new PathHCode());
 
         return codes;
     }
@@ -989,7 +989,7 @@ public class Parser
             // the codes stack until we reach a "("
 
             else if (isDelimiter() && getChar() == ',') {
-                if (level < 0) throwParseException("Programming error");
+                if (level < 0) throw new ProgrammingException("Parser.parseExp(): Comma without preceding '('");
 
                 while (!ops.isEmpty()) {
                     OpToken t = ops.pop();
@@ -1003,7 +1003,7 @@ public class Parser
                 }
 
                 if (ops.isEmpty()) {
-                    throwParseException("Programming error");
+                    throw new ProgrammingException("Parser.parseExp(): Ops stack is empty");
                 }
 
                 // Count the number of arguments found for parentheses at this
@@ -1110,6 +1110,10 @@ public class Parser
                         OpToken topToken = ops.pop();
                         if (topToken.getChar() != '(') {
                             codes.add(opTokenToHCode(topToken));
+                        }
+                        else {
+                            ops.push(topToken);
+                            break;
                         }
                     }
                     else {

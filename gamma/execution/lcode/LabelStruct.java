@@ -18,6 +18,7 @@ package gamma.execution.lcode;
 
 import gamma.execution.HCodeEngine;
 import gamma.math.Lorentz;
+import gamma.math.Util;
 import gamma.value.Coordinate;
 import gamma.value.Frame;
 
@@ -34,6 +35,12 @@ public class LabelStruct extends Struct
 
     public LabelStruct()
     {
+    }
+
+    @Override
+    public void finalizeValues()
+    {
+        rotation = Util.normalizeAngle90(rotation);
     }
 
     @Override

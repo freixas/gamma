@@ -95,19 +95,7 @@ public class Text
 
             // Convert sizes from screen units to world units
 
-            Point2D size = transform.inverseDeltaTransform(1D, 0D);
-            double scale;
-            double xScale = size.getX();
-            double yScale = size.getY();
-            if (xScale == 0.0) {
-                scale = yScale;
-            }
-            else if (yScale == 0.0) {
-                scale = xScale;
-            }
-            else {
-                scale = Math.sqrt(xScale * xScale + yScale * yScale);
-            }
+            double scale = context.getCurrentScale();
 
             // We scale the font so that the font size comes out constant
             // regardless of the current scale
@@ -118,18 +106,8 @@ public class Text
             // padding, which is in screen coordinates, so let's repeat the
             // above steps
 
-            size = transform.inverseDeltaTransform(1D, 0D);
-            xScale = size.getX();
-            yScale = size.getY();
-            if (xScale == 0.0) {
-                scale = yScale;
-            }
-            else if (yScale == 0.0) {
-                scale = xScale;
-            }
-            else {
-                scale = Math.sqrt(xScale * xScale + yScale * yScale);
-            }
+            Point2D size = transform.inverseDeltaTransform(1D, 0D);
+            scale = size.getX();
 
             // (x, t) is the position which we will scale and rotate
             // (xOffset, tOffset) is the position at which we will draw the

@@ -16,15 +16,14 @@
  */
 package gamma.drawing;
 
-import gamma.ProgrammingException;
 import gamma.execution.lcode.StyleStruct;
 import gamma.math.Util;
 import gamma.value.Bounds;
 import gamma.value.Coordinate;
+import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.text.Font;
 import javafx.scene.transform.Affine;
-import javafx.scene.transform.NonInvertibleTransformException;
 
 /**
  *
@@ -34,252 +33,344 @@ public class Axis
 {
     static final double MIN_MINOR_TICK_MARK_LENGTH = 3.0;
     static final double MIN_MAJOR_TICK_MARK_LENGTH = 10.0;
-    static final double IDEAL_TICK_SPACING = 10.0;
+    static final double IDEAL_TICK_SPACING = 20.0;
 
     public static void draw(Context context, double v, gamma.value.Line line,
                             gamma.value.Line.AxisType axisType,
                             double tickScale, boolean positiveOnly, String xLabel,
                             StyleStruct styles)
     {
-        try {
-            GraphicsContext gc = context.gc;
+        GraphicsContext gc = context.gc;
 
-            // Save the current graphics context
+        // Save the current graphics context
 
-            gc.save();
+        gc.save();
 
-            // Set up the gc for line drawing
+        // Set up the gc for line drawing
 
-            Line.setupLineGc(context, styles);
+        Line.setupLineGc(context, styles);
 
-            // *********************************************
-            // *** Find out the current scale.           ***
-            // *********************************************
+        // *********************************************
+        // *** Find out the current scale.           ***
+        // *********************************************
 
-            // We multiply by this scale to convert a from screen units to
-            // world units. We divide by this to go from world units to screen
-            // units.
+        // We multiply by this scale to convert a from screen units to
+        // world units. We divide by this to go from world units to screen
+        // units.
 
-            double viewportScale = gc.getTransform().inverseDeltaTransform(1.0, 0).getX();
+        double viewportScale = context.scale;
 
-            // *********************************************
-            // *** Set up the transformed system.        ***
-            // *********************************************
+        // *********************************************
+        // *** Set up the transformed system.        ***
+        // *********************************************
 
-            // Rotate the gc so that our line can be drawn horizontal. After
-            // the rotation is applied, the gc transform will transform rotated
-            // world to screen units and inverse transform screen to rotated world units
+        // Rotate the gc so that our line can be drawn horizontal. After
+        // the rotation is applied, the gc transform will transform rotated
+        // world to screen units and inverse transform screen to rotated world units
 
-            double angle = line.getAngle();
-            Coordinate origin = line.getCoordinate();
-            Affine rotTransform = gc.getTransform();
-            rotTransform.appendRotation(angle, origin.x, origin.t);
-            gc.setTransform(rotTransform);
+        double angle = line.getAngle();
+        Coordinate origin = line.getCoordinate();
+        Affine originalTransform = gc.getTransform();
+        Affine rotTransform = gc.getTransform();
+        rotTransform.appendRotation(angle, origin.x, origin.t);
+        gc.setTransform(rotTransform);
 
-            // *********************************************
-            // *** Intersect the axis with the viewport. ***
-            // *********************************************
+        // *********************************************
+        // *** Intersect the axis with the viewport. ***
+        // *********************************************
 
-            // A line has some thickness. If we have tick marks, we can think of
-            // the line is being thicker, so we can apply the same algorithm
-            // whether a line has tick marks or not.
+        // A line has some thickness. If we have tick marks, we can think of
+        // the line is being thicker, so we can apply the same algorithm
+        // whether a line has tick marks or not.
 
-            double height = styles.lineThickness;
+        double height = styles.lineThickness;
 
-            // If we have tick marks, the height increases
+        // If we have tick marks, the height increases
 
-            if (styles.ticks) {
-                height += MIN_MAJOR_TICK_MARK_LENGTH;
+        if (styles.ticks) {
+            height += MIN_MAJOR_TICK_MARK_LENGTH;
+        }
+
+        // The thickness of the line is evenly distributed to either side
+
+        double halfHeight = height / 2.0;
+
+        // Convert this from pixel coordinates to world unit coordinates
+
+        double halfHeightMajor = viewportScale * halfHeight;
+
+        // Create a bounding box for the line. The bounds should be
+        // specified as though the line has been rotated the same
+        // as the graphics context. This means we need to transform our
+        // origin to screen units and then inverse transform to rotated
+        // world units
+
+        Bounds lineBounds = new Bounds(
+            positiveOnly && v >= 0.0 ? origin.x : Double.NEGATIVE_INFINITY,
+            origin.t - halfHeightMajor,
+            positiveOnly && v < 0.0 ? origin.x : Double.POSITIVE_INFINITY,
+            origin.t + halfHeightMajor);
+
+        Bounds rotatedBounds = context.getCurrentCanvasBounds();
+        Bounds intersection = lineBounds.intersect(rotatedBounds);
+
+        // If there is no intersection, we're done
+
+        if (intersection == null) {
+            gc.restore();
+            return;
+        }
+
+        // *********************************************
+        // *** Draw the line.                        ***
+        // *********************************************
+
+        // The line is in the bounding box. Draw it
+
+        gc.strokeLine(intersection.min.x, origin.t, intersection.max.x, origin.t);
+
+        // *********************************************
+        // *** Draw the tick marks.                  ***
+        // *********************************************
+
+        // Check for tick marks
+
+        if (!styles.ticks) {
+            gc.restore();
+            return;
+        }
+
+        // Get the world space units per ideal tick spacing in pixels
+
+        double worldUnitsPerIdealPixelSpacing = IDEAL_TICK_SPACING * viewportScale;
+
+        // We try to get as close to the ideal spacing as we can, while
+        // keeping the units to powers of 10, The tick spacing is in
+        // world units
+
+        double tickSpacing = Math.pow(10, Math.ceil(Math.log10(worldUnitsPerIdealPixelSpacing)));
+
+        // The faster the velocity, the further apart the tick marks are.
+        // For v = 0, tickScale = 1.0
+        // For v = 1, tickScale = + infinity
+
+        tickSpacing *= tickScale;
+
+        // We need to widen the intersection box to account for the
+        // width of the the tick marks. Note that the width is in pixel
+        // space but the intersection is in world space
+
+        double worldTickThickness = viewportScale * styles.tickThickness;
+        double worldMajorTickThickness = viewportScale * styles.majorTickThickness;
+
+        double padding = Math.max(worldTickThickness, worldMajorTickThickness) / 2.0;
+        padding *= viewportScale;
+
+        intersection.min.x -= padding;
+        intersection.max.x += padding;
+
+        // We'll draw from the minimum of the intersection box to the
+        // maximum
+
+        double halfHeightMinor =
+            viewportScale * (styles.lineThickness + MIN_MINOR_TICK_MARK_LENGTH) / 2;
+
+        // Determine the first tick mark and its value
+
+        double minDistance = intersection.min.x - origin.x;
+        double maxDistance = intersection.max.x;
+
+        double firstTick = minDistance - (minDistance % tickSpacing);
+        int tickNumber = Util.toInt(firstTick / tickSpacing);
+        firstTick += origin.x;
+
+        gc.setLineWidth(worldTickThickness);
+        for (double x = firstTick, tickCount = tickNumber; x <= maxDistance; x += tickSpacing, tickCount++) {
+            if (tickCount != 0) {
+
+                // Major tick
+
+                if (tickCount % 10 == 0.0) {
+                    gc.setLineWidth(worldMajorTickThickness);
+                    gc.strokeLine(x, origin.t - halfHeightMajor, x, origin.t + halfHeightMajor);
+                    gc.setLineWidth(worldTickThickness);
+                }
+
+                // Minor tick
+
+                else {
+                    gc.strokeLine(x, origin.t - halfHeightMinor, x, origin.t + halfHeightMinor);
+                }
             }
+        }
 
-            // The thickness of the line is evenly distributed to either side
+        // *********************************************
+        // *** Draw the tick labels.                 ***
+        // *********************************************
 
-            double halfHeight = height / 2.0;
+        if (!styles.tickLabels) {
+            gc.restore();
+            return;
+        }
 
-            // Convert this from pixel coordinates to world unit coordinates
+        // The text system has problems with rotations in the graphics
+        // context combined with scaling the Y axis by -1. So if we have tick
+        // labels, we need to undo the rotation
 
-            double halfHeightMajor = viewportScale * halfHeight;
+        gc.setTransform(originalTransform);
 
-            // Create a bounding box for the line. The bounds should be
-            // specified as though the line has been rotated the same
-            // as the graphics context. This means we need to transform our
-            // origin to screen units and then inverse transform to rotated
-            // world units
+        // We need to set up a new transform, one that takes rotated
+        // world units and transforms them to unrotated world units. We
+        // need this because the line is still in rotated world units
 
-            Bounds lineBounds = new Bounds(
-                positiveOnly && v >= 0.0 ? origin.x : Double.NEGATIVE_INFINITY,
-                origin.t - halfHeightMajor,
-                positiveOnly && v < 0.0 ? origin.x : Double.POSITIVE_INFINITY,
-                origin.t + halfHeightMajor);
+        Affine revRotation = new Affine();
+        revRotation.appendRotation(angle, origin.x, origin.t);
 
-            Bounds rotatedBounds = context.getCanvasBounds();
-            Bounds intersection = lineBounds.intersect(rotatedBounds);
+        // Set up the tick labels
 
-            // If there is no intersection, we're done
+        String format;
+        String anchor;
+        int printEvery;
 
-            if (intersection == null) {
-                gc.restore();
-                return;
-            }
+        // Half height is half the height of a major tickmark in screen
+        // units
 
-            // *********************************************
-            // *** Draw the line.                        ***
-            // *********************************************
+        double pad = halfHeight + 2.0;
 
-            // The line is in the bounding box. Draw it
+        format = getTickFormat(firstTick, maxDistance, tickSpacing);
 
-            gc.strokeLine(intersection.min.x, origin.t, intersection.max.x, origin.t);
-
-            // *********************************************
-            // *** Draw the tick marks.                  ***
-            // *********************************************
-
-            // Check for tick marks
-
-            if (!styles.ticks) {
-                gc.restore();
-                return;
-            }
-
-            // Calculate the pixels per world space units
-
-            double pixelWidth = context.canvas.getWidth();
-            double worldUnitsWidth = context.getCanvasBounds().getWidth();
-            double pixelsPerWorldUnit = pixelWidth / worldUnitsWidth;
-
-            // Get the world space units per ideal tick spacing in pixels
-
-            double worldUnitsPerIdealPixelSpacing = IDEAL_TICK_SPACING / pixelsPerWorldUnit;
-
-            // We try to get as close to the ideal spacing as we can, while
-            // keeping the units to powers of 10, The tick spacing is in
-            // world units
-
-            double tickSpacing = Math.pow(10, Math.ceil(Math.log10(worldUnitsPerIdealPixelSpacing)));
-
-            // The faster the velocity, the further apart the tick marks are.
-            // For v = 0, tickScale = 1.0
-            // For v = 1, tickScale = + infinity
-
-            tickSpacing *= tickScale;
-
-            // We need to widen the intersection box to account for the
-            // width of the the tick marks. Note that the width is in pixel
-            // space but the intersection is in world space
-
-            double worldTickThickness = viewportScale * styles.tickThickness;
-            double worldMajorTickThickness = viewportScale * styles.majorTickThickness;
-
-            double padding = Math.max(worldTickThickness, worldMajorTickThickness) / 2.0;
-            padding *= viewportScale;
-
-            intersection.min.x -= padding;
-            intersection.max.x += padding;
-
-            // We'll draw from the minimum of the intersection box to the
-            // maximum
-
-            double halfHeightMinor =
-                viewportScale * (styles.lineThickness + MIN_MINOR_TICK_MARK_LENGTH) / 2;
-
-            // Determine the first tick mark and its value
-
-            double minDistance = intersection.min.x - origin.x;
-            double maxDistance = intersection.max.x;
-
-            double firstTick = minDistance - (minDistance % tickSpacing);
-            int tickNumber = Util.toInt(firstTick / tickSpacing);
-            firstTick += origin.x;
-
-            // Set up for tick labels
-
-            String format = null;
-            String anchor = null;
-            double fontAngle= 0.0;
-            int printEvery = 0;
-            double pad = 5.0;
-
-            if (styles.tickLabels) {
-                format = getTickFormat(firstTick, maxDistance);
-                if (angle >= 0) {
-                    if (axisType == gamma.value.Line.AxisType.X) {
-                        anchor = "TC";
-                        fontAngle = -angle;
-                    }
-                    else {
-                        anchor = "MR";
-                        fontAngle = -90;
-                    }
+        if (v >= 0.0) {
+            if (axisType == gamma.value.Line.AxisType.X) {
+                if (angle <= 22.5) {
+                    anchor = "TC";
                 }
                 else {
-                    if (axisType == gamma.value.Line.AxisType.X) {
-                        anchor = "TC";
-                        fontAngle = -angle;
-                    }
-                    else {
-                        anchor = "MR";
-                        fontAngle = 90;
-                    }
+                    anchor = "TL";
                 }
-               if (angle == 90.0) {
-                    fontAngle = 90;
+            }
+            else /* T axis */ {
+                if (angle <= 67.5)  {
+                    anchor = "BR";
+                }
+                else {
+                    anchor = "MR";
+                }
+            }
+        }
+        else /* v < 0 */ {
+            if (axisType == gamma.value.Line.AxisType.X) {
+                if (angle >= -22.5) {
+                    anchor = "TC";
+                }
+                else {
+                    anchor = "TR";
+                }
+            }
+            else /* T axis */ {
+                if (angle >= -67.5)  {
+                    anchor = "BL";
+                }
+                else {
                     anchor = "ML";
-                    pad = 20.0;
-                }
-
-                // Figure out how many labels we should skip depending on label size
-                // and tickSpacing
-
-                printEvery = getLabelSkip(firstTick, maxDistance, tickSpacing * tickScale, format, styles.font, viewportScale);
-            }
-
-            gc.setLineWidth(worldTickThickness);
-            for (double x = firstTick; x <= maxDistance; x += tickSpacing, tickNumber++) {
-                if (tickNumber != 0) {
-
-                    // Major tick
-
-                    if (tickNumber % 10 == 0.0) {
-                        gc.setLineWidth(worldMajorTickThickness);
-                        gc.strokeLine(x, origin.t - halfHeightMajor, x, origin.t + halfHeightMajor);
-                        gc.setLineWidth(worldTickThickness);
-                    }
-
-                    // Minor tick
-
-                    else {
-                        gc.strokeLine(x, origin.t - halfHeightMinor, x, origin.t + halfHeightMinor);
-                    }
-                    if (styles.tickLabels) {
-                        if (tickNumber % printEvery == 0) {
-                            Text.draw(context, x, origin.t, String.format(format, x / tickScale), fontAngle,
-                                      styles.javaFXColor, styles.font, pad, anchor);
-                        }
-                    }
                 }
             }
-
-            // Restore the original graphics context
-
-            gc.restore();
         }
-        catch (NonInvertibleTransformException e)
-        {
-            throw new ProgrammingException("Axis.draw()", e);
+
+        // Figure out how many labels we should skip depending on label size
+        // and tickSpacing
+
+        printEvery = getLabelSkip(firstTick, maxDistance, tickSpacing * tickScale, format, styles.font, viewportScale);
+
+        for (double x = firstTick, tickCount = tickNumber; x <= maxDistance; x += tickSpacing, tickCount++) {
+            if (tickCount != 0) {
+                if (tickCount % printEvery == 0) {
+                    Point2D pos1 = revRotation.transform(x, origin.t);
+                    Text.draw(context, pos1.getX(), pos1.getY(), String.format(format, (x - origin.x) / tickScale), 0.0,
+                              styles.javaFXColor, styles.font, pad, anchor);
+                }
+            }
         }
+
+        // Restore the original graphics context
+
+        gc.restore();
     }
 
-    private static String getTickFormat(double minValue, double maxValue)
+    /**
+     * Determine the number of significant digits needed to display a range
+     * from min to max with steps of delta. There should be enough digits so
+     * no two adjacent steps display the same value.
+     *
+     * @param minValue The smallest value of the range.
+     * @param maxValue The largest value of the range.
+     * @param delta The step size.
+     *
+     * @return A format string which can be used to produce values with the
+     * given number of significant digits (using String.format()).
+     */
+    private static String getTickFormat(double minValue, double maxValue, double delta)
     {
         minValue = Math.abs(minValue);
         maxValue = Math.abs(maxValue);
+        delta = Math.abs(delta);
+
         minValue = minValue < 2 * Double.MIN_NORMAL ? 0 : Math.floor(Math.log10(minValue));
         maxValue = maxValue < 2 * Double.MIN_NORMAL ? 0 : Math.floor(Math.log10(maxValue));
-        int significantDigits = (int)Math.max(Math.abs(minValue), Math.abs(maxValue)) + 1;
-        return "%." + significantDigits + "g";
+        delta =     delta   < 2 * Double.MIN_NORMAL ? 0 : Math.floor(Math.log10(delta));
+        if (minValue > 0) minValue += 1;
+        if (maxValue > 0) maxValue += 1;
+        if (delta > 0) delta += 1;
+
+        int sig1 = (int)(Math.abs(minValue - delta)) + 1;
+        int sig2 = (int)(Math.abs(maxValue - delta)) + 1;
+        int significantDigits = Math.max(sig1, sig2);
+
+        int mostSignificantDigit = (int)maxValue;
+        if (mostSignificantDigit >= 0) mostSignificantDigit += 1;
+
+        int eFormatChars = significantDigits + 6;
+        int fFormatChars;
+        String fFormat;
+
+        if (mostSignificantDigit > 0) {
+            if (mostSignificantDigit >= significantDigits) {
+                fFormatChars = mostSignificantDigit;
+                fFormat = "%" + fFormatChars + ".0f";
+            }
+            else {
+                fFormatChars = mostSignificantDigit + 1;
+                fFormat = "%" + fFormatChars  + "." + (significantDigits - mostSignificantDigit) + "f";
+            }
+        }
+        else {
+            fFormatChars = -mostSignificantDigit + significantDigits + 1;
+            fFormat = "%" + fFormatChars + "." + (fFormatChars - 2) + "f";
+        }
+
+        if (eFormatChars < fFormatChars) {
+            return "%" + eFormatChars + "." + (significantDigits - 1) + "e";
+        }
+        return fFormat;
     }
 
-    private static int getLabelSkip(double minValue, double maxValue, double step, String format, Font font, double scale)
+    /**
+     * Given a range, determine how many values to skip so that side-by-side
+     * tick mark labels don't overlap. This method could be improved to deal
+     * with rotated labels (or non-rotated labels displayed along a rotated
+     * axis), but with some loss of performance and symmetry.
+     *
+     * @param minValue The smallest value of the range.
+     * @param maxValue The largest value of the range.
+     * @param delta The delta size.
+     * @param format The format string by which to convert numbers to string.
+     * @param font The font which will be used to display the string.
+     * @param scale The scale to use to convert screen units to world units.
+     *
+     * @return A number that can be used with the remainder operator to determine
+     * whether to display or skip a particular tick mark.
+     */
+    private static int getLabelSkip(
+        double minValue, double maxValue, double delta, String format, Font font, double scale)
     {
         String minString = String.format(format, minValue);
         javafx.geometry.Bounds minBounds = Text.getTextBounds(minString, font);
@@ -287,7 +378,7 @@ public class Axis
         javafx.geometry.Bounds maxBounds = Text.getTextBounds(maxString, font);
 
         double maxWidth = Math.max(minBounds.getWidth(), maxBounds.getWidth()) * scale * 2;
-        double s = maxWidth / step;
+        double s = maxWidth / delta;
 
         int printEvery;
         if (s > 50) printEvery = 100;
@@ -299,7 +390,6 @@ public class Axis
         else printEvery = 1;
 
         return printEvery;
-
     }
 
 }

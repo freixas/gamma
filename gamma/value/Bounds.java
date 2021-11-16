@@ -148,6 +148,46 @@ public class Bounds
     }
 
     /**
+     * Return a code that identifies which area a point lies within.
+     * See the Cohen - Sutherland algorithm.
+     *
+     * @param coord The point.
+     * @return The out code.
+     */
+    private int computeOutCode(Coordinate coord)
+    {
+        return computeOutCode(coord.x, coord.t);
+    }
+
+    /**
+     * Return a code that identifies which area a point lies within.
+     * See the Cohen - Sutherland algorithm.
+     *
+     * @param coord The point.
+     * @return The out code.
+     */
+    private int computeOutCode(double x, double t)
+    {
+	int code = 0x0;			// INSIDE
+
+	if (x < min.x) {
+	    code |= 0x01;		// LEFT
+	}
+	else if (x > max.x) {
+	    code |= 0x02;		// RIGHT
+	}
+
+	if (t < min.t) {
+	    code |= 0x04;		// BOTTOM
+	}
+	else if (t > max.t) {
+	    code |= 0x08;		// TOP
+	}
+
+	return code;
+    }
+
+    /**
      * Returns true if the given point is inside this bounding box.
      *
      * @param c The point.
@@ -169,7 +209,34 @@ public class Bounds
      */
     public boolean inside(double x, double t)
     {
-        return x >= min.x && x <= max.x && t >= min.t && t <= max.t;
+        return computeOutCode(x, t) == 0x0;
+    }
+
+    /**
+     * Return true if a line segment is completely inside this bounds.
+     *
+     * @param segment The line segment.
+     * @return True if a line segment is completely inside the clip.
+     */
+    public boolean completelyInsideClip(LineSegment segment)
+    {
+	int outcode0 = computeOutCode(segment.point1);
+	int outcode1 = computeOutCode(segment.point2);
+	return (outcode0 | outcode1) == 0;
+    }
+
+    /**
+     * Return true if a line segment is completely outside this bounds.
+     *
+     * @param segment The line segment.
+     * @return True if a line segment is completely outside the clip.
+     */
+
+    public boolean completelyOutsideClip(LineSegment segment)
+    {
+	int outcode0 = computeOutCode(segment.point1);
+	int outcode1 = computeOutCode(segment.point2);
+	return (outcode0 & outcode1) != 0;
     }
 
     /**
@@ -181,6 +248,7 @@ public class Bounds
      */
     public boolean intersects(Bounds other)
     {
+        if (other == null) return false;
         return !(
             max.x < other.min.x ||
             min.x > other.max.x ||
@@ -206,6 +274,106 @@ public class Bounds
             Math.min(max.x, other.max.x),
             Math.min(max.t, other.max.t));
 
+    }
+    /**
+     * Intersect a line segment with this bounds. This method returns
+     * a line segment that lies completely within the bounds or null if there
+     * is no intersection.
+     *
+     * @param segment The segment to intersect.
+     * @return The clipped line segment or null if there is no intersection.
+     */
+
+    public LineSegment intersect(LineSegment segment)
+    {
+        // Copy the line segment
+
+	segment = new LineSegment(segment);
+
+	int outcode0 = computeOutCode(segment.point1);
+	int outcode1 = computeOutCode(segment.point2);
+	boolean accept = false;
+
+	while (true) {
+
+	    // Bitwise OR is 0: both points inside clip; trivially
+	    // accept and exit loop
+
+	    if ((outcode0 | outcode1) == 0) {
+		accept = true;
+		break;
+	    }
+
+	    // Bitwise AND is not 0: both points share an outside zone
+	    // (LEFT, RIGHT, TOP, or BOTTOM), so both must be outside
+	    // window; exit loop (accept is false)
+
+	    else if ((outcode0 & outcode1) != 0) {
+		break;
+	    }
+
+	    // Failed both tests, so calculate the line segment to clip
+	    // from an outside point to an intersection with clip edge
+
+	    else {
+		double x = 0.0;
+		double t = 0.0;
+
+		// At least one endpoint is outside the clip
+		// rectangle; pick it.
+
+		int outcodeOut = outcode0 != 0 ? outcode0 : outcode1;
+
+		// Now find the intersection point; use formulas:
+		//   slope = (t1 - t0) / (x1 - x0)
+		//   x = x0 + (1 / slope) * (tm - t0), where tm is tmin or tmax
+		//   t = t0 + slope * (xm - x0), where xm is xmin or
+		//   xmax
+		// No need to worry about divide-by-zero because, in
+		// each case, the outcode bit being tested guarantees
+		// the denominator is non-zero
+
+		if ((outcodeOut & 0x08) != 0) { 	// Point is above the clip window
+		    x =
+			segment.point1.x + (segment.point2.x - segment.point1.x) * (max.t - segment.point1.t) /
+			(segment.point2.t - segment.point1.t);
+		    t = max.t;
+		}
+		else if ((outcodeOut & 0x04) != 0) { // Point is below the clip window
+		    x =
+			segment.point1.x + (segment.point2.x - segment.point1.x) * (min.t - segment.point1.t) /
+			(segment.point2.t - segment.point1.t);
+		    t = min.t;
+		}
+		else if ((outcodeOut & 0x02) != 0) {  // Point is to the right of clip window
+		    t =
+			segment.point1.t + (segment.point2.t - segment.point1.t) * (max.x - segment.point1.x) /
+			(segment.point2.x - segment.point1.x);
+		    x = max.x;
+		}
+		else if ((outcodeOut & 0x01) != 0) {   // Point is to the left of clip window
+		    t =
+			segment.point1.t + (segment.point2.t - segment.point1.t) * (min.x - segment.point1.x) /
+			(segment.point2.x - segment.point1.x);
+		    x = min.x;
+		}
+
+		// Now we move outside point to intersection point to clip
+		// and get ready for next pass.
+
+		if (outcodeOut == outcode0) {
+                    segment.point1.setTo(x, t);
+		    outcode0 = computeOutCode(segment.point1);
+		}
+		else {
+		    segment.point2.setTo(x, t);
+		    outcode1 = computeOutCode(segment.point2);
+		}
+	    }
+	}
+
+	if (accept) return segment;
+	return null;
     }
 
     /**

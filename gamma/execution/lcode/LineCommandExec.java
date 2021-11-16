@@ -17,6 +17,9 @@
 package gamma.execution.lcode;
 
 import gamma.drawing.Context;
+import gamma.drawing.Line;
+import gamma.value.Bounds;
+import gamma.value.LineSegment;
 
 /**
  *
@@ -28,7 +31,15 @@ public class LineCommandExec extends CommandExec
     @Override
     public void execute(Context context, Struct cmdStruct, StyleStruct styles)
     {
-        // throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        LineStruct struct = (LineStruct)cmdStruct;
+
+        Bounds clip = context.bounds.intersect(struct.bounds);
+        if (clip == null) return;
+
+        LineSegment segment = struct.line.intersect(clip);
+        if (segment == null) return;
+
+        Line.draw(context, segment, styles);
     }
 
 }

@@ -17,6 +17,7 @@
 package gamma.execution.lcode;
 
 import gamma.drawing.Context;
+import gamma.drawing.Text;
 
 /**
  *
@@ -28,7 +29,9 @@ public class LabelCommandExec extends CommandExec
     @Override
     public void execute(Context context, Struct cmdStruct, StyleStruct styles)
     {
-        // throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        LabelStruct struct = (LabelStruct)cmdStruct;
+
+        Text.draw(context, struct.location.x, struct.location.t, struct.text, struct.rotation, styles);
     }
 
 }
