@@ -83,56 +83,56 @@ public class PropertyInfo
         this.stringSet = Arrays.asList(sets);
     }
 
-    public Type getType()
-    {
-        return type;
-    }
-
-    public Object getDefault()
-    {
-        return defaultValue;
-    }
-
-    public double getMinValue()
-    {
-        return minValue;
-    }
-
-    public double getMaxValue()
-    {
-        return maxValue;
-    }
-
-    public ArrayList<String> getCommands()
-    {
-        return commands;
-    }
-
-    public List<String> getStringSet()
-    {
-        return stringSet;
-    }
-
-    public boolean isRequired()
-    {
-        return defaultValue == null;
-    }
-
+//    public Type getType()
+//    {
+//        return type;
+//    }
+//
+//    public Object getDefault()
+//    {
+//        return defaultValue;
+//    }
+//
+//    public double getMinValue()
+//    {
+//        return minValue;
+//    }
+//
+//    public double getMaxValue()
+//    {
+//        return maxValue;
+//    }
+//
+//    public ArrayList<String> getCommands()
+//    {
+//        return commands;
+//    }
+//
+//    public List<String> getStringSet()
+//    {
+//        return stringSet;
+//    }
+//
+//    public boolean isRequired()
+//    {
+//        return defaultValue == null;
+//    }
+//
     static public boolean exists(String command, String propertyName)
     {
         String name = command + "-" + propertyName;
         return infoTable.containsKey(name);
     }
 
-    static public boolean isStyleProperty(String propertyName)
-    {
-        return exists("style", propertyName);
-    }
-
-    static public PropertyInfo getPropertyInfo(String command, String propertyName)
-    {
-        String name = command + "-" + propertyName;
-        return infoTable.get(name);
-    }
+//    static public boolean isStyleProperty(String propertyName)
+//    {
+//        return exists("style", propertyName);
+//    }
+//
+//    static public PropertyInfo getPropertyInfo(String command, String propertyName)
+//    {
+//        String name = command + "-" + propertyName;
+//        return infoTable.get(name);
+//    }
 
 }
