@@ -25,6 +25,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardWatchEventKinds;
+import static java.nio.file.StandardWatchEventKinds.*;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
@@ -92,12 +93,6 @@ public class FileWatcher extends Thread
             e.printStackTrace();
             Platform.runLater(new ScriptParseErrorHandler(window, list));
         }
-
-        // Start a new thread each time
-        
-        FileWatcher watcher = new FileWatcher(file, window);
-        Thread watcherThread = new Thread(watcher);
-        watcherThread.start();
     }
 
     @Override
@@ -108,9 +103,71 @@ public class FileWatcher extends Thread
 
         doOnChange();
 
-        try ( WatchService watcher = FileSystems.getDefault().newWatchService()) {
+        try {
+            WatchService watchService = FileSystems.getDefault().newWatchService();
+
             Path path = file.toPath().getParent();
-            path.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
+            path.register(watchService, ENTRY_CREATE, ENTRY_MODIFY, ENTRY_DELETE);
+
+            boolean poll = true;
+
+            while (poll) {
+                WatchKey key = watchService.take();
+                for (WatchEvent<?> event : key.pollEvents()) {
+                    WatchEvent.Kind<?> kind = event.kind();
+                    System.err.println("Event kind : " + kind + " - File : " + event.context());
+
+                    if (kind == StandardWatchEventKinds.ENTRY_CREATE ||
+                        kind == StandardWatchEventKinds.ENTRY_MODIFY) {
+
+                        @SuppressWarnings("unchecked")
+                        Path filename = ((WatchEvent<Path>)event).context();
+                        System.err.print("Filename is " + filename + "\n");
+
+                        if (filename.toString().equals(file.getName())) {
+                            System.err.println("doOnChange()\n");
+                            doOnChange();
+                        }
+                    }
+
+                    else if (kind == StandardWatchEventKinds.ENTRY_DELETE) {
+                        Path filename = ((WatchEvent<Path>)event).context();
+                        System.err.print("Filename is " + filename + "\n");
+
+                        if (filename.toString().equals(file.getName())) {
+                            // ???
+                        }
+                    }
+
+                }
+                poll = key.reset();
+            }
+        }
+        catch (IOException e) {
+            list.add(e);
+            Platform.runLater(new ScriptParseErrorHandler(window, list));
+        }
+        catch (InterruptedException e) {
+            list.add(e);
+            Platform.runLater(new ScriptParseErrorHandler(window, list));
+        }
+    }
+
+    public void run1()
+    {
+        // When we first execute this thread, we should treat the file as though
+        // we've just noticed that it changed
+
+        doOnChange();
+
+        try (WatchService watcher = FileSystems.getDefault().newWatchService()) {
+            Path path = file.toPath().getParent();
+            path.register(watcher,
+                          StandardWatchEventKinds.ENTRY_MODIFY,
+                          StandardWatchEventKinds.ENTRY_DELETE,
+                          StandardWatchEventKinds.ENTRY_CREATE,
+                          StandardWatchEventKinds.OVERFLOW);
+
             while (!isStopped()) {
                 try {
                     WatchKey key;
@@ -118,20 +175,36 @@ public class FileWatcher extends Thread
                         key = watcher.take();
                     }
                     catch (InterruptedException e) {
+                        System.err.println(e + "\n");
                         continue;
                     }
 
                     for (WatchEvent<?> event : key.pollEvents()) {
+
                         WatchEvent.Kind<?> kind = event.kind();
+                        System.err.println("Kind " + kind + "\n");
 
-                        @SuppressWarnings("unchecked")
-                        Path filename = ((WatchEvent<Path>)event).context();
+                        if (kind == StandardWatchEventKinds.ENTRY_CREATE ||
+                            kind == StandardWatchEventKinds.ENTRY_MODIFY) {
 
-                        if (kind == StandardWatchEventKinds.ENTRY_MODIFY &&
-                            filename.toString().equals(file.getName())) {
+                            @SuppressWarnings("unchecked")
+                            Path filename = ((WatchEvent<Path>)event).context();
+                            System.err.print("Filename is " + filename + "\n");
 
-                            doOnChange();
+                            if (filename.toString().equals(file.getName())) {
+                                System.err.println("doOnChange()\n");
+                                doOnChange();
+                            }
                         }
+                        else if (kind == StandardWatchEventKinds.ENTRY_DELETE) {
+                           Path filename = ((WatchEvent<Path>)event).context();
+                            System.err.print("Filename is " + filename + "\n");
+
+                            if (filename.toString().equals(file.getName())) {
+                                // ???
+                            }
+                        }
+                        key.reset();
                     }
                 }
                 catch (Exception e) {
