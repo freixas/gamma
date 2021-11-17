@@ -103,6 +103,14 @@ public class Parser
         {
             return initialized;
         }
+
+        @Override
+        public String toString()
+        {
+            return "Op{" + "chr=" + chr + '}';
+        }
+
+
     }
 
     class OpToken<T> extends Token<T>
@@ -116,6 +124,14 @@ public class Parser
             this.token = token;
             this.op = op;
         }
+
+        @Override
+        public String toString()
+        {
+            return "OpToken{" + "token=" + token + ", op=" + op + '}';
+        }
+
+
     }
 
     static {
@@ -1015,7 +1031,7 @@ public class Parser
             // If we have a "(", push it on the operator stack
 
             else if (isDelimiter() && getChar() == '(') {
-                ops.push(new OpToken<>(curToken, Op.find('(', true)));
+               ops.push(new OpToken<>(curToken, Op.find('(', true)));
                 level++;                    // Begin a new parenthesis level
 
                 // Record the number of arguments seen so far (0)
@@ -1045,7 +1061,7 @@ public class Parser
 
                 while (!ops.isEmpty()) {
                     OpToken t = ops.pop();
-                    if (t.op.chr != '(') {
+                   if (t.op.chr != '(') {
                         codes.add(opTokenToHCode(t));
                     }
                     else {
@@ -1057,7 +1073,7 @@ public class Parser
                 // the function name on the codes stack, along with the total of
                 // all the arguments plus the function name
 
-                if (ops.size() > 0 && ops.firstElement().op.chr == '!') {
+                if (ops.size() > 0 && ops.peek().op.chr == '!') {
                     OpToken t = ops.pop();
                     codes.add(t.token.getValue());
                     codes.add(argCount.get(level) + 1);
@@ -1104,11 +1120,11 @@ public class Parser
                 // the codes stack
 
                 while (ops.size() > 0) {
-                    Op topOp = ops.lastElement().op;
+                    Op topOp = ops.peek().op;
                     if ((op.isLeftAssoc && op.precedence <= topOp.precedence) ||
                         (!op.isLeftAssoc && op.precedence < topOp.precedence)) {
                         OpToken topToken = ops.pop();
-                        if (topToken.getChar() != '(') {
+                        if (topToken.isDelimiter() && topToken.getChar() != '(') {
                             codes.add(opTokenToHCode(topToken));
                         }
                         else {
@@ -1126,7 +1142,7 @@ public class Parser
                 ops.push(new OpToken<>(curToken, op));
             }
 
-            // Since we are not using recursive descent to parse exceptions,
+            // Since we are not using recursive descent to parse expressions,
             // we need to know when we're done with an expression
             //
             // An expression begins with a number, a string, a name, an open
