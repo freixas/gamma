@@ -30,8 +30,8 @@ public class Observer
 {
     private final Worldline worldline;
 
-    private final WInitializer initializer;
-    private final ArrayList<WSegment> segments;
+//    private final WInitializer initializer;
+//    private final ArrayList<WSegment> segments;
 
     /**
      * Create an observer.
@@ -44,8 +44,8 @@ public class Observer
      */
     public Observer(WInitializer initializer, ArrayList<WSegment> segments)
     {
-        this.initializer = initializer;
-        this.segments = segments;
+//        this.initializer = initializer;
+//        this.segments = segments;
 
         worldline = new Worldline(initializer);
 
@@ -53,12 +53,17 @@ public class Observer
 
             // Create a default segment
 
-            segments.add(new WSegment(0, 0, WorldlineSegment.LimitType.NONE, Double.NaN));
+            segments.add(new WSegment(0.0, 0.0, WorldlineSegment.LimitType.NONE, Double.NaN));
         }
 
         Iterator<WSegment> iter = segments.iterator();
         while (iter.hasNext()) {
             WSegment wSegment = iter.next();
+
+        // Temporary hack - TO DO !!!!!!!!!!!
+        // Convert acceleration to proper units
+
+        double a = wSegment.getA() * 1.032295276;
 
             // Not the last segment
 
@@ -66,16 +71,21 @@ public class Observer
                 worldline.addSegment(
                         wSegment.getType(),
                         wSegment.getDelta(),
-                        wSegment.getA(),
+                        a,
                         wSegment.getV());
             }
 
             // The last segment
 
             else {
-                worldline.addFinalSegment(wSegment.getA(), wSegment.getV());
+                worldline.addFinalSegment(a, wSegment.getV());
             }
         }
+    }
+
+    public Worldline getWorldline()
+    {
+        return worldline;
     }
 
     /**
@@ -87,11 +97,30 @@ public class Observer
      */
     public Observer relativeTo(Frame prime)
     {
+        // Create a new list of WSegments by copying the existing ones and
+        // making them relative to the prime frame
+
         ArrayList<WSegment> segs = new ArrayList<>();
-        Iterator<WSegment> iter = segs.iterator();
+
+        // We should always have one segment. If the first segment's velocity is
+        // NaN, it's going to be set to 0, but we want it set to 0 in the
+        // prime frame, so set it to an explicity 0
+
+        boolean isFirst = true;
+        Iterator<WSegment> iter = segments.iterator();
         while (iter.hasNext()) {
-            segs.add(iter.next().relativeTo(prime));
+            WSegment seg = iter.next();
+            if (isFirst && Double.isNaN(seg.getV())) {
+                segs.add(new WSegment(0.0, seg.getA(), seg.getType(), seg.getDelta()).relativeTo(prime));
+            }
+            else {
+                segs.add(seg.relativeTo(prime));
+            }
+            isFirst = false;
         }
+
+        // Re-create the entire observer
+
         return new Observer(initializer.relativeTo(prime), segs);
     }
 
@@ -286,4 +315,12 @@ public class Observer
         return worldline.intersect(other.worldline);
 
     }
+
+    @Override
+    public String toString()
+    {
+        return "Observer:\n" + worldline.toString().replaceAll("(?m)^", "  ");
+    }
+
+
 }
