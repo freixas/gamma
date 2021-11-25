@@ -19,11 +19,11 @@ package gamma.drawing;
 import gamma.ProgrammingException;
 import gamma.execution.LCodeEngine;
 import gamma.value.Bounds;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import gamma.value.Coordinate;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
 
 /**
@@ -39,7 +39,7 @@ public class Context
     public final Canvas canvas;
     public final GraphicsContext gc;
 
-    public double scale;
+    public double invScale;
     public Bounds bounds;
 
     public Context(LCodeEngine engine, Canvas canvas)
@@ -48,32 +48,38 @@ public class Context
         this.canvas = canvas;
         this.gc = canvas.getGraphicsContext2D();
 
-        this.scale = getCurrentScale();
+        this.invScale = getCurrentInvScale();
         this.bounds = getCurrentCanvasBounds();
     }
 
     /**
-     * Return the scale for the canvas. Multiply a screen length by this number
-     * to get corresponding world unit length. This is maintained by the zoom
-     * and pan methods and may not match the actual canvas bounds if local
-     * transforms have been applied.
+     * Return the inverse scale for the canvas. Normal scaling goes from world
+     * units to screen units. Multiply a screen length by the inverse scale to
+     * get corresponding world unit length.
+     * <p>
+     * This scale value is maintained by the zoom and pan methods and may not
+     * match the actual canvas bounds if local transforms have been applied. Use
+     * getCurrentInvScale in those situations.
      *
-     * @return The canvas scale.
+     * @return The canvas inverse scale.
      */
-    public final double getScale()
+    public final double getInvScale()
     {
-        return scale;
+        return invScale;
     }
 
     /**
-     * Return the scale for the canvas. Multiply a screen length by this number
-     * to get corresponding world unit length. This returns a scale based on all
-     * the transforms that have been applied to whatever is the current graphics
-     * context. It does not work if any rotations have been applied.
+     * Return the inverse scale for the canvas. Normal scaling goes from world
+     * units to screen units. Multiply a screen length by the inverse scale to
+     * get corresponding world unit length.
+     * <p>
+     * This returns a scale based on all the transforms that have been applied
+     * to whatever is the current graphics context. It does not work if any
+     * rotations have been applied.
      *
-     * @return The canvas scale.
+     * @return The canvas inverse scale.
      */
-    public final double getCurrentScale()
+    public final double getCurrentInvScale()
     {
         try {
             Point2D point = gc.getTransform().inverseDeltaTransform(1D, 0D);
@@ -85,16 +91,18 @@ public class Context
     }
 
     /**
-     * Return the scale for the canvas. Multiply a screen length by this number
-     * to get corresponding world unit length. This returns a scale based on all
-     * the transforms that have been applied to whatever is the current graphics
-     * context. This version works even if the graphics context has been
-     * rotated. However, it assumes the magnitude of the x and y scaling is the
-     * same.
+     * Return the inverse scale for the canvas. Normal scaling goes from world
+     * units to screen units. Multiply a screen length by the inverse scale to
+     * get corresponding world unit length.
+     * <p>
+     * This returns a scale based on all the transforms that have been applied
+     * to whatever is the current graphics context. This version works even if
+     * the graphics context has been rotated. However, it assumes the magnitude
+     * of the x and y scaling is the same.
      *
-     * @return The canvas scale.
+     * @return The canvas inverse scale.
      */
-    public final double getCurrentRotatedScale()
+    public final double getCurrentRotatedInvScale()
     {
         try {
             Point2D point = gc.getTransform().inverseDeltaTransform(1D, 0D);
@@ -131,11 +139,29 @@ public class Context
         try {
             // The bounding box in screen units
 
-            Bounds curBounds = new Bounds(0.0, 0.0, canvas.getWidth(), canvas.getHeight());
+            Bounds screenBounds = new Bounds(0.0, 0.0, canvas.getWidth(), canvas.getHeight());
 
             // The inverse transform goes from screen units to world units
 
-            return curBounds.transform(gc.getTransform().createInverse());
+            Affine inverse = gc.getTransform().createInverse();
+            Bounds worldBounds = screenBounds.transform(inverse);
+
+//            Point2D p1 = gc.getTransform().transform(worldBounds.min.x, worldBounds.min.t);
+//            Point2D p2 = gc.getTransform().transform(worldBounds.max.x, worldBounds.max.t);
+//
+//            double error1 = p1.getX();
+//            double error2 = p1.getY() - canvas.getHeight();
+//            double error3 = p2.getX() - canvas.getWidth();
+//            double error4 = p2.getY();
+//
+//            System.err.println(
+//                "Debug: canvas bounds " +
+//                error1 + ", " +
+//                error2 + ", " +
+//                error3 + ", " +
+//                error4);
+
+            return worldBounds;
         }
         catch (NonInvertibleTransformException e) {
             throw new ProgrammingException("Context.getCanvasBounds()", e);

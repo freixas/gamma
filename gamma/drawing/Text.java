@@ -38,9 +38,9 @@ public class Text
 {
     private static javafx.scene.text.Text textNode = null;
 
-    public static void draw(Context context, double x, double t, String text, double angle, StyleStruct styles)
+    public static void draw(Context context, double x, double t, String text, StyleStruct styles)
     {
-        draw(context, x, t, text, angle, styles.javaFXColor, styles.font, styles.textPadding, styles.textAnchor);
+        draw(context, x, t, text, styles.textRotation, styles.javaFXColor, styles.font, styles.textPadding, styles.textAnchor);
     }
 
     public static void draw(Context context, double x, double t, String text, double angle,
@@ -95,10 +95,10 @@ public class Text
 
             // Convert sizes from screen units to world units
 
-            double scale = context.getCurrentScale();
+            double scale = context.getCurrentInvScale();
 
-            // We scale the font so that the font size comes out constant
-            // regardless of the current scale
+            // We invScale the font so that the font size comes out constant
+            // regardless of the current invScale
 
             transform.appendScale(scale, -scale, x, t);
 
@@ -109,7 +109,7 @@ public class Text
             Point2D size = transform.inverseDeltaTransform(1D, 0D);
             scale = size.getX();
 
-            // (x, t) is the position which we will scale and rotate
+            // (x, t) is the position which we will invScale and rotate
             // (xOffset, tOffset) is the position at which we will draw the
             // text
 
@@ -124,13 +124,6 @@ public class Text
 
             gc.setTransform(transform);
             gc.fillText(text, xOffset, tOffset);
-
-//            gc.setStroke(Color.MAGENTA);
-//            gc.strokeLine(x, t, x, t+10);
-//            gc.strokeLine(x, t, x+10, t);
-//            gc.setStroke(Color.CYAN);
-//            gc.strokeLine(xOffset, tOffset, xOffset, tOffset+20);
-//            gc.strokeLine(xOffset, tOffset, xOffset+20, tOffset);
 
             // Restore the original graphics context
 
@@ -154,56 +147,4 @@ public class Text
         return textNode.getLayoutBounds();
     }
 
-    public static void test(Context context)
-    {
-        GraphicsContext gc = context.gc;
-
-        gc.setFill(Color.BLACK);
-        gc.fillOval(-1, -1, 2, 2);
-        gc.fillOval(19, -1, 2, 2);
-        gc.fillOval(-1, 19, 2, 2);
-        gc.fillOval(-21, -1, 2, 2);
-        gc.fillOval(-1, -21, 2, 2);
-
-        Font font = Font.font(null, 50);
-//        draw(context, 0, 0, "A", 0, Color.RED, font, 0, "MC");
-//        draw(context, 20, 0, "B", 45, Color.GREEN, font, 0, "MC");
-//        draw(context, 0, 20, "C", 90, Color.BLUE, font, 0, "MC");
-//        draw(context, -20, 0, "D", -45, Color.CYAN, font, 0, "MC");
-//        draw(context, 0, -20, "E", -90, Color.MAGENTA, font, 0, "MC");
-
-//        draw(context, 0, 0,   "A", 0, Color.RED, font, 0, "MC");
-//        draw(context, 20, 0,  "B", 0, Color.GREEN, font, 10, "MC");
-//        draw(context, 0, 20,  "C", 0, Color.BLUE, font, 20, "MC");
-//        draw(context, -20, 0, "D", 0, Color.CYAN, font, 30, "MC");
-//        draw(context, 0, -20, "E", 0, Color.MAGENTA, font, 40, "MC");
-
-        draw(context, 0, 0,   "123", 90, Color.RED, font, 10, "TL");
-        draw(context, 20, 0,  "123", 90, Color.GREEN, font, 10, "TC");
-        draw(context, 0, 20,  "123", 90, Color.BLUE, font, 10, "TR");
-        draw(context, -20, 0, "123", 90, Color.CYAN, font, 10, "ML");
-        draw(context, 0, -20, "123", 90, Color.MAGENTA, font, 10, "MR");
-        draw(context, 0, 0,   "123", 90, Color.YELLOW, font, 10, "BL");
-        draw(context, 20, 0,  "123", 90, Color.GRAY, font, 10, "BC");
-        draw(context, 0, 20,  "123", 90, Color.PINK, font, 10, "BR");
-
-//        draw(context, 0, 0,   "X", 0, Color.RED, font, 0, "BR");
-//        draw(context, 20, 0,  "X", 45, Color.GREEN, font, 0, "BR");
-//        draw(context, 0, 20,  "X", 90, Color.BLUE, font, 0, "BR");
-//        draw(context, -20, 0, "X", -45, Color.CYAN, font, 0, "BR");
-//        draw(context, 0, -20, "X", -90, Color.MAGENTA, font, 0, "BR");
-
-//        draw(context, 0, 0,   "A", 0, Color.RED, font, 10, "TC");
-//        draw(context, 20, 0,  "B", 0, Color.GREEN, font, 10, "BC");
-//        draw(context, 0, 20,  "C", 0, Color.BLUE, font, 10, "MR");
-//        draw(context, -20, 0, "D", 0, Color.CYAN, font, 10, "ML");
-//        draw(context, 0, -20, "E", 0, Color.MAGENTA, font, 10, "BR");
-
-//        draw(context, 0, 0, "XXXXX", -90, Color.RED, font, 20, "MR");
-//        draw(context, 20, 0, "XXXXX", -90, Color.GREEN, font, 20, "MR");
-//        draw(context, 0, 20, "XXXXX", -90, Color.BLUE, font, 20, "MR");
-//        draw(context, -20, 0, "XXXXX", -90, Color.CYAN, font, 20, "MR");
-//        draw(context, 0, -20, "XXXXX", -90, Color.MAGENTA, font, 20, "MR");
-//
-    }
 }

@@ -20,6 +20,7 @@ import gamma.execution.lcode.StyleStruct;
 import gamma.math.Util;
 import gamma.value.Bounds;
 import gamma.value.Coordinate;
+import gamma.value.Frame;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.text.Font;
@@ -35,7 +36,7 @@ public class Axis
     static final double MIN_MAJOR_TICK_MARK_LENGTH = 10.0;
     static final double IDEAL_TICK_SPACING = 20.0;
 
-    public static void draw(Context context, double v, gamma.value.Line line,
+    public static void draw(Context context, Frame frame,
                             gamma.value.Line.AxisType axisType,
                             double tickScale, boolean positiveOnly, String xLabel,
                             StyleStruct styles)
@@ -50,15 +51,20 @@ public class Axis
 
         Line.setupLineGc(context, styles);
 
+        // Get the values we need
+
+        double v = frame.getV();
+        gamma.value.Line line = new gamma.value.Line(axisType, frame);
+
         // *********************************************
-        // *** Find out the current scale.           ***
+        // *** Find out the current invScale.           ***
         // *********************************************
 
-        // We multiply by this scale to convert a from screen units to
+        // We multiply by this invScale to convert a from screen units to
         // world units. We divide by this to go from world units to screen
         // units.
 
-        double viewportScale = context.scale;
+        double viewportScale = context.invScale;
 
         // *********************************************
         // *** Set up the transformed system.        ***
@@ -160,8 +166,8 @@ public class Axis
         // width of the the tick marks. Note that the width is in pixel
         // space but the intersection is in world space
 
-        double worldTickThickness = viewportScale * styles.tickThickness;
-        double worldMajorTickThickness = viewportScale * styles.majorTickThickness;
+        double worldTickThickness = viewportScale * styles.divThickness;
+        double worldMajorTickThickness = viewportScale * styles.majorDivThickness;
 
         double padding = Math.max(worldTickThickness, worldMajorTickThickness) / 2.0;
         padding *= viewportScale;
@@ -184,16 +190,22 @@ public class Axis
         int tickNumber = Util.toInt(firstTick / tickSpacing);
         firstTick += origin.x;
 
+        gc.setStroke(styles.javaFXDivColor);
         gc.setLineWidth(worldTickThickness);
-        for (double x = firstTick, tickCount = tickNumber; x <= maxDistance; x += tickSpacing, tickCount++) {
+
+        double x;
+        int tickCount;
+        for (x = firstTick, tickCount = tickNumber; x <= maxDistance; x += tickSpacing, tickCount++) {
             if (tickCount != 0) {
 
                 // Major tick
 
-                if (tickCount % 10 == 0.0) {
+                if (tickCount % 10 == 0) {
+                    gc.setStroke(styles.javaFXMajorDivColor);
                     gc.setLineWidth(worldMajorTickThickness);
                     gc.strokeLine(x, origin.t - halfHeightMajor, x, origin.t + halfHeightMajor);
-                    gc.setLineWidth(worldTickThickness);
+                    gc.setStroke(styles.javaFXMajorDivColor);
+                    gc.setLineWidth(worldMajorTickThickness);
                 }
 
                 // Minor tick
@@ -281,11 +293,13 @@ public class Axis
 
         printEvery = getLabelSkip(firstTick, maxDistance, tickSpacing * tickScale, format, styles.font, viewportScale);
 
-        for (double x = firstTick, tickCount = tickNumber; x <= maxDistance; x += tickSpacing, tickCount++) {
+        for (x = firstTick, tickCount = tickNumber; x <= maxDistance; x += tickSpacing, tickCount++) {
             if (tickCount != 0) {
                 if (tickCount % printEvery == 0) {
+                    double tickValue = (x - origin.x) / tickScale;
+                    if (v < 0 && axisType == gamma.value.Line.AxisType.T) tickValue = -tickValue;
                     Point2D pos1 = revRotation.transform(x, origin.t);
-                    Text.draw(context, pos1.getX(), pos1.getY(), String.format(format, (x - origin.x) / tickScale), 0.0,
+                    Text.draw(context, pos1.getX(), pos1.getY(), String.format(format, tickValue), 0.0,
                               styles.javaFXColor, styles.font, pad, anchor);
                 }
             }
@@ -314,18 +328,19 @@ public class Axis
         maxValue = Math.abs(maxValue);
         delta = Math.abs(delta);
 
-        minValue = minValue < 2 * Double.MIN_NORMAL ? 0 : Math.floor(Math.log10(minValue));
-        maxValue = maxValue < 2 * Double.MIN_NORMAL ? 0 : Math.floor(Math.log10(maxValue));
-        delta =     delta   < 2 * Double.MIN_NORMAL ? 0 : Math.floor(Math.log10(delta));
-        if (minValue > 0) minValue += 1;
-        if (maxValue > 0) maxValue += 1;
-        if (delta > 0) delta += 1;
+        minValue = Util.fuzzyEQ(minValue, 0.0) ? 0 : Math.floor(Math.log10(minValue));
+        maxValue = Util.fuzzyEQ(maxValue, 0.0) ? 0 : Math.floor(Math.log10(maxValue));
+        delta =    Util.fuzzyEQ(delta, 0.0)    ? 0 : Math.floor(Math.log10(delta));
+
+//        if (minValue >= 0) minValue += 1;
+//        if (maxValue >= 0) maxValue += 1;
+//        if (delta >= 0) delta += 1;
 
         int sig1 = (int)(Math.abs(minValue - delta)) + 1;
         int sig2 = (int)(Math.abs(maxValue - delta)) + 1;
         int significantDigits = Math.max(sig1, sig2);
 
-        int mostSignificantDigit = (int)maxValue;
+        int mostSignificantDigit = (int)Math.max(minValue, maxValue);
         if (mostSignificantDigit >= 0) mostSignificantDigit += 1;
 
         int eFormatChars = significantDigits + 6;
@@ -364,7 +379,7 @@ public class Axis
      * @param delta The delta size.
      * @param format The format string by which to convert numbers to string.
      * @param font The font which will be used to display the string.
-     * @param scale The scale to use to convert screen units to world units.
+     * @param scale The invScale to use to convert screen units to world units.
      *
      * @return A number that can be used with the remainder operator to determine
      * whether to display or skip a particular tick mark.

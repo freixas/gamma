@@ -18,14 +18,9 @@ package gamma.drawing;
 
 import gamma.execution.lcode.StyleStruct;
 import gamma.value.LineSegment;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javafx.scene.Node;
-import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.StrokeLineCap;
-import javafx.scene.transform.NonInvertibleTransformException;
 
 /**
  *
@@ -34,31 +29,63 @@ import javafx.scene.transform.NonInvertibleTransformException;
 public class Line
 {
 
+    /**
+     * Draw a line segment.
+     *
+     * @param context The drawing context.
+     * @param segment The line segment to draw.
+     * @param styles The styles to use.
+     */
     static public void draw(Context context, LineSegment segment, StyleStruct styles)
     {
         draw(context, segment, styles.lineThickness, styles.arrow, styles);
     }
 
+    /**
+     * Draw a line segment.Override some styles with specific settings.
+     *
+     * @param context The drawing context.
+     * @param segment The line segment to draw.
+     * @param thickness The line thickness.
+     * @param arrow Whether to draw arrowheads and which end(s) to draw them on.
+     * @param styles The styles to use.
+     */
     static public void draw(
         Context context, LineSegment segment,
         double thickness, String arrow,
         StyleStruct styles)
     {
-        Canvas canvas = context.canvas;
         GraphicsContext gc = context.gc;
 
         // Save the current graphics context
 
         gc.save();
-        Node savedClip = canvas.getClip();
 
         setupLineGc(context, styles);
+
+        drawRaw(context, segment, arrow);
+
+        // Restore the original graphics context
+
+        gc.restore();
+    }
+
+    /**
+     * Draw a line segment. Don't save, restore or setup the graphics context.
+     *
+     * @param context The drawing context.
+     * @param segment The line segment to draw.
+     * @param arrow Whether to draw arrowheads and which end(s) to draw them on.
+     */
+    static public void drawRaw(Context context, LineSegment segment, String arrow)
+    {
+        GraphicsContext gc = context.gc;
 
         // Draw the line
 
         gc.strokeLine(
-            segment.getPoint1().x, segment.getPoint1().t,
-            segment.getPoint2().x, segment.getPoint2().t);
+            segment.point1.x, segment.point1.t,
+            segment.point2.x, segment.point2.t);
 
         // Draw the arrowheads
 
@@ -70,11 +97,6 @@ public class Line
             // TO DO
             // Draw the arrowhead at the end
         }
-
-        // Restore the original graphics context
-
-        canvas.setClip(savedClip);
-        gc.restore();
     }
 
     /**
@@ -101,7 +123,7 @@ public class Line
     static public void setupLineGc(Context context, Color color, String lineStyle, double lineThickness)
     {
         GraphicsContext gc = context.gc;
-        double scale = context.getCurrentScale();
+        double scale = context.getCurrentInvScale();
 
         // Set the line color
 
@@ -121,8 +143,9 @@ public class Line
         }
         else if (lineStyle.equals("dotted")) {
             gc.setLineCap(StrokeLineCap.ROUND);
-            gc.setLineDashes(worldLineThickness, worldLineThickness);
+            gc.setLineDashes(worldLineThickness / 10.0, worldLineThickness * 2);
         }
-
     }
+
+
 }
