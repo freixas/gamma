@@ -30,6 +30,11 @@ public abstract class Function
     static final HashMap<String, Function> functions = new HashMap<>();
 
     static {
+        functions.put("gamma",   new gammaFunction());
+
+        functions.put("toXAngle",   new toXAngleFunction());
+        functions.put("toTAngle",   new toTAngleFunction());
+
         functions.put("dToT",   new dToTFunction());
         functions.put("dToTau", new dToTauFunction());
         functions.put("dToV",   new dToVFunction());

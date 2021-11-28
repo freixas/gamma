@@ -31,6 +31,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.Region;
 import javafx.scene.text.FontSmoothingType;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
@@ -41,6 +42,9 @@ import javafx.scene.transform.NonInvertibleTransformException;
  */
 public class LCodeEngine
 {
+    static private final double MIN_ZOOM_SCALE =      0.000001;
+    static private final double MAX_ZOOM_SCALE = 100.0;
+
     private final ArrayList<Command> commands;
     private final MainWindow window;
     private Command animationCommand;
@@ -48,12 +52,14 @@ public class LCodeEngine
     private Command frameCommand;
 
     private Canvas canvas;
+    private Region canvasParent;
     private double lastWidth;
     private double lastHeight;
 
     private Context context;
 
-    ChangeListener<Number> sizeListener;
+    ChangeListener<Number> widthListener;
+    ChangeListener<Number> heightListener;
 
     private double mouseX;
     private double mouseY;
@@ -210,6 +216,7 @@ public class LCodeEngine
         // Get the drawing area
 
         canvas = window.getCanvas();
+        canvasParent = (Region)canvas.getParent();
 
         // Set up our change listeners
 
@@ -293,14 +300,21 @@ public class LCodeEngine
         // *
         // ************************************************************
 
-        sizeListener = (ObservableValue<? extends Number> ov, Number oldValue, Number newValue) -> {
-            if (engine.lastWidth != canvas.getWidth() || engine.lastHeight != canvas.getHeight()) {
+        widthListener = (ObservableValue<? extends Number> ov, Number oldValue, Number newValue) -> {
+            if (engine.lastWidth != canvasParent.getWidth()) {
                 engine.execute();
-                engine.lastWidth = canvas.getWidth();
-                engine.lastHeight = canvas.getWidth();
+                engine.lastWidth = canvasParent.getWidth();
             }
         };
-        window.widthProperty().addListener(sizeListener);
+        canvasParent.widthProperty().addListener(widthListener);
+
+        heightListener = (ObservableValue<? extends Number> ov, Number oldValue, Number newValue) -> {
+            if (engine.lastHeight != canvasParent.getHeight()) {
+                engine.execute();
+                engine.lastHeight = canvasParent.getHeight();
+            }
+        };
+        canvasParent.heightProperty().addListener(heightListener);
 
         // ************************************************************
         // *
@@ -345,7 +359,7 @@ public class LCodeEngine
                 Affine transform = gc.getTransform();
                 Point2D point = transform.inverseDeltaTransform(deltaX, deltaY);
                 gc.translate(point.getX(), point.getY());
-                context.scale = context.getCurrentScale();
+                context.invScale = context.getCurrentInvScale();
                 context.bounds = context.getCurrentCanvasBounds();
 
                 engine.execute();
@@ -403,7 +417,7 @@ public class LCodeEngine
 
             else {
                 Point2D center = new Point2D(canvas.getWidth() / 2.0, canvas.getHeight() / 2.0);
-                zoom(center, event.getCode() == KeyCode.MINUS ? -100.0 : +100.0);
+                zoom(center, event.getCode() == KeyCode.MINUS ? +100.0 : -100.0);
            }
 
             engine.execute();
@@ -434,7 +448,7 @@ public class LCodeEngine
     /**
      * Common zoom code.
      *
-     * @param center The point to zoom around.
+     * @param center The point to zoom around in screen coordinates.
      * @param delta  The zoom amount (+ for zoom in, - for zoom out).
      */
     private void zoom(Point2D center, double delta)
@@ -446,41 +460,39 @@ public class LCodeEngine
 
              Affine transform = gc.getTransform();
 
-             // We want to zoom in from the mouse position when using the
-             // scroll wheel
-
-             Point2D worldCenter = transform.inverseTransform(center);
-
-             // Translate the origin to the center
-
-             gc.translate(worldCenter.getX(), worldCenter.getY());
-
-             // Find out what the current scale is
-
-             Point2D scaleVector = transform.deltaTransform(1D, 0);
-             double curScale = scaleVector.getX();
+             double curInvScale = context.getCurrentInvScale();
 
              // Scale using this rather magic formula
 
              double zoomExp = 1 + (Math.abs(delta) / 1000.0);
-             double zoomIncr = Math.pow(curScale, zoomExp) / 10.0;
+             double zoomIncr = Math.pow(curInvScale, zoomExp) / 10.0;
              if (delta < 0) zoomIncr = -zoomIncr;
-             double newScale = curScale + zoomIncr;
+             double newScale = curInvScale + zoomIncr;
 
              // Limit the scaling
 
-             if (newScale > 10000000 || newScale < .001) return;
+             if (newScale < MIN_ZOOM_SCALE) {
+                 newScale = MIN_ZOOM_SCALE;
+             }
+             else if (newScale > MAX_ZOOM_SCALE) {
+                 newScale = MAX_ZOOM_SCALE;
+             }
 
-             // Set the new scale
+             // Get the relative scaling to use
 
-             double scale = newScale / curScale;
-             gc.scale(scale, scale);
+             newScale = 1 / newScale;
 
-             // Translate the origin back to its original position
+             // Convert the zoom center to world coordinates
 
-             gc.translate(-worldCenter.getX(), -worldCenter.getY());
+             Point2D worldCenter = transform.inverseTransform(center);
 
-            context.scale = context.getCurrentScale();
+             // Scale around the center point
+
+             transform.appendScale(curInvScale, curInvScale, worldCenter.getX(), worldCenter.getY());
+             transform.appendScale(newScale, newScale, worldCenter.getX(), worldCenter.getY());
+             gc.setTransform(transform);
+
+            context.invScale = context.getCurrentInvScale();
             context.bounds = context.getCurrentCanvasBounds();
          }
          catch (NonInvertibleTransformException e) {
@@ -493,7 +505,8 @@ public class LCodeEngine
      */
     private void removeListeners()
     {
-        window.widthProperty().removeListener(sizeListener);
+        canvasParent.widthProperty().removeListener(widthListener);
+        canvasParent.widthProperty().removeListener(heightListener);
         canvas.setOnMouseMoved(null);
         canvas.setOnMouseExited(null);
         canvas.setOnMousePressed(null);

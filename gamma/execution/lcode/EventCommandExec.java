@@ -28,7 +28,9 @@ public class EventCommandExec extends CommandExec
     @Override
     public void execute(Context context, Struct cmdStruct, StyleStruct styles)
     {
-        // throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        EventStruct struct = (EventStruct)cmdStruct;
+
+        gamma.drawing.Event.draw(context, struct, styles);
     }
 
 }

@@ -69,7 +69,7 @@ public class Color
         this.b = (int)((iColor >> 8) & 0xFF);
         this.a = (int)(iColor & 0xFF);
 
-        javaFXColor = javafx.scene.paint.Color.rgb(this.r, this.g, this.b, this.a / 255);
+        javaFXColor = javafx.scene.paint.Color.rgb(this.r, this.g, this.b, this.a / 255.0);
     }
 
     public Color(double red, double green, double blue)
@@ -84,7 +84,7 @@ public class Color
         this.b = Util.toInt(blue);
         this.a = Util.toInt(alpha);
 
-        javaFXColor = javafx.scene.paint.Color.rgb(this.r, this.b, this.g, this.a / 255);
+        javaFXColor = javafx.scene.paint.Color.rgb(this.r, this.b, this.g, this.a / 255.0);
     }
 
     public Color(Color other)

@@ -19,7 +19,9 @@ package gamma.execution.function;
 import gamma.execution.ArgInfo;
 import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
-import gamma.math.Util;
+import gamma.math.Lorentz;
+import gamma.value.Frame;
+import gamma.value.Observer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,27 +29,32 @@ import java.util.List;
  *
  * @author Antonio Freixas
  */
-public class toStringFunction extends Function
+public class toTAngleFunction extends Function
 {
     private static final ArgInfo argInfo;
 
     static {
         ArrayList<ArgInfo.Type> argTypes = new ArrayList<>();
-        argTypes.add(ArgInfo.Type.DOUBLE);
-        argTypes.add(ArgInfo.Type.DOUBLE);
-        argInfo = new ArgInfo(2, argTypes);
+        argTypes.add(ArgInfo.Type.ANY);
+        argInfo = new ArgInfo(1, argTypes);
     }
 
     @Override
     public Object execute(HCodeEngine engine, List<Object> code)
     {
-        double d =   (Double)           code.get(0);
-        int digits = Util.toInt((Double)code.get(1));
-
-        if (digits < 0) {
-            throw new ExecutionException("Invalid number of digits in float to string conversion");
+        Object arg1 = code.get(0);
+        if (arg1 instanceof Double dbl) {
+            return Lorentz.vToTAngle(dbl);
         }
-        return String.format("%." + digits + "f", d);
+        else if (arg1 instanceof Observer observer) {
+            return Lorentz.vToTAngle(new Frame(observer).getV());
+        }
+        else if (arg1 instanceof Frame frame) {
+            return Lorentz.vToTAngle(frame.getV());
+        }
+        else {
+            throw new ExecutionException("toTAngle requires a velocity, observer, or a frame");
+        }
     }
 
     @Override
@@ -55,5 +62,6 @@ public class toStringFunction extends Function
     {
         return argInfo;
     }
+
 
 }

@@ -14,28 +14,46 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.execution.lcode;
-
-import gamma.execution.HCodeEngine;
-import gamma.value.Frame;
-import gamma.value.Path;
+package gamma.value;
 
 /**
+ * Create an interval.
  *
  * @author Antonio Freixas
  */
-public class BorderStruct extends Struct
+public class Interval
 {
-    public Path path;
-    public boolean pathSet = false;
+    public double minT;
+    public double maxT;
 
-    public BorderStruct()
+    public Interval(double t1, double t2)
     {
+        minT = Math.min(t1, t2);
+        maxT = Math.max(t1, t2);
     }
 
-    @Override
-    public void relativeTo(Frame prime)
+    /**
+     * Copy constructor.
+     *
+     * @param other The other interval to copy.
+     */
+    public Interval(Interval other)
     {
-        // Do nothing
+        // There's no need to sort as the other bounds will already
+        // be sorted
+
+        this.minT = other.minT;
+        this.maxT = other.maxT;
     }
-}
+
+    /**
+     * Get the interval delta.
+     *
+     * @return The interval delta.
+     */
+    public double getDelta()
+    {
+        return maxT - minT;
+    }
+
+ }

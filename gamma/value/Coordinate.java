@@ -119,6 +119,12 @@ public class Coordinate extends ObjectContainer
     }
 
     @Override
+    public String toString()
+    {
+        return "(" + x + ", " + t + ')';
+    }
+
+    @Override
     public int hashCode()
     {
         int hash = 3;

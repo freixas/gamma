@@ -134,9 +134,6 @@ public class Parser
 
     }
 
-    static {
-    }
-
     private final File file;
     private final String script;
     private ArrayList<Token> tokens;
@@ -223,9 +220,7 @@ public class Parser
         // The token list always has at least one item. The last token is
         // always the EOF token.
 
-        tokenPtr = -1;
-        curToken = dummyToken;
-        peek = tokens.get(0);
+        setCurrentTokenTo(-1);
 
         hCodes = parseProgram();
         return hCodes;
@@ -247,7 +242,7 @@ public class Parser
             if (isName()) {
                 codes.add(new LineInfoHCode(curToken.getFile(), curToken.getLineNumber()));
                 switch (getString()) {
-                    case "include" -> codes.addAll(parseIncludeStatement());
+                    case "include" -> parseIncludeStatement();
                     case "let" -> codes.addAll(parseAssignmentStatement());
                     case "style" -> codes.addAll(parseStyleStatement());
                     default -> codes.addAll(parseCommandStatement());
@@ -266,13 +261,9 @@ public class Parser
         return codes;
     }
 
-    private LinkedList<Object> parseIncludeStatement() throws ParseException
+    private void parseIncludeStatement() throws ParseException
     {
         LinkedList<Object> codes = new LinkedList<>();
-
-        // This one is going to be a problem as it requires the included file
-        // to be tokenized, the tokens to be inserted into the token list,
-        // and the parsing to continue with the first inserted token
 
         // We start knowing that the current token is "include"
 
@@ -281,7 +272,7 @@ public class Parser
         // The next token has to be a string. We don't have the ability to
         // process expressions in the parser
 
-        if (!curToken.isString()) {
+        if (!isString()) {
             throwParseException("Missing include file name");
         }
 
@@ -289,49 +280,47 @@ public class Parser
 
         if (!peek.isDelimiter() || peek.getChar() != ';') {
             nextToken();
-            return codes;
+            return;
         }
 
         try {
-           String name = (String)curToken.getValue();
-           File includeFile = new File(name);
-           if (!includeFile.isAbsolute()) {
-               includeFile = new File(file, name);
-           }
-           if (!file.exists()) {
-               throwParseException("File '" + includeFile.toString() +"' does not exist.");
-           }
-           if (file.isDirectory()) {
-               throwParseException("File '" + includeFile.toString() +"' is a directory.");
-           }
-           String includeScript = Files.readString(includeFile.toPath());
-           Tokenizer tokenizer = new Tokenizer(includeFile, includeScript);
-           ArrayList<Token> includeTokens = tokenizer.tokenize();
+            String name = getString();
+            File includeFile = new File(name);
+            if (!includeFile.isAbsolute()) {
+                includeFile = new File(file.getParent(), name);
+            }
+            if (!file.exists()) {
+                throwParseException("File '" + includeFile.toString() +"' does not exist.");
+            }
+            if (file.isDirectory()) {
+                throwParseException("File '" + includeFile.toString() +"' is a directory.");
+            }
+            String includeScript = Files.readString(includeFile.toPath());
+            Tokenizer tokenizer = new Tokenizer(includeFile, includeScript);
+            ArrayList<Token> includeTokens = tokenizer.tokenize();
 
-           // tokenPtr points to the current token, the include file name.
-           // tokenPtr - 1 points to "include"
-           // tokenPtr + 1 points to the ';'
-           // We want to the "include" and the name, but not the ';'
+            // tokenPtr points to the current token, the include file name.
+            // tokenPtr - 1 points to "include"
+            // tokenPtr + 1 points to the ';'
+            // We want to remove the "include" and the name, but not the ';'
 
-           tokens.subList(tokenPtr - 1, tokenPtr).clear();
+            tokens.subList(tokenPtr - 1, tokenPtr + 1).clear();
 
-           // Add all the new stuff after the ';', which is now at tokenPtr - 1
+            // Remove the EOF at the end of the included tokens
 
-           tokens.addAll(tokenPtr, includeTokens);
+            includeTokens.remove(includeTokens.size() - 1);
 
-           // Reset things so that the next token is ';'
+            // Add all the new stuff after the ';', which is now at tokenPtr - 1
 
-           tokenPtr = tokenPtr - 2;
+            tokens.addAll(tokenPtr, includeTokens);
 
+            // Reset things so that the current token is ';'
+
+            setCurrentTokenTo(tokenPtr - 1);
         }
         catch (IOException e) {
             throwParseException("IO Error - " + e.getMessage());
         }
-
-        // Insert the tokens into region occupied by the include statement
-        // Make sure
-
-        return null; // TO DO
     }
 
     private LinkedList<Object> parseAssignmentStatement() throws ParseException
@@ -502,6 +491,9 @@ public class Parser
                 }
                 case "path" -> {
                     return parsePathObj();
+                }
+                case "interval" -> {
+                    return parseIntervalObj();
                 }
                 case "style" -> {
                     return parseStyleObj();
@@ -877,6 +869,27 @@ public class Parser
         return codes;
     }
 
+    private LinkedList<Object> parseIntervalObj() throws ParseException
+    {
+        LinkedList<Object> codes = new LinkedList<>();
+
+        // We start knowing that the current token points
+        // to "interval"
+
+        nextToken();
+        codes.addAll(parseExpr());
+
+        if (!(isName() && getString().equals("to"))) {
+            throwParseException("Expected 'to'");
+        }
+
+        nextToken();
+        codes.addAll(parseExpr());
+
+        codes.add(new IntervalHCode());
+        return codes;
+    }
+
     private LinkedList<Object> parseStyleObj() throws ParseException
     {
         LinkedList<Object> codes = new LinkedList<>();
@@ -1087,10 +1100,10 @@ public class Parser
                     codes.add(new CoordinateHCode());
                 }
 
-                // If we have any other argCount value at this point, we have an
-                // invalid expression
+                // If we have any other argCount value at this point (other than
+                // 1), we have an invalid expression
 
-                else if (argCount.get(level) > 0) {
+                else if (argCount.get(level) > 1) {
                    throwParseException("Invalid commas inside parentheses");
                 }
 
@@ -1124,7 +1137,7 @@ public class Parser
                     if ((op.isLeftAssoc && op.precedence <= topOp.precedence) ||
                         (!op.isLeftAssoc && op.precedence < topOp.precedence)) {
                         OpToken topToken = ops.pop();
-                        if (topToken.isDelimiter() && topToken.getChar() != '(') {
+                        if (topToken.op.chr != '(') {
                             codes.add(opTokenToHCode(topToken));
                         }
                         else {
@@ -1196,8 +1209,8 @@ public class Parser
             // If we're not done, but we've reached the end of the input, we have
             // an error
 
-            if (!notDone && isEOF()) {
-                throwParseException("Invalid expression");
+            if (notDone && isEOF()) {
+                throwParseException("Premature end of file while processing an expression");
             }
 
             if (!notDone) {
@@ -1302,6 +1315,26 @@ public class Parser
         else {
             tokenPtr--;
             curToken = tokens.get(tokenPtr);
+        }
+    }
+
+    private void setCurrentTokenTo(int ptr)
+    {
+        if (ptr < 0) {
+            tokenPtr = -1;
+            curToken = dummyToken;
+            peek = tokens.get(0);
+        }
+        else if (ptr >= tokens.size()) {
+            tokenPtr = tokens.size() - 1;
+            curToken = tokens.get(tokenPtr);    // Should be EOF
+            peek = curToken;
+        }
+        else {
+            tokenPtr = ptr;
+            curToken = tokens.get(tokenPtr);
+            peek = curToken;
+            if (!isEOF()) peek = tokens.get(tokenPtr + 1);
         }
     }
 

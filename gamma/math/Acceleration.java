@@ -193,8 +193,8 @@ public final class Acceleration
      */
     public static double vToX(double a, double v)
     {
-        if (a == 0) {
-            if (v == 0) return 0;
+        if (Util.fuzzyZero(a)) {
+            if (Util.fuzzyZero(v)) return 0;
             throw new ArithmeticException("Position can't be calculated from velocity when the acceleration is 0 but the velocity is non-zero.");
         }
         return tToX(a, vToT(a, v));
@@ -210,8 +210,8 @@ public final class Acceleration
      */
     public static double vToD(double a, double v)
     {
-        if (a == 0) {
-            if (v == 0) return 0;
+        if (Util.fuzzyZero(a)) {
+            if (Util.fuzzyZero(v)) return 0;
             throw new ArithmeticException("Distance can't be calculated from velocity when the acceleration is 0, but the velocity is non-zero.");
         }
 
@@ -222,7 +222,7 @@ public final class Acceleration
         double x = vToX(a, v);
         double t = vToT(a, v);
         double d = Math.abs(x);
-        return (t < 0) ? -d : d;
+        return (Util.fuzzyLT(t, 0)) ? -d : d;
     }
 
     /**
@@ -235,7 +235,7 @@ public final class Acceleration
      */
     public static double vToT(double a, double v)
     {
-        if (a == 0) {
+        if (Util.fuzzyZero(a)) {
             throw new ArithmeticException("Time can't be calculated from velocity when the acceleration is 0.");
         }
         return v / (a * Math.sqrt(1 - v * v));
@@ -251,7 +251,7 @@ public final class Acceleration
      */
     public static double vToTau(double a, double v)
     {
-        if (a == 0) {
+        if (Util.fuzzyZero(a)) {
             throw new ArithmeticException("Tau can't be calculated from velocity when the acceleration is 0.");
         }
         return Util.atanh(v) / a;
@@ -283,7 +283,7 @@ public final class Acceleration
      * <p>
      * When the x coordinate crosses the curve, there can be two correct
      * answers. This method returns the velocity matching the x value
-     * that occurs later in time.
+     * that occurs earlier in time.
      *
      * @param a The acceleration.
      * @param x The position in the rest frame.
@@ -293,7 +293,7 @@ public final class Acceleration
      */
     public static double xToV(double a, double x)
     {
-        return xToV(a, x, true);
+        return xToV(a, x, false);
     }
 
     /**
@@ -320,7 +320,7 @@ public final class Acceleration
      * <p>
      * When the x coordinate crosses the curve, there can be two correct
      * answers. This method returns the distance matching the x value
-     * that occurs later in time.
+     * that occurs earlier in time.
      *
      * @param a The acceleration.
      * @param x The position in the rest frame.
@@ -330,7 +330,7 @@ public final class Acceleration
      */
     public static double xToD(double a, double x)
     {
-        return xToD(a, x, true);
+        return xToD(a, x, false);
     }
 
     /**
@@ -349,11 +349,11 @@ public final class Acceleration
      */
     public static double xToD(double a, double x, boolean later)
     {
-        if (a == 0) {
-            if (x == 0) return 0;
+        if (Util.fuzzyZero(a)) {
+            if (Util.fuzzyZero(x)) return 0;
             throw new ArithmeticException("The position matches no point on the acceleration curve.");
         }
-        if (a * x < 0) {
+        if (Util.fuzzyLT(a * x, 0)) {
             throw new ArithmeticException("The position matches no point on the acceleration curve.");
         }
 
@@ -365,7 +365,7 @@ public final class Acceleration
      * Given x, return t.
      * <p>
      * When the x coordinate crosses the curve, there can be two correct
-     * answers. This method returns the later time.
+     * answers. This method returns the earlier time.
      *
      * @param a The acceleration.
      * @param x The position in the rest frame.
@@ -375,7 +375,7 @@ public final class Acceleration
      */
     public static double xToT(double a, double x)
     {
-        return xToT(a, x, true);
+        return xToT(a, x, false);
     }
 
     /**
@@ -394,17 +394,18 @@ public final class Acceleration
      */
     public static double xToT(double a, double x, boolean later)
     {
-        if (a == 0) {
-            if (x == 0) {
+        if (Util.fuzzyZero(a)) {
+            if (Util.fuzzyZero(x)) {
                 throw new ArithmeticException("The position matches every point on the acceleration curve.");
             }
             else {
                 throw new ArithmeticException("The position matches no points on the acceleration curve.");
             }
         }
-        if (a * x < 0) {
+        if (Util.fuzzyLT(a * x, 0)) {
             throw new ArithmeticException("The position matches no points on the acceleration curve.");
         }
+        if (Util.fuzzyZero(x)) x = 0.0;
         double t = Math.sqrt(x * x + (2 * x) / a);
         return later ? t : -t;
     }
@@ -413,7 +414,7 @@ public final class Acceleration
      * Given x, return tau.
      * <p>
      * When the x coordinate crosses the curve, there can be two correct
-     * answers. This method returns the later tau.
+     * answers. This method returns the earlier tau.
      *
      * @param a The acceleration.
      * @param x The position in the rest frame.
@@ -423,7 +424,7 @@ public final class Acceleration
      */
     public static double xToTau(double a, double x)
     {
-        return xToTau(a, x, true);
+        return xToTau(a, x, false);
     }
 
     /**
@@ -442,21 +443,23 @@ public final class Acceleration
      */
     public static double xToTau(double a, double x, boolean later)
     {
-        if (a == 0) {
-            if (x == 0) {
+        if (Util.fuzzyZero(a)) {
+            if (Util.fuzzyZero(x)) {
                 throw new ArithmeticException("The position matches every point on the acceleration curve.");
             }
             else {
                 throw new ArithmeticException("The position matches no points on the acceleration curve.");
             }
         }
+        if (Util.fuzzyZero(x)) x = 0.0;
         double ax = a * x;
-        if (ax < 0) {
+        if (Util.fuzzyLT(ax, 0)) {
             throw new ArithmeticException("The position matches no points on the acceleration curve.");
         }
 
         double tau = Util.acosh(ax + 1) / a;
-        return later ? tau : -tau;
+        double sign = Util.sign(a);
+        return later ? sign * tau : -sign * tau;
     }
 
     /**
@@ -471,11 +474,12 @@ public final class Acceleration
      */
     public static double xToGamma(double a, double x)
     {
-        if (a == 0) {
+        if (Util.fuzzyZero(a)) {
             return 1;
         }
+        if (Util.fuzzyZero(x)) x = 0.0;
         double ax = a * x;
-        if (ax < 0) {
+        if (Util.fuzzyLT(ax, 0)) {
             throw new ArithmeticException("The position matches no points on the acceleration curve.");
         }
         return ax + 1;
@@ -498,11 +502,11 @@ public final class Acceleration
 
     public static double dToV(double a, double d)
     {
-        if (a == 0) {
-            if (d == 0) return 0;
+        if (Util.fuzzyZero(a)) {
+            if (Util.fuzzyZero(d)) return 0;
             throw new ArithmeticException("The distance matches no points on the acceleration curve.");
         }
-        double x = (a < 0) ? -Math.abs(d) : Math.abs(d);
+        double x = (Util.fuzzyLT(a, 0)) ? -Math.abs(d) : Math.abs(d);
         boolean later = d >= 0;
         return tToV(a, xToT(a, x, later));
     }
@@ -517,13 +521,14 @@ public final class Acceleration
      */
     public static double dToX(double a, double d)
     {
-        if (a == 0) {
-            if (d == 0) return 0;
+        if (Util.fuzzyZero(a)) {
+            if (Util.fuzzyZero(d)) return 0;
             throw new ArithmeticException("The distance matches no points on the acceleration curve.");
         }
 
+        if (Util.fuzzyZero(d)) d = 0.0;
         double x = Math.abs(d);
-        return a > 0 ? x : -x;
+        return Util.sign(a) * x;
     }
 
     /**
@@ -536,14 +541,17 @@ public final class Acceleration
      */
     public static double dToT(double a, double d)
     {
-        if (a == 0) {
-            if (d != 0) {
+        if (Util.fuzzyZero(a)) {
+            if (Util.fuzzyZero(d)) {
                 throw new ArithmeticException("The distance matches every point on the acceleration curve.");
             }
             throw new ArithmeticException("The distance matches no points on the acceleration curve.");
         }
-        double t = Math.sqrt(d * d + (2 * d) / a);
-        return d >= 0 ? t : -t;
+
+        // If a > 0, t = xToT(a,  |d|, d >= 0)
+        // If a < 0, t = xToT(a, -|d|, d >= 0);
+
+        return (a > 0) ? xToT(a, Math.abs(d), d >= 0) : xToT(a, -Math.abs(d), d >= 0);
     }
 
     /**
@@ -559,14 +567,17 @@ public final class Acceleration
      */
     public static double dToTau(double a, double d)
     {
-        if (a == 0) {
-            if (d != 0) {
+        if (Util.fuzzyZero(a)) {
+            if (Util.fuzzyZero(d)) {
                 throw new ArithmeticException("The distance matches every point on the acceleration curve.");
             }
             throw new ArithmeticException("The distance matches no points on the acceleration curve.");
         }
-        double tau = Util.acosh(a * d + 1) / a;
-        return d >= 0 ? tau : -tau;
+
+        // If a > 0, tau = xToTau(a,  |d|, d >= 0)
+        // If a < 0, tau = xToTau(a, -|d|, d >= 0);
+
+        return (a > 0) ? xToTau(a, Math.abs(d), d >= 0) : xToTau(a, -Math.abs(d), d >= 0);
     }
 
     /**
@@ -583,8 +594,8 @@ public final class Acceleration
      */
     public static double dToGamma(double a, double d)
     {
-        if (a == 0) {
-            if (d == 0) return 1;
+        if (Util.fuzzyZero(a)) {
+            if (Util.fuzzyZero(d)) return 1;
             throw new ArithmeticException("The distance matches no points on the acceleration curve.");
         }
         return xToGamma(a, d);
@@ -606,13 +617,14 @@ public final class Acceleration
      */
     public static double tToV(double a, double t)
     {
-        if (a == 0) {
+        if (Util.fuzzyZero(a)) {
             return 0;
         }
 
         // This formula works with positive and negative acceleration and with
         // positive and negative t's.
 
+        if (Util.fuzzyZero(t)) t = 0.0;
         return (a * t) / Math.sqrt(1 + (a * a * t * t));
     }
 
@@ -626,7 +638,7 @@ public final class Acceleration
      */
     public static double tToX(double a, double t)
     {
-        if (a == 0) {
+        if (Util.fuzzyZero(a)) {
             return 0;
         }
 
@@ -636,6 +648,7 @@ public final class Acceleration
         //
         // The formula also works fine with positive or negative t's.
 
+        if (Util.fuzzyZero(t)) t = 0.0;
         return (Math.sqrt(1 + (a * a * t * t)) - 1) / a;
     }
 
@@ -649,7 +662,8 @@ public final class Acceleration
     public static double tToD(double a, double t)
     {
         double d = Math.abs(tToX(a, t));
-        return (t < 0) ? -d : d;
+        if (Util.fuzzyZero(d)) d = 0.0;
+        return (Util.fuzzyLT(t, 0)) ? -d : d;
     }
 
     /**
@@ -662,7 +676,7 @@ public final class Acceleration
      */
     public static double tToTau(double a, double t)
     {
-        if (a == 0) {
+        if (Util.fuzzyZero(a)) {
             return t;
         }
         // This formula works with positive and negative acceleration. The time
@@ -670,6 +684,7 @@ public final class Acceleration
         //
         // The formula also works with positive and negative t's.
 
+        if (Util.fuzzyZero(t)) t = 0.0;
         return Util.asinh(a * t) / a;
     }
 
@@ -682,13 +697,14 @@ public final class Acceleration
      */
     public static double tToGamma(double a, double t)
     {
-        if (a == 0) {
+        if (Util.fuzzyZero(a)) {
             return 1;
         }
 
         // This formula works with positive and negative acceleration and with
         // positive and negative t's.
 
+        if (Util.fuzzyZero(t)) t = 0.0;
         return Math.sqrt(1 + (a * a * t * t));
     }
 
@@ -708,13 +724,14 @@ public final class Acceleration
      */
     public static double tauToV(double a, double tau)
     {
-        if (a == 0) {
+        if (Util.fuzzyZero(a)) {
             return 0;
         }
 
         // This formula works with positive and negative acceleration and with
         // positive and negative taus.
 
+        if (Util.fuzzyZero(tau)) tau = 0.0;
         return Math.tanh(a * tau);
     }
 
@@ -728,7 +745,7 @@ public final class Acceleration
      */
     public static double tauToX(double a, double tau)
     {
-        if (a == 0) {
+        if (Util.fuzzyZero(a)) {
             return 0;
         }
 
@@ -738,6 +755,7 @@ public final class Acceleration
         //
         // The formula also works fine with positive or negative taus.
 
+        if (Util.fuzzyZero(tau)) tau = 0.0;
         return (Math.cosh(a * tau) - 1) / a;
     }
 
@@ -751,10 +769,11 @@ public final class Acceleration
      */
     public static double tauToD(double a, double tau)
     {
-        if (a == 0) {
+        if (Util.fuzzyZero(a)) {
             return 0;
         }
         double d = Math.abs(tauToX(a, tau));
+        if (Util.fuzzyZero(d)) d = 0.0;
         return (tau < 0) ? -d : d;
     }
 
@@ -768,7 +787,7 @@ public final class Acceleration
      */
     public static double tauToT(double a, double tau)
     {
-        if (a == 0) {
+        if (Util.fuzzyZero(a)) {
             return tau;
         }
 
@@ -777,6 +796,7 @@ public final class Acceleration
         //
         // The formula also works with positive and negative taus.
 
+        if (Util.fuzzyZero(tau)) tau = 0.0;
         return Math.sinh(a * tau) / a;
     }
 
@@ -789,13 +809,14 @@ public final class Acceleration
      */
     public static double tauToGamma(double a, double tau)
     {
-        if (a == 0) {
+        if (Util.fuzzyZero(a)) {
             return 1;
         }
 
         // This formula works with positive and negative acceleration and with
         // positive and negative taus.
 
+        if (Util.fuzzyZero(tau)) tau = 0.0;
         return Math.cosh(a * tau);
     }
 
@@ -825,12 +846,12 @@ public final class Acceleration
         // Get m and k for the line
 
         double m = line.getSlope();
-        double k = line.getOffset();
+        double k = line.getConstantOffset();
 
         // If the acceleration is 0, our curve is a vertical line with the
         // formula x = 0.
 
-        if (a == 0) {
+        if (Util.fuzzyZero(a)) {
 
             // If the line is vertical, there are either no intersections or
             // infinite intersections, so return null

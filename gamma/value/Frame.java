@@ -153,9 +153,23 @@ public class Frame
      */
     public Coordinate toRest(Coordinate c)
     {
-        Coordinate tc = Lorentz.toRestFrame(c, v);
-        tc.x -= origin.x;
-        tc.t -= origin.t;
+        return toRest(c.x, c.t);
+    }
+
+    /**
+     * Convert a coordinate relative to this frame to one relative to the rest
+     * frame.
+     *
+     * @param x
+     * @param t
+     *
+     * @return The transformed coordinate.
+     */
+    public Coordinate toRest(double x, double t)
+    {
+        Coordinate tc = Lorentz.toRestFrame(x, t, v);
+        tc.x += origin.x;
+        tc.t += origin.t;
         return tc;
     }
 
@@ -169,7 +183,21 @@ public class Frame
      */
     public Coordinate toFrame(Coordinate c)
     {
-        return Lorentz.toPrimeFrame(new Coordinate(c.x + origin.x, c.t + origin.t), v);
+        return toFrame(c.x, c.t);
+    }
+
+    /**
+     * Convert a coordinate relative to the default frame to one relative to
+     * this frame.
+     *
+     * @param x The x coordinate.
+     * @param t The t coordinate.
+     *
+     * @return The transformed coordinate.
+     */
+    public Coordinate toFrame(double x, double t)
+    {
+        return Lorentz.toPrimeFrame(x - origin.x, t - origin.t, v);
     }
 
     /**

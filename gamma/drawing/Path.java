@@ -16,6 +16,7 @@
  */
 package gamma.drawing;
 
+import gamma.execution.lcode.PathStruct;
 import gamma.execution.lcode.StyleStruct;
 import gamma.math.Util;
 import gamma.value.Coordinate;
@@ -28,17 +29,25 @@ import javafx.scene.shape.FillRule;
  */
 public class Path
 {
-    public static void draw(Context context, gamma.value.Path path, boolean closed, boolean stroke, boolean fill, StyleStruct styles)
+    public static void draw(Context context, PathStruct struct, StyleStruct styles)
     {
+        // Quick test to see if we need to bother with this path
+
+        if (!context.bounds.intersects(struct.path.getBounds())) {
+            return;
+        }
+
         GraphicsContext gc = context.gc;
 
         // Save the current graphics context
 
         gc.save();
 
+        gamma.value.Path path = struct.path;
+
         gc.beginPath();
         for (int i = 0; i < path.size(); i++) {
-            Coordinate coord = path.get(i);
+            Coordinate coord = struct.path.get(i);
             if (i == 0) {
                 gc.moveTo(coord.x, coord.t);
             }
@@ -46,20 +55,20 @@ public class Path
                 gc.lineTo(coord.x, coord.t);
             }
         }
-        if (closed) {
+        if (struct.closed) {
             gc.closePath();
         }
 
-       if (stroke) {
+       if (struct.stroke) {
            Line.setupLineGc(context, styles);
            gc.stroke();
        }
 
        // Add arrow heads
 
-       if (stroke && !closed && !styles.arrow.equals("none")) {
+       if (struct.stroke && !struct.closed && !styles.arrow.equals("none")) {
            int size = path.size();
-           if (size > 2) {
+           if (size > 1) {
                if (styles.arrow.equals("end") || styles.arrow.equals("both")) {
                    Coordinate start = path.get(size - 2);
                    Coordinate end = path.get(size - 1);
@@ -75,7 +84,7 @@ public class Path
            }
        }
 
-       if (fill) {
+       if (struct.fill) {
            setupFillGc(context, styles);
            gc.fill();
        }

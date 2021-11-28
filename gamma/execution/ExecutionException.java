@@ -16,11 +16,13 @@
  */
 package gamma.execution;
 
+import gamma.GammaRuntimeException;
+
 /**
  *
  * @author Antonio Freixas
  */
-public class ExecutionException extends RuntimeException
+public class ExecutionException  extends GammaRuntimeException
 {
     public ExecutionException(String message)
     {

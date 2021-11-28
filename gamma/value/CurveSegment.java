@@ -14,21 +14,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.execution.lcode;
-
-import gamma.drawing.Context;
+package gamma.value;
 
 /**
+ * This class ties together LineSegments and HyperbolicSegments, both of
+ * which could be parts of a worldline.
  *
  * @author Antonio Freixas
  */
-public class BorderCommandExec extends CommandExec
+public abstract class CurveSegment
 {
-
-    @Override
-    public void execute(Context context, Struct cmdStruct, StyleStruct styles)
-    {
-        // throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
+    /**
+     * Get the bounds of this curve.
+     *
+     * @return The bounds of this curve.
+     */
+    public abstract Bounds getBounds();
 }

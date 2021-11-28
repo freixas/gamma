@@ -19,7 +19,7 @@ package gamma.execution;
 import gamma.GammaRuntimeException;
 import gamma.ProgrammingException;
 import gamma.execution.hcode.HCode;
-import gamma.execution.lcode.Color;
+import gamma.value.Color;
 import gamma.execution.lcode.Command;
 import gamma.execution.lcode.Struct;
 import gamma.execution.lcode.StyleStruct;
@@ -250,23 +250,11 @@ public class HCodeEngine
         throws GammaRuntimeException
     {
         if (e instanceof GammaRuntimeException) {
-            throw new GammaRuntimeException(file.getName()+ ":" + lineNumber + ": ", e);
+            throw new GammaRuntimeException(file.getName() + ":" + lineNumber + ": " + e.getLocalizedMessage(), e);
         }
         else {
-            throw new GammaRuntimeException(file.getName()+ ":" + lineNumber + ": " + e.getLocalizedMessage(), e);
+           throw new GammaRuntimeException(file.getName() + ":" + lineNumber + ": " + e.getLocalizedMessage(), e);
         }
     }
-
-//    public void throwExecutionException(Throwable e)
-//        throws ExecutionException
-//    {
-//        throw new ExecutionException(file.getName()+ ":" + lineNumber + ": " + e.getLocalizedMessage(), e);
-//    }
-//
-//    public void throwProgrammingException(Throwable e)
-//        throws ProgrammingException
-//    {
-//        throw new ProgrammingException(file.getName()+ ":" + lineNumber + ": " + e.getLocalizedMessage(), e);
-//    }
 
 }

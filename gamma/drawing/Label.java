@@ -17,13 +17,13 @@
 package gamma.drawing;
 
 import gamma.ProgrammingException;
+import gamma.execution.lcode.LabelStruct;
 import gamma.execution.lcode.StyleStruct;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.geometry.VPos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 import javafx.scene.text.TextBoundsType;
@@ -34,19 +34,14 @@ import javafx.scene.transform.NonInvertibleTransformException;
  *
  * @author Antonio Freixas
  */
-public class Text
+public class Label
 {
     private static javafx.scene.text.Text textNode = null;
 
-    public static void draw(Context context, double x, double t, String text, StyleStruct styles)
-    {
-        draw(context, x, t, text, styles.textRotation, styles.javaFXColor, styles.font, styles.textPadding, styles.textAnchor);
-    }
-
-    public static void draw(Context context, double x, double t, String text, double angle,
-                            Color color, Font font, double padding, String anchor)
+    public static void draw(Context context, LabelStruct struct, StyleStruct styles)
     {
         // NOTE: + angle is counterclockwise. - angle is clockwise
+
         try {
             Canvas canvas = context.canvas;
             GraphicsContext gc = context.gc;
@@ -55,41 +50,41 @@ public class Text
 
             gc.save();
 
-            gc.setFont(font);
+            gc.setFont(styles.font);
 
             // Set the drawing position
             // These need to be inverted from their logical settings
 
-            char vAlign = anchor.charAt(0);
-            char hAlign = anchor.charAt(1);
+            char vAlign = styles.textAnchor.charAt(0);
+            char hAlign = styles.textAnchor.charAt(1);
             double offsetX = 0;
             double offsetT = 0;
 
             switch (vAlign) {
                 case 'T' -> {
                     gc.setTextBaseline(VPos.TOP);
-                    offsetT = padding;
+                    offsetT = styles.textPadding;
                 }
                 case 'M' -> gc.setTextBaseline(VPos.CENTER);
                 case 'B' -> {
                     gc.setTextBaseline(VPos.BASELINE);
-                    offsetT = -padding;
+                    offsetT = -styles.textPadding;
                 }
             }
 
             switch (hAlign) {
                 case 'R' -> {
                     gc.setTextAlign(TextAlignment.RIGHT);
-                    offsetX = -padding;
+                    offsetX = -styles.textPadding;
                 }
                 case 'C' -> gc.setTextAlign(TextAlignment.CENTER);
                 case 'L' -> {
                     gc.setTextAlign(TextAlignment.LEFT);
-                    offsetX = padding;
+                    offsetX = styles.textPadding;
                 }
             }
 
-            gc.setFill(color);
+            gc.setFill(styles.javaFXColor);
 
             Affine transform = gc.getTransform();
 
@@ -100,7 +95,7 @@ public class Text
             // We invScale the font so that the font size comes out constant
             // regardless of the current invScale
 
-            transform.appendScale(scale, -scale, x, t);
+            transform.appendScale(scale, -scale, struct.location.x, struct.location.t);
 
             // Point (x, t) hasn't changed position. We need to offset by the
             // padding, which is in screen coordinates, so let's repeat the
@@ -113,17 +108,17 @@ public class Text
             // (xOffset, tOffset) is the position at which we will draw the
             // text
 
-            double xOffset = x + (offsetX / scale);
-            double tOffset = t + (offsetT / scale);
+            double xOffset = struct.location.x + (offsetX / scale);
+            double tOffset = struct.location.t + (offsetT / scale);
 
             // Rotate around the offset
 
-            transform.appendRotation(-angle, x, t);
+            transform.appendRotation(-styles.textRotation, struct.location.x, struct.location.t);
 
             // Now draw the text
 
             gc.setTransform(transform);
-            gc.fillText(text, xOffset, tOffset);
+            gc.fillText(struct.text, xOffset, tOffset);
 
             // Restore the original graphics context
 

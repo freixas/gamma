@@ -24,11 +24,12 @@ import gamma.drawing.Context;
  */
 public class HypergridCommandExec extends CommandExec
 {
-
     @Override
     public void execute(Context context, Struct cmdStruct, StyleStruct styles)
     {
-        // throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        HypergridStruct struct = (HypergridStruct)cmdStruct;
+
+        gamma.drawing.Hypergrid.draw(context, struct, styles);
     }
 
 }

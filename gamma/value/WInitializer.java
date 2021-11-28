@@ -64,7 +64,7 @@ public class WInitializer
         return new WInitializer(
             prime.toFrame(origin),
             tau,
-            Lorentz.lengthContraction(d, prime.getV()));
+            d);
     }
 
 }

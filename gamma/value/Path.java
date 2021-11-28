@@ -26,11 +26,14 @@ import java.util.Iterator;
 public class Path
 {
     private final ArrayList<Coordinate> coords;
+    private Bounds bounds;
 
     public Path(ArrayList<Coordinate> coords)
     {
         this.coords = new ArrayList<>();
         this.coords.addAll(coords);
+
+        calculateBounds();
     }
 
     public Coordinate get(int index)
@@ -43,6 +46,11 @@ public class Path
         return coords.size();
     }
 
+    public Bounds getBounds()
+    {
+        return bounds;
+    }
+
     public void relativeTo(Frame prime)
     {
         for (int i = 0; i < coords.size(); i++) {
@@ -50,5 +58,23 @@ public class Path
             coord = prime.toFrame(coord);
             coords.set(i, coord);
         }
+        calculateBounds();
+    }
+
+    private void calculateBounds()
+    {
+        double minX = Double.POSITIVE_INFINITY;
+        double minT = Double.POSITIVE_INFINITY;
+        double maxX = Double.NEGATIVE_INFINITY;
+        double maxT = Double.NEGATIVE_INFINITY;
+
+        for (int i = 0; i < coords.size(); i++) {
+            Coordinate coord = coords.get(i);
+            if (coord.x < minX) minX = coord.x;
+            if (coord.x > maxX) maxX = coord.x;
+            if (coord.t < minT) minT = coord.t;
+            if (coord.t > maxT) maxT = coord.t;
+         }
+        this.bounds = new Bounds(minX, minT, maxX, maxT);
     }
 }

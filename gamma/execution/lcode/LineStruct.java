@@ -27,32 +27,18 @@ import gamma.value.Line;
  */
 public class LineStruct extends Struct
 {
-
-    static Coordinate min = new Coordinate(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY);
-    static Coordinate max = new Coordinate(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
-
     public Line line;
     public boolean lineSet = false;
-    public Coordinate clipBL = min;
-    public Coordinate clipTR = max;
-
-    public Bounds bounds;
+    public Bounds clip = null;
 
     public LineStruct()
     {
     }
 
     @Override
-    public void finalizeValues()
-    {
-        bounds = new Bounds(clipBL, clipTR);
-    }
-
-    @Override
     public void relativeTo(Frame prime)
     {
         line = line.relativeTo(prime);
-        clipBL = prime.toFrame(clipBL);
-        clipTR = prime.toFrame(clipTR);
+        // clip = new Bounds(prime.toFrame(clip.min), prime.toFrame(clip.max));
     }
 }

@@ -17,16 +17,14 @@
 package gamma.drawing;
 
 import gamma.execution.lcode.StyleStruct;
-import gamma.value.Coordinate;
+import gamma.execution.lcode.WorldlineStruct;
 import gamma.value.CurveSegment;
 import gamma.value.HyperbolicSegment;
 import gamma.value.LineSegment;
-import gamma.value.Observer;
 import gamma.value.WorldlineSegment;
 import java.util.ArrayList;
 import java.util.Iterator;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 
 /**
  *
@@ -34,19 +32,21 @@ import javafx.scene.paint.Color;
  */
 public class Worldline
 {
-    public static void draw(Context context, Observer observer, StyleStruct styles)
+    public static void draw(Context context, WorldlineStruct struct, StyleStruct styles)
     {
         GraphicsContext gc = context.gc;
 
         // Save the current graphics context
 
         gc.save();
+        String savedArrow = styles.arrow;
 
         // Set up the gc for line drawing
 
         Line.setupLineGc(context, styles);
+        styles.arrow = "none";
 
-        gamma.value.Worldline worldline = observer.getWorldline();
+        gamma.value.Worldline worldline = struct.observer.getWorldline();
         ArrayList<WorldlineSegment>segments = worldline.getSegments();
 
         Iterator<WorldlineSegment> iter = segments.iterator();
@@ -61,7 +61,7 @@ public class Worldline
             if (curveSegment instanceof LineSegment lineSegment) {
                 lineSegment = lineSegment.intersect(context.bounds);
                 if (lineSegment != null) {
-                    Line.drawRaw(context, lineSegment, "none");
+                    Line.drawRaw(context, lineSegment, styles);
                 }
             }
 
@@ -82,13 +82,14 @@ public class Worldline
             else if (curveSegment instanceof gamma.value.Line line) {
                 LineSegment lineSegment = line.intersect(context.bounds);
                 if (lineSegment != null) {
-                    Line.drawRaw(context, lineSegment, "none");
+                    Line.drawRaw(context, lineSegment, styles);
                 }
             }
         }
 
         // Restore the original graphics context
 
+        styles.arrow = savedArrow;
         gc.restore();
     }
 

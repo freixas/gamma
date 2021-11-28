@@ -16,6 +16,7 @@
  */
 package gamma.drawing;
 
+import gamma.execution.lcode.GridStruct;
 import gamma.execution.lcode.StyleStruct;
 import gamma.math.Lorentz;
 import gamma.math.Util;
@@ -32,10 +33,10 @@ public class Grid
 {
     public static final double MIN_GRID_SIZE = 20;
 
-    public static void draw(Context context, Frame frame,
-                            boolean drawX, boolean drawT, StyleStruct styles)
+    public static void draw(Context context, GridStruct struct, StyleStruct styles)
     {
         GraphicsContext gc = context.gc;
+        Frame frame = struct.frame;
 
         // Save the current graphics context
 
@@ -82,14 +83,14 @@ public class Grid
 
         // Set up the gc
 
-        Line.setupLineGc(context, styles.javaFXDivColor, styles.lineStyle, styles.divThickness);
+        Line.setupLineGc(context, styles);
 
         // Draw the X lines
 
         double startX = transformedBounds.min.x - (transformedBounds.min.x % spacing);
         int lineNumber = Util.toInt(startX / spacing);
 
-        if (drawX) {
+        if (struct.x) {
             double x;
             int iX;
             for (x = startX, iX = lineNumber; x <= transformedBounds.max.x; x += spacing, iX++) {
@@ -114,7 +115,7 @@ public class Grid
         double startT = transformedBounds.min.t - (transformedBounds.min.t % spacing);
         lineNumber = Util.toInt(startT / spacing);
 
-        if (drawT) {
+        if (struct.t) {
             double t;
             int iT;
             for (t = startT, iT = lineNumber; t <= transformedBounds.max.t; t += spacing, iT++) {

@@ -17,6 +17,7 @@
 package gamma.execution.hcode;
 
 import gamma.execution.ArgInfo;
+import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,8 +35,8 @@ public class AddHCode extends HCode
     private static final ArgInfo argInfo;
     static {
         ArrayList<ArgInfo.Type> argTypes = new ArrayList<>();
-        argTypes.add(ArgInfo.Type.DOUBLE_OR_STRING);
-        argTypes.add(ArgInfo.Type.DOUBLE_OR_STRING);
+        argTypes.add(ArgInfo.Type.ANY);
+        argTypes.add(ArgInfo.Type.ANY);
         argInfo = new ArgInfo(2, argTypes);
     }
 
@@ -54,14 +55,14 @@ public class AddHCode extends HCode
         if (isDouble1 && isDouble2) {
             code.add((Double)arg1 + (Double)arg2);
         }
-        else if (isDouble1 && isString2) {
-            code.add((Double)arg1 + (String)arg2);
+        else if (isString1) {
+            code.add(arg1.toString() + (String)arg2);
         }
-        else if (isString1 && isDouble2) {
-            code.add((String)arg1 + (Double)arg2);
+        else if (isString2) {
+            code.add((String)arg1 + arg2.toString());
         }
         else {
-            code.add((String)arg1 + (String)arg2);
+            throw new ExecutionException("Invalid types for '+' operator");
         }
     }
 

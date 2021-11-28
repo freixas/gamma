@@ -16,15 +16,17 @@
  */
 package gamma.drawing;
 
+import gamma.execution.lcode.EventStruct;
+import gamma.execution.lcode.LabelStruct;
 import gamma.execution.lcode.StyleStruct;
 import gamma.math.Util;
 import gamma.value.Coordinate;
-import gamma.value.Frame;
 import gamma.value.HyperbolicSegment;
+import static java.awt.SystemColor.text;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
+import static javafx.scene.paint.Color.color;
 import javafx.scene.shape.FillRule;
-import javafx.scene.text.Font;
+import static javafx.scene.text.Font.font;
 
 /**
  *
@@ -56,51 +58,9 @@ public class Event
             pathX[i] = outerPointX[ix];
             pathY[i] = outerPointY[ix];
         }
-   }
-
-    public static void draw(
-        Context context,
-        Coordinate location, Frame boostTo,
-        String text,
-        boolean boostX, HyperbolicSegment segment, boolean positiveDirection,
-        StyleStruct styles)
-    {
-        draw(
-            context,
-            location, boostTo,
-            text,
-            boostX, segment, positiveDirection,
-            styles.eventDiameter, styles.eventShape, styles.javaFXColor,
-            styles.textRotation, styles.font, styles.textPadding, styles.textAnchor,
-            styles);
     }
 
-    public static void draw(
-        Context context,
-        Coordinate location, Frame boostTo,
-        String text,
-        boolean boostX, HyperbolicSegment segment, boolean positiveDirection,
-        String shape, Color color,
-        StyleStruct styles)
-    {
-        draw(
-            context,
-            location, boostTo,
-            text,
-            boostX, segment, positiveDirection,
-            styles.eventDiameter, shape, color,
-            styles.textRotation, styles.font, styles.textPadding, styles.textAnchor,
-            styles);
-    }
-
-    public static void draw(
-        Context context,
-        Coordinate location, Frame boostTo,
-        String text,
-        boolean boostX, HyperbolicSegment segment, boolean positiveDirection,
-        double diameter, String shape, Color color,
-        double angle, Font font, double padding, String anchor,
-        StyleStruct styles)
+    public static void draw(Context context, EventStruct struct, StyleStruct styles)
     {
         GraphicsContext gc = context.gc;
 
@@ -108,13 +68,17 @@ public class Event
 
         gc.save();
 
+        double diameter = styles.eventDiameter;
+
         diameter *= context.invScale;
         double halfDiameter = diameter / 2.0;
 
-        gc.setStroke(color);
-        gc.setFill(color);
+        gc.setStroke(styles.javaFXColor);
+        gc.setFill(styles.javaFXColor);
 
-        switch(shape) {
+        Coordinate location = struct.location;
+
+        switch(styles.eventShape) {
             case "circle" -> {
                 gc.fillOval(location.x - halfDiameter, location.t - halfDiameter, diameter, diameter);
             }
@@ -148,8 +112,13 @@ public class Event
             }
         }
 
+        String text = struct.text;
+
         if (text.length() > 0) {
-            Text.draw(context, location.x, location.t, text, angle, color, font, padding, anchor);
+            LabelStruct labelStruct = new LabelStruct();
+            labelStruct.location = location;
+            labelStruct.text = text;
+            Label.draw(context, labelStruct, styles);
         }
 
         // Restore the original graphics context
@@ -163,22 +132,31 @@ public class Event
 
         Line.setupLineGc(context, styles);
 
-        if (boostTo != null) {
-            if (boostX) {
-                segment = segment.intersect(context.bounds);
+        if (struct.boostTo != null) {
+            if (struct.boostX) {
+                HyperbolicSegment segment = struct.segment.intersect(context.bounds);
                 if (segment != null) {
                     Hyperbola.drawRaw(context, segment);
                     if (styles.arrow.equals("start") || styles.arrow.equals("both")) {
-                        Arrow.draw(context, location, styles., styles)
+                        Arrow.draw(context, location, struct.angleAtStart, styles);
+                    }
+                    if (styles.arrow.equals("end") || styles.arrow.equals("both")) {
+                        Arrow.draw(context, struct.endPoint, struct.angleAtEnd, styles);
                     }
                 }
             }
             else {
                 gc.rotate(90);
                 gc.scale(1, -1);
-                segment = segment.intersect(context.getCurrentCanvasBounds());
+                HyperbolicSegment segment = struct.segment.intersect(context.getCurrentCanvasBounds());
                 if (segment != null) {
                     Hyperbola.drawRaw(context, segment);
+                }
+                if (styles.arrow.equals("start") || styles.arrow.equals("both")) {
+                    Arrow.draw(context, location, struct.angleAtStart, styles);
+                }
+                if (styles.arrow.equals("end") || styles.arrow.equals("both")) {
+                    Arrow.draw(context, struct.endPoint, struct.angleAtEnd, styles);
                 }
             }
         }

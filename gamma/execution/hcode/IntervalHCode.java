@@ -14,23 +14,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.execution.function;
+package gamma.execution.hcode;
 
 import gamma.execution.ArgInfo;
-import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
-import gamma.math.Util;
+import gamma.value.Bounds;
+import gamma.value.Interval;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Create an interval object. These are implemented as Bounds.
+ * <p>
+ * Arg 1 is one end of the x interval.<br>
+ * Arg 2 is the other end of the x interval.<br>
+ * Arg 3 is one end of the t interval.<br>
+ * Arg 4 is the other end of the t interval.<br>
  *
  * @author Antonio Freixas
  */
-public class toStringFunction extends Function
+public class IntervalHCode extends HCode
 {
     private static final ArgInfo argInfo;
-
     static {
         ArrayList<ArgInfo.Type> argTypes = new ArrayList<>();
         argTypes.add(ArgInfo.Type.DOUBLE);
@@ -39,15 +44,14 @@ public class toStringFunction extends Function
     }
 
     @Override
-    public Object execute(HCodeEngine engine, List<Object> code)
+    public void execute(HCodeEngine engine, List<Object> code)
     {
-        double d =   (Double)           code.get(0);
-        int digits = Util.toInt((Double)code.get(1));
+        double t1 = (Double)code.get(0);
+        double t2 = (Double)code.get(1);
 
-        if (digits < 0) {
-            throw new ExecutionException("Invalid number of digits in float to string conversion");
-        }
-        return String.format("%." + digits + "f", d);
+        code.clear();
+
+        code.add(new Interval(t1, t2));
     }
 
     @Override
@@ -55,5 +59,4 @@ public class toStringFunction extends Function
     {
         return argInfo;
     }
-
 }

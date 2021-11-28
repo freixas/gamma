@@ -25,8 +25,9 @@ import java.util.ArrayList;
  */
 public class Tokenizer
 {
+    static private final char EOF = '\1';
     private ArrayList<Token> list = null;
-    private File file;
+    private final File file;
     private final String script;
 
     private int cPtr;
@@ -49,7 +50,7 @@ public class Tokenizer
         // \R also catches Form Feed and some other odd line separators
         // Add a null to the end to make it easier to know when we're done.
 
-        this.script = script.replaceAll("\\R", "\n") + '\0';
+        this.script = script.replaceAll("\\R", "\n") + EOF;
     }
 
     /**
@@ -67,7 +68,7 @@ public class Tokenizer
         cPtr = 0;
         list = new ArrayList<>();
 
-        while ((c = script.charAt(cPtr)) != '\0') {
+        while ((c = script.charAt(cPtr)) != EOF) {
 
             cNext = script.charAt(cPtr + 1);
             charNumber = cPtr - lineNumberStart + 1;
@@ -77,7 +78,7 @@ public class Tokenizer
             if (c == '/' && cNext == '/') {
                 cPtr += 2;
                 stripComment();
-                if (c == '\0') break;
+                if (c == EOF) break;
                 cNext = script.charAt(cPtr + 1);
                 charNumber = cPtr - lineNumberStart + 1;
             }
@@ -137,7 +138,7 @@ public class Tokenizer
             }
         }
 
-        list.add(new Token<>(Token.Type.EOF, '\0', file, lineNumber, cPtr - lineNumberStart + 1));
+        list.add(new Token<>(Token.Type.EOF, EOF, file, lineNumber, cPtr - lineNumberStart + 1));
 
         return list;
     }
@@ -150,7 +151,7 @@ public class Tokenizer
      */
     private void stripComment()
     {
-        while ((c = script.charAt(cPtr)) != '\0') {
+        while ((c = script.charAt(cPtr)) != EOF) {
             c = script.charAt(cPtr);
             if (c == '\n') return;
             cPtr++;
@@ -175,7 +176,7 @@ public class Tokenizer
         char delimiter = script.charAt(cPtr);
         cPtr++;
 
-        while ((c = script.charAt(cPtr)) != delimiter && c != '\0') {
+        while ((c = script.charAt(cPtr)) != delimiter) {
 
             // Check for quoting
 
@@ -188,7 +189,7 @@ public class Tokenizer
 
                         // Check for EOF. If found, just terminate the string
 
-                        case '\0' -> {
+                        case EOF -> {
                             return name.toString();
                         }
 
@@ -210,7 +211,7 @@ public class Tokenizer
 
                 // Check for EOF. If found, just terminate the string
 
-                case '\0' -> {
+                case EOF -> {
                     return name.toString();
                 }
 

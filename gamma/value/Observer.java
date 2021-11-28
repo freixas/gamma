@@ -83,6 +83,11 @@ public class Observer
         }
     }
 
+    private Observer(Worldline worldline)
+    {
+        this.worldline = worldline;
+    }
+
     public Worldline getWorldline()
     {
         return worldline;
@@ -97,31 +102,8 @@ public class Observer
      */
     public Observer relativeTo(Frame prime)
     {
-        // Create a new list of WSegments by copying the existing ones and
-        // making them relative to the prime frame
-
-        ArrayList<WSegment> segs = new ArrayList<>();
-
-        // We should always have one segment. If the first segment's velocity is
-        // NaN, it's going to be set to 0, but we want it set to 0 in the
-        // prime frame, so set it to an explicity 0
-
-        boolean isFirst = true;
-        Iterator<WSegment> iter = segments.iterator();
-        while (iter.hasNext()) {
-            WSegment seg = iter.next();
-            if (isFirst && Double.isNaN(seg.getV())) {
-                segs.add(new WSegment(0.0, seg.getA(), seg.getType(), seg.getDelta()).relativeTo(prime));
-            }
-            else {
-                segs.add(seg.relativeTo(prime));
-            }
-            isFirst = false;
-        }
-
-        // Re-create the entire observer
-
-        return new Observer(initializer.relativeTo(prime), segs);
+        Worldline newWorldline = worldline.relativeTo(prime);
+        return new Observer(newWorldline);
     }
 
     // **********************************************************

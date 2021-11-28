@@ -114,7 +114,22 @@ public final class Lorentz
      */
     static public Coordinate toPrimeFrame(Coordinate rest, double v)
     {
-        return new Coordinate(xPrime(rest.x, rest.t, v), tPrime(rest.x, rest.t, v));
+        return toPrimeFrame(rest.x, rest.t, v);
+    }
+
+    /**
+     * Given (x, t), calculate (x', t') given an inertial frame F' at velocity
+     * v.This is the Lorentz transformation.
+     *
+     * @param x The x coordinate.
+     * @param t The t coordiante.
+     * @param v The velocity.
+     *
+     * @return (x', t')
+     */
+    static public Coordinate toPrimeFrame(double x, double t, double v)
+    {
+        return new Coordinate(xPrime(x, t, v), tPrime(x, t, v));
     }
 
     /**
@@ -128,7 +143,22 @@ public final class Lorentz
      */
     static public Coordinate toRestFrame(Coordinate prime, double v)
     {
-        return new Coordinate(x(prime.x, prime.t, v), t(prime.x, prime.t, v));
+        return toRestFrame(prime.x, prime.t, v);
+    }
+
+    /**
+     * Given (x', t'), calculate (x, t) given an inertial frame F' at velocity
+     * v.This is the Lorentz transformation.
+     *
+     * @param xP The x' coordinate
+     * @param tP The t' coordinate.
+     * @param v The velocity.
+     *
+     * @return (x, t)
+     */
+    static public Coordinate toRestFrame(double xP, double tP, double v)
+    {
+        return new Coordinate(x(xP, tP, v), t(xP, tP, v));
     }
 
     /**
@@ -222,7 +252,7 @@ public final class Lorentz
      * @return The proper duration (in F').
      */
     static public double invTimeDilation(double duration, double v) {
-	return duration * Lorentz.gamma(v);
+	return duration / Lorentz.gamma(v);
     }
 
     /**
@@ -347,6 +377,5 @@ public final class Lorentz
             return vToTAngle(v2);
         }
     }
-
 
 }

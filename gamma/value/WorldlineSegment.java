@@ -16,8 +16,10 @@
  */
 package gamma.value;
 
+import gamma.ProgrammingException;
+import gamma.execution.ExecutionException;
 import gamma.math.OffsetAcceleration;
-
+import gamma.math.Util;
 
 /**
  * A worldline segment is a segment of an offset acceleration curve. See
@@ -125,51 +127,20 @@ public class WorldlineSegment
         NONE, T, TAU, D
     }
 
-    /**
-     * A structure holding the x, v, t, tau, and d values for a segment
-     * endpoint. In some cases, the values may be +infinite or -infinity.
-     */
-    public class Endpoint
-    {
-        public double v;
-        public double x;
-        public double t;
-        public double tau;
-        public double d;
+    private final HyperbolaEndpoint min;
+    private final HyperbolaEndpoint max;
 
-        Endpoint(double v, double x, double t, double tau, double d)
-        {
-            this.v = v;
-            this.x = x;
-            this.t = t;
-            this.tau = tau;
-            this.d = d;
-        }
-
-        Endpoint(Endpoint o)
-        {
-            this.v = o.v;
-            this.x = o.x;
-            this.t = o.t;
-            this.tau = o.tau;
-            this.d = o.d;
-        }
-    }
-
-    private final Endpoint min;
-    private final Endpoint max;
+    private final HyperbolaEndpoint originalMin;
+    private final HyperbolaEndpoint originalMax;
 
     private final double a;
     private final OffsetAcceleration curve;
-
-    private final Bounds bounds;
+    private CurveSegment curveSegment;
 
     /**
      * Create a new WorldlineSegment.
      *
-     * @param type The type of the delta value. Valid values are:
-     * LimitType.T, LimitType.TAU, or LimitType.D. LimitType.NONE is only used
-     * by the parser and should never be passed in to this constructor.
+     * @param type The type of the delta value.
      * @param delta A non-negative increment to the time, tau, or distance.
      * @param a The acceleration.
      * @param v The velocity at vPoint.
@@ -182,11 +153,11 @@ public class WorldlineSegment
                             Coordinate vPoint, double tau, double d)
     {
         if (delta < 0) {
-            throw new IllegalArgumentException("delta cannot be negative");
+            throw new ExecutionException("Observer segment limit delta cannot be negative");
         }
 
         this.a = a;
-        this.min = new Endpoint(v, vPoint.x, vPoint.t, tau, d);
+        this.min = new HyperbolaEndpoint(v, vPoint.x, vPoint.t, tau, d);
 
         // Create the offset curve
 
@@ -200,14 +171,29 @@ public class WorldlineSegment
                     maxT = vPoint.t + delta;
                 case TAU -> {
                     double finalTau = tau + delta;
+                    if (delta == 0.0) {
+                        maxT = vPoint.t;
+                    }
                     maxT = curve.tauToT(finalTau);
                 }
                 case D -> {
                     double finalD = d + delta;
-                    maxT = curve.dToT(finalD);
+
+                    // If the distance moved is 0, we have a zero-length
+                    // segment
+
+                    if (delta == 0.0) {
+                        maxT = vPoint.t;
+                    }
+                    else if (delta > 0.0 && a == 0.0 && v == 0.0) {
+                        throw new ExecutionException("Observer segment distance delta is > 0, but acceleration and velocity are 0");
+                    }
+                    else {
+                        maxT = curve.dToT(finalD);
+                    }
                 }
-                default -> {
-                    throw new IllegalArgumentException("Unknown delta type");
+                case NONE -> {
+                    // maxT already set to vPoint.t
                 }
             }
         }
@@ -215,7 +201,7 @@ public class WorldlineSegment
         // Generate the max limit. The x value won't be correct if the segment
         // includes the curve's turn-around point
 
-        this.max = new Endpoint(curve.tToV(maxT), curve.tToX(maxT), maxT, curve.tToTau(maxT), curve.tToD(maxT));
+        this.max = new HyperbolaEndpoint(maxT, curve);
 
         // At this point:
         //
@@ -227,40 +213,83 @@ public class WorldlineSegment
         //
         // Comparisons with v need to be done carefully
 
-        // Get the bounding box for this segment
-        // Bounds are automatically sorted
-
-        if (a == 0) {
+        if (Util.fuzzyZero(a)) {
 
             // We have a line segment
 
-            this.bounds = new Bounds(min.x, min.t, max.x, max.t);
+            curveSegment = new LineSegment(min.x, min.t, max.x, max.t);
         }
         else {
 
-            // We need to see if the turn-around point for the curve is included
-            // in this segment. The turn-around point is the offset point.
+            // We have a hyperbolic segment
 
-            Coordinate offset = this.curve.getOffset();
-            if (min.t <= offset.t && offset.t <= max.t) {
+            curveSegment = new HyperbolicSegment(a, min, max, curve);
+       }
 
-                // We include the turn-around point. In this case, bounds depend
-                // on whether acceleration is positive or negative
+        // We sometimes need to get the original endpoints and not ones
+        // that have perhaps been modified to be at +/- infinit.
 
-                if (a < 0) {
-                    this.bounds = new Bounds(Math.min(min.x, max.x), min.t, offset.x, max.t);
-                }
-                else {
-                    this.bounds = new Bounds(offset.x, min.t, Math.max(min.x, max.x), max.t);
-                }
-            }
+        this.originalMin = new HyperbolaEndpoint(min);
+        this.originalMax = new HyperbolaEndpoint(max);
+    }
 
-            // Otherwise, we can treat this just like a line segment
+    /**
+     * This constructor is used only when transforming an existing
+     * worldline to be relative to a new frame. It forces the endpoints of
+     * each segment to match given values.
+     *
+     * @param a The acceleration.
+     * @param v The velocity at the initial point.
+     * @param start The starting coordinate.
+     * @param end The ending coordinate.
+     * @param tau Tau at the start.
+     * @param d Distance at the start.
+     */
+    public WorldlineSegment(double a, double v, Coordinate start,
+                            Coordinate end, double tau, double d)
+    {
+        this.a = a;
+        this.min = new HyperbolaEndpoint(v, start.x, start.t, tau, d);
+        this.curve = new OffsetAcceleration(a, v, start, tau, d);
+        this.max = new HyperbolaEndpoint(end.t, curve);
 
-            else {
-                this.bounds = new Bounds(min.x, min.t, max.x, max.t);
-            }
+        assert Util.fuzzyEQ(max.x, end.x);
+
+        this.originalMin = new HyperbolaEndpoint(min);
+        this.originalMax = new HyperbolaEndpoint(max);
+        
+        if (Util.fuzzyZero(a)) {
+
+            // We have a line segment
+
+            curveSegment = new LineSegment(min.x, min.t, max.x, max.t);
         }
+        else {
+
+            // We have a hyperbolic segment
+
+            curveSegment = new HyperbolicSegment(a, min, max, curve);
+       }
+    }
+
+    public OffsetAcceleration getCurve()
+    {
+        return curve;
+    }
+
+    public CurveSegment getCurveSegment()
+    {
+        return curveSegment;
+    }
+
+    public HyperbolaEndpoint getOriginalMin()
+    {
+        return originalMin;
+    }
+
+    public HyperbolaEndpoint getOriginalMax()
+    {
+        return originalMax;
     }
 
     /**
@@ -268,9 +297,16 @@ public class WorldlineSegment
      */
     public void setInfinitePast()
     {
-        min.x = a > 0 ? Double.NEGATIVE_INFINITY : (a < 0 ? Double.POSITIVE_INFINITY : (min.v > 0 ? Double.NEGATIVE_INFINITY : (min.v < 0 ? Double.POSITIVE_INFINITY : min.x)));
+        if (curveSegment instanceof LineSegment) {
+            curveSegment = new Line(Line.AxisType.T, min.v, new Coordinate(min.x, min.t));
+            ((Line)curveSegment).setIsInfinitePlus(false);
+        }
+        else if (curveSegment instanceof Line) {
+            ((Line)curveSegment).setIsInfiniteMinus(true);
+        }
+        min.x = Util.fuzzyGT(a, 0) ? Double.POSITIVE_INFINITY : (Util.fuzzyLT(a, 0) ? Double.NEGATIVE_INFINITY : (Util.fuzzyGT(min.v, 0) ? Double.NEGATIVE_INFINITY : (Util.fuzzyLT(min.v, 0) ? Double.POSITIVE_INFINITY : min.x)));
         min.v = min.v < max.v ? Double.NEGATIVE_INFINITY: (min.v > max.v ? Double.POSITIVE_INFINITY : min.v);
-        min.d = Double.NEGATIVE_INFINITY;
+        min.d = Util.fuzzyZero(a) && Util.fuzzyZero(min.v) ? min.d : Double.NEGATIVE_INFINITY;
         min.t = Double.NEGATIVE_INFINITY;
         min.tau = Double.NEGATIVE_INFINITY;
     }
@@ -280,9 +316,16 @@ public class WorldlineSegment
      */
     public void setInfiniteFuture()
     {
-        max.x = a > 0 ? Double.POSITIVE_INFINITY : (a < 0 ? Double.NEGATIVE_INFINITY : (max.v > 0 ? Double.POSITIVE_INFINITY : (max.v < 0 ? Double.NEGATIVE_INFINITY : max.x)));
-        max.v = max.v < max.v ? Double.POSITIVE_INFINITY: (max.v > max.v ? Double.NEGATIVE_INFINITY : max.v);
-        max.d = Double.POSITIVE_INFINITY;
+        if (curveSegment instanceof LineSegment) {
+            curveSegment = new Line(Line.AxisType.T, max.v, new Coordinate(max.x, max.t));
+            ((Line)curveSegment).setIsInfiniteMinus(false);
+        }
+        else if (curveSegment instanceof Line) {
+            ((Line)curveSegment).setIsInfinitePlus(true);
+        }
+        max.x = Util.fuzzyGT(a, 0) ? Double.POSITIVE_INFINITY : (Util.fuzzyLT(a, 0) ? Double.NEGATIVE_INFINITY : (Util.fuzzyGT(max.v, 0) ? Double.POSITIVE_INFINITY : (Util.fuzzyLT(max.v, 0) ? Double.NEGATIVE_INFINITY : max.x)));
+        max.v = Util.fuzzyLT(max.v, max.v) ? Double.POSITIVE_INFINITY: (Util.fuzzyGT(max.v, max.v) ? Double.NEGATIVE_INFINITY : max.v);
+        max.d = Util.fuzzyZero(a) && Util.fuzzyZero(max.v) ? max.d : Double.POSITIVE_INFINITY;
         max.t = Double.POSITIVE_INFINITY;
         max.tau = Double.POSITIVE_INFINITY;
     }
@@ -295,9 +338,9 @@ public class WorldlineSegment
      * @return A structure holding the x, v, t, tau, and d values associated
      * with the earlier endpoint.
      */
-    public final Endpoint getMin()
+    public final HyperbolaEndpoint getMin()
     {
-        return new Endpoint(min);
+        return new HyperbolaEndpoint(min);
     }
 
     /**
@@ -308,9 +351,29 @@ public class WorldlineSegment
      * @return A structure holding the x, v, t, tau, and d values associated
      * with the later endpoint.
      */
-    public final Endpoint getMax()
+    public final HyperbolaEndpoint getMax()
     {
-        return new Endpoint(max);
+        return new HyperbolaEndpoint(max);
+    }
+
+    /**
+     * Get the bounds for this segment.
+     *
+     * @return The bounds for this segment.
+     */
+    public Bounds getBounds()
+    {
+        return curveSegment.getBounds();
+    }
+
+    /**
+     * Get the acceleration for this segment.
+     *
+     * @return The acceleration for this segment.
+     */
+    public double getA()
+    {
+        return a;
     }
 
     // **********************************************************
@@ -328,9 +391,9 @@ public class WorldlineSegment
      */
     public double vToX(double v)
     {
-        if (min.v < max.v && min.v > v || max.v < v) return Double.NaN;
-        if (min.v > max.v && max.v > v || min.v < v) return Double.NaN;
-        if (min.v == max.v) return min.x;
+        if (Util.fuzzyLT(min.v, max.v) && (Util.fuzzyLT(v, min.v) || Util.fuzzyGT(v, max.v))) return Double.NaN;
+        if (Util.fuzzyGT(min.v, max.v) && (Util.fuzzyLT(v, max.v) || Util.fuzzyGT(v, min.v))) return Double.NaN;
+        if (Util.fuzzyEQ(min.v, max.v)) return min.x;
         return curve.vToX(v);
     }
 
@@ -343,9 +406,9 @@ public class WorldlineSegment
      */
     public double vToD(double v)
     {
-        if (min.v < max.v && min.v > v || max.v < v) return Double.NaN;
-        if (min.v > max.v && max.v > v || min.v < v) return Double.NaN;
-        if (min.v == max.v) return min.d;
+        if (Util.fuzzyLT(min.v, max.v) && (Util.fuzzyLT(v, min.v) || Util.fuzzyGT(v, max.v))) return Double.NaN;
+        if (Util.fuzzyGT(min.v, max.v) && (Util.fuzzyLT(v, max.v) || Util.fuzzyGT(v, min.v))) return Double.NaN;
+        if (Util.fuzzyEQ(min.v, max.v)) return min.d;
         return curve.vToD(v);
     }
 
@@ -358,9 +421,9 @@ public class WorldlineSegment
      */
     public double vToT(double v)
     {
-        if (min.v < max.v && min.v > v || max.v < v) return Double.NaN;
-        if (min.v > max.v && max.v > v || min.v < v) return Double.NaN;
-        if (min.v == max.v) return min.t;
+        if (Util.fuzzyLT(min.v, max.v) && (Util.fuzzyLT(v, min.v) || Util.fuzzyGT(v, max.v))) return Double.NaN;
+        if (Util.fuzzyGT(min.v, max.v) && (Util.fuzzyLT(v, max.v) || Util.fuzzyGT(v, min.v))) return Double.NaN;
+        if (Util.fuzzyEQ(min.v, max.v)) return min.t;
         return curve.vToT(v);
     }
 
@@ -373,9 +436,9 @@ public class WorldlineSegment
      */
     public double vToTau(double v)
     {
-        if (min.v < max.v && min.v > v || max.v < v) return Double.NaN;
-        if (min.v > max.v && max.v > v || min.v < v) return Double.NaN;
-        if (min.v == max.v) return min.tau;
+        if (Util.fuzzyLT(min.v, max.v) && (Util.fuzzyLT(v, min.v) || Util.fuzzyGT(v, max.v))) return Double.NaN;
+        if (Util.fuzzyGT(min.v, max.v) && (Util.fuzzyLT(v, max.v) || Util.fuzzyGT(v, min.v))) return Double.NaN;
+        if (Util.fuzzyEQ(min.v, max.v)) return min.tau;
          return curve.vToTau(v);
     }
 
@@ -389,8 +452,8 @@ public class WorldlineSegment
      */
     public double vToGamma(double v)
     {
-        if (min.v < max.v && min.v > v || max.v < v) return Double.NaN;
-        if (min.v > max.v && max.v > v || min.v < v) return Double.NaN;
+        if (Util.fuzzyLT(min.v, max.v) && (Util.fuzzyLT(v, min.v) || Util.fuzzyGT(v, max.v))) return Double.NaN;
+        if (Util.fuzzyGT(min.v, max.v) && (Util.fuzzyLT(v, max.v) || Util.fuzzyGT(v, min.v))) return Double.NaN;
         return curve.vToGamma(v);
     }
 
@@ -409,8 +472,8 @@ public class WorldlineSegment
      */
     public double dToV(double d)
     {
-        if (min.d > d || max.d < d) return Double.NaN;
-        if (min.d == max.d) return min.v;
+        if (Util.fuzzyLT(d, min.d) || Util.fuzzyGT(d, max.d)) return Double.NaN;
+        if (Util.fuzzyEQ(min.d, max.d)) return min.v;
         return curve.dToV(d);
      }
 
@@ -422,8 +485,8 @@ public class WorldlineSegment
      */
     public double dToX(double d)
     {
-        if (min.d > d || max.d < d) return Double.NaN;
-        if (min.d == max.d) return min.x;
+        if (Util.fuzzyLT(d, min.d) || Util.fuzzyGT(d, max.d)) return Double.NaN;
+        if (Util.fuzzyEQ(min.d, max.d)) return min.x;
         return curve.dToX(d);
     }
 
@@ -436,8 +499,8 @@ public class WorldlineSegment
      */
     public double dToT(double d)
     {
-        if (min.d > d || max.d < d) return Double.NaN;
-        if (min.d == max.d) return min.t;
+        if (Util.fuzzyLT(d, min.d) || Util.fuzzyGT(d, max.d)) return Double.NaN;
+        if (Util.fuzzyEQ(min.d, max.d)) return min.t;
         return curve.dToT(d);
     }
 
@@ -450,8 +513,8 @@ public class WorldlineSegment
      */
     public double dToTau(double d)
     {
-        if (min.d > d || max.d < d) return Double.NaN;
-        if (min.d == max.d) return min.tau;
+        if (Util.fuzzyLT(d, min.d) || Util.fuzzyGT(d, max.d)) return Double.NaN;
+        if (Util.fuzzyEQ(min.d, max.d)) return min.tau;
         return curve.dToTau(d);
     }
 
@@ -464,8 +527,8 @@ public class WorldlineSegment
      */
      public double dToGamma(double d)
     {
-        if (min.d > d || max.d < d) return Double.NaN;
-        if (min.d == max.d) return curve.vToGamma(min.v);
+        if (Util.fuzzyLT(d, min.d) || Util.fuzzyGT(d, max.d)) return Double.NaN;
+        if (Util.fuzzyEQ(min.d, max.d)) return curve.vToGamma(min.v);
         return curve.dToGamma(d);
     }
 
@@ -483,8 +546,8 @@ public class WorldlineSegment
      */
     public double tToV(double t)
     {
-        if (min.t > t || max.t < t) return Double.NaN;
-        if (min.t == max.t) return min.v;
+        if (Util.fuzzyLT(t, min.t) || Util.fuzzyGT(t, max.t)) return Double.NaN;
+        if (Util.fuzzyEQ(min.t, max.t)) return min.v;
         return curve.tToV(t);
     }
 
@@ -496,8 +559,8 @@ public class WorldlineSegment
      */
     public double tToX(double t)
     {
-        if (min.t > t || max.t < t) return Double.NaN;
-        if (min.t == max.t) return min.x;
+        if (Util.fuzzyLT(t, min.t) || Util.fuzzyGT(t, max.t)) return Double.NaN;
+        if (Util.fuzzyEQ(min.t, max.t)) return min.x;
         return curve.tToX(t);
     }
 
@@ -509,8 +572,8 @@ public class WorldlineSegment
      */
     public double tToD(double t)
     {
-        if (min.t > t || max.t < t) return Double.NaN;
-        if (min.t == max.t) return min.d;
+        if (Util.fuzzyLT(t, min.t) || Util.fuzzyGT(t, max.t)) return Double.NaN;
+        if (Util.fuzzyEQ(min.t, max.t)) return min.d;
         return curve.tToD(t);
     }
 
@@ -522,8 +585,8 @@ public class WorldlineSegment
      */
     public double tToTau(double t)
     {
-        if (min.t > t || max.t < t) return Double.NaN;
-        if (min.t == max.t) return min.tau;
+        if (Util.fuzzyLT(t, min.t) || Util.fuzzyGT(t, max.t)) return Double.NaN;
+        if (Util.fuzzyEQ(min.t, max.t)) return min.tau;
         return curve.tToTau(t);
     }
 
@@ -535,7 +598,7 @@ public class WorldlineSegment
      */
     public double tToGamma(double t)
     {
-        if (min.t > t || max.t < t) return Double.NaN;
+        if (Util.fuzzyLT(t, min.t) || Util.fuzzyGT(t, max.t)) return Double.NaN;
         return curve.tToGamma(t);
     }
 
@@ -553,8 +616,8 @@ public class WorldlineSegment
      */
     public double tauToV(double tau)
     {
-        if (min.tau > tau || max.tau < tau) return Double.NaN;
-        if (min.tau == max.tau) return min.v;
+        if (Util.fuzzyLT(tau, min.tau) || Util.fuzzyGT(tau, max.tau)) return Double.NaN;
+        if (Util.fuzzyEQ(min.tau, max.tau)) return min.v;
         return curve.tauToV(tau);
     }
 
@@ -566,8 +629,8 @@ public class WorldlineSegment
      */
     public double tauToX(double tau)
     {
-        if (min.tau > tau || max.tau < tau) return Double.NaN;
-        if (min.tau == max.tau) return min.x;
+        if (Util.fuzzyLT(tau, min.tau) || Util.fuzzyGT(tau, max.tau)) return Double.NaN;
+        if (Util.fuzzyEQ(min.tau, max.tau)) return min.x;
         return curve.tauToX(tau);
     }
 
@@ -581,8 +644,8 @@ public class WorldlineSegment
      */
     public double tauToD(double tau)
     {
-        if (min.tau > tau || max.tau < tau) return Double.NaN;
-        if (min.tau == max.tau) return min.d;
+        if (Util.fuzzyLT(tau, min.tau) || Util.fuzzyGT(tau, max.tau)) return Double.NaN;
+        if (Util.fuzzyEQ(min.tau, max.tau)) return min.d;
         return curve.tauToD(tau);
     }
 
@@ -594,8 +657,8 @@ public class WorldlineSegment
      */
     public double tauToT(double tau)
     {
-        if (min.tau > tau || max.tau < tau) return Double.NaN;
-        if (min.tau == max.tau) return min.t;
+        if (Util.fuzzyLT(tau, min.tau) || Util.fuzzyGT(tau, max.tau)) return Double.NaN;
+        if (Util.fuzzyEQ(min.tau, max.tau)) return min.t;
         return curve.tauToT(tau);
     }
 
@@ -607,7 +670,7 @@ public class WorldlineSegment
      */
     public double tauToGamma(double tau)
     {
-        if (min.tau > tau || max.tau < tau) return Double.NaN;
+        if (Util.fuzzyLT(tau, min.tau) || Util.fuzzyGT(tau, max.tau)) return Double.NaN;
         return curve.tauToGamma(tau);
     }
 
@@ -627,10 +690,15 @@ public class WorldlineSegment
      */
     public Coordinate intersect(Line line)
     {
+        // Find where the segment's curve intersects the line (if anywhere)
+
         Coordinate intersection = curve.intersect(line, false);
         if (intersection == null) return null;
 
-        if (bounds.inside(intersection)) return intersection;
+        // Find out if this intersection occurs within the bounds of this
+        // segment.
+
+        if (curveSegment.getBounds().inside(intersection)) return intersection;
         return null;
     }
 
@@ -646,5 +714,17 @@ public class WorldlineSegment
     {
         return null;
     }
+
+    @Override
+    public String toString()
+    {
+        return "Acceleration: " + a +"\n" +
+               "Starting values:\n" +
+               min.toString().replaceAll("(?m)^", "  ") + "\n" +
+               "Ending values:" +
+               max.toString().replaceAll("(?m)^", "  ");
+    }
+
+
 
 }

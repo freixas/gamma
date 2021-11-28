@@ -17,6 +17,8 @@
 package gamma.execution.lcode;
 
 import gamma.drawing.Context;
+import gamma.drawing.Grid;
+import gamma.value.Line;
 
 /**
  *
@@ -24,11 +26,12 @@ import gamma.drawing.Context;
  */
 public class GridCommandExec extends CommandExec
 {
-
     @Override
     public void execute(Context context, Struct cmdStruct, StyleStruct styles)
     {
-        // throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        GridStruct struct = (GridStruct)cmdStruct;
+
+        Grid.draw(context, struct, styles);
     }
 
 }

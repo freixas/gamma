@@ -68,10 +68,10 @@ public class ArgInfo
             Object obj = iter.next();
             switch (argTypes.get(argTypePtr)) {
                 case INTEGER ->             { if (!(obj instanceof Integer))                                throwTypeError("an integer"); }
-                case DOUBLE ->              { if (!(obj instanceof Double))                                 throwTypeError("a double"); }
+                case DOUBLE ->              { if (!(obj instanceof Double))                                 throwTypeError("a number"); }
                 case STRING ->              { if (!(obj instanceof String))                                 throwTypeError("a string"); }
-                case DOUBLE_OR_STRING ->    { if (!(obj instanceof Double) && !(obj instanceof String))     throwTypeError( "a double or string"); }
-                case W_INITIALIZER ->       { if (!(obj instanceof WInitializer))                           throwTypeError( "a worldline initializer"); }
+                case DOUBLE_OR_STRING ->    { if (!(obj instanceof Double) && !(obj instanceof String))     throwTypeError("a number or string"); }
+                case W_INITIALIZER ->       { if (!(obj instanceof WInitializer))                           throwTypeError("a worldline initializer"); }
                 case W_SEGMENT ->           { if (!(obj instanceof WSegment))                               throwTypeError("a worldline segment"); }
                 case LIMIT_TYPE ->          { if (!(obj instanceof WorldlineSegment.LimitType))             throwTypeError("a worldline segment limit type"); }
                 case OBSERVER ->            { if (!(obj instanceof Observer))                               throwTypeError("an observer"); }

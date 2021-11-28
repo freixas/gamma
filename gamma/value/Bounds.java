@@ -16,6 +16,7 @@
  */
 package gamma.value;
 
+import gamma.math.Util;
 import javafx.geometry.Point2D;
 import javafx.scene.transform.Affine;
 
@@ -26,6 +27,8 @@ import javafx.scene.transform.Affine;
  */
 public class Bounds
 {
+    public static Bounds INFINITE_BOUNDS = new Bounds(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+    
     public Coordinate min;
     public Coordinate max;
 
@@ -66,7 +69,7 @@ public class Bounds
 
     /**
      * Set this bounding box to a new set of corners. The values given can be
-     * for any two opposing corners. The corners are sort so that the min corner
+     * for any two opposing corners. The corners are sorted so that the min corner
      * is bottom left and the max corner is upper right.
      *
      * @param x1 The x coordinate of the first corner.
@@ -154,33 +157,35 @@ public class Bounds
      * @param coord The point.
      * @return The out code.
      */
-    private int computeOutCode(Coordinate coord)
+    public int computeOutCode(Coordinate coord)
     {
         return computeOutCode(coord.x, coord.t);
     }
 
     /**
-     * Return a code that identifies which area a point lies within.
-     * See the Cohen - Sutherland algorithm.
+     * Return a code that identifies which area a point lies within. See the
+     * Cohen - Sutherland algorithm.
      *
-     * @param coord The point.
+     * @param x The x coordinate.
+     * @param t The t coordinate
+     *
      * @return The out code.
      */
-    private int computeOutCode(double x, double t)
+    public int computeOutCode(double x, double t)
     {
 	int code = 0x0;			// INSIDE
 
-	if (x < min.x) {
+	if (Util.fuzzyLT(x, min.x)) {
 	    code |= 0x01;		// LEFT
 	}
-	else if (x > max.x) {
+	else if (Util.fuzzyGT(x, max.x)) {
 	    code |= 0x02;		// RIGHT
 	}
 
-	if (t < min.t) {
+	if (Util.fuzzyLT(t, min.t)) {
 	    code |= 0x04;		// BOTTOM
 	}
-	else if (t > max.t) {
+	else if (Util.fuzzyGT(t, max.t)) {
 	    code |= 0x08;		// TOP
 	}
 
@@ -294,6 +299,9 @@ public class Bounds
 	int outcode1 = computeOutCode(segment.point2);
 	boolean accept = false;
 
+        double slopeXT = Double.NaN;
+        double slopeTX = Double.NaN;
+
 	while (true) {
 
 	    // Bitwise OR is 0: both points inside clip; trivially
@@ -325,37 +333,47 @@ public class Bounds
 		int outcodeOut = outcode0 != 0 ? outcode0 : outcode1;
 
 		// Now find the intersection point; use formulas:
+                //
 		//   slope = (t1 - t0) / (x1 - x0)
 		//   x = x0 + (1 / slope) * (tm - t0), where tm is tmin or tmax
-		//   t = t0 + slope * (xm - x0), where xm is xmin or
-		//   xmax
+		//   t = t0 + slope       * (xm - x0), where xm is xmin or xmax
+                //
 		// No need to worry about divide-by-zero because, in
 		// each case, the outcode bit being tested guarantees
 		// the denominator is non-zero
 
+                // Calculate the slopes if not yet set
+
+                if (Double.isNaN(slopeXT)) {
+                    if (Util.fuzzyEQ(segment.point2.t, segment.point1.t)) {
+                        slopeXT = Double.POSITIVE_INFINITY;
+                    }
+                    else {
+                        slopeXT = (segment.point2.x - segment.point1.x) / (segment.point2.t - segment.point1.t);
+                    }
+                   if (Util.fuzzyEQ(segment.point2.x, segment.point1.x)) {
+                        slopeTX = Double.POSITIVE_INFINITY;
+                    }
+                    else {
+                        slopeTX = (segment.point2.t - segment.point1.t) / (segment.point2.x - segment.point1.x);
+                    }
+                }
+
 		if ((outcodeOut & 0x08) != 0) { 	// Point is above the clip window
-		    x =
-			segment.point1.x + (segment.point2.x - segment.point1.x) * (max.t - segment.point1.t) /
-			(segment.point2.t - segment.point1.t);
 		    t = max.t;
+		    x = segment.point1.x + slopeXT * (t - segment.point1.t);
 		}
 		else if ((outcodeOut & 0x04) != 0) { // Point is below the clip window
-		    x =
-			segment.point1.x + (segment.point2.x - segment.point1.x) * (min.t - segment.point1.t) /
-			(segment.point2.t - segment.point1.t);
 		    t = min.t;
+		    x = segment.point1.x + slopeXT * (t - segment.point1.t);
 		}
 		else if ((outcodeOut & 0x02) != 0) {  // Point is to the right of clip window
-		    t =
-			segment.point1.t + (segment.point2.t - segment.point1.t) * (max.x - segment.point1.x) /
-			(segment.point2.x - segment.point1.x);
 		    x = max.x;
+		    t = segment.point1.t + slopeTX * (x - segment.point1.x);
 		}
 		else if ((outcodeOut & 0x01) != 0) {   // Point is to the left of clip window
-		    t =
-			segment.point1.t + (segment.point2.t - segment.point1.t) * (min.x - segment.point1.x) /
-			(segment.point2.x - segment.point1.x);
 		    x = min.x;
+		    t = segment.point1.t + slopeTX * (x - segment.point1.x);
 		}
 
 		// Now we move outside point to intersection point to clip
@@ -398,4 +416,12 @@ public class Bounds
             Math.max(Math.max(p1.getX(), p2.getX()), Math.max(p3.getX(), p4.getX())),
             Math.max(Math.max(p1.getY(), p2.getY()), Math.max(p3.getY(), p4.getY())));
     }
+
+    @Override
+    public String toString()
+    {
+        return "Bounds{" + "from " + min + " to " + max + '}';
+    }
+
+
 }

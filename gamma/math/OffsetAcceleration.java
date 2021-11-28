@@ -222,6 +222,9 @@ public class OffsetAcceleration
     private final double stdVPointTau;
     private final double stdVPointD;
 
+    private final boolean zeroAcceleration;
+    private final boolean zeroVelocity;
+
     /**
      * Create a new OffsetAcceleration object.
      *
@@ -233,15 +236,19 @@ public class OffsetAcceleration
      */
     public OffsetAcceleration(double a, double v, Coordinate vPoint, double tau, double d)
     {
-        this.a = a;
-        this.vInit = v;
+        this.zeroAcceleration = Util.fuzzyZero(a);
+        this.zeroVelocity = zeroAcceleration && Util.fuzzyZero(v);
+
+        this.a = zeroAcceleration ? 0.0 : a;
+        this.vInit = zeroVelocity ? 0.0 : v;
         this.vPoint = vPoint;
         this.vPointTau = tau;
         this.vPointD = d;
 
+
         // Handle the case where the acceleration is 0
 
-        if (a == 0) {
+        if (Util.fuzzyZero(a)) {
             // In this case, the std curve point matching vPoint is always
             // the origin
 
@@ -266,19 +273,20 @@ public class OffsetAcceleration
         // Handle the case where the acceleration is not 0
 
         else {
+
             // Find the point identified by v in the standard curve
 
-            double stdT =   Acceleration.vToT(a, v);
             double stdX =   Acceleration.vToX(a, v);
-            stdVPoint = new Coordinate(stdT, stdX);
+            double stdT =   Acceleration.vToT(a, v);
+            stdVPoint = new Coordinate(stdX, stdT);
 
             // Tau on the standard curve at the standard equivalent of vPoint
 
             stdVPointTau = Acceleration.vToTau(a, v);
 
-            // D on the standard curve at the standard equivalen of vPoint
+            // D on the standard curve at the standard equivalent of vPoint
 
-            stdVPointD = stdX;
+            stdVPointD = Acceleration.xToD(a, stdX, stdT >= 0.0);
 
             // Calculate the offset from vPoint to stdVpoint.
             // We subtract the offset to go from offset to standard coordinates.
@@ -290,13 +298,18 @@ public class OffsetAcceleration
             offset = new Coordinate(vPoint.x - stdVPoint.x, vPoint.t - stdVPoint.t);
 
             // Calculate the offset for d (if we translated the offset
-            // curve to its standard location, what would d's value be at the
-            // origin?).
+            // curve to its standard location, what would d's value be at its
+            // standard curve equivalent?).
             // We subtract the offset to go from offset to standard coordinates.
             // We add the offset to go from standard to offset coordinates.
 
-            dOffset = d - stdX;
+            dOffset = d - stdVPointD;
         }
+    }
+
+    public double getA()
+    {
+        return a;
     }
 
     /**
@@ -306,7 +319,7 @@ public class OffsetAcceleration
      *
      * @return The offset of this curve from the standard acceleration curve.
      */
-    public Coordinate getOffset()
+    public final Coordinate getOffset()
     {
         return this.offset;
     }
@@ -326,10 +339,10 @@ public class OffsetAcceleration
      * @return The position in the rest frame.
      * @throws ArithmeticException When a = 0 and v &ne; 0.
      */
-    public double vToX(double v)
+    public final double vToX(double v)
     {
-        if (a == 0) {
-            if (v == 0) return stdVPoint.x;
+        if (zeroAcceleration) {
+            if (zeroVelocity) return stdVPoint.x;
             throw new ArithmeticException("Position can't be calculated from velocity when the acceleration is 0.");
         }
         return Acceleration.vToX(a, v) + offset.x;
@@ -342,10 +355,10 @@ public class OffsetAcceleration
      * @return The distance in the rest frame.
      * @throws ArithmeticException When a = 0 and v &ne; 0.
      */
-    public double vToD(double v)
+    public final double vToD(double v)
     {
-        if (a == 0) {
-            if (v == 0) return stdVPointD;
+        if (zeroAcceleration) {
+            if (zeroVelocity) return stdVPointD;
             throw new ArithmeticException("Distance can't be calculated from velocity when then acceleration is 0.");
         }
         return Acceleration.vToD(a, v) + dOffset;
@@ -358,9 +371,9 @@ public class OffsetAcceleration
      * @return The time in the rest frame.
      * @throws ArithmeticException When a = 0.
      */
-    public double vToT(double v)
+    public final double vToT(double v)
     {
-        if (a == 0) {
+        if (zeroAcceleration) {
             throw new ArithmeticException("Time can't be calculated from velocity when then acceleration is 0.");
         }
         return Acceleration.vToT(a, v) + offset.t;
@@ -373,12 +386,12 @@ public class OffsetAcceleration
      * @return The time in the accelerated frame.
      * @throws ArithmeticException When a = 0.
      */
-    public double vToTau(double v)
+    public final double vToTau(double v)
     {
-        if (a == 0) {
+        if (zeroAcceleration) {
             throw new ArithmeticException("Tau can't be calculated from velocity when then acceleration is 0.");
         }
-        return toOffsetTau(Acceleration.vToT(a, v));
+        return toOffsetTau(Acceleration.vToTau(a, v));
     }
 
     /**
@@ -387,7 +400,7 @@ public class OffsetAcceleration
      * @param v The velocity.
      * @return Gamma.
      */
-    public double vToGamma(double v)
+    public final double vToGamma(double v)
     {
         // The acceleration is moot. Since we have v, we can derive gamma
         // directly
@@ -406,16 +419,16 @@ public class OffsetAcceleration
      * <p>
      * When the x coordinate crosses the curve, there can be two correct
      * answers. This method returns the velocity matching the x value that
-     * occurs later in time.
+     * occurs earlier in time.
      *
      * @param x The position in the rest frame
      * @return The velocity.
      * @throws ArithmeticException When the x coordinate doesn't cross the
      * offset acceleration curve.
      */
-    public double xToV(double x)
+    public final double xToV(double x)
     {
-        return xToV(x, true);
+        return xToV(x, false);
     }
 
     /**
@@ -432,11 +445,11 @@ public class OffsetAcceleration
      * @throws ArithmeticException When the x coordinate doesn't cross the
      * offset acceleration curve.
      */
-    public double xToV(double x, boolean later)
+    public final double xToV(double x, boolean later)
     {
-        if (a == 0) {
-            if (vInit != 0) return vInit;
-            if (x == vPoint.x) return 0;
+        if (zeroAcceleration) {
+            if (!zeroVelocity) return vInit;
+            if (Util.fuzzyEQ(x, vPoint.x)) return 0;
             throw new ArithmeticException("The position matches no point on the acceleration curve.");
         }
         return tToV(xToT(x, later));
@@ -447,16 +460,16 @@ public class OffsetAcceleration
      * <p>
      * When the x coordinate crosses the curve, there can be two correct
      * answers. This method returns the distance matching the x value
-     * that occurs later in time.
+     * that occurs earlier in time.
      *
      * @param x The position in the rest frame.
      * @return The distance in the rest frame.
      * @throws ArithmeticException When the x coordinate doesn't cross the
      * offset acceleration curve.
      */
-    public double xToD(double x)
+    public final double xToD(double x)
     {
-        return xToD(x, true);
+        return xToD(x, false);
     }
 
     /**
@@ -473,16 +486,16 @@ public class OffsetAcceleration
      * @throws ArithmeticException When the x coordinate doesn't cross the
      * offset acceleration curve.
      */
-    public double xToD(double x, boolean later)
+    public final double xToD(double x, boolean later)
     {
         // If the acceleration is 0, convert x to standard d and convert that to d
 
-        if (a == 0) {
+        if (zeroAcceleration) {
             return (x - offset.x) + dOffset;
         }
 
-        double stdX = x - offset.x;
-        if (a * stdX < 0) {
+        x -= offset.x;
+        if (Util.fuzzyLT(a * x, 0)) {
             throw new ArithmeticException("The position matches no point on the acceleration curve.");
         }
 
@@ -495,16 +508,16 @@ public class OffsetAcceleration
      * Given x, return t.
      * <p>
      * When the x coordinate crosses the curve, there can be two correct
-     * answers. This method returns the later time.
+     * answers. This method returns the earlier time.
      *
      * @param x The position in the rest frame.
      * @return The time in the rest frame.
      * @throws ArithmeticException When the x coordinate doesn't cross the
      * offset acceleration curve or matches all the curve points.
      */
-    public double xToT(double x)
+    public final double xToT(double x)
     {
-        return xToT(x, true);
+        return xToT(x, false);
     }
 
     /**
@@ -521,10 +534,10 @@ public class OffsetAcceleration
      * @throws ArithmeticException When the x coordinate doesn't cross the
      * offset acceleration curve or matches all the curve points.
      */
-    public double xToT(double x, boolean later)
+    public final double xToT(double x, boolean later)
     {
-        if (a == 0) {
-            if (vInit == 0) {
+        if (zeroAcceleration) {
+            if (zeroVelocity) {
                 throw new ArithmeticException("The position matches every point on the acceleration curve.");
             }
             return linearXToT(x);
@@ -537,16 +550,16 @@ public class OffsetAcceleration
      * Given x, return tau.
      * <p>
      * When the x coordinate crosses the curve, there can be two correct
-     * answers. This method returns the later tau.
+     * answers. This method returns the earlier tau.
      *
      * @param x The position in the rest frame.
      * @return The time in the accelerated frame.
      * @throws ArithmeticException When the x coordinate doesn't cross the
      * offset acceleration curve or matches all the curve points.
      */
-    public double xToTau(double x)
+    public final double xToTau(double x)
     {
-        return xToTau(x, true);
+        return xToTau(x, false);
     }
 
     /**
@@ -563,10 +576,10 @@ public class OffsetAcceleration
      * @throws ArithmeticException When the x coordinate doesn't cross the
      * offset acceleration curve.
      */
-    public double xToTau(double x, boolean later)
+    public final double xToTau(double x, boolean later)
     {
-        if (a == 0) {
-	    if (vInit == 0) {
+        if (zeroAcceleration) {
+	    if (zeroVelocity) {
                 throw new ArithmeticException("The position matches every point on the acceleration curve.");
             }
 	    return linearXToTau(x);
@@ -583,9 +596,9 @@ public class OffsetAcceleration
      * @throws ArithmeticException When the x coordinate doesn't cross the
      * offset acceleration curve or matches all the curve points.
      */
-    public double xToGamma(double x)
+    public final double xToGamma(double x)
     {
-	if (a == 0) return Lorentz.gamma(vInit);
+	if (zeroAcceleration) return Lorentz.gamma(vInit);
 	return Acceleration.xToGamma(a, x - offset.x);
     }
 
@@ -603,11 +616,11 @@ public class OffsetAcceleration
      * @throws ArithmeticException When a = 0, v = 0, and d != d at VPoint.
      */
 
-    public double dToV(double d)
+    public final double dToV(double d)
     {
-        if (a == 0) {
-            if (vInit != 0) return vInit;
-            if (d == stdVPointD) return 0;
+        if (zeroAcceleration) {
+            if (!zeroVelocity) return vInit;
+            if (Util.fuzzyEQ(d, stdVPointD)) return 0;
             throw new ArithmeticException("The distance matches no point on the acceleration curve.");
         }
         return Acceleration.dToV(a, d - dOffset);
@@ -620,13 +633,15 @@ public class OffsetAcceleration
      * @return The position in the rest frame.
      * @throws ArithmeticException When a = 0, v = 0 and d != d at vPoint.
      */
-    public double dToX(double d)
+    public final double dToX(double d)
     {
-        if (a == 0) {
-            if (vInit == 0 && d != stdVPointD) {
+        if (zeroAcceleration) {
+            if (zeroVelocity && !Util.fuzzyEQ(d, stdVPointD)) {
                 throw new ArithmeticException("The distance matches no point on the acceleration curve.");
             }
-            return (d - dOffset) + offset.x;
+            d = d - dOffset;
+            if (vInit < 0.0)  d = -d;
+            return d + offset.x;
         }
         return Acceleration.dToX(a, d - dOffset) + offset.x;
     }
@@ -638,11 +653,11 @@ public class OffsetAcceleration
      * @return The time in the rest frame.
      * @throws ArithmeticException When a = 0 and v = 0.
      */
-    public double dToT(double d)
+    public final double dToT(double d)
     {
-        if (a == 0) {
-            if (vInit == 0) {
-                if (d != stdVPointD) {
+        if (zeroAcceleration) {
+            if (zeroVelocity) {
+                if (Util.fuzzyEQ(d, stdVPointD)) {
                     throw new ArithmeticException("The distance matches every point on the acceleration curve.");
                 }
                 throw new ArithmeticException("The distance matches no points on the acceleration curve.");
@@ -660,11 +675,11 @@ public class OffsetAcceleration
      * @return The time in the accelerated frame.
      * @throws ArithmeticException When a = 0 and v = 0.
      */
-    public double dToTau(double d)
+    public final double dToTau(double d)
     {
-        if (a == 0) {
-            if (vInit == 0) {
-                if (d != stdVPointD) {
+        if (zeroAcceleration) {
+            if (zeroVelocity) {
+                if (Util.fuzzyEQ(d, stdVPointD)) {
                     throw new ArithmeticException("The distance matches every point on the acceleration curve.");
                 }
                 throw new ArithmeticException("The distance matches no points on the acceleration curve.");
@@ -684,11 +699,11 @@ public class OffsetAcceleration
      * @return Gamma.
      * @throws ArithmeticException When a = 0, v = 0, and d != d at VPoint.
      */
-     public double dToGamma(double d)
+     public final double dToGamma(double d)
     {
-        if (a == 0) {
-            if (vInit != 0) return Lorentz.gamma(vInit);
-            if (d == stdVPointD) return 1;
+        if (zeroAcceleration) {
+            if (!zeroVelocity) return Lorentz.gamma(vInit);
+            if (Util.fuzzyEQ(d, stdVPointD)) return 1;
             throw new ArithmeticException("The distance matches no point on the acceleration curve.");
         }
         return Acceleration.dToGamma(a, d);
@@ -706,9 +721,9 @@ public class OffsetAcceleration
      * @param t The time in the rest frame.
      * @return The velocity.
      */
-    public double tToV(double t)
+    public final double tToV(double t)
     {
-	if (a == 0) return vInit;
+	if (zeroAcceleration) return vInit;
 	return Acceleration.tToV(a, t - offset.t);
     }
 
@@ -718,9 +733,9 @@ public class OffsetAcceleration
      * @param t The time in the rest frame.
      * @return The position in the rest frame.
      */
-    public double tToX(double t)
+    public final double tToX(double t)
     {
-	if (a == 0) {
+	if (zeroAcceleration) {
             return linearTToX(t);
         }
 	return Acceleration.tToX(a, t - offset.t) + offset.x;
@@ -732,14 +747,14 @@ public class OffsetAcceleration
      * @param t The time in the rest frame.
      * @return The distance in the rest frame.
      */
-    public double tToD(double t)
+    public final double tToD(double t)
     {
-        if (a == 0) {
-            if (vInit == 0) return dOffset;
+        if (zeroAcceleration) {
+            if (zeroVelocity) return dOffset;
             double stdT = t - offset.t;
             double stdX = vInit * (stdT);
             double d = Math.abs(stdX);
-            d = stdT >= 0 ? d : -d;
+            d = Util.sign(stdT) * d;
             return d + dOffset;
         }
         return Acceleration.tToD(a, t - offset.t) + dOffset;
@@ -751,9 +766,9 @@ public class OffsetAcceleration
      * @param t The time in the rest frame.
      * @return The time in the accelerated frame.
      */
-    public double tToTau(double t)
+    public final double tToTau(double t)
     {
-        if (a == 0) {
+        if (zeroAcceleration) {
             return toOffsetTau(Lorentz.tToTau(t - offset.t, vInit));
         }
         return toOffsetTau(Acceleration.tToTau(a, t - offset.t));
@@ -765,9 +780,9 @@ public class OffsetAcceleration
      * @param t The time in the rest frame.
      * @return Gamma.
      */
-    public double tToGamma(double t)
+    public final double tToGamma(double t)
     {
-	if (a == 0) return Lorentz.gamma(vInit);
+	if (zeroAcceleration) return Lorentz.gamma(vInit);
 	return Acceleration.tToGamma(a, t - offset.t);
     }
 
@@ -783,9 +798,9 @@ public class OffsetAcceleration
      * @param tau The time in the accelerated frame.
      * @return The velocity.
      */
-    public double tauToV(double tau)
+    public final double tauToV(double tau)
     {
-	if (a == 0) return vInit;
+	if (zeroAcceleration) return vInit;
 	return Acceleration.tauToV(a, toStdTau(tau));
     }
 
@@ -795,9 +810,9 @@ public class OffsetAcceleration
      * @param tau The time in the accelerated frame.
      * @return The position in the rest frame.
      */
-    public double tauToX(double tau)
+    public final double tauToX(double tau)
     {
-	if (a == 0) {
+	if (zeroAcceleration) {
 	    return vInit * Lorentz.tauToT(toStdTau(tau), vInit) + offset.x;
         }
 	return Acceleration.tauToX(a, toStdTau(tau)) + offset.x;
@@ -810,15 +825,15 @@ public class OffsetAcceleration
      *
      * @return The distance in the rest frame..
      */
-    public double tauToD(double tau)
+    public final double tauToD(double tau)
     {
-        if (a == 0) {
-            if (vInit == 0) return dOffset;
+        if (zeroAcceleration) {
+            if (zeroVelocity) return dOffset;
             double stdTau = toStdTau(tau);
             double stdT = stdTau / Lorentz.gamma(vInit);
             double stdX = vInit * (stdT);
             double d = Math.abs(stdX);
-            d = stdT >= 0 ? d : -d;
+            d = Util.sign(stdT) * d;
             return d + dOffset;
         }
          return Acceleration.tauToD(a, toStdTau(tau)) + dOffset;
@@ -830,9 +845,9 @@ public class OffsetAcceleration
      * @param tau The time in the accelerated frame.
      * @return The time in the rest frame.
      */
-    public double tauToT(double tau)
+    public final double tauToT(double tau)
     {
-        if (a == 0) {
+        if (zeroAcceleration) {
             return Lorentz.tauToT(toStdTau(tau), a) + offset.t;
         }
         return Acceleration.tauToT(a, toStdTau(tau)) + offset.t;
@@ -844,9 +859,9 @@ public class OffsetAcceleration
      * @param tau The time in the accelerated frame.
      * @return Gamma.
      */
-    public double tauToGamma(double tau)
+    public final double tauToGamma(double tau)
     {
-	if (a == 0) return Lorentz.gamma(vInit);
+	if (zeroAcceleration) return Lorentz.gamma(vInit);
 	return Acceleration.tauToGamma(a, toStdTau(tau));
     }
 
@@ -860,7 +875,7 @@ public class OffsetAcceleration
      * @param stdTau A tau value on the standard curve
      * @return The equivalent stdTau on the offset curve.
      */
-    private double toOffsetTau(double stdTau)
+    private final double toOffsetTau(double stdTau)
     {
         return vPointTau + (stdTau - stdVPointTau);
     }
@@ -875,7 +890,7 @@ public class OffsetAcceleration
      * @param tau A tau value on the standard curve
      * @return The equivalent tau on the offset curve.
      */
-    private double toStdTau(double tau)
+    private final double toStdTau(double tau)
     {
         return stdVPointTau + (tau - vPointTau);
     }
@@ -883,12 +898,12 @@ public class OffsetAcceleration
     /**
      * Given x, return t.
      * <p>
-     * Use this only when vInit is 0.
+     * Use this only when the acceleration is 0.
      *
      * @param x The position in the rest frame.
      * @return The time in the rest frame.
      */
-    private double linearXToT(double x)
+    private final double linearXToT(double x)
     {
         return ((x - offset.x) / vInit) + offset.t;
     }
@@ -896,12 +911,12 @@ public class OffsetAcceleration
     /**
      * Given t, return x.
      * <p>
-     * USe this only when vInit is 0.
+     * USe this only when the acceleration is 0.
      *
      * @param t The time in the rest frame
      * @return The position in the rest frame.
      */
-    private double linearTToX(double t)
+    private final double linearTToX(double t)
     {
         return ((t - offset.t) * vInit) + offset.x;
     }
@@ -909,12 +924,12 @@ public class OffsetAcceleration
     /**
      * Given x, return tau.
      * <p>
-     * Use this only when vInit is 0.
+     * Use this only when the acceleration is 0.
      *
      * @param x The position in the rest frame.
      * @return The time in the accelerated frame.
      */
-    private double linearXToTau(double x)
+    private final double linearXToTau(double x)
     {
         return toOffsetTau(Lorentz.tToTau((x - offset.x) / vInit, vInit));
     }
@@ -935,7 +950,7 @@ public class OffsetAcceleration
      * @return The intersection or null if there are no intersections or an
      * infinite number of intersections.
      */
-    public Coordinate intersect(Line line, boolean later)
+    public final Coordinate intersect(Line line, boolean later)
     {
         // Basics:
         // The line formula is t = mx + k.
@@ -944,12 +959,12 @@ public class OffsetAcceleration
         // Get m and k for the line
 
         double m = line.getSlope();
-        double k = line.getOffset();
+        double k = line.getConstantOffset();
 
         // If the acceleration is 0, our offset acceleration curve is also a
         // line
 
-        if (a == 0) {
+        if (zeroAcceleration) {
             return line.intersect(new Line(Line.AxisType.T, vInit, vPoint));
         }
 
@@ -975,7 +990,7 @@ public class OffsetAcceleration
      * @param other The other observer.
      * @return The intersection or null if none.
      */
-    public Coordinate intersect(WorldlineSegment other)
+    public final Coordinate intersect(WorldlineSegment other)
     {
         return null;
     }

@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.StandardWatchEventKinds;
 import static java.nio.file.StandardWatchEventKinds.*;
@@ -93,6 +94,11 @@ public class FileWatcher extends Thread
             e.printStackTrace();
             Platform.runLater(new ScriptParseErrorHandler(window, list));
         }
+        catch (Exception e) {
+            list.add(e);
+            e.printStackTrace();
+            Platform.runLater(new ScriptParseErrorHandler(window, list));
+        }
     }
 
     @Override
@@ -110,6 +116,7 @@ public class FileWatcher extends Thread
             path.register(watchService, ENTRY_CREATE, ENTRY_MODIFY, ENTRY_DELETE);
 
             boolean poll = true;
+            long lastModTime = 0L;
 
             while (poll) {
                 WatchKey key = watchService.take();
@@ -125,12 +132,17 @@ public class FileWatcher extends Thread
                         System.err.print("Filename is " + filename + "\n");
 
                         if (filename.toString().equals(file.getName())) {
-                            System.err.println("doOnChange()\n");
-                            doOnChange();
+                            Long modTime = file.lastModified();
+                            if (modTime > lastModTime + 1000) {
+                                System.err.println("doOnChange()\n");
+                                doOnChange();
+                                lastModTime = modTime;
+                            }
                         }
                     }
 
                     else if (kind == StandardWatchEventKinds.ENTRY_DELETE) {
+                        @SuppressWarnings("unchecked")
                         Path filename = ((WatchEvent<Path>)event).context();
                         System.err.print("Filename is " + filename + "\n");
 
@@ -151,71 +163,10 @@ public class FileWatcher extends Thread
             list.add(e);
             Platform.runLater(new ScriptParseErrorHandler(window, list));
         }
-    }
-
-    public void run1()
-    {
-        // When we first execute this thread, we should treat the file as though
-        // we've just noticed that it changed
-
-        doOnChange();
-
-        try (WatchService watcher = FileSystems.getDefault().newWatchService()) {
-            Path path = file.toPath().getParent();
-            path.register(watcher,
-                          StandardWatchEventKinds.ENTRY_MODIFY,
-                          StandardWatchEventKinds.ENTRY_DELETE,
-                          StandardWatchEventKinds.ENTRY_CREATE,
-                          StandardWatchEventKinds.OVERFLOW);
-
-            while (!isStopped()) {
-                try {
-                    WatchKey key;
-                    try {
-                        key = watcher.take();
-                    }
-                    catch (InterruptedException e) {
-                        System.err.println(e + "\n");
-                        continue;
-                    }
-
-                    for (WatchEvent<?> event : key.pollEvents()) {
-
-                        WatchEvent.Kind<?> kind = event.kind();
-                        System.err.println("Kind " + kind + "\n");
-
-                        if (kind == StandardWatchEventKinds.ENTRY_CREATE ||
-                            kind == StandardWatchEventKinds.ENTRY_MODIFY) {
-
-                            @SuppressWarnings("unchecked")
-                            Path filename = ((WatchEvent<Path>)event).context();
-                            System.err.print("Filename is " + filename + "\n");
-
-                            if (filename.toString().equals(file.getName())) {
-                                System.err.println("doOnChange()\n");
-                                doOnChange();
-                            }
-                        }
-                        else if (kind == StandardWatchEventKinds.ENTRY_DELETE) {
-                           Path filename = ((WatchEvent<Path>)event).context();
-                            System.err.print("Filename is " + filename + "\n");
-
-                            if (filename.toString().equals(file.getName())) {
-                                // ???
-                            }
-                        }
-                        key.reset();
-                    }
-                }
-                catch (Exception e) {
-                    list.add(e);
-                    Platform.runLater(new ScriptParseErrorHandler(window, list));
-                }
-            }
-        }
         catch (Exception e) {
             list.add(e);
             Platform.runLater(new ScriptParseErrorHandler(window, list));
         }
     }
+
 }

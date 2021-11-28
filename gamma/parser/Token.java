@@ -121,4 +121,12 @@ public class Token<T>
     public char getChar() { return (Character)getValue(); }
     public double getNumber() { return (Double)getValue(); }
     public String getString() { return (String)getValue(); }
+
+    @Override
+    public String toString()
+    {
+        return "Token{" + "type=" + type + ", value=" + value + ", file=" + file.getName() + ", lineNumber=" + lineNumber + ", charNumber=" + charNumber + '}';
+    }
+
+
 }

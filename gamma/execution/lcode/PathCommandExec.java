@@ -30,8 +30,7 @@ public class PathCommandExec extends CommandExec
     {
         PathStruct struct = (PathStruct)cmdStruct;
 
-
-
+        gamma.drawing.Path.draw(context, struct, styles);
     }
 
 }

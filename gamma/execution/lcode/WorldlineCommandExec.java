@@ -17,6 +17,7 @@
 package gamma.execution.lcode;
 
 import gamma.drawing.Context;
+import gamma.drawing.Worldline;
 
 /**
  *
@@ -28,7 +29,9 @@ public class WorldlineCommandExec extends CommandExec
     @Override
     public void execute(Context context, Struct cmdStruct, StyleStruct styles)
     {
-        // throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        WorldlineStruct struct = (WorldlineStruct)cmdStruct;
+
+        Worldline.draw(context, struct, styles);
     }
 
 }

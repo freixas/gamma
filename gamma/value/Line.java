@@ -18,7 +18,6 @@ package gamma.value;
 
 import gamma.math.Lorentz;
 import gamma.math.Util;
-import javafx.scene.transform.Affine;
 
 /**
  * A line is defined by an angle (in degrees) and a point through which
@@ -29,7 +28,7 @@ import javafx.scene.transform.Affine;
  *
  * @author Antonio Freixas
  */
-public class Line
+public class Line extends CurveSegment
 {
     public enum AxisType
     {
@@ -40,7 +39,10 @@ public class Line
     private Coordinate coord;
     private double slope;
     private double mXOrigin;
-    private double offset;
+    private double t1MinusMX1;
+
+    private boolean isInfiniteMinus;
+    private boolean isInfinitePlus;
 
     /**
      * Create a line from a Frame axis that goes through the origin of the
@@ -144,7 +146,10 @@ public class Line
 
         // Pre-calculate the constant (t1 - mx1)
 
-        this.offset = this.coord.t - this.mXOrigin;
+        this.t1MinusMX1 = this.coord.t - this.mXOrigin;
+
+        this.isInfiniteMinus = true;
+        this.isInfinitePlus = true;
     }
 
     /**
@@ -183,9 +188,9 @@ public class Line
      *
      * @return The line's offset.
      */
-    public double getOffset()
+    public double getConstantOffset()
     {
-        return this.offset;
+        return this.t1MinusMX1;
     }
 
     /**
@@ -286,6 +291,8 @@ public class Line
     /**
      * Intersect this line with a bounding box. Return the line segment
      * that intersects or null if none.
+     * <p>
+     * The given bounding box cannot have corners at infinity.
      *
      * @param bounds The bounding box.
      *
@@ -293,6 +300,12 @@ public class Line
      */
     public LineSegment intersect(Bounds bounds)
     {
+        // Intersect with our bounding box (which will have corners at
+        // infinity
+
+        bounds = bounds.intersect(getBounds());
+        if (bounds == null) return null;
+
         // Create lines for the edges of the bounding box. If the line is
         // not vertical, we use the left and right edges. If it is vertical,
         // we use the top and bottom edges.
@@ -312,7 +325,54 @@ public class Line
 
         // Intersect the line segment with the bounds
 
-        return bounds.intersect(segment);
+        return segment.intersect(bounds);
     }
+
+    public boolean isIsIfiniteMinus()
+    {
+        return isInfiniteMinus;
+    }
+
+    public void setIsInfiniteMinus(boolean isInfiniteMinus)
+    {
+        this.isInfiniteMinus = isInfiniteMinus;
+    }
+
+    public boolean isIsInfinitePlus()
+    {
+        return isInfinitePlus;
+    }
+
+    public void setIsInfinitePlus(boolean isInfinitePlus)
+    {
+        this.isInfinitePlus = isInfinitePlus;
+    }
+
+    @Override
+    public Bounds getBounds()
+    {
+        double minX, minT, maxX, maxT;
+        if (angle >= 0) {
+            minX = Double.NEGATIVE_INFINITY; minT = Double.NEGATIVE_INFINITY; maxX = Double.POSITIVE_INFINITY; maxT = Double.POSITIVE_INFINITY;
+        }
+        else {
+            minX = Double.POSITIVE_INFINITY; minT = Double.NEGATIVE_INFINITY; maxX = Double.NEGATIVE_INFINITY; maxT = Double.POSITIVE_INFINITY;
+        }
+
+        if (!isInfiniteMinus) { minX = coord.x; minT = coord.t; }
+        if (!isInfinitePlus) { maxX = coord.x; maxT = coord.t; }
+
+        return new Bounds(minX, minT, maxX, maxT);
+    }
+
+    @Override
+    public String toString()
+    {
+        return "Line{" +
+               "\n  angle=" + angle + ", coord=" + coord +
+               "\n isInfiniteMinus=" + isInfiniteMinus + ", isInfinitePlus=" + isInfinitePlus +
+               "\n}";
+    }
+
 
 }

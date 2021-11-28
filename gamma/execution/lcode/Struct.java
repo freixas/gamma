@@ -16,6 +16,7 @@
  */
 package gamma.execution.lcode;
 
+import gamma.value.Color;
 import gamma.ProgrammingException;
 import gamma.math.Util;
 import gamma.value.Frame;
@@ -180,7 +181,6 @@ public abstract class Struct
      * structure, which is held by the hcode engine and then initialized from
      * the property list using initializeStruct. *
      *
-     * @param engine The hcode engine.
      * @param cmdName The name of the command.
      * @param list The property list used to initialize the structure.
      *
@@ -292,6 +292,13 @@ public abstract class Struct
 
         if (propertyValue.getClass() == field.getType()) {
             field.set(instance, propertyValue);
+        }
+
+        // Field is a string
+        // Property value can be anything
+
+        else if (field.getType() == String.class) {
+            field.set(instance, propertyValue.toString());
         }
 
         // Property value is a Double

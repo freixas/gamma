@@ -16,9 +16,6 @@
  */
 package gamma.execution.lcode;
 
-import gamma.execution.HCodeEngine;
-import gamma.math.Lorentz;
-import gamma.math.Util;
 import gamma.value.Coordinate;
 import gamma.value.Frame;
 
@@ -31,22 +28,14 @@ public class LabelStruct extends Struct
     public String text = "";
     public Coordinate location;
     public boolean locationSet = false;
-    public double rotation = 0.0;
 
     public LabelStruct()
     {
     }
 
     @Override
-    public void finalizeValues()
-    {
-        rotation = Util.normalizeAngle90(rotation);
-    }
-
-    @Override
     public void relativeTo(Frame prime)
     {
         location = prime.toFrame(location);
-        rotation = Lorentz.toPrimeAngle(rotation, prime.getV());
     }
 }

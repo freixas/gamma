@@ -16,6 +16,7 @@
  */
 package gamma.drawing;
 
+import gamma.execution.lcode.HypergridStruct;
 import gamma.execution.lcode.StyleStruct;
 import gamma.math.OffsetAcceleration;
 import gamma.math.Util;
@@ -33,7 +34,8 @@ public class Hypergrid
 {
     public static final double MIN_GRID_SIZE = 20;
 
-    public static void draw(Context context, boolean bottom, boolean left, boolean right, boolean top, StyleStruct styles)
+    public static void draw(Context context, HypergridStruct struct,
+                            StyleStruct styles)
     {
         GraphicsContext gc = context.gc;
 
@@ -57,18 +59,18 @@ public class Hypergrid
 
         // Set up the gc
 
-        Line.setupLineGc(context, styles.javaFXDivColor, styles.lineStyle, styles.divThickness);
+        Line.setupLineGc(context, styles);
 
         // Draw the left  and right quadrants
 
         double startX = bounds.min.x - (bounds.min.x % spacing);
         int lineNumber = Util.toInt(startX / spacing);
-        if (left || right) {
+        if (struct.left || struct.right) {
             double x;
             int iX;
             for (x = startX, iX = lineNumber; x <= bounds.max.x; x += spacing, iX++) {
-                if (x < 0 && !left) continue;
-                if (x > 0 && !right) continue;
+                if (x < 0 && !struct.left) continue;
+                if (x > 0 && !struct.right) continue;
                 if (Util.fuzzyZero(x)) continue;
                 double a = 1/x;
                 OffsetAcceleration curve = new OffsetAcceleration(a, 0, new Coordinate(x, 0.0), 0.0, 0.0);
@@ -76,9 +78,6 @@ public class Hypergrid
                 HyperbolicSegment segment2 = segment.intersect(bounds);
                 if (segment2 != null) {
                     Hyperbola.drawRaw(context, segment2);
-                }
-                else {
-                    segment2 = null;
                 }
             }
         }
@@ -90,12 +89,12 @@ public class Hypergrid
 
         startX = bounds.min.x - (bounds.min.x % spacing);
         lineNumber = Util.toInt(startX / spacing);
-        if (bottom || top) {
+        if (struct.bottom || struct.top) {
             double x;
             int iX;
             for (x = startX, iX = lineNumber; x <= bounds.max.x; x += spacing, iX++) {
-                if (x < 0 && !bottom) continue;
-                if (x > 0 && !top) continue;
+                if (x < 0 && !struct.bottom) continue;
+                if (x > 0 && !struct.top) continue;
                 if (Util.fuzzyZero(x)) continue;
                 double a = 1/x;
                 OffsetAcceleration curve = new OffsetAcceleration(a, 0, new Coordinate(x, 0.0), 0.0, 0.0);
@@ -103,9 +102,6 @@ public class Hypergrid
                 HyperbolicSegment segment2 = segment.intersect(bounds);
                 if (segment2 != null) {
                     Hyperbola.drawRaw(context, segment2);
-                }
-                else {
-                    segment2 = null;
                 }
             }
         }

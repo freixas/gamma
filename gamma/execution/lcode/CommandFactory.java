@@ -38,7 +38,7 @@ public class CommandFactory
         commandMap.put("hypergrid", new HypergridCommandExec());
         commandMap.put("event", new EventCommandExec());
         commandMap.put("line", new LineCommandExec());
-        commandMap.put("world", new WorldlineCommandExec());
+        commandMap.put("worldline", new WorldlineCommandExec());
         commandMap.put("path", new PathCommandExec());
         commandMap.put("label", new LabelCommandExec());
     }

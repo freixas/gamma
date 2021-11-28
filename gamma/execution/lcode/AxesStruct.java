@@ -18,6 +18,7 @@ package gamma.execution.lcode;
 
 import gamma.execution.HCodeEngine;
 import gamma.value.Frame;
+import gamma.value.Line;
 
 /**
  *
@@ -25,6 +26,12 @@ import gamma.value.Frame;
  */
 public class AxesStruct extends Struct
 {
+    public class AxisStruct
+    {
+        public Line.AxisType axisType;
+        public String label;
+    }
+
     public Frame frame;
     public boolean positiveOnly = false;
     public boolean x = true;
@@ -32,9 +39,24 @@ public class AxesStruct extends Struct
     public String xLabel = "";
     public String tLabel = "";
 
+    public AxisStruct xAxis;
+    public AxisStruct tAxis;
+
     public AxesStruct()
     {
         this.frame = HCodeEngine.getDefFrame();
+    }
+
+    @Override
+    public void finalizeValues()
+    {
+        xAxis = new AxisStruct();
+        xAxis.axisType = Line.AxisType.X;
+        xAxis.label = xLabel;
+
+        tAxis = new AxisStruct();
+        tAxis.axisType = Line.AxisType.T;
+        tAxis.label = tLabel;
     }
 
     @Override

@@ -46,7 +46,7 @@ public class Arrow
         // arrow so it points to the right (the 0 degree angle)
 
         Affine transform = gc.getTransform();
-        transform.appendRotation(-angle, location.x, location.t);
+        transform.appendRotation(angle, location.x, location.t);
         gc.setTransform(transform);
 
         // Create a bounding box for the arrow and see if it intersects with the

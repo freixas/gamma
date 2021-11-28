@@ -16,9 +16,13 @@
  */
 package gamma.execution.lcode;
 
+import gamma.value.Color;
 import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
+import gamma.math.Lorentz;
+import gamma.math.Util;
 import gamma.value.Frame;
+import gamma.value.Property;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
@@ -34,22 +38,52 @@ public class StyleStruct extends Struct
     public double lineThickness = 2.0;
     public String lineStyle = "solid";
     public String arrow = "none";
-    public double eventDiameter = 2.0;
+    public double eventDiameter = 5.0;
     public String eventShape = "circle";
     public String fontFamily = null;
     public String fontWeigth = "normal";
     public String fontStyle = "normal";
     public double fontSize = 10.0;
     public double textPadding = 2.0;
-    public String textAnchor = "MC";
+    public String textAnchor = "TC";
+    public double textRotation = 0.0;
     public boolean ticks = true;
     public boolean tickLabels = true;
-    public double tickThickness = 1.0;
-    public double majorTickThickness = 2.0;
+    public Color divColor = null;
+    public Color majorDivColor = null;
+    public double divThickness = 1.0;
+    public double majorDivThickness = 2.0;
 
     public javafx.scene.paint.Color javaFXColor;
     public javafx.scene.paint.Color javaFXBackgroundColor;
+    public javafx.scene.paint.Color javaFXDivColor;
+    public javafx.scene.paint.Color javaFXMajorDivColor;
     public Font font;
+
+    public static boolean isStyleProperty(Property property)
+    {
+        switch (property.getName()) {
+            case "color" -> 		{ return true; }
+            case "backgroundColor" ->	{ return true; }
+            case "lineThickness" ->	{ return true; }
+            case "lineStyle" -> 	{ return true; }
+            case "arrow" -> 		{ return true; }
+            case "eventDiameter" -> 	{ return true; }
+            case "eventShape" -> 	{ return true; }
+            case "fontFamily" -> 	{ return true; }
+            case "fontWeight" -> 	{ return true; }
+            case "fontStyle" -> 	{ return true; }
+            case "fontSize" -> 		{ return true; }
+            case "textPadding" ->	{ return true; }
+            case "textAnchor" -> 	{ return true; }
+            case "textRotation" ->	{ return true; }
+            case "ticks" -> 		{ return true; }
+            case "tickLabels" -> 	{ return true; }
+            case "divThickness" -> 	{ return true; }
+            case "majorDivThickness" -> { return true; }
+            default -> 			{ return false; }
+        }
+    }
 
     public StyleStruct()
     {
@@ -72,8 +106,8 @@ public class StyleStruct extends Struct
         this.textAnchor = other.textAnchor;
         this.ticks = other.ticks;
         this.tickLabels = other.tickLabels;
-        this.tickThickness = other.tickThickness;
-        this.majorTickThickness = other.majorTickThickness;
+        this.divThickness = other.divThickness;
+        this.majorDivThickness = other.majorDivThickness;
     }
 
     @Override
@@ -104,6 +138,11 @@ public class StyleStruct extends Struct
                 font = Font.getDefault();
             }
         }
+
+        textRotation = Util.normalizeAngle90(textRotation);
+
+        javaFXDivColor = divColor == null ? javaFXColor : divColor.getJavaFXColor();
+        javaFXMajorDivColor = majorDivColor == null ? javaFXDivColor : majorDivColor.getJavaFXColor();
     }
 
     public void lineThicknessRangeCheck()
@@ -196,21 +235,22 @@ public class StyleStruct extends Struct
 
     public void tickThicknessRangeCheck()
     {
-        if (tickThickness <= 0.0) {
-            throw new ExecutionException("'tickThickness' must be greater than 0");
+        if (divThickness <= 0.0) {
+            throw new ExecutionException("'divThickness' must be greater than 0");
         }
     }
 
     public void majorTickThicknessRangeCheck()
     {
-        if (majorTickThickness <= 0.0) {
-            throw new ExecutionException("'majorTickThickness' must be greater than 0");
+        if (majorDivThickness <= 0.0) {
+            throw new ExecutionException("'majorDivThickness' must be greater than 0");
         }
     }
 
     @Override
     public void relativeTo(Frame prime)
     {
-        // Do nothing
+        textRotation = Lorentz.toPrimeAngle(textRotation, prime.getV());
     }
+
 }

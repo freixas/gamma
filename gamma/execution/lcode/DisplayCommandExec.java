@@ -88,7 +88,7 @@ public class DisplayCommandExec extends CommandExec
                     newCenter.getX()- originalCenter.getX(),
                     newCenter.getY()- originalCenter.getY());
 
-                context.scale = context.getCurrentScale();
+                context.invScale = context.getCurrentInvScale();
                 context.bounds = context.getCurrentCanvasBounds();
 
             }
@@ -220,24 +220,43 @@ public class DisplayCommandExec extends CommandExec
 
         gc.translate(originX, originT);
 
-        // Set real scale.
-        // The user's scale is such that number of world units for the lesser of
-        // the width or height is (100 / user scale). A scale of 1 gives 100
-        // units across, a scale of 2 gives 50 world units, a scale of .5 gives
+        // Set real invScale.
+        // The user's invScale is such that number of world units for the lesser of
+        // the width or height is (100 / user invScale). A invScale of 1 gives 100
+        // units across, a invScale of 2 gives 50 world units, a invScale of .5 gives
         // 200 world units, etc.
 
         double realScale = Math.min(width, height) / (100.0 / struct.scale);
         gc.scale(realScale, realScale);
 
-        context.scale = context.getCurrentScale();
+        context.invScale = context.getCurrentInvScale();
         context.bounds = context.getCurrentCanvasBounds();
     }
 
+//    static Color[] colors = { Color.ALICEBLUE, Color.ANTIQUEWHITE, Color.AQUA, Color.AZURE,
+//        Color.BEIGE, Color.BISQUE, Color.BLANCHEDALMOND, Color.BLUE };
+//    static int colorIndex = 0;
+
+    private final static Affine identifyTransform = new Affine();
+
     private void clearDisplay(Context context, Color color)
     {
-        Bounds bounds = context.bounds;
-        context.gc.setFill(color);
-        context.gc.fillRect(bounds.min.x, bounds.min.t, bounds.getWidth(), bounds.getHeight());
+        GraphicsContext gc = context.gc;
+        Canvas canvas = context.canvas;
+
+        // Currently, there is a bug where, with certain scales and translations,
+        // the bounds in world units don't match the bounds in screen
+        // unit. This code makes sure the entire canvas is cleared, but
+        // the problem remains for other things that depend on knowing the
+        // canvas bounds in world units.
+
+        gc.save();
+
+        gc.setTransform(identifyTransform);
+        gc.setFill(color);
+        context.gc.fillRect(0.0, 0.0, context.canvas.getWidth(), context.canvas.getHeight());
+
+        context.gc.restore();
     }
 
 }

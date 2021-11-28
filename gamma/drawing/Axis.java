@@ -16,6 +16,8 @@
  */
 package gamma.drawing;
 
+import gamma.execution.lcode.AxesStruct;
+import gamma.execution.lcode.LabelStruct;
 import gamma.execution.lcode.StyleStruct;
 import gamma.math.Util;
 import gamma.value.Bounds;
@@ -36,9 +38,8 @@ public class Axis
     static final double MIN_MAJOR_TICK_MARK_LENGTH = 10.0;
     static final double IDEAL_TICK_SPACING = 20.0;
 
-    public static void draw(Context context, Frame frame,
-                            gamma.value.Line.AxisType axisType,
-                            double tickScale, boolean positiveOnly, String xLabel,
+    public static void draw(Context context, AxesStruct struct,
+                            AxesStruct.AxisStruct axisStruct, double tickScale,
                             StyleStruct styles)
     {
         GraphicsContext gc = context.gc;
@@ -53,8 +54,8 @@ public class Axis
 
         // Get the values we need
 
-        double v = frame.getV();
-        gamma.value.Line line = new gamma.value.Line(axisType, frame);
+        double v = struct.frame.getV();
+        gamma.value.Line line = new gamma.value.Line(axisStruct.axisType, struct.frame);
 
         // *********************************************
         // *** Find out the current invScale.           ***
@@ -112,9 +113,9 @@ public class Axis
         // world units
 
         Bounds lineBounds = new Bounds(
-            positiveOnly && v >= 0.0 ? origin.x : Double.NEGATIVE_INFINITY,
+            struct.positiveOnly && v >= 0.0 ? origin.x : Double.NEGATIVE_INFINITY,
             origin.t - halfHeightMajor,
-            positiveOnly && v < 0.0 ? origin.x : Double.POSITIVE_INFINITY,
+            struct.positiveOnly && v < 0.0 ? origin.x : Double.POSITIVE_INFINITY,
             origin.t + halfHeightMajor);
 
         Bounds rotatedBounds = context.getCurrentCanvasBounds();
@@ -193,10 +194,14 @@ public class Axis
         gc.setStroke(styles.javaFXDivColor);
         gc.setLineWidth(worldTickThickness);
 
+        // If we only print out one of the axes, don't skip labeling 0
+
+        boolean skipZero = struct.x && struct.t;
+
         double x;
         int tickCount;
         for (x = firstTick, tickCount = tickNumber; x <= maxDistance; x += tickSpacing, tickCount++) {
-            if (tickCount != 0) {
+            if (tickCount != 0 || !skipZero) {
 
                 // Major tick
 
@@ -225,6 +230,11 @@ public class Axis
             return;
         }
 
+        LabelStruct labelStruct = new LabelStruct();
+        double savedTextRotation = styles.textRotation;
+        double savedTextPadding = styles.textPadding;
+        String savedTextAnchor = styles.textAnchor;
+
         // The text system has problems with rotations in the graphics
         // context combined with scaling the Y axis by -1. So if we have tick
         // labels, we need to undo the rotation
@@ -241,7 +251,8 @@ public class Axis
         // Set up the tick labels
 
         String format;
-        String anchor;
+        String anchorPlus;
+        String anchorMinus;
         int printEvery;
 
         // Half height is half the height of a major tickmark in screen
@@ -252,38 +263,46 @@ public class Axis
         format = getTickFormat(firstTick, maxDistance, tickSpacing);
 
         if (v >= 0.0) {
-            if (axisType == gamma.value.Line.AxisType.X) {
+            if (axisStruct.axisType == gamma.value.Line.AxisType.X) {
                 if (angle <= 22.5) {
-                    anchor = "TC";
+                    anchorPlus = "TC";      // Horz to slightly up CCW
+                    anchorMinus = "TC";
                 }
                 else {
-                    anchor = "TL";
-                }
+                    anchorPlus = "TL";      // Closer to +45
+                     anchorMinus = "BR";
+               }
             }
             else /* T axis */ {
                 if (angle <= 67.5)  {
-                    anchor = "BR";
+                    anchorPlus = "BR";      // Closer to +45
+                    anchorMinus = "TL";
                 }
                 else {
-                    anchor = "MR";
+                    anchorPlus = "MR";      // Vert to slighty down CW
+                    anchorMinus = "MR";
                 }
             }
         }
         else /* v < 0 */ {
-            if (axisType == gamma.value.Line.AxisType.X) {
+            if (axisStruct.axisType == gamma.value.Line.AxisType.X) {
                 if (angle >= -22.5) {
-                    anchor = "TC";
+                    anchorPlus = "TC";      // Horz to slightly down CW
+                    anchorMinus = "TC";
                 }
                 else {
-                    anchor = "TR";
+                    anchorPlus = "BL";      // Closer to -45
+                    anchorMinus = "TR";
                 }
             }
             else /* T axis */ {
                 if (angle >= -67.5)  {
-                    anchor = "BL";
+                    anchorPlus = "BL";      // Closer to -45
+                    anchorMinus = "TR";
                 }
                 else {
-                    anchor = "ML";
+                    anchorPlus = "MR";      // Vert to slightly down CCW
+                    anchorMinus = "MR";
                 }
             }
         }
@@ -292,21 +311,30 @@ public class Axis
         // and tickSpacing
 
         printEvery = getLabelSkip(firstTick, maxDistance, tickSpacing * tickScale, format, styles.font, viewportScale);
+        styles.textRotation = 0.0;
+        styles.textPadding = pad;
 
         for (x = firstTick, tickCount = tickNumber; x <= maxDistance; x += tickSpacing, tickCount++) {
-            if (tickCount != 0) {
+            if (tickCount != 0 || !skipZero) {
                 if (tickCount % printEvery == 0) {
                     double tickValue = (x - origin.x) / tickScale;
-                    if (v < 0 && axisType == gamma.value.Line.AxisType.T) tickValue = -tickValue;
+                    if (v < 0 && axisStruct.axisType == gamma.value.Line.AxisType.T) tickValue = -tickValue;
                     Point2D pos1 = revRotation.transform(x, origin.t);
-                    Text.draw(context, pos1.getX(), pos1.getY(), String.format(format, tickValue), 0.0,
-                              styles.javaFXColor, styles.font, pad, anchor);
+
+                    labelStruct.location = new Coordinate(pos1.getX(), pos1.getY());
+                    labelStruct.text = String.format(format, tickValue);
+
+                    styles.textAnchor = tickValue >= 0 ? anchorPlus : anchorMinus;
+                    Label.draw(context, labelStruct, styles);
                 }
             }
         }
 
         // Restore the original graphics context
 
+        styles.textRotation = savedTextRotation;
+        styles.textPadding = savedTextPadding;
+        styles.textAnchor = savedTextAnchor;
         gc.restore();
     }
 
@@ -388,9 +416,9 @@ public class Axis
         double minValue, double maxValue, double delta, String format, Font font, double scale)
     {
         String minString = String.format(format, minValue);
-        javafx.geometry.Bounds minBounds = Text.getTextBounds(minString, font);
+        javafx.geometry.Bounds minBounds = Label.getTextBounds(minString, font);
         String maxString = String.format(format, maxValue);
-        javafx.geometry.Bounds maxBounds = Text.getTextBounds(maxString, font);
+        javafx.geometry.Bounds maxBounds = Label.getTextBounds(maxString, font);
 
         double maxWidth = Math.max(minBounds.getWidth(), maxBounds.getWidth()) * scale * 2;
         double s = maxWidth / delta;

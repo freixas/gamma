@@ -16,8 +16,7 @@
  */
 package gamma.value;
 
-import gamma.execution.lcode.Color;
-import java.util.HashMap;
+import gamma.execution.lcode.StyleStruct;
 
 /**
  *
@@ -46,25 +45,7 @@ public class Property implements PropertyElement
 
     public boolean isStyleProperty()
     {
-        switch (name) {
-            case "color"                -> { return true; }
-            case "backgroundColor"      -> { return true; }
-            case "lineThickness"        -> { return true; }
-            case "lineStyle"            -> { return true; }
-            case "arrow"                -> { return true; }
-            case "eventDiameter"        -> { return true; }
-            case "eventShape"           -> { return true; }
-            case "fontFamily"           -> { return true; }
-            case "fontWeight"           -> { return true; }
-            case "fontStyle"            -> { return true; }
-            case "fontSize"             -> { return true; }
-            case "textPadding"          -> { return true; }
-            case "textAnchor"           -> { return true; }
-            case "ticks"                -> { return true; }
-            case "tickLabels"           -> { return true; }
-            case "tickThickness"        -> { return true; }
-            case "majorTickThickness"   -> { return true; }
-            default                     -> { return false; }
-        }
+        return StyleStruct.isStyleProperty(this);
     }
+
 }

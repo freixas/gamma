@@ -17,8 +17,9 @@
 package gamma.value;
 
 import gamma.ProgrammingException;
+import gamma.execution.ExecutionException;
+import gamma.math.Lorentz;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.ListIterator;
 
 /**
@@ -32,7 +33,7 @@ public class Worldline
     private final double dInit;
 
     private final ArrayList<WorldlineSegment> segments;
-    private WorldlineSegment lastSegment = null;
+    private transient WorldlineSegment lastSegment = null;
 
     public Worldline(WInitializer initializer)
     {
@@ -43,38 +44,111 @@ public class Worldline
         segments = new ArrayList<>();
     }
 
-    public void addSegment(WorldlineSegment.LimitType type, double delta, double a, double v)
+//    private Worldline(Coordinate origin, double tauInit, double dInit, ArrayList<WorldlineSegment> segments)
+//    {
+//        this.origin = origin;
+//        this.tauInit = tauInit;
+//        this.dInit = dInit;
+//        this.segments = segments;
+//    }
+//
+    public WorldlineSegment addSegment(WorldlineSegment.LimitType type, double delta, double a, double v)
     {
         WorldlineSegment segment;
+
+        // Add the first segment
+
         if (segments.size() < 1) {
+            if (Double.isNaN(v)) v = 0.0;
             segment = new WorldlineSegment(type, delta, a, v, origin, tauInit, dInit);
             segment.setInfinitePast();
         }
+
+        // Add any segment that is not the first and not the last
+
         else {
-            WorldlineSegment.Endpoint maxLimit = lastSegment.getMax();
+            HyperbolaEndpoint maxLimit = lastSegment.getMax();
+            if (Double.isNaN(v)) v = maxLimit.v;
             segment = new WorldlineSegment(type, delta, a, v, new Coordinate(maxLimit.x, maxLimit.t), maxLimit.tau, maxLimit.d);
         }
 
         segments.add(segment);
         lastSegment = segment;
+
+        return segment;
     }
 
-    public void addFinalSegment(double a, double v)
+    public WorldlineSegment addFinalSegment(double a, double v)
     {
         WorldlineSegment segment;
         if (segments.size() < 1) {
+            if (Double.isNaN(v)) v = 0.0;
             segment = new WorldlineSegment(WorldlineSegment.LimitType.T, 0, a, v, origin, tauInit, dInit);
             segment.setInfinitePast();
             segment.setInfiniteFuture();
         }
         else {
-            WorldlineSegment.Endpoint maxLimit = lastSegment.getMax();
+            HyperbolaEndpoint maxLimit = lastSegment.getMax();
+            if (Double.isNaN(v)) v = maxLimit.v;
             segment = new WorldlineSegment(WorldlineSegment.LimitType.T, 0, a, v, new Coordinate(maxLimit.x, maxLimit.t), maxLimit.tau, maxLimit.d);
+            segment.setInfiniteFuture();
         }
 
-        segment.setInfiniteFuture();
         segments.add(segment);
         lastSegment = segment;
+
+        return segment;
+    }
+
+    public ArrayList<WorldlineSegment> getSegments()
+    {
+        return segments;
+    }
+
+    public Worldline relativeTo(Frame prime)
+    {
+        Worldline worldline = new Worldline(new WInitializer(prime.toFrame(origin), tauInit, dInit));
+        ArrayList<WorldlineSegment>newSegments = worldline.getSegments();
+
+        ListIterator<WorldlineSegment> iter = segments.listIterator();
+        while (iter.hasNext()) {
+            WorldlineSegment segment = iter.next();
+            WorldlineSegment newSegment;
+
+            newSegment = new WorldlineSegment(
+                segment.getA(),
+                Lorentz.vPrime(segment.getOriginalMin().v, prime.getV()),
+                prime.toFrame(segment.getOriginalMin().x, segment.getOriginalMin().t),
+                prime.toFrame(segment.getOriginalMax().x, segment.getOriginalMax().t),
+                segment.getOriginalMin().tau, segment.getOriginalMin().d);
+            newSegments.add(newSegment);
+
+            // Last segment
+
+            if (!iter.hasNext()) {
+
+                // One and only segment
+
+                if (segments.size() == 1) {
+                    newSegment.setInfinitePast();
+                    newSegment.setInfiniteFuture();
+                }
+
+                // Last, but not first, segment
+
+                else {
+                    newSegment.setInfiniteFuture();
+                }
+            }
+
+            // First, but not last, segment
+
+            else if (newSegments.size() == 1) {
+                newSegment.setInfinitePast();
+            }
+        }
+
+        return worldline;
     }
 
     // **********************************************************
@@ -97,7 +171,7 @@ public class Worldline
             double v = iter.next().dToV(d);
             if (!Double.isNaN(d)) return v;
         }
-        throw new ArithmeticException("dToV(): No matching velocity for d.");
+        throw new ExecutionException("dToV(): No matching velocity for d.");
     }
 
     /**
@@ -114,7 +188,7 @@ public class Worldline
             double x = iter.next().dToX(d);
             if (!Double.isNaN(x)) return x;
         }
-        throw new ArithmeticException("dToX(): No matching x coordinate for d.");
+        throw new ExecutionException("dToX(): No matching x coordinate for d.");
    }
 
     /**
@@ -131,7 +205,7 @@ public class Worldline
             double t = iter.next().dToT(d);
             if (!Double.isNaN(t)) return t;
         }
-        throw new ArithmeticException("dToT(): No or infinite matching times for d.");
+        throw new ExecutionException("dToT(): No or infinite matching times for d.");
     }
 
     /**
@@ -148,7 +222,7 @@ public class Worldline
             double tau = iter.next().dToTau(d);
             if (!Double.isNaN(tau)) return tau;
         }
-        throw new ArithmeticException("dToTau(): No or infinite matching taus for d.");
+        throw new ExecutionException("dToTau(): No or infinite matching taus for d.");
     }
 
     // **********************************************************
@@ -342,4 +416,29 @@ public class Worldline
         }
         return null;
     }
+
+    @Override
+    public String toString()
+    {
+        String str =
+            "Origin          : " + origin + "\n" +
+            "Initial tau     : " + tauInit + "\n" +
+            "Initial distance: " + dInit + "\n";
+
+        if (segments.size() > 0) {
+            str += "Segments:";
+
+            for (int i = 0; i < segments.size(); i++) {
+                str +=
+                    "\n  " + i + ": " + segments.get(i).toString().replaceAll("(?m)^", "  ");
+            }
+        }
+        else {
+            str += "No segments";
+        }
+
+        return str;
+    }
+
+
 }

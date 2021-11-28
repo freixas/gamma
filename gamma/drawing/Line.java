@@ -16,10 +16,11 @@
  */
 package gamma.drawing;
 
+import gamma.execution.lcode.LineStruct;
 import gamma.execution.lcode.StyleStruct;
+import gamma.value.Bounds;
 import gamma.value.LineSegment;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.StrokeLineCap;
 
 /**
@@ -30,30 +31,32 @@ public class Line
 {
 
     /**
+     * Draw a line.
+     *
+     * @param context The drawing context.
+     * @param struct The line command structure.
+     * @param styles The styles to use.
+     */
+    public static void draw(Context context, LineStruct struct, StyleStruct styles)
+    {
+//        Bounds clip = context.bounds.intersect(struct.clip);
+//        if (clip == null) return;
+
+        LineSegment segment = struct.line.intersect(context.bounds);
+        if (segment == null) return;
+
+        draw(context, segment, styles);
+    }
+
+    /**
      * Draw a line segment.
      *
      * @param context The drawing context.
      * @param segment The line segment to draw.
      * @param styles The styles to use.
      */
-    static public void draw(Context context, LineSegment segment, StyleStruct styles)
-    {
-        draw(context, segment, styles.lineThickness, styles.arrow, styles);
-    }
-
-    /**
-     * Draw a line segment.Override some styles with specific settings.
-     *
-     * @param context The drawing context.
-     * @param segment The line segment to draw.
-     * @param thickness The line thickness.
-     * @param arrow Whether to draw arrowheads and which end(s) to draw them on.
-     * @param styles The styles to use.
-     */
     static public void draw(
-        Context context, LineSegment segment,
-        double thickness, String arrow,
-        StyleStruct styles)
+        Context context, LineSegment segment, StyleStruct styles)
     {
         GraphicsContext gc = context.gc;
 
@@ -63,7 +66,7 @@ public class Line
 
         setupLineGc(context, styles);
 
-        drawRaw(context, segment, arrow);
+        drawRaw(context, segment, styles);
 
         // Restore the original graphics context
 
@@ -71,13 +74,13 @@ public class Line
     }
 
     /**
-     * Draw a line segment. Don't save, restore or setup the graphics context.
+     * Draw a line segment.Don't save, restore or setup the graphics context.
      *
      * @param context The drawing context.
      * @param segment The line segment to draw.
-     * @param arrow Whether to draw arrowheads and which end(s) to draw them on.
+     * @param styles The styles to use.
      */
-    static public void drawRaw(Context context, LineSegment segment, String arrow)
+    static public void drawRaw(Context context, LineSegment segment, StyleStruct styles)
     {
         GraphicsContext gc = context.gc;
 
@@ -89,13 +92,20 @@ public class Line
 
         // Draw the arrowheads
 
-        if (arrow.equals("both") || arrow.equals("start")) {
-            // TO DO
-            // Draw the arrowhead at the start
+        boolean bothArrows = styles.arrow.equals("both");
+        boolean startArrow = styles.arrow.equals("start") || bothArrows;
+        boolean endArrow = styles.arrow.equals("end") || bothArrows;
+
+        double angle = 0.0;
+        if (startArrow || endArrow) {
+            angle = segment.getAngle();
         }
-        if (arrow.equals("both") || arrow.equals("end")) {
-            // TO DO
-            // Draw the arrowhead at the end
+
+        if (startArrow) {
+            Arrow.draw(context, segment.point1, angle + 180.0, styles);
+        }
+        if (endArrow) {
+            Arrow.draw(context, segment.point2, angle, styles);
         }
     }
 
@@ -109,43 +119,29 @@ public class Line
      */
     static public void setupLineGc(Context context, StyleStruct styles)
     {
-        setupLineGc(context, styles.javaFXColor, styles.lineStyle, styles.lineThickness);
-    }
-
-    /**
-     * Set up the graphics context for drawing a line.
-     *
-     * @param context The context.
-     * @param color A JavaFX Color.
-     * @param lineStyle The line style ("solid", "dashed", or "dotted").
-     * @param lineThickness The line thickness in pixels.
-     */
-    static public void setupLineGc(Context context, Color color, String lineStyle, double lineThickness)
-    {
         GraphicsContext gc = context.gc;
-        double scale = context.getCurrentInvScale();
+        double scale = context.invScale;
 
         // Set the line color
 
-        gc.setStroke(color);
+        gc.setStroke(styles.javaFXColor);
 
         // *** NOTE: For now, we'll assume the stroke style is CENTER
         // Set the line thickness
 
-        double worldLineThickness = lineThickness * scale;
+        double worldLineThickness = styles.lineThickness * scale;
         gc.setLineWidth(worldLineThickness);
 
         // Set the line style
 
-        if (lineStyle.equals("dashed")) {
+        if (styles.lineStyle.equals("dashed")) {
             double dashLength = 5.0 * scale;
             gc.setLineDashes(dashLength, dashLength);
         }
-        else if (lineStyle.equals("dotted")) {
+        else if (styles.lineStyle.equals("dotted")) {
             gc.setLineCap(StrokeLineCap.ROUND);
             gc.setLineDashes(worldLineThickness / 10.0, worldLineThickness * 2);
         }
     }
-
 
 }

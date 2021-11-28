@@ -17,7 +17,7 @@
 package gamma.execution.lcode;
 
 import gamma.drawing.Context;
-import gamma.drawing.Text;
+import gamma.drawing.Label;
 
 /**
  *
@@ -31,7 +31,7 @@ public class LabelCommandExec extends CommandExec
     {
         LabelStruct struct = (LabelStruct)cmdStruct;
 
-        Text.draw(context, struct.location.x, struct.location.t, struct.text, struct.rotation, styles);
+        Label.draw(context, struct, styles);
     }
 
 }
