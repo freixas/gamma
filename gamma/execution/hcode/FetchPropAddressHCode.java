@@ -40,11 +40,11 @@ public class FetchPropAddressHCode extends HCode
     }
 
     @Override
-    public void execute(HCodeEngine engine, List<Object> code)
+    public void execute(HCodeEngine engine, List<Object> data)
     {
-        Address address = (Address)code.get(0);
-        String propName = (String) code.get(1);
-        code.clear();
+        Address address = (Address)data.get(0);
+        String propName = (String) data.get(1);
+        data.clear();
 
         // Get the value pointed at by the address
         // This is either a symbol in a symbol table or a property in an object.
@@ -64,7 +64,7 @@ public class FetchPropAddressHCode extends HCode
 
         // Convert this value into an address to this property
 
-        code.add(new ObjectPropertyAddress((ObjectContainer)value, propName));
+        data.add(new ObjectPropertyAddress((ObjectContainer)value, propName));
     }
 
     @Override

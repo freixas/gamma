@@ -41,16 +41,16 @@ public class ObserverHCode extends HCode
     }
 
     @Override
-    public void execute(HCodeEngine engine, List<Object> code)
+    public void execute(HCodeEngine engine, List<Object> data)
     {
         // The total number of segments is the size of the code stack, minus
-        // the worldline initializer, the argument count, and the hCode.
+        // the worldline initializer and the argument count
 
-        int numOfSegments = code.size() - 3;
+        int numOfSegments = data.size() - 2;
 
         // Grab the worldline initializer
 
-        WInitializer initializer = (WInitializer)code.get(0);
+        WInitializer initializer = (WInitializer)data.get(0);
 
         ArrayList<WSegment> segments = new ArrayList<>();
 
@@ -60,7 +60,7 @@ public class ObserverHCode extends HCode
 
             // Grab each of the segments
 
-            WSegment segment = (WSegment)code.get(i);
+            WSegment segment = (WSegment)data.get(i);
 
             // Check that all segments have a limit except for the last
 
@@ -71,9 +71,9 @@ public class ObserverHCode extends HCode
             segments.add(segment);
         }
 
-        code.clear();
+        data.clear();
 
-        code.add(new Observer(initializer, segments));
+        data.add(new Observer(initializer, segments));
     }
 
     @Override

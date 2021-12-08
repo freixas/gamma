@@ -38,12 +38,12 @@ public class UnaryMinusHCode extends HCode
     }
 
     @Override
-    public void execute(HCodeEngine engine, List<Object> code)
+    public void execute(HCodeEngine engine, List<Object> data)
     {
-        double num = (Double)code.get(0);
-        code.clear();
+        double num = (Double)data.get(0);
+        data.clear();
 
-        code.add(-num);
+        data.add(-num);
     }
 
     @Override

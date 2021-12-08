@@ -18,7 +18,7 @@ package gamma.value;
 
 import gamma.ProgrammingException;
 import gamma.execution.ExecutionException;
-import gamma.math.Lorentz;
+import gamma.math.Relativity;
 import java.util.ArrayList;
 import java.util.ListIterator;
 
@@ -117,7 +117,7 @@ public class Worldline
 
             newSegment = new WorldlineSegment(
                 segment.getA(),
-                Lorentz.vPrime(segment.getOriginalMin().v, prime.getV()),
+                Relativity.vPrime(segment.getOriginalMin().v, prime.getV()),
                 prime.toFrame(segment.getOriginalMin().x, segment.getOriginalMin().t),
                 prime.toFrame(segment.getOriginalMax().x, segment.getOriginalMax().t),
                 segment.getOriginalMin().tau, segment.getOriginalMin().d);

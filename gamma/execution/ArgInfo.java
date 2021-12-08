@@ -38,9 +38,12 @@ public class ArgInfo
 
     private final int numberOfArgs;
     private final List<Type> argTypes;
+    private final int numberOfReturnedValues;
 
     /**
      * Define the valid arguments for an HCode instruction or a Function.
+     * <p>
+     * This constructor sets the number of returned values to 1.
      *
      * @param numberOfArgs The number of arguments. If -1, then the number is
      * variable.
@@ -50,13 +53,49 @@ public class ArgInfo
      */
     public ArgInfo(int numberOfArgs, List<Type> argTypes)
     {
-        this.numberOfArgs = numberOfArgs;
-        this.argTypes = argTypes;
+        this(numberOfArgs, argTypes, 1);
     }
 
+    /**
+     * Define the valid arguments for an HCode instruction or a Function.
+     *
+     * @param numberOfArgs The number of arguments. If -1, then the number is
+     * variable.
+     * @param argTypes A list of the allowed argument types. Arguments and types
+     * are matched 1-to-1. If the number of arguments is variable, the last type
+     * on the list is repeatedly applied to any remaining arguments.
+     * @param numberOfReturnedValues The number of values returned by the
+     * associated HCode or Function.
+     */
+    public ArgInfo(int numberOfArgs, List<Type> argTypes, int numberOfReturnedValues)
+    {
+        this.numberOfArgs = numberOfArgs;
+        this.argTypes = argTypes;
+        this.numberOfReturnedValues = numberOfReturnedValues;
+    }
+
+    /**
+     * Return the number of arguments required by an HCode instruction or
+     * Function. A value of -1 means that we get the number of arguments from
+     * the data stack.
+     *
+     * @return The number of arguments required by an HCode instruction or
+     * Function.
+     */
     public int getNumberOfArgs()
     {
         return numberOfArgs;
+    }
+
+    /**
+     * Get the number of values pushed back onto the data stack. Currently,
+     * this will be either 1 or 0.
+     *
+     * @return The number of values pushed back onto the data stack.
+     */
+    public int getNumberOfReturnedValues()
+    {
+        return numberOfReturnedValues;
     }
 
     public void checkTypes(List<Object> code)
@@ -66,6 +105,12 @@ public class ArgInfo
 
         while (iter.hasNext()) {
             Object obj = iter.next();
+
+            // If this is the last object to check and the number of args is -1, then the
+            // last object is an integer which has already been checked, so we're done
+
+            if (numberOfArgs == -1 && !iter.hasNext()) return;
+            
             switch (argTypes.get(argTypePtr)) {
                 case INTEGER ->             { if (!(obj instanceof Integer))                                throwTypeError("an integer"); }
                 case DOUBLE ->              { if (!(obj instanceof Double))                                 throwTypeError("a number"); }

@@ -16,7 +16,7 @@
  */
 package gamma.value;
 
-import gamma.math.Lorentz;
+import gamma.math.Relativity;
 
 /**
  * This is a worldline initializer definition structure. It is used to

@@ -31,7 +31,7 @@ public class LineInfoHCode extends HCode
     private final static ArgInfo argInfo;
     static {
         ArrayList<ArgInfo.Type> argTypes = new ArrayList<>();
-        argInfo = new ArgInfo(0, argTypes);
+        argInfo = new ArgInfo(0, argTypes, 0);
     }
 
     private final File file;
@@ -44,9 +44,9 @@ public class LineInfoHCode extends HCode
     }
 
     @Override
-    public void execute(HCodeEngine engine, List<Object> code)
+    public void execute(HCodeEngine engine, List<Object> data)
     {
-        code.clear();
+        data.clear();
 
         engine.setFile(file);
         engine.setLineNumber(lineNumber);

@@ -38,12 +38,12 @@ public class UnaryPlusHCode extends HCode
     }
 
     @Override
-    public void execute(HCodeEngine engine, List<Object> code)
+    public void execute(HCodeEngine engine, List<Object> data)
     {
-        Double arg1 = (Double)code.get(0);
-        code.clear();
+        Double arg1 = (Double)data.get(0);
+        data.clear();
 
-        code.add(arg1);
+        data.add(arg1);
     }
 
     @Override

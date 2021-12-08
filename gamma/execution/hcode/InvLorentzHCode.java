@@ -40,10 +40,10 @@ public class InvLorentzHCode extends HCode
     }
 
     @Override
-    public void execute(HCodeEngine engine, List<Object> code)
+    public void execute(HCodeEngine engine, List<Object> data)
     {
-        Coordinate coord = (Coordinate)code.get(0);
-        Object arg2 =                  code.get(1);
+        Coordinate coord = (Coordinate)data.get(0);
+        Object arg2 =                  data.get(1);
 
         Frame frame;
         if (arg2 instanceof Observer observer) {
@@ -53,9 +53,9 @@ public class InvLorentzHCode extends HCode
             frame = (Frame)arg2;
         }
 
-        code.clear();
+        data.clear();
 
-        code.add(frame.toRest(coord));
+        data.add(frame.toRest(coord));
     }
 
     @Override

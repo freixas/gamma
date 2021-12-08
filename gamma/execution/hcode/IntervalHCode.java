@@ -44,14 +44,14 @@ public class IntervalHCode extends HCode
     }
 
     @Override
-    public void execute(HCodeEngine engine, List<Object> code)
+    public void execute(HCodeEngine engine, List<Object> data)
     {
-        double t1 = (Double)code.get(0);
-        double t2 = (Double)code.get(1);
+        double t1 = (Double)data.get(0);
+        double t2 = (Double)data.get(1);
 
-        code.clear();
+        data.clear();
 
-        code.add(new Interval(t1, t2));
+        data.add(new Interval(t1, t2));
     }
 
     @Override

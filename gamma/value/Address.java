@@ -22,7 +22,7 @@ package gamma.value;
  *
  * @author Antonio Freixas
  */
-public abstract class Address
+public abstract class Address implements ExecutionImmutable
 {
     /**
      * Return true if the object referenced by this address exists.

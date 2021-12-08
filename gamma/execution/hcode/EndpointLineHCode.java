@@ -39,13 +39,13 @@ public class EndpointLineHCode extends HCode
     }
 
     @Override
-    public void execute(HCodeEngine engine, List<Object> code)
+    public void execute(HCodeEngine engine, List<Object> data)
     {
-        Coordinate coord1 = (Coordinate)code.get(0);
-        Coordinate coord2 = (Coordinate)code.get(1);
-        code.clear();
+        Coordinate coord1 = (Coordinate)data.get(0);
+        Coordinate coord2 = (Coordinate)data.get(1);
+        data.clear();
 
-        code.add(new Line(coord1, coord2));
+        data.add(new Line(coord1, coord2));
     }
 
     @Override

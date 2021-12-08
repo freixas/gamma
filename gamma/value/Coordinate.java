@@ -16,7 +16,7 @@
  */
 package gamma.value;
 
-import gamma.math.Lorentz;
+import gamma.math.Relativity;
 import javafx.geometry.Point2D;
 
 /**

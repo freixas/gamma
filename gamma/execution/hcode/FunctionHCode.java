@@ -38,16 +38,18 @@ public class FunctionHCode extends HCode
     }
 
     @Override
-    public void execute(HCodeEngine engine, List<Object> code)
+    public void execute(HCodeEngine engine, List<Object> data)
     {
-        String funcName = (String)code.get(code.size() - 3);
+        String funcName = (String)data.get(data.size() - 2);
 
         Function function = Function.get(funcName);
         if (function == null) {
             throw new ExecutionException("Uknown function '" + funcName + "'");
         }
 
-        List<Object> funcCode = code.subList(0, code.size() - 3);
+        // The function arguments omit the argument count and function name
+        
+        List<Object> funcCode = data.subList(0, data.size() - 2);
 
         // Check the arguments
 
@@ -71,11 +73,11 @@ public class FunctionHCode extends HCode
 
         // Remove all of the function hcode
 
-        code.clear();
+        data.clear();
 
         // Add the result
 
-        code.add(result);
+        data.add(result);
     }
 
     @Override

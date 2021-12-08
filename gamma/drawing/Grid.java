@@ -18,7 +18,7 @@ package gamma.drawing;
 
 import gamma.execution.lcode.GridStruct;
 import gamma.execution.lcode.StyleStruct;
-import gamma.math.Lorentz;
+import gamma.math.Relativity;
 import gamma.math.Util;
 import gamma.value.Bounds;
 import gamma.value.Coordinate;
@@ -70,7 +70,7 @@ public class Grid
         // we need to find the equivalent size in our transformed space
 
         double minRestFrameSpacing = MIN_GRID_SIZE * context.invScale;
-        double minTransformedSpacing = Lorentz.invLengthContraction(minRestFrameSpacing, v);
+        double minTransformedSpacing = Relativity.invLengthContraction(minRestFrameSpacing, v);
 
         // We want to use the largest power of 10 that is larger than the
         // spacing we've calculated. For instance, if the spacing is 30, we

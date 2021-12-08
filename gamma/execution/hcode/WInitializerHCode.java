@@ -39,14 +39,14 @@ public class WInitializerHCode extends HCode
     }
 
     @Override
-    public void execute(HCodeEngine engine, List<Object> code)
+    public void execute(HCodeEngine engine, List<Object> data)
     {
-        Coordinate coord = (Coordinate)code.get(0);
-        double tau =       (Double)    code.get(1);
-        double d =         (Double)    code.get(2);
-        code.clear();
+        Coordinate coord = (Coordinate)data.get(0);
+        double tau =       (Double)    data.get(1);
+        double d =         (Double)    data.get(2);
+        data.clear();
 
-        code.add(new WInitializer(coord, tau, d));
+        data.add(new WInitializer(coord, tau, d));
     }
 
     @Override

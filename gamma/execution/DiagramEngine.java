@@ -44,14 +44,14 @@ import javafx.scene.control.Alert;
 public class DiagramEngine
 {
     private final MainWindow window;
-    private final LinkedList<Object> hCodes;
+    private final HCodeProgram program;
     private final boolean isAnimated;
     private LCodeEngine lCodeEngine = null;
 
     public DiagramEngine(MainWindow window, LinkedList<Object> hCodes, boolean isAnimated)
     {
         this.window = window;
-        this.hCodes = hCodes;
+        this.program = new HCodeProgram(hCodes);
         this.isAnimated = isAnimated;
     }
 
@@ -71,7 +71,7 @@ public class DiagramEngine
 
             try {
                 lCodeEngine = new LCodeEngine(window);
-                HCodeEngine hCodeEngine = new HCodeEngine(hCodes, lCodeEngine);
+                HCodeEngine hCodeEngine = new HCodeEngine(program, lCodeEngine);
                 hCodeEngine.execute();
 
                 // Set up the lcode engine for this set of lcodes.

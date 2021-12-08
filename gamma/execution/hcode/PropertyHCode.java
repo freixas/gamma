@@ -37,13 +37,13 @@ public class PropertyHCode extends HCode
     }
 
     @Override
-    public void execute(HCodeEngine engine, List<Object> code)
+    public void execute(HCodeEngine engine, List<Object> data)
     {
-        String name  = (String)code.get(0);
-        Object value =         code.get(1);
-        code.clear();
+        String name  = (String)data.get(0);
+        Object value =         data.get(1);
+        data.clear();
 
-        code.add(new Property(name, value));
+        data.add(new Property(name, value));
     }
 
     @Override

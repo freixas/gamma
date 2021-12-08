@@ -19,7 +19,7 @@ package gamma.execution.lcode;
 import gamma.value.Color;
 import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
-import gamma.math.Lorentz;
+import gamma.math.Relativity;
 import gamma.math.Util;
 import gamma.value.Frame;
 import gamma.value.Property;
@@ -250,7 +250,7 @@ public class StyleStruct extends Struct
     @Override
     public void relativeTo(Frame prime)
     {
-        textRotation = Lorentz.toPrimeAngle(textRotation, prime.getV());
+        textRotation = Relativity.toPrimeAngle(textRotation, prime.getV());
     }
 
 }

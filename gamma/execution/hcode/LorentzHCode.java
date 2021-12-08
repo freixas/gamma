@@ -41,11 +41,11 @@ public class LorentzHCode extends HCode
 
     @Override
     @SuppressWarnings("null")
-    public void execute(HCodeEngine engine, List<Object> code)
+    public void execute(HCodeEngine engine, List<Object> data)
     {
-        Coordinate coord = (Coordinate)code.get(0);
-        Object arg2 =                  code.get(1);
-        code.clear();
+        Coordinate coord = (Coordinate)data.get(0);
+        Object arg2 =                  data.get(1);
+        data.clear();
 
         Frame frame;
         if (arg2 instanceof Observer observer) {
@@ -55,7 +55,7 @@ public class LorentzHCode extends HCode
             frame = (Frame)arg2;
         }
 
-        code.add(frame.toFrame(coord));
+        data.add(frame.toFrame(coord));
     }
 
     @Override

@@ -16,7 +16,7 @@
  */
 package gamma.value;
 
-import gamma.math.Lorentz;
+import gamma.math.Relativity;
 import gamma.math.Util;
 import java.util.Objects;
 
@@ -98,7 +98,7 @@ public class Frame
         // Find the origin of the axes (where tau is 0)
 
         double distanceToOrigin = tau * scaling;
-        double theta = Lorentz.vToTAngle(v);
+        double theta = Relativity.vToTAngle(v);
         double signTheta = Util.sign(theta);
 
         origin = new Coordinate(
@@ -167,7 +167,7 @@ public class Frame
      */
     public Coordinate toRest(double x, double t)
     {
-        Coordinate tc = Lorentz.toRestFrame(x, t, v);
+        Coordinate tc = Relativity.toRestFrame(x, t, v);
         tc.x += origin.x;
         tc.t += origin.t;
         return tc;
@@ -197,7 +197,7 @@ public class Frame
      */
     public Coordinate toFrame(double x, double t)
     {
-        return Lorentz.toPrimeFrame(x - origin.x, t - origin.t, v);
+        return Relativity.toPrimeFrame(x - origin.x, t - origin.t, v);
     }
 
     /**
@@ -209,7 +209,7 @@ public class Frame
      */
     public Frame relativeTo(Frame prime)
     {
-        return new Frame(prime.toFrame(origin), Lorentz.vPrime(v, prime.getV()));
+        return new Frame(prime.toFrame(origin), Relativity.vPrime(v, prime.getV()));
     }
 
     @Override

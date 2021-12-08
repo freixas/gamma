@@ -36,15 +36,15 @@ public class FetchAddressHCode extends HCode
     }
 
     @Override
-    public void execute(HCodeEngine engine, List<Object> code)
+    public void execute(HCodeEngine engine, List<Object> data)
     {
-        String symbol = (String)code.get(0);
-        code.clear();
+        String symbol = (String)data.get(0);
+        data.clear();
 
         // Create an address. We don't worry whether this points to an existing
         //symbol until we need to assign to it (or find a property in it)
 
-        code.add(new SymbolTableAddress(engine.getSymbolTable(), symbol));
+        data.add(new SymbolTableAddress(engine.getSymbolTable(), symbol));
     }
 
     @Override

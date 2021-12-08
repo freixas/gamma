@@ -19,7 +19,7 @@ package gamma.execution.function;
 import gamma.execution.ArgInfo;
 import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
-import gamma.math.Lorentz;
+import gamma.math.Relativity;
 import gamma.value.Frame;
 import gamma.value.Observer;
 import java.util.ArrayList;
@@ -44,13 +44,13 @@ public class gammaFunction extends Function
     {
         Object arg1 = code.get(0);
         if (arg1 instanceof Double dbl) {
-            return Lorentz.gamma(dbl);
+            return Relativity.gamma(dbl);
         }
         else if (arg1 instanceof Observer observer) {
-            return Lorentz.gamma(new Frame(observer).getV());
+            return Relativity.gamma(new Frame(observer).getV());
         }
         else if (arg1 instanceof Frame frame) {
-            return Lorentz.gamma(frame.getV());
+            return Relativity.gamma(frame.getV());
         }
         else {
             throw new ExecutionException("gamma requires a velocity or a frame");

@@ -28,13 +28,15 @@ import java.util.List;
  */
 abstract public class HCode
 {
+    private int argOffset;
+
     /**
      * Execute the HCode.
      *
      * @param engine The HCode engine.
-     * @param code The code to execute, with all arguments.
+     * @param data The arguments for this hCode instruction.
      */
-    abstract public void execute(HCodeEngine engine, List<Object> code);
+    abstract public void execute(HCodeEngine engine, List<Object> data);
 
     /**
      * Return the number of arguments required. -1 means the size is on the
@@ -43,5 +45,15 @@ abstract public class HCode
      * @return The number of arguments required.
      */
     abstract public ArgInfo getArgInfo();
+
+    public int getArgOffset()
+    {
+        return argOffset;
+    }
+
+    public void setArgOffset(int argOffset)
+    {
+        this.argOffset = argOffset;
+    }
 
 }

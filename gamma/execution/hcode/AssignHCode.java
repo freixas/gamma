@@ -41,16 +41,16 @@ public class AssignHCode extends HCode
         ArrayList<ArgInfo.Type> argTypes = new ArrayList<>();
         argTypes.add(ArgInfo.Type.ADDRESS);
         argTypes.add(ArgInfo.Type.ANY);
-        argInfo = new ArgInfo(2, argTypes);
+        argInfo = new ArgInfo(2, argTypes, 0);
     }
 
     @Override
     @SuppressWarnings("null")
-    public void execute(HCodeEngine engine, List<Object> code)
+    public void execute(HCodeEngine engine, List<Object> data)
     {
-        Object arg1 = code.get(0);
-        Object arg2 = code.get(1);
-        code.clear();
+        Object arg1 = data.get(0);
+        Object arg2 = data.get(1);
+        data.clear();
 
         Address address = (Address)arg1;
 

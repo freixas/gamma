@@ -39,14 +39,14 @@ public class FrameHCode extends HCode
     }
 
     @Override
-    public void execute(HCodeEngine engine, List<Object> code)
+    public void execute(HCodeEngine engine, List<Object> data)
     {
-        Observer observer =   (Observer)    code.get(0);
-        Frame.AtType atType = (Frame.AtType)code.get(1);
-        Double atValue =      (Double)      code.get(2);
-        code.clear();
+        Observer observer =   (Observer)    data.get(0);
+        Frame.AtType atType = (Frame.AtType)data.get(1);
+        Double atValue =      (Double)      data.get(2);
+        data.clear();
 
-        code.add(new Frame(observer, atType, atValue));
+        data.add(new Frame(observer, atType, atValue));
     }
 
     @Override

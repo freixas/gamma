@@ -16,7 +16,7 @@
  */
 package gamma.value;
 
-import gamma.math.Lorentz;
+import gamma.math.Relativity;
 import gamma.math.Util;
 
 /**
@@ -80,10 +80,10 @@ public class Line extends CurveSegment
     public Line(AxisType type, double v, Coordinate point)
     {
         if (type == AxisType.X) {
-            initialize(Lorentz.vToXAngle(v), point);
+            initialize(Relativity.vToXAngle(v), point);
         }
         else {
-            initialize(Lorentz.vToTAngle(v), point);
+            initialize(Relativity.vToTAngle(v), point);
         }
     }
 
@@ -202,7 +202,7 @@ public class Line extends CurveSegment
      */
     public Line relativeTo(Frame prime)
     {
-        return new Line(Lorentz.toPrimeAngle(angle, prime.getV()), prime.toFrame(coord));
+        return new Line(Relativity.toPrimeAngle(angle, prime.getV()), prime.toFrame(coord));
     }
 
     /**

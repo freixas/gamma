@@ -38,13 +38,13 @@ public class CoordinateHCode extends HCode
     }
 
     @Override
-    public void execute(HCodeEngine engine, List<Object> code)
+    public void execute(HCodeEngine engine, List<Object> data)
     {
-        double x = (Double)code.get(0);
-        double t = (Double)code.get(1);
-        code.clear();
+        double x = (Double)data.get(0);
+        double t = (Double)data.get(1);
+        data.clear();
 
-        code.add(new Coordinate(x, t));
+        data.add(new Coordinate(x, t));
     }
 
     @Override

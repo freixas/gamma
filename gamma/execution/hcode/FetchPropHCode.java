@@ -38,11 +38,11 @@ public class FetchPropHCode extends HCode
     }
 
     @Override
-    public void execute(HCodeEngine engine, List<Object> code)
+    public void execute(HCodeEngine engine, List<Object> data)
     {
-        ObjectContainer container = (ObjectContainer)code.get(0);
-        String propName =           (String)         code.get(1);
-        code.clear();
+        ObjectContainer container = (ObjectContainer)data.get(0);
+        String propName =           (String)         data.get(1);
+        data.clear();
 
        // Make sure the value has the given property
 
@@ -53,7 +53,7 @@ public class FetchPropHCode extends HCode
         // Get the property value
 
         Object propValue = container.getProperty(propName);
-        code.add(propValue);
+        data.add(propValue);
     }
 
     @Override

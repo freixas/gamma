@@ -269,7 +269,7 @@ public final class Acceleration
         // The acceleration is moot. Since we have v, we can derive gamma
         // directly
 
-        return Lorentz.gamma(v);
+        return Relativity.gamma(v);
     }
 
     // **********************************************************

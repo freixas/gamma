@@ -37,17 +37,17 @@ public class FetchHCode extends HCode
     }
 
     @Override
-    public void execute(HCodeEngine engine, List<Object> code)
+    public void execute(HCodeEngine engine, List<Object> data)
     {
-        String symbol = (String)code.get(0);
-        code.clear();
+        String symbol = (String)data.get(0);
+        data.clear();
 
         SymbolTable table = engine.getSymbolTable();
         if (!table.contains(symbol)) {
             throw new ExecutionException("Variable '" + symbol + "' is not defined");
         }
         Object value = table.get(symbol);
-        code.add(value);
+        data.add(value);
     }
 
     @Override

@@ -23,7 +23,7 @@ import gamma.execution.SymbolTable;
  *
  * @author Antonio Freixas
  */
-public class SymbolTableAddress extends Address
+public class SymbolTableAddress extends Address implements ExecutionImmutable
 {
     private final SymbolTable table;
     private final String name;
@@ -33,6 +33,8 @@ public class SymbolTableAddress extends Address
         this.table = table;
         this.name = name;
     }
+
+    Symbol Table is problematic
 
     /**
      * Get the name of the symbol for which this object is an address.

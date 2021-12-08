@@ -40,13 +40,13 @@ public class DivHCode extends HCode
     }
 
     @Override
-    public void execute(HCodeEngine engine, List<Object> code)
+    public void execute(HCodeEngine engine, List<Object> data)
     {
-        Double num1 = (Double)code.get(0);
-        Double num2 = (Double)code.get(1);
-        code.clear();
+        Double num1 = (Double)data.get(0);
+        Double num2 = (Double)data.get(1);
+        data.clear();
 
-        code.add(num1 / num2);
+        data.add(num1 / num2);
     }
 
     @Override

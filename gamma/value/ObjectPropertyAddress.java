@@ -21,7 +21,7 @@ package gamma.value;
  *
  * @author Antonio Freixas
  */
-public class ObjectPropertyAddress extends Address
+public class ObjectPropertyAddress extends Address implements ExecutionImmutable
 {
     private final ObjectContainer container;
     private final String name;
@@ -31,6 +31,8 @@ public class ObjectPropertyAddress extends Address
         this.container = container;
         this.name = name;
     }
+
+    Retaining a pointer to the container is problematic for an immutable object
 
     /**
      * Get the name of the symbol for which this object is an address.

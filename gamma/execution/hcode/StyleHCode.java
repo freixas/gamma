@@ -38,17 +38,17 @@ public class StyleHCode extends HCode
     }
 
     @Override
-    public void execute(HCodeEngine engine, List<Object> code)
+    public void execute(HCodeEngine engine, List<Object> data)
     {
         // Style properties can only have style variables
 
-        PropertyList properties = (PropertyList)code.get(0);
-        code.clear();
+        PropertyList properties = (PropertyList)data.get(0);
+        data.clear();
 
         Style style = new Style();
         style.add(properties);
 
-        code.add(style);
+        data.add(style);
     }
 
     @Override

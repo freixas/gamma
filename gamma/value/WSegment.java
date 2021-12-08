@@ -16,7 +16,7 @@
  */
 package gamma.value;
 
-import gamma.math.Lorentz;
+import gamma.math.Relativity;
 
 /**
  * This is a worldline segment definition structure. It is used to
@@ -81,7 +81,7 @@ public class WSegment
         double v = this.v;
 
         if (!Double.isNaN(v)) {
-            v = Lorentz.vPrime(v, prime.getV());
+            v = Relativity.vPrime(v, prime.getV());
         }
 
         @SuppressWarnings("LocalVariableHidesMemberVariable")
@@ -89,10 +89,10 @@ public class WSegment
 
         if (type != WorldlineSegment.LimitType.NONE && !Double.isNaN(delta)) {
             if (type == WorldlineSegment.LimitType.D) {
-                delta = Lorentz.lengthContraction(delta, prime.getV());
+                delta = Relativity.lengthContraction(delta, prime.getV());
             }
             else if (type == WorldlineSegment.LimitType.T) {
-                delta = Lorentz.timeDilation(delta, prime.getV());
+                delta = Relativity.timeDilation(delta, prime.getV());
             }
         }
 

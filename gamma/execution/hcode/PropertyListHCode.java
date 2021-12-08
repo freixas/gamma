@@ -38,19 +38,22 @@ public class PropertyListHCode extends HCode
     }
 
     @Override
-    public void execute(HCodeEngine engine, List<Object> code)
+    public void execute(HCodeEngine engine, List<Object> data)
     {
-        int numOfProperties = code.size() - 2;
+        // The number of properties is the data size minus the properties
+        // count
+        
+        int numOfProperties = data.size() - 1;
 
         PropertyList properties = new PropertyList();
         for (int i = 0; i < numOfProperties; i++) {
-            PropertyElement element = (PropertyElement)code.get(i);
+            PropertyElement element = (PropertyElement)data.get(i);
             properties.add(element);
         }
 
-        code.clear();
+        data.clear();
 
-        code.add(properties);
+        data.add(properties);
     }
 
     @Override

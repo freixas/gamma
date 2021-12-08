@@ -38,18 +38,21 @@ public class PathHCode extends HCode
     }
 
     @Override
-    public void execute(HCodeEngine engine, List<Object> code)
+    public void execute(HCodeEngine engine, List<Object> data)
     {
-        double numOfCoordinates = code.size() - 2;
+        // The number of coordinates is the data size minus the path points
+        // count
+        
+        double numOfCoordinates = data.size() - 1;
 
         ArrayList<Coordinate> coords = new ArrayList<>();
         for (int i = 0; i < numOfCoordinates; i++) {
-            coords.add((Coordinate)code.get(i));
+            coords.add((Coordinate)data.get(i));
         }
 
-        code.clear();
+        data.clear();
 
-        code.add(new Path(coords));
+        data.add(new Path(coords));
     }
 
     @Override

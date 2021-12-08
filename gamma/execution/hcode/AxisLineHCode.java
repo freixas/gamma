@@ -41,12 +41,12 @@ public class AxisLineHCode extends HCode
     }
 
     @Override
-    public void execute(HCodeEngine engine, List<Object> code)
+    public void execute(HCodeEngine engine, List<Object> data)
     {
-        Line.AxisType type = (Line.AxisType)code.get(0);
-        Object arg2 =                       code.get(1);
-        double offset =      (Double)       code.get(2);
-        code.clear();
+        Line.AxisType type = (Line.AxisType)data.get(0);
+        Object arg2 =                       data.get(1);
+        double offset =      (Double)       data.get(2);
+        data.clear();
 
         Frame frame;
         if (arg2 instanceof Observer observer) {
@@ -56,7 +56,7 @@ public class AxisLineHCode extends HCode
             frame = (Frame)arg2;
         }
 
-        code.add(new Line(type, frame, offset));
+        data.add(new Line(type, frame, offset));
     }
 
     @Override

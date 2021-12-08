@@ -24,30 +24,36 @@ import java.util.ListIterator;
  *
  * @author Antonio Freixas
  */
-public class PropertyList implements PropertyElement
+public class PropertyList implements PropertyElement, ExecutionMutable
 {
     private final ArrayList<Property> properties;
     private final HashMap<String, Integer> index;
-    
+
     /**
      * Create an empty property list.
      */
     public PropertyList()
     {
-        this.properties = new ArrayList<>(); 
+        this.properties = new ArrayList<>();
         this.index = new HashMap<>();
     }
-    
+
+    @Override
+    public Object createCopy()
+    {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
     public boolean hasProperty(String name)
     {
         return index.containsKey(name);
     }
-    
+
     public Property getProperty(int index)
     {
         return properties.get(index);
     }
-    
+
     /**
      * Get the property's value.This will return null if the property does not
      * exist, although null might be a valid value for the property. To avoid
@@ -62,7 +68,7 @@ public class PropertyList implements PropertyElement
         if (i == null) return null;
         return properties.get(i).getValue();
     }
-    
+
     /**
      * Add a property element to the end of the property list. If the
      * element is a property list, add all the properties in that list to this
@@ -70,7 +76,7 @@ public class PropertyList implements PropertyElement
      * <p>
      * If the element is or contains a property that is already in the list,
      * the existing element is removed and the new one is added at the end.
-     * 
+     *
      * @param element
      */
     public void add(PropertyElement element)
@@ -82,36 +88,36 @@ public class PropertyList implements PropertyElement
             addList(propertyList);
         }
     }
-    
+
     protected void addProperty(Property property)
     {
         String name = property.getName();
-        
+
         // If the property exists, remove it
-        
+
         Integer i = index.get(name);
         if (i != null) {
             index.remove(name);
             properties.remove((int)i);
         }
-        
+
         // Add the property at the end of the list
-        
+
         index.put(property.getName(), properties.size());
         properties.add(property);
     }
-    
+
     protected void addList(PropertyList list)
     {
         ListIterator<Property> iter = list.properties.listIterator();
         while (iter.hasNext()) {
             addProperty(iter.next());
-        }        
+        }
     }
-    
+
     /**
      * Get the number of properties in the container.
-     * 
+     *
      * @return
      */
     public int size()

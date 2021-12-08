@@ -36,15 +36,15 @@ public class CommandHCode extends HCode
         ArrayList<ArgInfo.Type> argTypes = new ArrayList<>();
         argTypes.add(ArgInfo.Type.PROPERTY_LIST);
         argTypes.add(ArgInfo.Type.STRING);
-        argInfo = new ArgInfo(2, argTypes);
+        argInfo = new ArgInfo(2, argTypes, 0);
     }
 
     @Override
-    public void execute(HCodeEngine engine, List<Object> code)
+    public void execute(HCodeEngine engine, List<Object> data)
     {
-        PropertyList properties = (PropertyList)code.get(0);
-        String name =             (String)      code.get(1);
-        code.clear();
+        PropertyList properties = (PropertyList)data.get(0);
+        String name =             (String)      data.get(1);
+        data.clear();
 
         Command command = CommandFactory.createCommand(engine, name, properties);
         engine.addCommand(command);

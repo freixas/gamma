@@ -30,6 +30,7 @@ import gamma.value.Style;
 import gamma.value.WInitializer;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -40,8 +41,8 @@ import java.util.List;
 public class HCodeEngine
 {
     private static final Frame defFrame = new Frame(new Observer(new WInitializer(new Coordinate(0.0, 0.0), 0.0, 0.0), new ArrayList<>()), Frame.AtType.TAU, 0);
-    private final LinkedList<Object> codes;
 
+    private final HCodeProgram program;
     private final SymbolTable table;
     private final AnimationSymbolTable animationTable;
     private StyleStruct styleDefaults;
@@ -50,9 +51,9 @@ public class HCodeEngine
     private File file;
     private int lineNumber;
 
-    public HCodeEngine(LinkedList<Object> codes, LCodeEngine lCodeEngine)
+    public HCodeEngine(HCodeProgram program, LCodeEngine lCodeEngine)
     {
-        this.codes = codes;
+        this.program = program;
 
         this.table = new SymbolTable(this);
         this.animationTable = new AnimationSymbolTable(this);
@@ -102,9 +103,9 @@ public class HCodeEngine
         table.protect("defFrame");
     }
 
-    public LinkedList<Object> getCodes()
+    public HCodeProgram getProgram()
     {
-        return codes;
+        return program;
     }
 
     public SymbolTable getSymbolTable()
@@ -160,85 +161,33 @@ public class HCodeEngine
 
     public void execute()
     {
+        Iterator<HCode> iter = program.reset();
+
         try {
-            int codePtr = 0;
+            while (iter.hasNext()) {
+                HCode hCode = iter.next();
 
-            while (codes.size() > codePtr) {
+                // Check the arguments
 
-                // If we have an hCode, execute it. We continue scanning from
-                // the same position
+                ArgInfo argInfo = hCode.getArgInfo();
 
-                if (codes.get(codePtr) instanceof HCode) {
-                    codePtr = executeOneInstruction(codePtr);
-                }
-                else {
-                    codePtr++;
-                }
+                // Get the number of arguments
+
+                List<Object> data = program.getData(hCode);
+                argInfo.checkTypes(data);
+
+                // Execute the hCode
+
+                hCode.execute(this, data);
             }
 
-            if (codes.size() > 0) {
-                throw new ExecutionException("Execution ended but the code stack is not empty");
+            if (!program.isDataEmpty()) {
+                throw new ProgrammingException("HCodeEngine.execute(): Execution ended but the data stack is not empty");
             }
         }
         catch (Throwable e) {
             throwGammaException(e);
         }
-//        catch (ProgrammingException e) {
-//            throwProgrammingException(e);
-//        }
-    }
-
-    private int executeOneInstruction(int codePtr)
-    {
-        HCode hCode = (HCode)codes.get(codePtr);
-
-        // Check the arguments
-
-        ArgInfo argInfo = hCode.getArgInfo();
-
-        // Get the number of arguments
-
-        int numOfArgs = argInfo.getNumberOfArgs();
-        int n = 0;
-
-        if (numOfArgs == -1) {
-            if (codePtr > 0) {
-                Object argN = codes.get(codePtr - 1);
-                if (!(argN instanceof Integer)) {
-                    throw new ExecutionException("Expected the number of hCode arguments");
-                }
-                numOfArgs = (Integer)argN;
-                n = 1;
-            }
-            else {
-                throw new ExecutionException("hCode arguments are missing");
-            }
-        }
-
-        // Create a sublist of just the arguments
-
-        int codeStart = codePtr - numOfArgs - n;
-        if (codeStart < 0) {
-            throw new ExecutionException("Invalid number of hCode arguments");
-        }
-        List<Object> code = codes.subList(codeStart, codeStart + numOfArgs);
-
-        argInfo.checkTypes(code);
-
-        // Now create a sublist of the arguments, the potential argument count,
-        // and the instruction
-
-        code = codes.subList(codeStart, codePtr + 1);
-
-        // Execute the hCode
-
-        hCode.execute(this, code);
-
-        // This hCode returns either zero or one values. We need to start
-        // checking for the next instruction at whatever we have at the
-        // start of the chunk of code we just processed and removed
-
-        return codeStart;
     }
 
     public void addCommand(Command command)
@@ -253,7 +202,7 @@ public class HCodeEngine
             throw new GammaRuntimeException(file.getName() + ":" + lineNumber + ": " + e.getLocalizedMessage(), e);
         }
         else {
-           throw new GammaRuntimeException(file.getName() + ":" + lineNumber + ": " + e.getLocalizedMessage(), e);
+            throw new GammaRuntimeException(file.getName() + ":" + lineNumber + ": " + e.getLocalizedMessage(), e);
         }
     }
 

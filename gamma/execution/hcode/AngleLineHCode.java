@@ -39,13 +39,13 @@ public class AngleLineHCode extends HCode
     }
 
     @Override
-    public void execute(HCodeEngine engine, List<Object> code)
+    public void execute(HCodeEngine engine, List<Object> data)
     {
-        Double angle =     (Double)    code.get(0);
-        Coordinate coord = (Coordinate)code.get(1);
-        code.clear();
+        Double angle =     (Double)    data.get(0);
+        Coordinate coord = (Coordinate)data.get(1);
+        data.clear();
 
-        code.add(new Line(angle, coord));
+        data.add(new Line(angle, coord));
     }
 
     @Override

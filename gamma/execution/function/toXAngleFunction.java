@@ -19,7 +19,7 @@ package gamma.execution.function;
 import gamma.execution.ArgInfo;
 import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
-import gamma.math.Lorentz;
+import gamma.math.Relativity;
 import gamma.value.Frame;
 import gamma.value.Observer;
 import java.util.ArrayList;
@@ -44,13 +44,13 @@ public class toXAngleFunction extends Function
     {
         Object arg1 = code.get(0);
         if (arg1 instanceof Double dbl) {
-            return Lorentz.vToXAngle(dbl);
+            return Relativity.vToXAngle(dbl);
         }
         else if (arg1 instanceof Observer observer) {
-            return Lorentz.vToXAngle(new Frame(observer).getV());
+            return Relativity.vToXAngle(new Frame(observer).getV());
         }
         else if (arg1 instanceof Frame frame) {
-            return Lorentz.vToXAngle(frame.getV());
+            return Relativity.vToXAngle(frame.getV());
         }
         else {
             throw new ExecutionException("toXAngle requires a velocity or a frame");

@@ -17,7 +17,7 @@
 package gamma.execution.lcode;
 
 import gamma.execution.HCodeEngine;
-import gamma.math.Lorentz;
+import gamma.math.Relativity;
 import gamma.math.OffsetAcceleration;
 import gamma.math.Util;
 import gamma.value.Coordinate;
@@ -88,7 +88,7 @@ public class EventStruct extends Struct
                 // Find the acceleration for a curve that crosses this point
 
                 double v = t / x;
-                double crossingPoint = Lorentz.xPrime(x, t, v);
+                double crossingPoint = Relativity.xPrime(x, t, v);
                 double a = 1 / crossingPoint;
 
                 OffsetAcceleration curve = new OffsetAcceleration(a, 0, new Coordinate(crossingPoint, 0.0), 0.0, 0.0);
@@ -117,8 +117,8 @@ public class EventStruct extends Struct
                 double vStart = curve.tToV(t);
                 double vEnd = curve.tToV(boostPoint.t);
 
-                angleAtStart = Lorentz.vToTAngle(vStart);
-                angleAtEnd   = Lorentz.vToTAngle(vEnd);
+                angleAtStart = Relativity.vToTAngle(vStart);
+                angleAtEnd   = Relativity.vToTAngle(vEnd);
 
                 double signStart = Util.sign(vStart) * Util.sign(boostPoint.t - t);
                 double signEnd   = Util.sign(vEnd  ) * Util.sign(boostPoint.t - t);

@@ -41,15 +41,15 @@ public class WSegmentHCode extends HCode
     }
 
     @Override
-    public void execute(HCodeEngine engine, List<Object> code)
+    public void execute(HCodeEngine engine, List<Object> data)
     {
-        double v =     (Double)code.get(0);
-        double a =     (Double)code.get(1);
-        WorldlineSegment.LimitType limitType = (WorldlineSegment.LimitType)code.get(2);
-        double delta = (Double)code.get(3);
-        code.clear();
+        double v =     (Double)data.get(0);
+        double a =     (Double)data.get(1);
+        WorldlineSegment.LimitType limitType = (WorldlineSegment.LimitType)data.get(2);
+        double delta = (Double)data.get(3);
+        data.clear();
 
-        code.add(new WSegment(v, a, limitType, delta));
+        data.add(new WSegment(v, a, limitType, delta));
     }
 
     @Override

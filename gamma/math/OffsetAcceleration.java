@@ -405,7 +405,7 @@ public class OffsetAcceleration
         // The acceleration is moot. Since we have v, we can derive gamma
         // directly
 
-        return Lorentz.gamma(v);
+        return Relativity.gamma(v);
     }
 
     // **********************************************************
@@ -598,7 +598,7 @@ public class OffsetAcceleration
      */
     public final double xToGamma(double x)
     {
-	if (zeroAcceleration) return Lorentz.gamma(vInit);
+	if (zeroAcceleration) return Relativity.gamma(vInit);
 	return Acceleration.xToGamma(a, x - offset.x);
     }
 
@@ -702,7 +702,7 @@ public class OffsetAcceleration
      public final double dToGamma(double d)
     {
         if (zeroAcceleration) {
-            if (!zeroVelocity) return Lorentz.gamma(vInit);
+            if (!zeroVelocity) return Relativity.gamma(vInit);
             if (Util.fuzzyEQ(d, stdVPointD)) return 1;
             throw new ArithmeticException("The distance matches no point on the acceleration curve.");
         }
@@ -769,7 +769,7 @@ public class OffsetAcceleration
     public final double tToTau(double t)
     {
         if (zeroAcceleration) {
-            return toOffsetTau(Lorentz.tToTau(t - offset.t, vInit));
+            return toOffsetTau(Relativity.tToTau(t - offset.t, vInit));
         }
         return toOffsetTau(Acceleration.tToTau(a, t - offset.t));
     }
@@ -782,7 +782,7 @@ public class OffsetAcceleration
      */
     public final double tToGamma(double t)
     {
-	if (zeroAcceleration) return Lorentz.gamma(vInit);
+	if (zeroAcceleration) return Relativity.gamma(vInit);
 	return Acceleration.tToGamma(a, t - offset.t);
     }
 
@@ -813,7 +813,7 @@ public class OffsetAcceleration
     public final double tauToX(double tau)
     {
 	if (zeroAcceleration) {
-	    return vInit * Lorentz.tauToT(toStdTau(tau), vInit) + offset.x;
+	    return vInit * Relativity.tauToT(toStdTau(tau), vInit) + offset.x;
         }
 	return Acceleration.tauToX(a, toStdTau(tau)) + offset.x;
     }
@@ -830,7 +830,7 @@ public class OffsetAcceleration
         if (zeroAcceleration) {
             if (zeroVelocity) return dOffset;
             double stdTau = toStdTau(tau);
-            double stdT = stdTau / Lorentz.gamma(vInit);
+            double stdT = stdTau / Relativity.gamma(vInit);
             double stdX = vInit * (stdT);
             double d = Math.abs(stdX);
             d = Util.sign(stdT) * d;
@@ -848,7 +848,7 @@ public class OffsetAcceleration
     public final double tauToT(double tau)
     {
         if (zeroAcceleration) {
-            return Lorentz.tauToT(toStdTau(tau), a) + offset.t;
+            return Relativity.tauToT(toStdTau(tau), a) + offset.t;
         }
         return Acceleration.tauToT(a, toStdTau(tau)) + offset.t;
     }
@@ -861,7 +861,7 @@ public class OffsetAcceleration
      */
     public final double tauToGamma(double tau)
     {
-	if (zeroAcceleration) return Lorentz.gamma(vInit);
+	if (zeroAcceleration) return Relativity.gamma(vInit);
 	return Acceleration.tauToGamma(a, toStdTau(tau));
     }
 
@@ -931,7 +931,7 @@ public class OffsetAcceleration
      */
     private final double linearXToTau(double x)
     {
-        return toOffsetTau(Lorentz.tToTau((x - offset.x) / vInit, vInit));
+        return toOffsetTau(Relativity.tToTau((x - offset.x) / vInit, vInit));
     }
 
     // **********************************************************

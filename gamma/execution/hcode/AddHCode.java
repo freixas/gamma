@@ -41,11 +41,11 @@ public class AddHCode extends HCode
     }
 
     @Override
-    public void execute(HCodeEngine engine, List<Object> code)
+    public void execute(HCodeEngine engine, List<Object> data)
     {
-        Object arg1 = code.get(0);
-        Object arg2 = code.get(1);
-        code.clear();
+        Object arg1 = data.get(0);
+        Object arg2 = data.get(1);
+        data.clear();
 
         boolean isDouble1 = arg1 instanceof Double;
         boolean isDouble2 = arg2 instanceof Double;
@@ -53,13 +53,13 @@ public class AddHCode extends HCode
         boolean isString2 = arg2 instanceof String;
 
         if (isDouble1 && isDouble2) {
-            code.add((Double)arg1 + (Double)arg2);
+            data.add((Double)arg1 + (Double)arg2);
         }
         else if (isString1) {
-            code.add(arg1.toString() + (String)arg2);
+            data.add(arg1.toString() + (String)arg2);
         }
         else if (isString2) {
-            code.add((String)arg1 + arg2.toString());
+            data.add((String)arg1 + arg2.toString());
         }
         else {
             throw new ExecutionException("Invalid types for '+' operator");

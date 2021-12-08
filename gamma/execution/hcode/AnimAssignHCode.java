@@ -39,18 +39,18 @@ public class AnimAssignHCode extends HCode
         argTypes.add(ArgInfo.Type.DOUBLE);
         argTypes.add(ArgInfo.Type.DOUBLE);
         argTypes.add(ArgInfo.Type.DOUBLE);
-        argInfo = new ArgInfo(4, argTypes);
+        argInfo = new ArgInfo(4, argTypes, 0);
     }
 
 
     @Override
-    public void execute(HCodeEngine engine, List<Object> code)
+    public void execute(HCodeEngine engine, List<Object> data)
     {
-        Address address =     (Address)code.get(0);
-        double initialValue = (Double) code.get(1);
-        double finalValue =   (Double) code.get(2);
-        double stepSize =     (Double) code.get(3);
-        code.clear();
+        Address address =     (Address)data.get(0);
+        double initialValue = (Double) data.get(1);
+        double finalValue =   (Double) data.get(2);
+        double stepSize =     (Double) data.get(3);
+        data.clear();
 
         // Check for a valid step size
 
