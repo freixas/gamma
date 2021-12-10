@@ -42,16 +42,10 @@ public class AnimationEngine
 
     private HCodeEngine hCodeEngine;
 
-    private int rep;
-    private int reps;
-    private int frame;
-    private int maxFrames;
+    private int framesPerLoop;
+    private int framesPerRep;
     private int absFrame;
     private int absMaxFrame;
-    private boolean isLoop;
-    private boolean countingDown;
-
-
 
     public AnimationEngine(MainWindow window, HCodeProgram program)
     {
@@ -66,37 +60,49 @@ public class AnimationEngine
         hCodeEngine = new HCodeEngine(window, program);
         hCodeEngine.execute(true);
 
+        // We don't have the animation statement settings or the variables until
+        // after the first execution
+
         AnimationStruct animationStruct =
             (AnimationStruct)hCodeEngine.getLCodeEngine().getAnimationCommand().getCmdStruct();
 
         animationSymbolTable = hCodeEngine.getAnimationSymbolTable();
 
-
-        isLoop = animationStruct.control.equals("loop");
-        reps = animationStruct.reps;
+        boolean isLoop = animationStruct.control.equals("loop");
+        int reps = animationStruct.reps;
         double speed = animationStruct.speed;
 
+        // We calculate the maximum number of frames in a loop by checking the
+        // limits of all the animation variables. If an animation variable doesn't
+        // have a limit, we still impose one
+
         framesPerLoop = getMaxFrames(hCodeEngine);
-        framesPerRep = (isLoop ? maxFramesPerLoop : maxFramesPerLoop * 2 - 2);
 
-        AnimationEngine me = this;
+        // If we cycle, we repeat the loop backwards, but without the first
+        // and last frames
 
-        // This is a 0-based absolute frame number
-
-        absFrame = 0;
+        framesPerRep = (isLoop ? framesPerLoop : framesPerLoop * 2 - 2);
 
         // This is the 0-based absolute frame number of the largest possible
         // absolute frame
 
         absMaxFrame = (reps * framesPerRep) - 1;
 
+        // This is a 0-based absolute frame number. We've already drawn the
+        // first frame, so we start with 1, the second frame
+
+        absFrame = 1;
+
+        AnimationEngine me = this;
         AnimationTimer timer = new AnimationTimer() {
+            private int lastFrame = -1;
 
             @Override
             public void handle(long now) {
-                int frame = me.getNextFrame();
-                if (frame == -1) stop();
+                int frame = me.getNextFrame(1);
+                if (frame == lastFrame) stop();
                 me.executeFrame(frame);
+                lastFrame = frame;
             }
 
         };
@@ -108,79 +114,32 @@ public class AnimationEngine
         // Calculate the next absolute frame number
 
         absFrame += step;
+
+        // We can't go below 0
+
         if (absFrame < 0) {
             absFrame = 0;
         }
+
+        // And we can't go over the absMaxFrame
+
         else if (absFrame > absMaxFrame) {
             absFrame = absMaxFrame;
         }
 
         // Calculate the frame position within a rep (0-based)
 
-        int frameInRep = absFrame % framesPerRep;
+        int frame = absFrame % framesPerRep;
 
         // Calculate the frame position within a cycle, if we have one
 
-        if (frameInRep >= framesPerLoop) {
-            frame = framesPerRep - frameInRep;
+        if (frame >= framesPerLoop) {
+            frame = framesPerRep - frame;
         }
 
         // Frame is 1-based
 
-        frame++;
-
-
-        // Normal, counting down
-
-        if (countingDown) {
-            if (frame >= 2) {
-                return frame--;
-            }
-
-            // Finished counting down
-
-            else if (rep < reps) {
-                reps++;
-                countingDown = false;
-                frame = 1;
-                return frame++;
-            }
-
-            // If we're done with reps, return -1
-
-            else {
-                return -1;
-            }
-        }
-
-        // Normal, counting up
-
-        else if (frame <= maxFrames) {
-            return frame++;
-        }
-
-        // Finished counting up
-        // If we're cycling, we need to count down
-
-        else if (!isLoop) {
-            frame = maxFrames - 1;
-            countingDown = true;
-            return frame--;
-        }
-
-        // If we're looping, we do another rep, counting up
-
-        else if (rep < reps) {
-            reps++;
-            frame = 1;
-            return frame++;
-        }
-
-        // If we're done with reps, return -1
-
-        else {
-            return -1;
-        }
+        return frame + 1;
     }
 
     private void executeFrame(int frame)
@@ -203,6 +162,12 @@ public class AnimationEngine
 
         hCodeEngine.execute(true);
     }
+
+    // TO DO
+
+    // * If the script file changes while we're running, we need to stop
+    // * Need to hook up buttons
+    // * Need to maintain running state
 
     // If we're not optimizing
     // Serialize the hCodes, an empty symbol table, and an empty container
