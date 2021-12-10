@@ -116,19 +116,18 @@ import gamma.math.Util;
  *
  * @author Antonio Freixas
  */
-public class WorldlineSegment
+public class WorldlineSegment implements ExecutionMutable
 {
-
     /**
      * The type of the delta value used to construct the worldline segment.
      */
-    public enum LimitType
+    public enum LimitType implements ExecutionImmutable
     {
         NONE, T, TAU, D
     }
 
-    private final HyperbolaEndpoint min;
-    private final HyperbolaEndpoint max;
+    private HyperbolaEndpoint min;
+    private HyperbolaEndpoint max;
 
     private final HyperbolaEndpoint originalMin;
     private final HyperbolaEndpoint originalMax;
@@ -257,7 +256,7 @@ public class WorldlineSegment
 
         this.originalMin = new HyperbolaEndpoint(min);
         this.originalMax = new HyperbolaEndpoint(max);
-        
+
         if (Util.fuzzyZero(a)) {
 
             // We have a line segment
@@ -270,6 +269,30 @@ public class WorldlineSegment
 
             curveSegment = new HyperbolicSegment(a, min, max, curve);
        }
+    }
+
+    /**
+     * Copy constructor.
+     *
+     * @param other The other worldline to copy.
+     */
+    public WorldlineSegment(WorldlineSegment other)
+    {
+        this.min = other.min;
+        this.max = other.max;
+
+        this.originalMin = other.originalMin;
+        this.originalMax = other.originalMax;
+
+        this.a = other.a;
+        this.curve = other.curve;
+        this.curveSegment = other.curveSegment;
+    }
+
+    @Override
+    public Object createCopy()
+    {
+        return new WorldlineSegment(this);
     }
 
     public OffsetAcceleration getCurve()
@@ -304,11 +327,14 @@ public class WorldlineSegment
         else if (curveSegment instanceof Line) {
             ((Line)curveSegment).setIsInfiniteMinus(true);
         }
-        min.x = Util.fuzzyGT(a, 0) ? Double.POSITIVE_INFINITY : (Util.fuzzyLT(a, 0) ? Double.NEGATIVE_INFINITY : (Util.fuzzyGT(min.v, 0) ? Double.NEGATIVE_INFINITY : (Util.fuzzyLT(min.v, 0) ? Double.POSITIVE_INFINITY : min.x)));
-        min.v = min.v < max.v ? Double.NEGATIVE_INFINITY: (min.v > max.v ? Double.POSITIVE_INFINITY : min.v);
-        min.d = Util.fuzzyZero(a) && Util.fuzzyZero(min.v) ? min.d : Double.NEGATIVE_INFINITY;
-        min.t = Double.NEGATIVE_INFINITY;
-        min.tau = Double.NEGATIVE_INFINITY;
+
+        double v = min.v < max.v ? Double.NEGATIVE_INFINITY: (min.v > max.v ? Double.POSITIVE_INFINITY : min.v);
+        double x = Util.fuzzyGT(a, 0) ? Double.POSITIVE_INFINITY : (Util.fuzzyLT(a, 0) ? Double.NEGATIVE_INFINITY : (Util.fuzzyGT(min.v, 0) ? Double.NEGATIVE_INFINITY : (Util.fuzzyLT(min.v, 0) ? Double.POSITIVE_INFINITY : min.x)));
+        double t = Double.NEGATIVE_INFINITY;
+        double d = Util.fuzzyZero(a) && Util.fuzzyZero(min.v) ? min.d : Double.NEGATIVE_INFINITY;
+        double tau = Double.NEGATIVE_INFINITY;
+
+        min = new HyperbolaEndpoint(v, x, t, tau, d);
     }
 
     /**
@@ -323,11 +349,14 @@ public class WorldlineSegment
         else if (curveSegment instanceof Line) {
             ((Line)curveSegment).setIsInfinitePlus(true);
         }
-        max.x = Util.fuzzyGT(a, 0) ? Double.POSITIVE_INFINITY : (Util.fuzzyLT(a, 0) ? Double.NEGATIVE_INFINITY : (Util.fuzzyGT(max.v, 0) ? Double.POSITIVE_INFINITY : (Util.fuzzyLT(max.v, 0) ? Double.NEGATIVE_INFINITY : max.x)));
-        max.v = Util.fuzzyLT(max.v, max.v) ? Double.POSITIVE_INFINITY: (Util.fuzzyGT(max.v, max.v) ? Double.NEGATIVE_INFINITY : max.v);
-        max.d = Util.fuzzyZero(a) && Util.fuzzyZero(max.v) ? max.d : Double.POSITIVE_INFINITY;
-        max.t = Double.POSITIVE_INFINITY;
-        max.tau = Double.POSITIVE_INFINITY;
+
+        double v = Util.fuzzyLT(max.v, max.v) ? Double.POSITIVE_INFINITY: (Util.fuzzyGT(max.v, max.v) ? Double.NEGATIVE_INFINITY : max.v);
+        double x = Util.fuzzyGT(a, 0) ? Double.POSITIVE_INFINITY : (Util.fuzzyLT(a, 0) ? Double.NEGATIVE_INFINITY : (Util.fuzzyGT(max.v, 0) ? Double.POSITIVE_INFINITY : (Util.fuzzyLT(max.v, 0) ? Double.NEGATIVE_INFINITY : max.x)));
+        double t = Double.POSITIVE_INFINITY;
+        double d = Util.fuzzyZero(a) && Util.fuzzyZero(max.v) ? max.d : Double.POSITIVE_INFINITY;
+        double tau = Double.POSITIVE_INFINITY;
+
+        max = new HyperbolaEndpoint(v, x, t, tau, d);
     }
 
     /**
@@ -340,7 +369,7 @@ public class WorldlineSegment
      */
     public final HyperbolaEndpoint getMin()
     {
-        return new HyperbolaEndpoint(min);
+        return min;
     }
 
     /**
@@ -353,7 +382,7 @@ public class WorldlineSegment
      */
     public final HyperbolaEndpoint getMax()
     {
-        return new HyperbolaEndpoint(max);
+        return max;
     }
 
     /**

@@ -227,14 +227,21 @@ public final class Util
         return d1 >= d2  - EPSILON ;
     }
 
+    /**
+     * Convert a double to an integer by rounding toward zero.
+     * @param d
+     * @return
+     */
     static public int toInt(double d)
     {
-        return (int) (-Math.signum(d) * Math.ceil(-Math.abs(d) - 0.5));
+        return (int)(d >= 0 ? Math.floor(d) : Math.ceil(d));
+        // return (int) (-Math.signum(d) * Math.ceil(-Math.abs(d) - 0.5));
     }
 
     static public long toLong(double d)
     {
-        return (long) (-Math.signum(d) * Math.ceil(-Math.abs(d) - 0.5));
+        return (long)(d >= 0 ? Math.floor(d) : Math.ceil(d));
+        // return (long) (-Math.signum(d) * Math.ceil(-Math.abs(d) - 0.5));
     }
 
     static public boolean toBoolean(double d)

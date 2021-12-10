@@ -23,7 +23,7 @@ import javafx.geometry.Point2D;
  *
  * @author Antonio Freixas
  */
-public class Coordinate extends ObjectContainer
+public class Coordinate extends ObjectContainer implements ExecutionMutable
 {
     static private String[] propertyNames = { "x", "t" };
 
@@ -73,6 +73,12 @@ public class Coordinate extends ObjectContainer
     {
         this.x = other.x;
         this.t = other.t;
+    }
+
+    @Override
+    public Object createCopy()
+    {
+        return new Coordinate(this);
     }
 
     /**

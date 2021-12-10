@@ -24,7 +24,7 @@ import gamma.math.Relativity;
  *
  * @author Antonio Freixas
  */
-public class WSegment
+public class WSegment implements ExecutionImmutable
 {
     private final double v;
     private final double a;

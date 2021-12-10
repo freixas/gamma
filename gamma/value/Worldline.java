@@ -26,7 +26,7 @@ import java.util.ListIterator;
  *
  * @author Antonio Freixas
  */
-public class Worldline
+public class Worldline implements ExecutionMutable
 {
     private final Coordinate origin;
     private final double tauInit;
@@ -41,18 +41,26 @@ public class Worldline
         this.tauInit = initializer.getTau();
         this.dInit =  initializer.getD();
 
-        segments = new ArrayList<>();
+        this.segments = new ArrayList<>();
     }
 
-//    private Worldline(Coordinate origin, double tauInit, double dInit, ArrayList<WorldlineSegment> segments)
-//    {
-//        this.origin = origin;
-//        this.tauInit = tauInit;
-//        this.dInit = dInit;
-//        this.segments = segments;
-//    }
-//
-    public WorldlineSegment addSegment(WorldlineSegment.LimitType type, double delta, double a, double v)
+    public Worldline(Worldline other)
+    {
+        this.origin = new Coordinate(other.origin);
+        this.tauInit = other.tauInit;
+        this.dInit = other.dInit;
+
+        this.segments = new ArrayList<>();
+        ExecutionMutableSupport.copy(other.segments, this.segments);
+    }
+
+    @Override
+    public Object createCopy()
+    {
+        return new Worldline(this);
+    }
+
+   public WorldlineSegment addSegment(WorldlineSegment.LimitType type, double delta, double a, double v)
     {
         WorldlineSegment segment;
 
@@ -439,6 +447,5 @@ public class Worldline
 
         return str;
     }
-
 
 }

@@ -18,6 +18,7 @@ package gamma.execution;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 
 /**
  *
@@ -31,7 +32,7 @@ public class SymbolTable
 
     public SymbolTable(HCodeEngine engine)
     {
-        this. engine = engine;
+        this.engine = engine;
         this.table = new HashMap<>();
         this.protectedSymbols = new ArrayList<>();
     }
@@ -98,5 +99,15 @@ public class SymbolTable
     public void protect(String symbol)
     {
         protectedSymbols.add(symbol);
+    }
+
+    /**
+     * Get all the symbols in the table.
+     *
+     * @return All the symbols in the table.
+     */
+    public Set<String> getSymbolNames()
+    {
+        return table.keySet();
     }
 }

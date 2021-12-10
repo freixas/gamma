@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.ListIterator;
 import gamma.value.ExecutionImmutable;
 import gamma.value.ExecutionMutable;
+import gamma.value.ExecutionMutableSupport;
 
 /**
  *
@@ -71,15 +72,7 @@ public class HCodeProgram
             data = new LinkedList<>();
             while (iter.hasNext()) {
                 Object obj = iter.next();
-                if (obj instanceof String ||
-                    obj instanceof Integer ||
-                    obj instanceof Double ||
-                    obj instanceof ExecutionImmutable) {
-                    data.add(obj);
-                }
-                else if (obj instanceof ExecutionMutable mutObj) {
-                    data.add(mutObj.createCopy());
-                }
+                data.add(ExecutionMutableSupport.copy(obj));
             }
         }
         else {

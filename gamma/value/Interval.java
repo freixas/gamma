@@ -21,7 +21,7 @@ package gamma.value;
  *
  * @author Antonio Freixas
  */
-public class Interval
+public class Interval implements ExecutionImmutable
 {
     public double minT;
     public double maxT;

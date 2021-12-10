@@ -23,7 +23,7 @@ import gamma.math.Util;
  *
  * @author Antonio Freixas
  */
-public class Color
+public class Color implements ExecutionImmutable
 {
     // Colors as doubles. These go into the symbol table for use by the
     // users

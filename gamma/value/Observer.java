@@ -26,7 +26,7 @@ import java.util.Iterator;
  *
  * @author Antonio Freixas
  */
-public class Observer
+public class Observer implements ExecutionImmutable
 {
     private final Worldline worldline;
 

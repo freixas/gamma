@@ -22,7 +22,6 @@ import gamma.execution.lcode.StyleStruct;
 import gamma.math.Util;
 import gamma.value.Bounds;
 import gamma.value.Coordinate;
-import gamma.value.Frame;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.text.Font;

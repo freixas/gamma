@@ -24,9 +24,9 @@ import java.util.Objects;
  *
  * @author Antonio Freixas
  */
-public class Frame
+public class Frame implements ExecutionMutable
 {
-    public enum AtType
+   public enum AtType implements ExecutionImmutable
     {
         T, TAU, D
     };
@@ -121,6 +121,12 @@ public class Frame
     {
         this.origin = origin;
         this.v = v;
+    }
+
+    @Override
+    public Object createCopy()
+    {
+        return new Frame(this);
     }
 
     /**

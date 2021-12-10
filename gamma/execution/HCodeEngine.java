@@ -17,6 +17,7 @@
 package gamma.execution;
 
 import gamma.GammaRuntimeException;
+import gamma.MainWindow;
 import gamma.ProgrammingException;
 import gamma.execution.hcode.HCode;
 import gamma.value.Color;
@@ -42,29 +43,26 @@ public class HCodeEngine
 {
     private static final Frame defFrame = new Frame(new Observer(new WInitializer(new Coordinate(0.0, 0.0), 0.0, 0.0), new ArrayList<>()), Frame.AtType.TAU, 0);
 
+    private MainWindow window;
     private final HCodeProgram program;
-    private final SymbolTable table;
     private final AnimationSymbolTable animationTable;
+
+    SymbolTable table;
+    private LCodeEngine lCodeEngine;
     private StyleStruct styleDefaults;
-    private final LCodeEngine lCodeEngine;
 
     private File file;
     private int lineNumber;
 
-    public HCodeEngine(HCodeProgram program, LCodeEngine lCodeEngine)
+    public HCodeEngine(MainWindow window, HCodeProgram program)
     {
+        this.window = window;
         this.program = program;
-
-        this.table = new SymbolTable(this);
         this.animationTable = new AnimationSymbolTable(this);
-        this.lineNumber = 0;
-        this.styleDefaults = new StyleStruct();
-        this.lCodeEngine = lCodeEngine;
-
-        initializeSymbolTable();
+        this.lCodeEngine = null;
     }
 
-    private void initializeSymbolTable()
+    private void initializeSymbolTable(SymbolTable table)
     {
         // Add pre-defined variables
 
@@ -156,12 +154,19 @@ public class HCodeEngine
 
     public LCodeEngine getLCodeEngine()
     {
-        return this.lCodeEngine;
+        return lCodeEngine;
     }
 
-    public void execute()
+    public void execute(boolean copyData)
     {
-        Iterator<HCode> iter = program.reset();
+        lineNumber = 0;
+        styleDefaults = new StyleStruct();
+        lCodeEngine = new LCodeEngine(window);
+
+        table = new SymbolTable(this);
+        initializeSymbolTable(table);
+
+        Iterator<HCode> iter = program.reset(copyData);
 
         try {
             while (iter.hasNext()) {
@@ -188,6 +193,19 @@ public class HCodeEngine
         catch (Throwable e) {
             throwGammaException(e);
         }
+
+        // Execute the lCodes
+
+        // Set up the lcode engine for this set of lcodes.
+        // This handles the initial drawing and sets up observers to
+        // handle redraws
+
+        lCodeEngine.setup();
+    }
+
+    public void close()
+    {
+        if (lCodeEngine != null) lCodeEngine.close();
     }
 
     public void addCommand(Command command)

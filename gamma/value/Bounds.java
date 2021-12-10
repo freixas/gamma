@@ -25,10 +25,10 @@ import javafx.scene.transform.Affine;
  *
  * @author Antonio Freixas
  */
-public class Bounds
+public class Bounds implements ExecutionMutable
 {
     public static Bounds INFINITE_BOUNDS = new Bounds(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
-    
+
     public Coordinate min;
     public Coordinate max;
 
@@ -61,10 +61,8 @@ public class Bounds
         // There's no need to sort as the other bounds will already
         // be sorted
 
-        this.min.x = other.min.x;
-        this.min.t = other.min.t;
-        this.max.x = other.max.x;
-        this.max.t = other.max.t;
+        this.min = new Coordinate(other.min);
+        this.max = new Coordinate(other.max);
     }
 
     /**
@@ -108,6 +106,12 @@ public class Bounds
 
         min.setTo(other.min);
         max.setTo(other.max);
+    }
+
+    @Override
+    public Object createCopy()
+    {
+        return new Bounds(this);
     }
 
     /**
@@ -422,6 +426,5 @@ public class Bounds
     {
         return "Bounds{" + "from " + min + " to " + max + '}';
     }
-
 
 }

@@ -24,7 +24,7 @@ import gamma.math.Relativity;
  *
  * @author Antonio Freixas
  */
-public class WInitializer
+public class WInitializer implements ExecutionImmutable
 {
     private final Coordinate origin;
     private final double tau;
@@ -39,7 +39,7 @@ public class WInitializer
 
     public Coordinate getOrigin()
     {
-        return origin;
+        return new Coordinate(origin);
     }
 
     public double getTau()

@@ -36,14 +36,16 @@ public class AnimationSymbolTable extends SymbolTable
     @Override
     public Object get(String symbol)
     {
-        AnimationVariable var = (AnimationVariable)directGet(symbol);
+        Object var = directGet(symbol);
         if (var == null) return null;
+        return ((AnimationVariable)var).getCurrentValue();
+    }
 
-        // TO DO
-        // When the animation engine is written, this needs to get a value
-        // based on the frame number
-
-        return var.getInitialValue();
+    public AnimationVariable getAnimationVariable(String symbol)
+    {
+        Object var = directGet(symbol);
+        if (var == null) return null;
+        return (AnimationVariable)var;
     }
 
     @Override

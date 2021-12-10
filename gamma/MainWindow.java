@@ -16,6 +16,7 @@
  */
 package gamma;
 
+import gamma.execution.DiagramEngine;
 import gamma.execution.LCodeEngine;
 import java.io.File;
 import java.util.ListIterator;
@@ -58,7 +59,8 @@ public final class MainWindow extends Stage
     private FileWatcher watcher = null;
     private Thread watcherThread = null;
 
-    private LCodeEngine lCodeEngine = null;
+    private DiagramEngine diagramEngine = null;
+//    private LCodeEngine lCodeEngine = null;
     private Canvas canvas;
 
     /**
@@ -155,7 +157,7 @@ public final class MainWindow extends Stage
         }
         file = null;
 
-        if (lCodeEngine != null) lCodeEngine.close();
+        if (diagramEngine != null) diagramEngine.close();
         super.close();
     }
 
@@ -243,19 +245,41 @@ public final class MainWindow extends Stage
 
     }
 
-    /**
-     * Set the current LCodeEngine. If a prior engine exists, close it
-     * down.
+//    /**
+//     * Set the current LCodeEngine. If a prior engine exists, close it
+//     * down.
+//     *
+//     * @param lCodeEngine The lcode engine to set.
+//     */
+//    public void setLCodeEngine(LCodeEngine lCodeEngine)
+//    {
+//        if (this.lCodeEngine != null) this.lCodeEngine.close();
+//        this.lCodeEngine = lCodeEngine;
+//    }
+//
+     /**
+     * Get the current DiagramEngine, if any.
      *
-     * @param lCodeEngine The lcode engine to set.
+     * @reutrn The current diagram engine, or null if none.
      */
-    public void setLCodeEngine(LCodeEngine lCodeEngine)
+    public DiagramEngine getDiagramEngine()
     {
-        if (this.lCodeEngine != null) this.lCodeEngine.close();
-        this.lCodeEngine = lCodeEngine;
+        return diagramEngine;
     }
 
-    /**
+     /**
+     * Set the current DiagramEngine. If a prior engine exists, close it
+     * down.
+     *
+     * @param diagramEngine The diagram engine to set.
+     */
+    public void setDiagramEngine(DiagramEngine diagramEngine)
+    {
+        if (this.diagramEngine != null) this.diagramEngine.close();
+        this.diagramEngine = diagramEngine;
+    }
+
+   /**
      * Return the canvas.
      *
      * @return The canvas

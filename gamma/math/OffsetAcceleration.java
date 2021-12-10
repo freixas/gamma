@@ -17,6 +17,7 @@
 package gamma.math;
 
 import gamma.value.Coordinate;
+import gamma.value.ExecutionImmutable;
 import gamma.value.Line;
 import gamma.value.WorldlineSegment;
 
@@ -207,7 +208,7 @@ import gamma.value.WorldlineSegment;
  *
  * @author Antonio Freixas
  */
-public class OffsetAcceleration
+public class OffsetAcceleration implements ExecutionImmutable
 {
     private final double a;
     private final double vInit;

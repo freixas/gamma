@@ -18,6 +18,10 @@ package gamma.value;
 
 /**
  * This class provides indirect access to property in an object.
+ * <p>
+ * This class is marked ExecutionImmutable because it is only created during
+ * execution, not during parsing. If we do any code optimization, this may no
+ * longer be true.
  *
  * @author Antonio Freixas
  */
@@ -31,8 +35,6 @@ public class ObjectPropertyAddress extends Address implements ExecutionImmutable
         this.container = container;
         this.name = name;
     }
-
-    Retaining a pointer to the container is problematic for an immutable object
 
     /**
      * Get the name of the symbol for which this object is an address.

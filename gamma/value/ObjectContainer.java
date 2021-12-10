@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * An interface implemented by any object that can hold a publicly accessible
+ * An base class extended by any object that can hold a publicly accessible
  * object property.
  *
  * @author Antonio Freixas

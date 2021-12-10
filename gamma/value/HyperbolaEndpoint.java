@@ -25,13 +25,13 @@ import gamma.math.OffsetAcceleration;
  *
  * @author Antonio Freixas
  */
-public class HyperbolaEndpoint
+public class HyperbolaEndpoint implements ExecutionImmutable
 {
-    public double v;
-    public double x;
-    public double t;
-    public double tau;
-    public double d;
+    public final double v;
+    public final double x;
+    public final double t;
+    public final double tau;
+    public final double d;
 
     HyperbolaEndpoint(double v, double x, double t, double tau, double d)
     {

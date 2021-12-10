@@ -25,7 +25,7 @@ import gamma.math.Util;
  *
  * @author Antonio Freixas
  */
-public class LineSegment extends CurveSegment
+public class LineSegment extends CurveSegment implements ExecutionImmutable
 {
     public final Coordinate point1;
     public final Coordinate point2;

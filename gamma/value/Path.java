@@ -23,17 +23,31 @@ import java.util.Iterator;
  *
  * @author Antonio Freixas
  */
-public class Path
+public class Path implements ExecutionImmutable
 {
     private final ArrayList<Coordinate> coords;
-    private Bounds bounds;
+    private final Bounds bounds;
 
     public Path(ArrayList<Coordinate> coords)
     {
-        this.coords = new ArrayList<>();
-        this.coords.addAll(coords);
+        double minX = Double.POSITIVE_INFINITY;
+        double minT = Double.POSITIVE_INFINITY;
+        double maxX = Double.NEGATIVE_INFINITY;
+        double maxT = Double.NEGATIVE_INFINITY;
 
-        calculateBounds();
+        this.coords = new ArrayList<>();
+        for (int i = 0; i < coords.size(); i++) {
+            Coordinate coord = coords.get(i);
+
+            if (coord.x < minX) minX = coord.x;
+            if (coord.x > maxX) maxX = coord.x;
+            if (coord.t < minT) minT = coord.t;
+            if (coord.t > maxT) maxT = coord.t;
+
+            this.coords.add(new Coordinate(coord));
+        }
+
+        this.bounds = new Bounds(minX, minT, maxX, maxT);
     }
 
     public Coordinate get(int index)
@@ -48,33 +62,17 @@ public class Path
 
     public Bounds getBounds()
     {
-        return bounds;
+        return new Bounds(bounds);
     }
 
-    public void relativeTo(Frame prime)
+    public Path relativeTo(Frame prime)
     {
+        ArrayList<Coordinate> newCoords = new ArrayList<>();
+
         for (int i = 0; i < coords.size(); i++) {
-            Coordinate coord = coords.get(i);
-            coord = prime.toFrame(coord);
-            coords.set(i, coord);
+            newCoords.add(prime.toFrame(coords.get(i)));
         }
-        calculateBounds();
+        return new Path(newCoords);
     }
 
-    private void calculateBounds()
-    {
-        double minX = Double.POSITIVE_INFINITY;
-        double minT = Double.POSITIVE_INFINITY;
-        double maxX = Double.NEGATIVE_INFINITY;
-        double maxT = Double.NEGATIVE_INFINITY;
-
-        for (int i = 0; i < coords.size(); i++) {
-            Coordinate coord = coords.get(i);
-            if (coord.x < minX) minX = coord.x;
-            if (coord.x > maxX) maxX = coord.x;
-            if (coord.t < minT) minT = coord.t;
-            if (coord.t > maxT) maxT = coord.t;
-         }
-        this.bounds = new Bounds(minX, minT, maxX, maxT);
-    }
 }

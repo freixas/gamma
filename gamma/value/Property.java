@@ -22,7 +22,7 @@ import gamma.execution.lcode.StyleStruct;
  *
  * @author Antonio Freixas
  */
-public class Property implements PropertyElement
+public class Property implements PropertyElement, ExecutionImmutable
 {
     private final String name;
     private final Object value;

@@ -27,7 +27,7 @@ import gamma.math.Util;
  *
  * @author Antonio Freixas
  */
-public class HyperbolicSegment extends CurveSegment
+public class HyperbolicSegment extends CurveSegment implements ExecutionImmutable
 {
     private final double a;
     private final HyperbolaEndpoint min;

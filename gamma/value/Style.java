@@ -22,7 +22,7 @@ import java.util.ArrayList;
  *
  * @author Antonio Freixas
  */
-public class Style extends PropertyList
+public class Style extends PropertyList implements ExecutionMutable
 {
     @Override
     protected void addProperty(Property property)

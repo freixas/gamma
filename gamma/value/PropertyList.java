@@ -16,11 +16,15 @@
  */
 package gamma.value;
 
+import gamma.ProgrammingException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.ListIterator;
 
 /**
+ * This class contains lists of properties.
  *
  * @author Antonio Freixas
  */
@@ -41,7 +45,21 @@ public class PropertyList implements PropertyElement, ExecutionMutable
     @Override
     public Object createCopy()
     {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try {
+            Class cls = this.getClass();
+            @SuppressWarnings("unchecked")
+            Constructor constructor = cls.getConstructor();
+            PropertyList newPropertyList = (PropertyList)constructor.newInstance();
+
+            for (int i = 0; i < size(); i++) {
+                PropertyElement element = getProperty(i);
+                newPropertyList.add((PropertyElement)ExecutionMutableSupport.copy(element));
+            }
+            return newPropertyList;
+        }
+        catch (IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException e) {
+            throw new ProgrammingException("PropertyList.createCopy()", e);
+        }
     }
 
     public boolean hasProperty(String name)

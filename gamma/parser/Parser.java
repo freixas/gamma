@@ -139,7 +139,8 @@ public class Parser
     private ArrayList<Token> tokens;
     private LinkedList<Object> hCodes;
 
-    private boolean isAnimated = false;
+    private boolean animationStatementIsPresent = false;
+    private boolean animationVariableIsPresent = false;
 
     private final Token dummyToken = new Token<>(Token.Type.DELIMITER, '~', null, 0, 0);
 
@@ -199,7 +200,7 @@ public class Parser
      */
     public boolean isAnimated()
     {
-        return this.isAnimated;
+        return animationStatementIsPresent && animationVariableIsPresent;
     }
 
     /**
@@ -209,6 +210,9 @@ public class Parser
      */
     public LinkedList<Object> parse() throws ParseException
     {
+        animationStatementIsPresent = false;
+        animationVariableIsPresent = false;
+
         Tokenizer tokenizer = new Tokenizer(file, script);
         tokens = tokenizer.tokenize();
 
@@ -367,6 +371,7 @@ public class Parser
         }
 
         if (stepToken != null) {
+            animationVariableIsPresent = true;
             codes.add(new AnimAssignHCode());
         }
         else {
@@ -415,7 +420,7 @@ public class Parser
         }
         Token nameToken = curToken;
 
-        if (name.equals("animation")) this.isAnimated = true;
+        if (name.equals("animation")) this.animationStatementIsPresent = true;
 
         nextToken();
 

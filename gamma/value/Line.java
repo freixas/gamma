@@ -28,18 +28,18 @@ import gamma.math.Util;
  *
  * @author Antonio Freixas
  */
-public class Line extends CurveSegment
+public class Line extends CurveSegment implements ExecutionMutable
 {
-    public enum AxisType
+    public enum AxisType implements ExecutionImmutable
     {
         X, T
     };
 
-    private double angle;
-    private Coordinate coord;
-    private double slope;
-    private double mXOrigin;
-    private double t1MinusMX1;
+    private final double angle;
+    private final Coordinate coord;
+    private final double slope;
+    private final double mXOrigin;
+    private final double t1MinusMX1;
 
     private boolean isInfiniteMinus;
     private boolean isInfinitePlus;
@@ -79,23 +79,7 @@ public class Line extends CurveSegment
      */
     public Line(AxisType type, double v, Coordinate point)
     {
-        if (type == AxisType.X) {
-            initialize(Relativity.vToXAngle(v), point);
-        }
-        else {
-            initialize(Relativity.vToTAngle(v), point);
-        }
-    }
-
-    /**
-     * Create a line at a given angle and that goes through a given coordinate.
-     *
-     * @param angle The angle of the line in degrees.
-     * @param coord The point through which the line crosses.
-     */
-    public Line(double angle, Coordinate coord)
-    {
-        initialize(Util.normalizeAngle90(angle), coord);
+        this((type == AxisType.X ? Relativity.vToXAngle(v) : Relativity.vToTAngle(v)), point);
     }
 
     /**
@@ -106,23 +90,18 @@ public class Line extends CurveSegment
      */
     public Line(Coordinate coord1, Coordinate coord2)
     {
-        double rad = Math.atan2(coord2.t - coord1.t, coord2.x - coord1.x);
-        double degrees = Math.toDegrees(rad);
-        degrees = Util.normalizeAngle90(degrees);
-        initialize(degrees, new Coordinate(coord1));
+        this(Math.toDegrees(Math.atan2(coord2.t - coord1.t, coord2.x - coord1.x)), coord1);
     }
 
     /**
-     * Initialize the line.
+     * Create a line at a given angle and that goes through a given coordinate.
      *
-     * @param angle The line's angle, in degrees, with 0 being parallel to the x
-     * axis. The value should be normalized so it is between 90 (inclusive)
-     * and -90 (exclusive).
-     * @param coord The coordinate through which the line goes.
+     * @param angle The angle of the line in degrees.
+     * @param coord The point through which the line crosses.
      */
-    private void initialize(double angle, Coordinate coord)
+    public Line(double angle, Coordinate coord)
     {
-        this.angle = angle;
+        this.angle = Util.normalizeAngle90(angle);
         this.coord = new Coordinate(coord);
 
         // The equation for the line is t = m * (x - x1) + t1
@@ -150,6 +129,29 @@ public class Line extends CurveSegment
 
         this.isInfiniteMinus = true;
         this.isInfinitePlus = true;
+    }
+
+    /**
+     * Copy constructor.
+     *
+     * @param other The other line to copy.
+     */
+    public Line(Line other)
+    {
+	this.angle = other.angle;
+	this.coord = other.coord;
+	this.slope = other.slope;
+	this.mXOrigin = other.mXOrigin;
+	this.t1MinusMX1 = other.t1MinusMX1;
+
+	this.isInfiniteMinus = other.isInfiniteMinus;
+	this.isInfinitePlus = other.isInfinitePlus;
+    }
+
+    @Override
+    public Object createCopy()
+    {
+        return new Line(this);
     }
 
     /**

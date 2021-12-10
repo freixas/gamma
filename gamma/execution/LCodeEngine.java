@@ -32,7 +32,6 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Region;
-import javafx.scene.text.FontSmoothingType;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
 
@@ -127,7 +126,7 @@ public class LCodeEngine
     }
 
     /**
-     * Get the canvas on which we will draww. This is only valid after setup()
+     * Get the canvas on which we will draw. This is only valid after setup()
      * is called.
      *
      * @return The drawing canvas.
@@ -210,8 +209,6 @@ public class LCodeEngine
     {
         // Tell the window we are starting it. It will shut down any prior
         // lcode engine
-
-        window.setLCodeEngine(this);
 
         // Get the drawing area
 

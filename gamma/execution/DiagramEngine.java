@@ -46,52 +46,64 @@ public class DiagramEngine
     private final MainWindow window;
     private final HCodeProgram program;
     private final boolean isAnimated;
-    private LCodeEngine lCodeEngine = null;
 
+    private AnimationEngine animationEngine;
+    private HCodeEngine hCodeEngine;
+
+    @SuppressWarnings("LeakingThisInConstructor")
     public DiagramEngine(MainWindow window, LinkedList<Object> hCodes, boolean isAnimated)
     {
         this.window = window;
         this.program = new HCodeProgram(hCodes);
         this.isAnimated = isAnimated;
+
+        this.animationEngine = null;
+        this.hCodeEngine = null;
+
+        // This call shuts down any diagram engine currently running in this
+        // window
+
+        window.setDiagramEngine(this);
     }
 
     public void execute() throws ExecutionException, ProgrammingException
     {
-        if (isAnimated) {
-            // We need to take the hCodes and send them to the hCodeEngine to
-            // be optimized. The ouput should be a symbol table, an animation
-            // table, a hCodes of lCodes and a hCodes of optimized hCodes.
+        try {
+            // Execute animated scripts
 
-            // We should then turn this over to the animation engine to generate
-            // the frames
+            if (isAnimated) {
+                animationEngine = new AnimationEngine(window, program);
+                animationEngine.execute();
+            }
+
+            // Execute non-animated scripts
+
+            else {
+                hCodeEngine = new HCodeEngine(window, program);
+                hCodeEngine.execute(false);
+            }
+        }
+        catch (ExecutionException e) {
+            e.printStackTrace();
+            window.showTextAreaAlert(Alert.AlertType.ERROR, "Runtime Errors", "Runtime Errors", e.getLocalizedMessage(), true);
+        }
+        catch (ProgrammingException e) {
+            e.printStackTrace();
+            window.showTextAreaAlert(Alert.AlertType.ERROR, "Internal Errors", "Internal Errors", e.getLocalizedMessage(), true);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            window.showTextAreaAlert(Alert.AlertType.ERROR, "Error", "Error", e.getLocalizedMessage(), true);
+        }
+    }
+
+    public void close()
+    {
+        if (isAnimated) {
+            if (animationEngine != null) animationEngine.close();
         }
         else {
-
-            // Execute the hCodes to generate lCodes
-
-            try {
-                lCodeEngine = new LCodeEngine(window);
-                HCodeEngine hCodeEngine = new HCodeEngine(program, lCodeEngine);
-                hCodeEngine.execute();
-
-                // Set up the lcode engine for this set of lcodes.
-                // This handles the initial drawing and sets up observers to
-                // handle redraws
-
-                lCodeEngine.setup();
-            }
-            catch (ExecutionException e) {
-                e.printStackTrace();
-                window.showTextAreaAlert(Alert.AlertType.ERROR, "Runtime Errors", "Runtime Errors", e.getLocalizedMessage(), true);
-            }
-            catch (ProgrammingException e) {
-                e.printStackTrace();
-                window.showTextAreaAlert(Alert.AlertType.ERROR, "Internal Errors", "Internal Errors", e.getLocalizedMessage(), true);
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-                window.showTextAreaAlert(Alert.AlertType.ERROR, "Error", "Error", e.getLocalizedMessage(), true);
-            }
+            if (hCodeEngine != null) hCodeEngine.close();
         }
     }
 

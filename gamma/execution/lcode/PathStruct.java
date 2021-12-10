@@ -38,6 +38,6 @@ public class PathStruct extends Struct
     @Override
     public void relativeTo(Frame prime)
     {
-        path.relativeTo(prime);
+        path = path.relativeTo(prime);
     }
 }

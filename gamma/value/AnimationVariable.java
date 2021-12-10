@@ -20,11 +20,12 @@ package gamma.value;
  *
  * @author Antonio Freixas
  */
-public class AnimationVariable
+public class AnimationVariable implements ExecutionImmutable
 {
     private final double initialValue;
     private final double finalValue;
     private final double stepSize;
+    private double currentValue;
 
     public AnimationVariable(double initialValue, double finalValue,
                              double stepSize)
@@ -32,6 +33,7 @@ public class AnimationVariable
         this.initialValue = initialValue;
         this.finalValue = finalValue;
         this.stepSize = stepSize;
+        this.currentValue = initialValue;
     }
 
     public double getInitialValue()
@@ -47,6 +49,16 @@ public class AnimationVariable
     public double getStepSize()
     {
         return stepSize;
+    }
+
+    public void setCurrentValue(int frame)
+    {
+        currentValue = initialValue + ((frame - 1) * stepSize);
+    }
+
+    public double getCurrentValue()
+    {
+        return this.currentValue;
     }
 
 

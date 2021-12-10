@@ -20,6 +20,10 @@ import gamma.execution.SymbolTable;
 
 /**
  * This class provides indirect access to a value in the symbol table.
+ * <p>
+ * This class is marked ExecutionImmutable because it is only created during
+ * execution, not during parsing. If we do any code optimization, this may no
+ * longer be true.
  *
  * @author Antonio Freixas
  */
@@ -33,8 +37,6 @@ public class SymbolTableAddress extends Address implements ExecutionImmutable
         this.table = table;
         this.name = name;
     }
-
-    Symbol Table is problematic
 
     /**
      * Get the name of the symbol for which this object is an address.
