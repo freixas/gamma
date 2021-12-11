@@ -104,7 +104,7 @@ public class DisplayCommandExec extends CommandExec
     }
 
     /**
-     * Set up the diagram.Call this the first time the lcode is run.
+     * Set up the diagram. Call this the first time the lcode is run.
      *
      * @param context The drawing context.
      * @param struct The display structure.

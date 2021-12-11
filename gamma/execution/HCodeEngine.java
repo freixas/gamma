@@ -161,7 +161,17 @@ public class HCodeEngine
     {
         lineNumber = 0;
         styleDefaults = new StyleStruct();
-        lCodeEngine = new LCodeEngine(window);
+
+        // Create an LCodeEngine only the first time
+
+        boolean firstExecution = false;
+        if (lCodeEngine == null) {
+            lCodeEngine = new LCodeEngine(window);
+            firstExecution = true;
+        }
+        else {
+            lCodeEngine.removeAllCommands();
+        }
 
         table = new SymbolTable(this);
         initializeSymbolTable(table);
@@ -200,7 +210,12 @@ public class HCodeEngine
         // This handles the initial drawing and sets up observers to
         // handle redraws
 
-        lCodeEngine.setup();
+        if (firstExecution) {
+            lCodeEngine.setup();
+        }
+        else {
+            lCodeEngine.execute();
+        }
     }
 
     public void close()

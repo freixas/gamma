@@ -215,6 +215,15 @@ public class LCodeEngine
     }
 
     /**
+     * Remove all LCode commands. This gets called if we're running any
+     * kind of animation and want to re-use the existing LCodeEngine.
+     */
+    public void removeAllCommands()
+    {
+        commands.clear();
+    }
+
+    /**
      * Set up for the first run of the lcode.
      */
     public final void setup()

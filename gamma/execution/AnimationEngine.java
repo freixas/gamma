@@ -475,10 +475,6 @@ public class AnimationEngine
 
     private void executeFrame(int frame)
     {
-        // Close down the last lCodeEngine
-
-        hCodeEngine.getLCodeEngine().close();
-
         Iterator<String> iter = symbolNames.iterator();
 
         // Tell all the animation variables to update to match the current
