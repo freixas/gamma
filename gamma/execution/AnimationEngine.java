@@ -19,20 +19,19 @@ package gamma.execution;
 import gamma.MainWindow;
 import gamma.ProgrammingException;
 import gamma.execution.lcode.AnimationStruct;
-import gamma.execution.lcode.DisplayCommandExec;
-import gamma.execution.lcode.DisplayStruct;
 import gamma.math.Util;
 import gamma.value.AnimationVariable;
 import java.util.Iterator;
 import java.util.Set;
 import javafx.animation.AnimationTimer;
-import javafx.beans.value.ObservableValue;
-import javafx.geometry.Point2D;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Label;
-import javafx.scene.input.KeyCode;
-import javafx.scene.transform.Affine;
-import javafx.scene.transform.NonInvertibleTransformException;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.control.Button;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.HBox;
 
 /**
  *
@@ -40,6 +39,10 @@ import javafx.scene.transform.NonInvertibleTransformException;
  */
 public class AnimationEngine
 {
+    enum STATE {
+        RUNNING, PAUSED, STOPPED, NOT_SET
+    }
+
     class DiagramAnimationTimer extends AnimationTimer
     {
         private final AnimationEngine animationEngine;
@@ -126,7 +129,28 @@ public class AnimationEngine
     private Set<String> symbolNames;
 
     private HCodeEngine hCodeEngine;
-    private AnimationTimer timer;
+    private DiagramAnimationTimer timer;
+    private STATE state;
+
+    private Canvas canvas;
+    private HBox animationControls;
+    private Button buttonAnimStart;
+    private Button buttonAnimEnd;
+    private Button buttonAnimStepBackward;
+    private Button buttonAnimStepForward;
+    private Button buttonAnimPlayPause;
+    private Button buttonAnimStop;
+
+    EventHandler<ActionEvent> animStartEventHandler;
+    EventHandler<ActionEvent> animEndEventHandler;
+    EventHandler<ActionEvent> animStepBackwardEventHandler;
+    EventHandler<ActionEvent> animStepForwardEventHandler;
+    EventHandler<ActionEvent> animPlayPauseEventHandler;
+    EventHandler<ActionEvent> animStopEventHandler;
+    EventHandler<KeyEvent> keyTypedEventHandler;
+
+    private ImageView playImage;
+    private ImageView pauseImage;
 
     private int framesPerLoop;
     private int framesPerRep;
@@ -140,6 +164,245 @@ public class AnimationEngine
 
         this.hCodeEngine = null;
         this.timer = null;
+
+        this.state = STATE.NOT_SET;
+
+        setup();
+    }
+
+    public final void setup()
+    {
+        // Get the drawing area
+
+        canvas = window.getCanvas();
+
+        animationControls       = (HBox)  window.getScene().lookup("#animationControls");
+        buttonAnimStart         = (Button)window.getScene().lookup("#animStart");
+        buttonAnimEnd           = (Button)window.getScene().lookup("#animEnd");
+        buttonAnimStepBackward  = (Button)window.getScene().lookup("#animStepBackward");
+        buttonAnimStepForward   = (Button)window.getScene().lookup("#animStepForward");
+        buttonAnimPlayPause     = (Button)window.getScene().lookup("#animPlay");
+        buttonAnimStop          = (Button)window.getScene().lookup("#animStop");
+
+        playImage = new ImageView(new Image(window.getClass().getResourceAsStream("resources/player_play.png")));
+        pauseImage = new ImageView(new Image(window.getClass().getResourceAsStream("resources/player_pause.png")));
+
+        // Enable the button area
+
+        animationControls.setDisable(false);
+
+        // Set up our change listeners
+
+        addListeners();
+
+        setState(STATE.STOPPED);
+    }
+
+    /**
+     * Add all the listeners needed by the animation engine. Every listener
+     * added must be removed when this engine is closed.
+     */
+    private void addListeners()
+    {
+        final AnimationEngine engine = this;
+
+        // ************************************************************
+        // *
+        // * BUTTON HANDLERS
+        // *
+        // ************************************************************
+
+        animStartEventHandler = event -> {
+            toStart();
+            canvas.requestFocus();
+        };
+        buttonAnimStart.addEventHandler(ActionEvent.ANY, animStartEventHandler);
+
+        animEndEventHandler = event -> {
+            toEnd();
+            canvas.requestFocus();
+	};
+	buttonAnimEnd.addEventHandler(ActionEvent.ANY, animEndEventHandler);
+
+        animStepBackwardEventHandler = event -> {
+            stepBackward();
+            canvas.requestFocus();
+        };
+	buttonAnimStepBackward.addEventHandler(ActionEvent.ANY, animStepBackwardEventHandler);
+
+        animStepForwardEventHandler = event -> {
+            stepForward();
+            canvas.requestFocus();
+	};
+	buttonAnimStepForward.addEventHandler(ActionEvent.ANY, animStepForwardEventHandler);
+
+        animPlayPauseEventHandler = event -> {
+            togglePlay();
+            canvas.requestFocus();
+	};
+	buttonAnimPlayPause.addEventHandler(ActionEvent.ANY, animPlayPauseEventHandler);
+
+        animStopEventHandler = event -> {
+            stop();
+            canvas.requestFocus();
+	};
+	buttonAnimStop.addEventHandler(ActionEvent.ANY, animStopEventHandler);
+
+        // ************************************************************
+        // *
+        // * KEYBOARDHANDLER
+        // *
+        // ************************************************************
+
+        keyTypedEventHandler = event -> {
+            boolean foundKey = true;
+            if (null != event.getCode()) {
+                switch (event.getCode()) {
+                    case SPACE -> togglePlay();
+                    case ESCAPE -> stop();
+                    case LEFT -> stepBackward();
+                    case RIGHT -> stepForward();
+                    case UP -> playFaster();
+                    case DOWN -> playSlower();
+                    case DIGIT1 -> playNormal();
+                    case BRACELEFT -> toStart();
+                    case BRACERIGHT -> toEnd();
+                    default -> foundKey = false;
+                }
+                if (foundKey) event.consume();
+            }
+        };
+        canvas.addEventHandler(KeyEvent.KEY_TYPED, keyTypedEventHandler);
+    }
+
+    private void toStart()
+    {
+        // We can always go to the first frame. This stops the animation
+
+        setState(STATE.STOPPED);
+        timer.stop();
+
+        if (absFrame != 0) {
+            absFrame = 0;
+            int frame = absoluteToLogicalFrame(absFrame);
+            executeFrame(frame);
+        }
+    }
+
+    private void toEnd()
+    {
+        // We can always go to the last frame. This stops the animation
+
+        setState(STATE.STOPPED);
+        timer.stop();
+
+        if (absFrame != absMaxFrame) {
+            absFrame = absMaxFrame;
+            int frame = absoluteToLogicalFrame(absFrame);
+            executeFrame(frame);
+        }
+    }
+
+    private void stepBackward()
+    {
+        // Only if paused
+
+        if (state != STATE.PAUSED) return;
+        int frame = getNextFrame(-1);
+        executeFrame(frame);
+
+    }
+
+    private void stepForward()
+    {
+        if (state != STATE.PAUSED) return;
+        int frame = getNextFrame(1);
+        executeFrame(frame);
+    }
+
+    private void play()
+    {
+        if (state == STATE.RUNNING) return;
+        setState(STATE.RUNNING);
+        timer.start();
+    }
+
+    private void pause()
+    {
+        if (state == STATE.PAUSED) return;
+        setState(STATE.PAUSED);
+        timer.stop();
+    }
+
+    private void togglePlay()
+    {
+        if (state == STATE.STOPPED || state == STATE.PAUSED) {
+            play();
+        }
+        else if (state == STATE.RUNNING) {
+            pause();
+        }
+    }
+
+    private void stop()
+    {
+        setState(STATE.STOPPED);
+        timer.stop();
+    }
+
+    private void playFaster()
+    {
+
+    }
+
+    private void playSlower()
+    {
+
+    }
+
+    private void playNormal()
+    {
+        timer.setSpeed(1.0);
+    }
+
+    private void setState(STATE newState)
+    {
+        if (newState == state) return;
+        if (state == STATE.STOPPED && newState == STATE.PAUSED) {
+            throw new ProgrammingException("AnimationEngine.setState() stopped -> paused");
+        }
+        state = newState;
+        if (state == STATE.RUNNING) {
+            buttonAnimStart.setDisable(false);
+            buttonAnimEnd.setDisable(false);
+            buttonAnimPlayPause.setDisable(false);
+            buttonAnimStop.setDisable(false);
+            buttonAnimStepBackward.setDisable(true);
+            buttonAnimStepForward.setDisable(true);
+
+            buttonAnimPlayPause.setGraphic(pauseImage);
+        }
+        else if (state == STATE.PAUSED) {
+            buttonAnimStart.setDisable(false);
+            buttonAnimEnd.setDisable(false);
+            buttonAnimPlayPause.setDisable(false);
+            buttonAnimStop.setDisable(false);
+            buttonAnimStepBackward.setDisable(false || absFrame == 0);
+            buttonAnimStepForward.setDisable(false || absFrame == absMaxFrame);
+
+            buttonAnimPlayPause.setGraphic(playImage);
+        }
+        else if (state == STATE.STOPPED) {
+            buttonAnimStart.setDisable(false);
+            buttonAnimEnd.setDisable(false);
+            buttonAnimPlayPause.setDisable(false);
+            buttonAnimStop.setDisable(true);
+            buttonAnimStepBackward.setDisable(true);
+            buttonAnimStepForward.setDisable(true);
+
+            buttonAnimPlayPause.setGraphic(playImage);
+        }
+
     }
 
     public void execute()
@@ -149,7 +412,7 @@ public class AnimationEngine
         hCodeEngine = new HCodeEngine(window, program);
         hCodeEngine.execute(true);
 
-        // We don't have the animation statement settings or the variables until
+        // We don"t have the animation statement settings or the variables until
         // after the first execution
 
         AnimationStruct animationStruct =
@@ -162,7 +425,7 @@ public class AnimationEngine
         double speed = animationStruct.speed;
 
         // We calculate the maximum number of frames in a loop by checking the
-        // limits of all the animation variables. If an animation variable doesn't
+        // limits of all the animation variables. If an animation variable doesn"t
         // have a limit, we still impose one
 
         framesPerLoop = getMaxFrames(hCodeEngine);
@@ -184,18 +447,8 @@ public class AnimationEngine
 
         timer = new DiagramAnimationTimer(this, speed, 1);
         timer.start();
-    }
 
-    public void close()
-    {
-        if (timer != null) {
-            timer.stop();
-            timer = null;
-        }
-
-        if (hCodeEngine != null) {
-            hCodeEngine.close();
-        }
+        setState(STATE.RUNNING);
     }
 
     private int getNextFrame(int step)
@@ -216,6 +469,11 @@ public class AnimationEngine
             absFrame = absMaxFrame;
         }
 
+        return absoluteToLogicalFrame(absFrame);
+    }
+
+    private int absoluteToLogicalFrame(int absFrame)
+    {
         // Calculate the frame position within a rep (0-based)
 
         int frame = absFrame % framesPerRep;
@@ -229,6 +487,7 @@ public class AnimationEngine
         // Frame is 1-based
 
         return frame + 1;
+
     }
 
     private void executeFrame(int frame)
@@ -314,196 +573,14 @@ public class AnimationEngine
         return maxFrames;
     }
 
-    /**
-     * Add all the listeners needed by this lcode engine. Every listener
-     * added must be removed when this lcode engine is closed.
-     */
-    private void addListeners()
+    public void close()
     {
-        final AnimationEngine engine = this;
+        stop();
+        removeListeners();
 
-        // ************************************************************
-        // *
-        // * MOUSE FEEDBACK HANDLER
-        // *
-        // ************************************************************
-
-        Label label = (Label)(window.getScene().lookup("#coordinateArea"));
-
-        canvas.setOnMouseMoved(event -> {
-            displayCoordinates(label, event.getX(), event.getY());
-            engine.setMouseInside(true);
-        });
-
-        canvas.setOnMouseEntered(event -> {
-            displayCoordinates(label, event.getX(), event.getY());
-            engine.setMouseInside(true);
-        });
-
-        canvas.setOnMouseExited(event -> {
-            label.setText("");
-            engine.setMouseInside(false);
-        });
-
-        // ************************************************************
-        // *
-        // * PAN HANDLER
-        // *
-        // ************************************************************
-
-        canvas.setOnMousePressed(event -> {
-            mouseX = event.getX();
-            mouseY = event.getY();
-        });
-
-        canvas.setOnMouseDragged(event -> {
-            try {
-                double deltaX = event.getX() - mouseX;
-                double deltaY = event.getY() - mouseY;
-
-                GraphicsContext gc = context.gc;
-                Affine transform = gc.getTransform();
-                Point2D point = transform.inverseDeltaTransform(deltaX, deltaY);
-                gc.translate(point.getX(), point.getY());
-                context.invScale = context.getCurrentInvScale();
-                context.bounds = context.getCurrentCanvasBounds();
-
-                engine.execute();
-
-                mouseX = event.getX();
-                mouseY = event.getY();
-            }
-            catch (NonInvertibleTransformException e) {
-                throw new ProgrammingException("LCodeEngine.setOnMouseDragged()", e);
-            }
-        });
-
-        // ************************************************************
-        // *
-        // * MOUSE ZOOM HANDLER
-        // *
-        // ************************************************************
-
-        canvas.setOnScroll(event -> {
-            GraphicsContext gc = canvas.getGraphicsContext2D();
-
-            double delta = event.getDeltaY();
-            if (delta == 0.0) return;
-
-            Point2D center = new Point2D(event.getX(), event.getY());
-            zoom(center, delta);
-
-            engine.execute();
-        });
-
-        // ************************************************************
-        // *
-        // * KEYBOARD ZOOM HANDLER
-        // *
-        // ************************************************************
-
-        canvas.setOnKeyPressed(event -> {
-
-            // The Ctrl key must be used
-
-            if (!event.isControlDown()) return;
-            if (event.getCode() != KeyCode.PLUS &&
-                event.getCode() != KeyCode.EQUALS &&
-                event.getCode() != KeyCode.MINUS &&
-                event.getCode() != KeyCode.DIGIT0) return;
-
-            // Reset zoom/pan (Ctrl + 0)
-
-            if (event.getCode() == KeyCode.DIGIT0) {
-                ((DisplayCommandExec)displayCommand.getCmdExec()).
-                    setInitialZoomPan(context, ((DisplayStruct)displayCommand.getCmdStruct()));
-            }
-
-            // Zoom in/out (Ctrl + +/-)
-
-            else {
-                Point2D center = new Point2D(canvas.getWidth() / 2.0, canvas.getHeight() / 2.0);
-                zoom(center, event.getCode() == KeyCode.MINUS ? +100.0 : -100.0);
-           }
-
-            engine.execute();
-            if (engine.isMouseInside()) {
-                // displayCoordinates(label, event.getX(), event.getY());
-            }
-        });
-    }
-
-    private void displayCoordinates(Label label, double x, double y)
-    {
-        try {
-            GraphicsContext gc = context.gc;
-            Point2D point
-                = gc.getTransform().inverseTransform(x, y);
-            label.setText(
-                "(" +
-                String.format("%g", point.getX()) +
-                ", " +
-                String.format("%g", point.getY()) +
-                ")");
+        if (hCodeEngine != null) {
+            hCodeEngine.close();
         }
-        catch (NonInvertibleTransformException e) {
-            throw new ProgrammingException("LCodeEngine.displayCoordinates()", e);
-        }
-    }
-
-    /**
-     * Common zoom code.
-     *
-     * @param center The point to zoom around in screen coordinates.
-     * @param delta  The zoom amount (+ for zoom in, - for zoom out).
-     */
-    private void zoom(Point2D center, double delta)
-    {
-        try {
-            GraphicsContext gc = context.gc;
-
-            if (delta == 0.0) return;
-
-             Affine transform = gc.getTransform();
-
-             double curInvScale = context.getCurrentInvScale();
-
-             // Scale using this rather magic formula
-
-             double zoomExp = 1 + (Math.abs(delta) / 1000.0);
-             double zoomIncr = Math.pow(curInvScale, zoomExp) / 10.0;
-             if (delta < 0) zoomIncr = -zoomIncr;
-             double newScale = curInvScale + zoomIncr;
-
-             // Limit the scaling
-
-             if (newScale < MIN_ZOOM_SCALE) {
-                 newScale = MIN_ZOOM_SCALE;
-             }
-             else if (newScale > MAX_ZOOM_SCALE) {
-                 newScale = MAX_ZOOM_SCALE;
-             }
-
-             // Get the relative scaling to use
-
-             newScale = 1 / newScale;
-
-             // Convert the zoom center to world coordinates
-
-             Point2D worldCenter = transform.inverseTransform(center);
-
-             // Scale around the center point
-
-             transform.appendScale(curInvScale, curInvScale, worldCenter.getX(), worldCenter.getY());
-             transform.appendScale(newScale, newScale, worldCenter.getX(), worldCenter.getY());
-             gc.setTransform(transform);
-
-            context.invScale = context.getCurrentInvScale();
-            context.bounds = context.getCurrentCanvasBounds();
-         }
-         catch (NonInvertibleTransformException e) {
-             throw new ProgrammingException("LCodeEngine.zoom()", e);
-         }
     }
 
     /**
@@ -511,14 +588,13 @@ public class AnimationEngine
      */
     private void removeListeners()
     {
-        canvasParent.widthProperty().removeListener(widthListener);
-        canvasParent.widthProperty().removeListener(heightListener);
-        canvas.setOnMouseMoved(null);
-        canvas.setOnMouseExited(null);
-        canvas.setOnMousePressed(null);
-        canvas.setOnMouseDragged(null);
-        canvas.setOnScroll(null);
-        canvas.setOnKeyPressed(null);
+        buttonAnimStart.removeEventHandler(ActionEvent.ACTION, animStartEventHandler);
+        buttonAnimEnd.removeEventHandler(ActionEvent.ACTION, animEndEventHandler);
+        buttonAnimStepBackward.removeEventHandler(ActionEvent.ACTION, animStepBackwardEventHandler);
+        buttonAnimStepForward.removeEventHandler(ActionEvent.ACTION, animStepForwardEventHandler);
+        buttonAnimPlayPause.removeEventHandler(ActionEvent.ACTION, animPlayPauseEventHandler);
+        buttonAnimStop.removeEventHandler(ActionEvent.ACTION, animStopEventHandler);
+        canvas.removeEventHandler(KeyEvent.KEY_TYPED, keyTypedEventHandler);
     }
 
 }
