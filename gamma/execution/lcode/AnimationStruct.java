@@ -27,7 +27,7 @@ import gamma.value.Frame;
 public class AnimationStruct extends Struct
 {
     public String control = "loop";
-    public int reps = Integer.MAX_VALUE;
+    public int reps = 500;
     public double speed = 1.0;
 
 
@@ -37,15 +37,15 @@ public class AnimationStruct extends Struct
 
     public void repsRangeCheck()
     {
-        if (reps < 1) {
-            throw new ExecutionException("Animation reps are out of range");
+        if (reps < 1 || reps > 500) {
+            throw new ExecutionException("Animation reps must be between 1 and 500");
         }
     }
 
     public void speedRangeCheck()
     {
-        if (speed <= 0.0) {
-            throw new ExecutionException("Animation speed is out of range");
+        if (speed < 0.1 || speed > 10.0) {
+            throw new ExecutionException("Animation speed must be between 0.1 and 10.0");
         }
     }
 

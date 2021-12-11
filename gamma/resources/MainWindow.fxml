@@ -88,7 +88,7 @@
     </MenuBar>
       <VBox alignment="CENTER" style="-fx-view-order: 100;" VBox.vgrow="ALWAYS">
          <children>
-            <Canvas id="diagramArea" height="480.0" style="-fx-view-order: 200;" width="640.0" />
+            <Canvas id="diagramArea" focusTraversable="true" height="480.0" style="-fx-view-order: 200;" width="640.0" />
          </children>
       </VBox>
       <Separator minHeight="-Infinity" minWidth="-Infinity" style="-fx-view-order: 0;" VBox.vgrow="NEVER" />
@@ -108,7 +108,7 @@
             <Separator focusTraversable="false" orientation="VERTICAL" HBox.hgrow="ALWAYS" />
             <HBox id="animationControls" disable="true" HBox.hgrow="NEVER">
                <children>
-                  <Button id="anim_start" mnemonicParsing="false">
+                  <Button id="animStart" focusTraversable="false" mnemonicParsing="false">
                      <graphic>
                         <ImageView pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -119,7 +119,7 @@
                      <tooltip>
                         <Tooltip text="Go to first frame" />
                      </tooltip></Button>
-                  <Button id="anim_step_backward" layoutX="10.0" layoutY="10.0" mnemonicParsing="false">
+                  <Button id="animStepBackward" focusTraversable="false" layoutX="10.0" layoutY="10.0" mnemonicParsing="false">
                      <graphic>
                         <ImageView pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -131,7 +131,7 @@
                         <Tooltip text="Step back one frame" />
                      </tooltip>
                   </Button>
-                  <Button id="anim_play" mnemonicParsing="false">
+                  <Button id="animPlay" focusTraversable="false" mnemonicParsing="false">
                      <graphic>
                         <ImageView pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -142,30 +142,7 @@
                      <tooltip>
                         <Tooltip text="Play" />
                      </tooltip></Button>
-                  <Button id="anim_pause" layoutX="124.0" layoutY="10.0" mnemonicParsing="false">
-                     <graphic>
-                        <ImageView pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@player_pause.png" />
-                           </image>
-                        </ImageView>
-                     </graphic>
-                     <tooltip>
-                        <Tooltip text="Pause" />
-                     </tooltip>
-                  </Button>
-                  <Button id="anim_stop" mnemonicParsing="false">
-                     <graphic>
-                        <ImageView pickOnBounds="true" preserveRatio="true">
-                           <image>
-                              <Image url="@player_stop.png" />
-                           </image>
-                        </ImageView>
-                     </graphic>
-                     <tooltip>
-                        <Tooltip text="Stop" />
-                     </tooltip></Button>
-                  <Button id="anim_step_forward" mnemonicParsing="false">
+                  <Button id="animStepForward" focusTraversable="false" mnemonicParsing="false">
                      <graphic>
                         <ImageView pickOnBounds="true" preserveRatio="true">
                            <image>
@@ -176,7 +153,7 @@
                      <tooltip>
                         <Tooltip text="Step forward one frame" />
                      </tooltip></Button>
-                  <Button id="anim_end" layoutX="162.0" layoutY="10.0" mnemonicParsing="false">
+                  <Button id="animEnd" focusTraversable="false" layoutX="162.0" layoutY="10.0" mnemonicParsing="false">
                      <graphic>
                         <ImageView pickOnBounds="true" preserveRatio="true">
                            <image>

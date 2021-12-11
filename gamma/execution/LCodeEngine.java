@@ -26,11 +26,16 @@ import java.util.Iterator;
 import java.util.ListIterator;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Region;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
@@ -59,6 +64,13 @@ public class LCodeEngine
 
     ChangeListener<Number> widthListener;
     ChangeListener<Number> heightListener;
+    EventHandler<MouseEvent> mouseMovedEventHandler;
+    EventHandler<MouseEvent> mouseEnteredEventHandler;
+    EventHandler<MouseEvent> mouseExitedEventHandler;
+    EventHandler<MouseEvent> mousePressedEventHandler;
+    EventHandler<MouseEvent> mouseDraggedEventHandler;
+    EventHandler<ScrollEvent> scrollEventHandler;
+    EventHandler<KeyEvent> keyPressedEventHandler;
 
     private double mouseX;
     private double mouseY;
@@ -205,7 +217,7 @@ public class LCodeEngine
     /**
      * Set up for the first run of the lcode.
      */
-    public void setup()
+    public final void setup()
     {
         // Tell the window we are starting it. It will shut down any prior
         // lcode engine
@@ -256,7 +268,7 @@ public class LCodeEngine
     /**
      * Execute the lCode.
      * <p>
-     * This is called after setup() and the after any zoom/pan changes or after
+     * This is called after setup() and  after any zoom/pan changes or after
      * the drawing area is resized.
      */
     public void execute()
@@ -321,20 +333,23 @@ public class LCodeEngine
 
         Label label = (Label)(window.getScene().lookup("#coordinateArea"));
 
-        canvas.setOnMouseMoved(event -> {
+        mouseMovedEventHandler = event -> {
             displayCoordinates(label, event.getX(), event.getY());
             engine.setMouseInside(true);
-        });
+        };
+        canvas.addEventHandler(MouseEvent.MOUSE_MOVED, mouseMovedEventHandler);
 
-        canvas.setOnMouseEntered(event -> {
+        mouseEnteredEventHandler = event -> {
             displayCoordinates(label, event.getX(), event.getY());
             engine.setMouseInside(true);
-        });
+        };
+        canvas.addEventHandler(MouseEvent.MOUSE_ENTERED, mouseEnteredEventHandler);
 
-        canvas.setOnMouseExited(event -> {
+        mouseExitedEventHandler = event -> {
             label.setText("");
             engine.setMouseInside(false);
-        });
+        };
+        canvas.addEventHandler(MouseEvent.MOUSE_EXITED, mouseExitedEventHandler);
 
         // ************************************************************
         // *
@@ -342,12 +357,13 @@ public class LCodeEngine
         // *
         // ************************************************************
 
-        canvas.setOnMousePressed(event -> {
+        mousePressedEventHandler = event -> {
             mouseX = event.getX();
             mouseY = event.getY();
-        });
+        };
+        canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, mousePressedEventHandler);
 
-        canvas.setOnMouseDragged(event -> {
+        mouseDraggedEventHandler = event -> {
             try {
                 double deltaX = event.getX() - mouseX;
                 double deltaY = event.getY() - mouseY;
@@ -367,7 +383,8 @@ public class LCodeEngine
             catch (NonInvertibleTransformException e) {
                 throw new ProgrammingException("LCodeEngine.setOnMouseDragged()", e);
             }
-        });
+        };
+        canvas.addEventHandler(MouseEvent.MOUSE_DRAGGED, mouseDraggedEventHandler);
 
         // ************************************************************
         // *
@@ -375,7 +392,7 @@ public class LCodeEngine
         // *
         // ************************************************************
 
-        canvas.setOnScroll(event -> {
+        scrollEventHandler = event -> {
             GraphicsContext gc = canvas.getGraphicsContext2D();
 
             double delta = event.getDeltaY();
@@ -385,7 +402,8 @@ public class LCodeEngine
             zoom(center, delta);
 
             engine.execute();
-        });
+        };
+        canvas.addEventHandler(ScrollEvent.ANY, scrollEventHandler);
 
         // ************************************************************
         // *
@@ -393,7 +411,7 @@ public class LCodeEngine
         // *
         // ************************************************************
 
-        canvas.setOnKeyPressed(event -> {
+        keyPressedEventHandler = event -> {
 
             // The Ctrl key must be used
 
@@ -421,7 +439,8 @@ public class LCodeEngine
             if (engine.isMouseInside()) {
                 // displayCoordinates(label, event.getX(), event.getY());
             }
-        });
+        };
+        canvas.addEventHandler(KeyEvent.KEY_PRESSED, keyPressedEventHandler);
     }
 
     private void displayCoordinates(Label label, double x, double y)
@@ -504,12 +523,20 @@ public class LCodeEngine
     {
         canvasParent.widthProperty().removeListener(widthListener);
         canvasParent.widthProperty().removeListener(heightListener);
-        canvas.setOnMouseMoved(null);
-        canvas.setOnMouseExited(null);
-        canvas.setOnMousePressed(null);
-        canvas.setOnMouseDragged(null);
-        canvas.setOnScroll(null);
-        canvas.setOnKeyPressed(null);
+        canvas.removeEventHandler(MouseEvent.MOUSE_MOVED, mouseMovedEventHandler);
+        // canvas.setOnMouseMoved(null);
+        canvas.removeEventHandler(MouseEvent.MOUSE_ENTERED, mouseEnteredEventHandler);
+        // canvas.setOnMouseEnetered(null);
+        canvas.removeEventHandler(MouseEvent.MOUSE_EXITED, mouseExitedEventHandler);
+        // canvas.setOnMouseExited(null);
+        canvas.removeEventHandler(MouseEvent.MOUSE_PRESSED, mousePressedEventHandler);
+        // canvas.setOnMousePressed(null);
+        canvas.removeEventHandler(MouseEvent.MOUSE_DRAGGED, mouseDraggedEventHandler);
+        // canvas.setOnMouseDragged(null);
+        canvas.removeEventHandler(ScrollEvent.ANY, scrollEventHandler);
+        // canvas.setOnScroll(null);
+        canvas.removeEventHandler(KeyEvent.KEY_PRESSED, keyPressedEventHandler);
+        // canvas.setOnKeyPressed(null);
     }
 
 }
