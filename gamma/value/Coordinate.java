@@ -16,6 +16,7 @@
  */
 package gamma.value;
 
+import gamma.execution.HCodeEngine;
 import gamma.math.Relativity;
 import javafx.geometry.Point2D;
 
@@ -23,7 +24,7 @@ import javafx.geometry.Point2D;
  *
  * @author Antonio Freixas
  */
-public class Coordinate extends ObjectContainer implements ExecutionMutable
+public class Coordinate extends ObjectContainer implements ExecutionMutable, Displayable
 {
     static private String[] propertyNames = { "x", "t" };
 
@@ -86,10 +87,11 @@ public class Coordinate extends ObjectContainer implements ExecutionMutable
      *
      * @param other The other coordinate to add.
      */
-    public void add(Coordinate other)
+    public Coordinate add(Coordinate other)
     {
         this.x += other.x;
         this.t += other.t;
+        return this;
     }
 
     /**
@@ -97,10 +99,11 @@ public class Coordinate extends ObjectContainer implements ExecutionMutable
      *
      * @param other The other coordinate to subtract.
      */
-    public void subtract(Coordinate other)
+    public Coordinate subtract(Coordinate other)
     {
         this.x -= other.x;
         this.t -= other.t;
+        return this;
     }
 
     @Override
@@ -156,6 +159,12 @@ public class Coordinate extends ObjectContainer implements ExecutionMutable
             return false;
         }
         return Double.doubleToLongBits(this.t) == Double.doubleToLongBits(other.t);
+    }
+
+    @Override
+    public String toDisplayableString(HCodeEngine engine)
+    {
+        return "(" + engine.toDisplayableString(x) + ", " + engine.toDisplayableString(t) + ")";
     }
 
 }

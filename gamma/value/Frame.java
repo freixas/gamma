@@ -16,6 +16,7 @@
  */
 package gamma.value;
 
+import gamma.execution.HCodeEngine;
 import gamma.math.Relativity;
 import gamma.math.Util;
 import java.util.Objects;
@@ -24,7 +25,7 @@ import java.util.Objects;
  *
  * @author Antonio Freixas
  */
-public class Frame implements ExecutionMutable
+public class Frame implements ExecutionMutable, Displayable
 {
    public enum AtType implements ExecutionImmutable
     {
@@ -244,6 +245,12 @@ public class Frame implements ExecutionMutable
             return false;
         }
         return Objects.equals(this.origin, other.origin);
+    }
+
+    @Override
+    public String toDisplayableString(HCodeEngine engine)
+    {
+        return "[ Frame velocity " + engine.toDisplayableString(v) + ", origin " + origin.toDisplayableString(engine) + " ]";
     }
 
 }

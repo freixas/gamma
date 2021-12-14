@@ -16,6 +16,7 @@
  */
 package gamma.value;
 
+import gamma.execution.HCodeEngine;
 import gamma.math.Relativity;
 import gamma.math.Util;
 
@@ -28,7 +29,7 @@ import gamma.math.Util;
  *
  * @author Antonio Freixas
  */
-public class Line extends CurveSegment implements ExecutionMutable
+public class Line extends CurveSegment implements ExecutionMutable, Displayable
 {
     public enum AxisType implements ExecutionImmutable
     {
@@ -365,6 +366,12 @@ public class Line extends CurveSegment implements ExecutionMutable
         if (!isInfinitePlus) { maxX = coord.x; maxT = coord.t; }
 
         return new Bounds(minX, minT, maxX, maxT);
+    }
+
+    @Override
+    public String toDisplayableString(HCodeEngine engine)
+    {
+        return "[ Line " + engine.toDisplayableString(angle) + " degrees through " + coord.toDisplayableString(engine) + " ]";
     }
 
     @Override

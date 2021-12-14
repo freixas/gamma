@@ -17,12 +17,14 @@
 package gamma.execution;
 
 import gamma.MainWindow;
+import gamma.execution.hcode.SetStatement;
 import gamma.execution.lcode.AnimationStruct;
 import gamma.math.Util;
 import gamma.value.AnimationVariable;
 import java.util.Iterator;
 import java.util.Set;
 import javafx.animation.AnimationTimer;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.canvas.Canvas;
@@ -38,7 +40,7 @@ import javafx.scene.layout.HBox;
  */
 public class AnimationEngine
 {
-    enum STATE {
+    enum State {
         RUNNING, STOPPED, NOT_SET
     }
 
@@ -49,16 +51,13 @@ public class AnimationEngine
         private int direction;
 
         private long firstCallTime;
-        private int totalFrameCount;
+        private long totalFrameCount;
 
         DiagramAnimationTimer(AnimationEngine animationEngine, double speed, int direction)
         {
             this.animationEngine = animationEngine;
             this.setSpeed(speed);
             this.setDirection(direction);
-
-            this.firstCallTime = -1;
-            this.totalFrameCount = 0;
         }
 
         public final void setSpeed(double speed)
@@ -71,6 +70,22 @@ public class AnimationEngine
             this.direction = (int)Util.sign(direction);
         }
 
+        public final void stop()
+        {
+            super.stop();
+            System.err.println("Timer stopped");
+        }
+
+        @Override
+        public final void start()
+        {
+            firstCallTime = -1;
+            totalFrameCount = 0;
+
+            super.start();
+            System.err.println("Timer started");
+        }
+
         @Override
         public void handle(long now)
         {
@@ -80,7 +95,6 @@ public class AnimationEngine
             if (firstCallTime == -1) {
                 frameSkipSize = 1;
                 frameStepSize = 1;
-                totalFrameCount = 0;
                 firstCallTime = now;
             }
             else {
@@ -105,10 +119,17 @@ public class AnimationEngine
                 int frame = animationEngine.getNextFrame(direction * frameStepSize);
                 if (animationEngine.atEnd()) {
                     animationEngine.stop();
-                    return;
                 }
 
-                animationEngine.executeFrame(frame);
+                try {
+                    animationEngine.executeFrame(frame);
+                }
+                catch (Throwable e) {
+                    animationEngine.stop();
+                    Platform.runLater(() -> {
+                        animationEngine.window.getDiagramEngine().handleExeception(e);
+                    });
+                }
             }
         }
     }
@@ -118,6 +139,7 @@ public class AnimationEngine
     private static final int MAX_FRAMES = 10 * 60 * 60 * 30;
 
     private final MainWindow window;
+    private final SetStatement setStatement;
     private final HCodeProgram program;
 
     private AnimationSymbolTable animationSymbolTable;
@@ -126,7 +148,7 @@ public class AnimationEngine
     private HCodeEngine hCodeEngine;
     private DiagramAnimationTimer timer;
     private double speed;
-    private STATE state;
+    private State state;
 
     private Canvas canvas;
     private HBox animationControls;
@@ -151,15 +173,16 @@ public class AnimationEngine
     private int absFrame;
     private int absMaxFrame;
 
-    public AnimationEngine(MainWindow window, HCodeProgram program)
+    public AnimationEngine(MainWindow window, SetStatement setStatement, HCodeProgram program)
     {
         this.window = window;
+        this.setStatement = setStatement;
         this.program = program;
 
         this.hCodeEngine = null;
         this.timer = null;
 
-        this.state = STATE.NOT_SET;
+        this.state = State.NOT_SET;
 
         setup();
     }
@@ -188,7 +211,7 @@ public class AnimationEngine
 
         addListeners();
 
-        setState(STATE.STOPPED);
+        setState(State.STOPPED);
     }
 
     /**
@@ -278,8 +301,8 @@ public class AnimationEngine
             int frame = absoluteToLogicalFrame(absFrame);
             executeFrame(frame);
         }
-        setState(STATE.STOPPED);
-        timer.stop();
+        setState(State.STOPPED);
+        if (timer != null) timer.stop();
     }
 
     private void toEnd()
@@ -291,84 +314,75 @@ public class AnimationEngine
             int frame = absoluteToLogicalFrame(absFrame);
             executeFrame(frame);
         }
-        setState(STATE.STOPPED);
-        timer.stop();
+        setState(State.STOPPED);
+        if (timer != null) timer.stop();
     }
 
     private void stepBackward()
     {
         // Only if stopped
 
-        if (state != STATE.STOPPED) return;
+        if (state != State.STOPPED) return;
         int frame = getNextFrame(-1);
         executeFrame(frame);
-        setState(STATE.STOPPED);
+        setState(State.STOPPED);
     }
 
     private void stepForward()
     {
         // Only if stopped
 
-        if (state != STATE.STOPPED) return;
+        if (state != State.STOPPED) return;
         int frame = getNextFrame(1);
         executeFrame(frame);
-        setState(STATE.STOPPED);
+        setState(State.STOPPED);
     }
 
     private void play()
     {
-        if (state == STATE.RUNNING) return;
-        setState(STATE.RUNNING);
-        timer.start();
+        setState(State.RUNNING);
+        if (timer != null) timer.start();
     }
 
     private void togglePlay()
     {
-        if (state == STATE.STOPPED) {
+        if (state == State.STOPPED) {
             play();
         }
-        else if (state == STATE.RUNNING) {
+        else if (state == State.RUNNING) {
             stop();
         }
     }
 
-    private void stop()
+    private synchronized void stop()
     {
-        setState(STATE.STOPPED);
-        timer.stop();
+        setState(State.STOPPED);
+        if (timer != null) timer.stop();
     }
 
     private void playFaster()
     {
-        // Only change speed if we're running
-
-        if (state == STATE.RUNNING) {
-            speed *= 2;
-            if (speed > 10.0) speed = 10.0;
-            timer.setSpeed(speed);
-        }
+        speed *= 2;
+        if (speed > 10.0) speed = 10.0;
+        if (timer != null) timer.setSpeed(speed);
     }
 
     private void playSlower()
     {
-        // Only change speed if we're running
-
-        if (state == STATE.RUNNING) {
-            speed /= 2;
-            if (speed < .1) speed = .1;
-            timer.setSpeed(speed);
-        }
+        speed /= 2;
+        if (speed < .1) speed = .1;
+        if (timer != null) timer.setSpeed(speed);
     }
 
     private void playNormal()
     {
-        timer.setSpeed(1.0);
+        if (timer != null) timer.setSpeed(1.0);
     }
 
-    private void setState(STATE newState)
+    private void setState(State newState)
     {
         state = newState;
-        if (state == STATE.RUNNING) {
+        if (state == State.RUNNING) {
             buttonAnimStart.setDisable(false);
             buttonAnimEnd.setDisable(false);
             buttonAnimPlayPause.setDisable(false);
@@ -377,7 +391,7 @@ public class AnimationEngine
 
             buttonAnimPlayPause.setGraphic(stopImage);
         }
-        else if (state == STATE.STOPPED) {
+        else if (state == State.STOPPED) {
             buttonAnimStart.setDisable(false || absFrame == 0);
             buttonAnimEnd.setDisable(false || absFrame == absMaxFrame);
             buttonAnimPlayPause.setDisable(false || absFrame == absMaxFrame);
@@ -392,7 +406,7 @@ public class AnimationEngine
     {
         // First execution
 
-        hCodeEngine = new HCodeEngine(window, program);
+        hCodeEngine = new HCodeEngine(window, setStatement, program);
         hCodeEngine.execute(true);
 
         // We don"t have the animation statement settings or the variables until
@@ -431,10 +445,10 @@ public class AnimationEngine
         timer = new DiagramAnimationTimer(this, speed, 1);
         timer.start();
 
-        setState(STATE.RUNNING);
+        setState(State.RUNNING);
     }
 
-    private int getNextFrame(int step)
+    private synchronized int getNextFrame(int step)
     {
         // Calculate the next absolute frame number
 
@@ -473,7 +487,7 @@ public class AnimationEngine
 
     }
 
-    private void executeFrame(int frame)
+    private synchronized void executeFrame(int frame)
     {
         Iterator<String> iter = symbolNames.iterator();
 
@@ -494,7 +508,7 @@ public class AnimationEngine
         canvas.requestFocus();
     }
 
-    private boolean atEnd()
+    private synchronized boolean atEnd()
     {
         return absFrame >= absMaxFrame;
     }

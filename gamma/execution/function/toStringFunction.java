@@ -47,7 +47,7 @@ public class toStringFunction extends Function
         if (digits < 0) {
             throw new ExecutionException("Invalid number of digits in float to string conversion");
         }
-        return String.format("%." + digits + "f", d);
+        return Util.toString(d, digits);
     }
 
     @Override

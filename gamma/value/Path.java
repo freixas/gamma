@@ -16,6 +16,7 @@
  */
 package gamma.value;
 
+import gamma.execution.HCodeEngine;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -23,7 +24,7 @@ import java.util.Iterator;
  *
  * @author Antonio Freixas
  */
-public class Path implements ExecutionImmutable
+public class Path implements ExecutionImmutable, Displayable
 {
     private final ArrayList<Coordinate> coords;
     private final Bounds bounds;
@@ -73,6 +74,19 @@ public class Path implements ExecutionImmutable
             newCoords.add(prime.toFrame(coords.get(i)));
         }
         return new Path(newCoords);
+    }
+
+    @Override
+    public String toDisplayableString(HCodeEngine engine)
+    {
+        StringBuilder str = new StringBuilder("[ Path\n");
+        for (int i = 0; i < coords.size(); i++) {
+            str.append(String.format("  %2d)", i + 1));
+            str.append(coords.get(i).toDisplayableString(engine));
+            str.append("\n");
+        }
+        str.append("]");
+        return str.toString();
     }
 
 }

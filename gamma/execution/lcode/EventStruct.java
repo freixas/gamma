@@ -56,9 +56,7 @@ public class EventStruct extends Struct
     @Override
     public void relativeTo(Frame prime)
     {
-        System.err.println("Location before transform = " + location);
         location = prime.toFrame(location);
-        System.err.println("Location after transform  = " + location);
         if (boostTo != null) {
             boostTo = boostTo.relativeTo(prime);
         }

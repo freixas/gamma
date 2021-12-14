@@ -19,6 +19,8 @@ package gamma.execution.hcode;
 import gamma.execution.ArgInfo;
 import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
+import gamma.math.Util;
+import gamma.value.Displayable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,16 +53,47 @@ public class AddHCode extends HCode
         boolean isDouble2 = arg2 instanceof Double;
         boolean isString1 = arg1 instanceof String;
         boolean isString2 = arg2 instanceof String;
+        boolean isDisplayable1 = arg1 instanceof Displayable;
+        boolean isDisplayable2 = arg2 instanceof Displayable;
+
+        // Both value are doubles; add them
 
         if (isDouble1 && isDouble2) {
             data.add((Double)arg1 + (Double)arg2);
         }
-        else if (isString1) {
-            data.add(arg1.toString() + (String)arg2);
+
+        // At least one value is a String; convert the other value to a string
+        // (if needed) and concatenate them
+
+        else if (isString1 || isString2) {
+            String string1;
+            String string2;
+
+            if (isDouble1) {
+                string1 = engine.toDisplayableString((Double)arg1);
+            }
+            else if (isDisplayable1) {
+                string1 = ((Displayable)arg1).toDisplayableString(engine);
+            }
+            else {
+                string1 = (String)arg1;
+            }
+
+            if (isDouble2) {
+                string2 = engine.toDisplayableString((Double)arg2);
+            }
+            else if (isDisplayable1) {
+                string2 = ((Displayable)arg2).toDisplayableString(engine);
+            }
+            else {
+                string2 = (String)arg2;
+            }
+
+            data.add(string1 + string2);
         }
-        else if (isString2) {
-            data.add((String)arg1 + arg2.toString());
-        }
+
+        // Invalid combination
+
         else {
             throw new ExecutionException("Invalid types for '+' operator");
         }

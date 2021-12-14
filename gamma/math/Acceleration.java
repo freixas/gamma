@@ -860,6 +860,8 @@ public final class Acceleration
 
             // Since we know x is 0, the intersection is at (0, k)
 
+            System.out.println("------");
+            System.out.println(new Coordinate(0, k));
             return new Coordinate(0, k);
         }
 
@@ -878,30 +880,29 @@ public final class Acceleration
             // We plug this into the acceleration formula to calculate t
 
             x1 = x2 = line.getCoordinate().x;
-            t1 = -Math.sqrt(x1 * x1 + (2 * x1) / a);
-            t2 = t1;
+            t1 = xToT(a, x1, false);
+            t2 = xToT(a, x2, true);
         }
 
         else {
-            // x = +/-((sqrt(ak(ak - 2m) + 1)/a + 1/a - km) / (m^2 - 1)
+            // mx + k = sqrt(x^2 + 2x/a)
+            // x = (+/-sqrt(a^2^k2 - 2*a*k*m + 1)/a + 1/a - k*m) / (m^2 - 1)
+            // x = ((+/-sqrt(a*k*(a*k - 2*m) + 1) + 1)/a - k*m) / (m^2 - 1)
             // Solve for t and we have the solutions
 
             double ak = a * k;
             double km = k * m;
-
+            double m21 = m *m - 1;
 
             double root = Math.sqrt(ak * (ak - 2 * m) + 1);
-            double term1 = (1 / a) - (k * m);
-            double term2 = (m * m) - 1;
-
-            x1 = (-root + term1) / term2;
-            x2 = (root + term1) / term2;
+            x1 = ((-root + 1)/a - km) / m21;
+            x2 = ((+root + 1)/a - km) / m21;
 
             t1 = m * x1 + k;
             t2 = m * x2 + k;
-        }
+      }
 
-        if (later) return new Coordinate(x2, t2);
+        if ((later && t2 > t1) || (!later && t2 <= t1)) return new Coordinate(x2, t2);
         return new Coordinate(x1, t1);
     }
 

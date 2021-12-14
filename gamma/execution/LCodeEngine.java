@@ -55,6 +55,8 @@ public class LCodeEngine
     private Command displayCommand;
     private Command frameCommand;
 
+    private boolean setupComplete;
+
     private Canvas canvas;
     private Region canvasParent;
     private double lastWidth;
@@ -88,6 +90,7 @@ public class LCodeEngine
 
         this.displayCommand = new Command(new DisplayStruct(), new StyleStruct(), new DisplayCommandExec());
         this.frameCommand = new Command(new FrameStruct(), new StyleStruct(), new FrameCommandExec());
+        this.setupComplete = false;
 
         lastWidth = -1.0;
         lastHeight = -1.0;
@@ -240,17 +243,9 @@ public class LCodeEngine
 
         addListeners();
 
-        // Use the frame command to revise all the coordinates in the structures.
-        // Optimize if we have the default frame
+        setUpDrawingFrame();
 
-        FrameStruct fStruct = (FrameStruct)frameCommand.getCmdStruct();
-        if (!fStruct.frame.equals(HCodeEngine.getDefFrame())) {
-            final Frame prime = fStruct.frame;
-            Iterator<Command> iter = (Iterator<Command>)commands.iterator();
-            commands.forEach((Command command) -> {
-                command.getCmdStruct().relativeTo(prime);
-            });
-        }
+        setupComplete = true;
 
         // Set up the drawing transforms. The transform is set up here,
         // but is modified whenever the zoom/pan changes or when the canvas
@@ -272,6 +267,21 @@ public class LCodeEngine
         // Draw the initial display
 
         execute();
+    }
+
+    public void setUpDrawingFrame()
+    {
+        // Use the frame command to revise all the coordinates in the structures.
+        // Optimize if we have the default frame
+
+        FrameStruct fStruct = (FrameStruct)frameCommand.getCmdStruct();
+        if (!fStruct.frame.equals(HCodeEngine.getDefFrame())) {
+            final Frame prime = fStruct.frame;
+            Iterator<Command> iter = (Iterator<Command>)commands.iterator();
+            commands.forEach((Command command) -> {
+                command.getCmdStruct().relativeTo(prime);
+            });
+        }
     }
 
     /**
@@ -301,7 +311,9 @@ public class LCodeEngine
      */
     public void close()
     {
-        removeListeners();
+        if (setupComplete) {
+            removeListeners();
+        }
     }
 
     /**

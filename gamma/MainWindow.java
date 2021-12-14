@@ -17,7 +17,6 @@
 package gamma;
 
 import gamma.execution.DiagramEngine;
-import gamma.execution.LCodeEngine;
 import java.io.File;
 import java.util.ListIterator;
 import javafx.collections.ObservableList;
@@ -33,8 +32,10 @@ import javafx.stage.WindowEvent;
 import gamma.file.FileWatcher;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
 import javafx.scene.control.TextArea;
-import javafx.scene.layout.Region;
 
 /**
  * This class manages the view / controller / model for one main window. It
@@ -62,6 +63,9 @@ public final class MainWindow extends Stage
     private DiagramEngine diagramEngine = null;
 //    private LCodeEngine lCodeEngine = null;
     private Canvas canvas;
+
+    private PrintDialog printDialog = null;
+    private TextArea printDialogTextArea = null;
 
     /**
      * Create a main window.
@@ -260,7 +264,7 @@ public final class MainWindow extends Stage
      /**
      * Get the current DiagramEngine, if any.
      *
-     * @reutrn The current diagram engine, or null if none.
+     * @return The current diagram engine, or null if none.
      */
     public DiagramEngine getDiagramEngine()
     {
@@ -320,6 +324,22 @@ public final class MainWindow extends Stage
         }
     }
 
+    /**
+     * Add text to the HCode's print dialog.
+     *
+     * @param str The text to add. A newline is added to the string.
+     */
+    public void print(String str)
+    {
+        if (printDialog == null) printDialog = new PrintDialog(this);
+        printDialog.appendText(str + "\n");
+        printDialog.show();
+    }
+
+    public void clearPrintDialog()
+    {
+        if (printDialog != null) printDialog.clear();
+    }
 
     @Override
     public int hashCode()

@@ -249,4 +249,17 @@ public final class Util
         return d != 0.0;
     }
 
+    /**
+     * Convert a double to a string with a given precision.
+     *
+     * @param value The value to convert.
+     * @param precision The precision: the number of digits to the right of the
+     * decimal point.
+     * @return The string representation of the number.
+     */
+    static public String toString(Double value, int precision)
+    {
+        return String.format("%." + precision + "f", value);
+    }
+
 }

@@ -849,7 +849,7 @@ public class OffsetAcceleration implements ExecutionImmutable
     public final double tauToT(double tau)
     {
         if (zeroAcceleration) {
-            return Relativity.tauToT(toStdTau(tau), a) + offset.t;
+            return Relativity.tauToT(toStdTau(tau), vInit) + offset.t;
         }
         return Acceleration.tauToT(a, toStdTau(tau)) + offset.t;
     }
@@ -953,15 +953,6 @@ public class OffsetAcceleration implements ExecutionImmutable
      */
     public final Coordinate intersect(Line line, boolean later)
     {
-        // Basics:
-        // The line formula is t = mx + k.
-        // The acceleration formula is t = sqrt(x^2 + 2x/a)
-
-        // Get m and k for the line
-
-        double m = line.getSlope();
-        double k = line.getConstantOffset();
-
         // If the acceleration is 0, our offset acceleration curve is also a
         // line
 
@@ -973,14 +964,12 @@ public class OffsetAcceleration implements ExecutionImmutable
         // there and translate the results back
 
         Coordinate translatedCoord = new Coordinate(line.getCoordinate());
-        translatedCoord.x -= offset.x;
-        translatedCoord.t -= offset.t;
+        translatedCoord.subtract(offset);
         Line translatedLine = new Line(line.getAngle(), translatedCoord);
 
         Coordinate intersection = Acceleration.intersect(a, translatedLine, later);
         if (intersection != null) {
-            intersection.x += offset.x;
-            intersection.t += offset.t;
+            intersection.add(offset);
         }
         return intersection;
     }

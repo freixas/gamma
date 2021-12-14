@@ -48,18 +48,30 @@ public class intersectFunction extends Function
         Object arg2 = code.get(1);
 
         Coordinate result;
+
+        // Both are lines
+
         if (arg1 instanceof Line && arg2 instanceof Line) {
             result = Line.intersect((Line)arg1, (Line)arg2);
         }
+
+        // The first is a line, so the second must be an observer
+
         else if (arg1 instanceof Line line) {
             Observer observer = (Observer)arg2;
             result = observer.intersect(line);
         }
+
+        // The first is an observer and the second is an observer
+
         else if (arg2 instanceof Observer observer2) {
             Observer observer1 = (Observer)arg1;
             result = observer1.intersect(observer2);
         }
-        else /* First is observer and second is line */ {
+
+        // The first is an observer and the second is a line
+        
+        else {
             Observer observer = (Observer)arg1;
             result = observer.intersect((Line)arg2);
         }

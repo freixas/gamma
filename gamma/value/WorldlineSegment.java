@@ -18,6 +18,7 @@ package gamma.value;
 
 import gamma.ProgrammingException;
 import gamma.execution.ExecutionException;
+import gamma.execution.HCodeEngine;
 import gamma.math.OffsetAcceleration;
 import gamma.math.Util;
 
@@ -116,7 +117,7 @@ import gamma.math.Util;
  *
  * @author Antonio Freixas
  */
-public class WorldlineSegment implements ExecutionMutable
+public class WorldlineSegment implements ExecutionMutable, Displayable
 {
     /**
      * The type of the delta value used to construct the worldline segment.
@@ -226,7 +227,7 @@ public class WorldlineSegment implements ExecutionMutable
        }
 
         // We sometimes need to get the original endpoints and not ones
-        // that have perhaps been modified to be at +/- infinit.
+        // that have perhaps been modified to be at +/- infinity.
 
         this.originalMin = new HyperbolaEndpoint(min);
         this.originalMax = new HyperbolaEndpoint(max);
@@ -328,13 +329,16 @@ public class WorldlineSegment implements ExecutionMutable
             ((Line)curveSegment).setIsInfiniteMinus(true);
         }
 
-        double v = min.v < max.v ? Double.NEGATIVE_INFINITY: (min.v > max.v ? Double.POSITIVE_INFINITY : min.v);
+        double v = Util.fuzzyGT(a, 0) ? Double.NEGATIVE_INFINITY: (Util.fuzzyLT(a, 0) ? Double.POSITIVE_INFINITY : min.v);
         double x = Util.fuzzyGT(a, 0) ? Double.POSITIVE_INFINITY : (Util.fuzzyLT(a, 0) ? Double.NEGATIVE_INFINITY : (Util.fuzzyGT(min.v, 0) ? Double.NEGATIVE_INFINITY : (Util.fuzzyLT(min.v, 0) ? Double.POSITIVE_INFINITY : min.x)));
         double t = Double.NEGATIVE_INFINITY;
         double d = Util.fuzzyZero(a) && Util.fuzzyZero(min.v) ? min.d : Double.NEGATIVE_INFINITY;
         double tau = Double.NEGATIVE_INFINITY;
 
         min = new HyperbolaEndpoint(v, x, t, tau, d);
+        if (curveSegment instanceof HyperbolicSegment) {
+            curveSegment = new HyperbolicSegment(a, min, max, curve);
+        }
     }
 
     /**
@@ -350,13 +354,16 @@ public class WorldlineSegment implements ExecutionMutable
             ((Line)curveSegment).setIsInfinitePlus(true);
         }
 
-        double v = Util.fuzzyLT(max.v, max.v) ? Double.POSITIVE_INFINITY: (Util.fuzzyGT(max.v, max.v) ? Double.NEGATIVE_INFINITY : max.v);
+        double v = Util.fuzzyGT(a, 0) ? Double.POSITIVE_INFINITY: (Util.fuzzyLT(a, 0) ? Double.NEGATIVE_INFINITY : max.v);
         double x = Util.fuzzyGT(a, 0) ? Double.POSITIVE_INFINITY : (Util.fuzzyLT(a, 0) ? Double.NEGATIVE_INFINITY : (Util.fuzzyGT(max.v, 0) ? Double.POSITIVE_INFINITY : (Util.fuzzyLT(max.v, 0) ? Double.NEGATIVE_INFINITY : max.x)));
         double t = Double.POSITIVE_INFINITY;
         double d = Util.fuzzyZero(a) && Util.fuzzyZero(max.v) ? max.d : Double.POSITIVE_INFINITY;
         double tau = Double.POSITIVE_INFINITY;
 
         max = new HyperbolaEndpoint(v, x, t, tau, d);
+        if (curveSegment instanceof HyperbolicSegment) {
+            curveSegment = new HyperbolicSegment(a, min, max, curve);
+        }
     }
 
     /**
@@ -722,7 +729,21 @@ public class WorldlineSegment implements ExecutionMutable
         // Find where the segment's curve intersects the line (if anywhere)
 
         Coordinate intersection = curve.intersect(line, false);
-        if (intersection == null) return null;
+        if (intersection == null) {
+            return null;
+        }
+
+        // Find out if this intersection occurs within the bounds of this
+        // segment.
+
+        if (curveSegment.getBounds().inside(intersection)) return intersection;
+
+        // Try the other possible intersection
+
+        intersection = curve.intersect(line, true);
+        if (intersection == null) {
+            return null;
+        }
 
         // Find out if this intersection occurs within the bounds of this
         // segment.
@@ -741,6 +762,7 @@ public class WorldlineSegment implements ExecutionMutable
      */
     public Coordinate intersect(WorldlineSegment other)
     {
+        // TO DO
         return null;
     }
 
@@ -754,6 +776,14 @@ public class WorldlineSegment implements ExecutionMutable
                max.toString().replaceAll("(?m)^", "  ");
     }
 
+    @Override
+    public String toDisplayableString(HCodeEngine engine)
+    {
+        return
+            "acceleration " + engine.toDisplayableString(a) +
+            ", velocity " + engine.toDisplayableString(min.v) +
+            " to " + engine.toDisplayableString(max.v);
+    }
 
 
 }

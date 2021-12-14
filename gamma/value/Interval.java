@@ -16,12 +16,14 @@
  */
 package gamma.value;
 
+import gamma.execution.HCodeEngine;
+
 /**
  * Create an interval.
  *
  * @author Antonio Freixas
  */
-public class Interval implements ExecutionImmutable
+public class Interval implements ExecutionImmutable, Displayable
 {
     public double minT;
     public double maxT;
@@ -54,6 +56,12 @@ public class Interval implements ExecutionImmutable
     public double getDelta()
     {
         return maxT - minT;
+    }
+
+    @Override
+    public String toDisplayableString(HCodeEngine engine)
+    {
+        return "[ Interval T min " + engine.toDisplayableString(minT) + " max " + engine.toDisplayableString(maxT) + " ]";
     }
 
  }

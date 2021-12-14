@@ -48,9 +48,9 @@ public class CommandFactory
         CommandExec exec = commandMap.get(name);
         if (exec == null) throw new ProgrammingException("Unexpected command name '" + name + ";");
 
-        Struct cmdStruct = Struct.createNewStruct(name, properties);
+        Struct cmdStruct = Struct.createNewStruct(engine, name, properties);
         StyleStruct styleStruct = new StyleStruct(engine.getStyleDefaults());
-        Struct.initializeStruct(styleStruct, "style", properties);
+        Struct.initializeStruct(engine, styleStruct, "style", properties);
 
         return new Command(cmdStruct, styleStruct, exec);
     }

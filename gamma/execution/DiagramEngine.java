@@ -19,6 +19,7 @@ package gamma.execution;
 import gamma.MainWindow;
 import gamma.ProgrammingException;
 import gamma.execution.hcode.HCode;
+import gamma.execution.hcode.SetStatement;
 import gamma.parser.Token;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -46,16 +47,18 @@ public class DiagramEngine
     private final MainWindow window;
     private final HCodeProgram program;
     private final boolean isAnimated;
+    private final SetStatement setStatement;
 
     private AnimationEngine animationEngine;
     private HCodeEngine hCodeEngine;
 
     @SuppressWarnings("LeakingThisInConstructor")
-    public DiagramEngine(MainWindow window, LinkedList<Object> hCodes, boolean isAnimated)
+    public DiagramEngine(MainWindow window, LinkedList<Object> hCodes, boolean isAnimated, SetStatement setStatement)
     {
         this.window = window;
         this.program = new HCodeProgram(hCodes);
         this.isAnimated = isAnimated;
+        this.setStatement = setStatement;
 
         this.animationEngine = null;
         this.hCodeEngine = null;
@@ -68,31 +71,45 @@ public class DiagramEngine
 
     public void execute() throws ExecutionException, ProgrammingException
     {
+        window.clearPrintDialog();
+
         try {
             // Execute animated scripts
 
             if (isAnimated) {
-                animationEngine = new AnimationEngine(window, program);
+                animationEngine = new AnimationEngine(window, setStatement, program);
                 animationEngine.execute();
             }
 
             // Execute non-animated scripts
 
             else {
-                hCodeEngine = new HCodeEngine(window, program);
+                hCodeEngine = new HCodeEngine(window, setStatement, program);
                 hCodeEngine.execute(false);
             }
         }
-        catch (ExecutionException e) {
-            e.printStackTrace();
+        catch (Throwable e) {
+            handleExeception(e);
+        }
+    }
+
+    /**
+     * This handler provides common handling for all exceptions that occur
+     * while running a program. During animation, errors can occur in separate
+     * threads, so try-catch won't handle everything.
+     *
+     * @param e The exeception.
+     */
+    public void handleExeception(Throwable e)
+    {
+        e.printStackTrace();
+        if (e instanceof ExecutionException) {
             window.showTextAreaAlert(Alert.AlertType.ERROR, "Runtime Errors", "Runtime Errors", e.getLocalizedMessage(), true);
         }
-        catch (ProgrammingException e) {
-            e.printStackTrace();
+        else if (e instanceof ProgrammingException) {
             window.showTextAreaAlert(Alert.AlertType.ERROR, "Internal Errors", "Internal Errors", e.getLocalizedMessage(), true);
         }
-        catch (Exception e) {
-            e.printStackTrace();
+        else {
             window.showTextAreaAlert(Alert.AlertType.ERROR, "Error", "Error", e.getLocalizedMessage(), true);
         }
     }

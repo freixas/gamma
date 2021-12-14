@@ -18,7 +18,6 @@ package gamma.parser;
 
 import gamma.ProgrammingException;
 import gamma.execution.hcode.*;
-import gamma.execution.*;
 import gamma.value.Coordinate;
 import gamma.value.Frame;
 import gamma.value.Line;
@@ -109,8 +108,6 @@ public class Parser
         {
             return "Op{" + "chr=" + chr + '}';
         }
-
-
     }
 
     class OpToken<T> extends Token<T>
@@ -131,7 +128,6 @@ public class Parser
             return "OpToken{" + "token=" + token + ", op=" + op + '}';
         }
 
-
     }
 
     private final File file;
@@ -141,6 +137,8 @@ public class Parser
 
     private boolean animationStatementIsPresent = false;
     private boolean animationVariableIsPresent = false;
+
+    private SetStatement setStatement;
 
     private final Token dummyToken = new Token<>(Token.Type.DELIMITER, '~', null, 0, 0);
 
@@ -204,6 +202,17 @@ public class Parser
     }
 
     /**
+     * Get the set statement. This contains information which needs to be
+     * processed before the HCodeEngine runs.
+     *
+     * @return The set statement.
+     */
+    public SetStatement getSetStatement()
+    {
+        return setStatement;
+    }
+
+    /**
      * Parse the script
      * @return
      * @throws ParseException
@@ -212,6 +221,7 @@ public class Parser
     {
         animationStatementIsPresent = false;
         animationVariableIsPresent = false;
+        setStatement = new SetStatement();
 
         Tokenizer tokenizer = new Tokenizer(file, script);
         tokens = tokenizer.tokenize();
@@ -247,6 +257,9 @@ public class Parser
                 codes.add(new LineInfoHCode(curToken.getFile(), curToken.getLineNumber()));
                 switch (getString()) {
                     case "include" -> parseIncludeStatement();
+                    case "stylesheet" -> parseStylesheetStatement();
+                    case "set" -> parseSetStatement();
+                    case "print" -> codes.addAll(parsePrintStatement());
                     case "let" -> codes.addAll(parseAssignmentStatement());
                     case "style" -> codes.addAll(parseStyleStatement());
                     default -> codes.addAll(parseCommandStatement());
@@ -325,6 +338,113 @@ public class Parser
         catch (IOException e) {
             throwParseException("IO Error - " + e.getMessage());
         }
+    }
+
+    private LinkedList<Object> parseStylesheetStatement() throws ParseException
+    {
+         LinkedList<Object> codes = new LinkedList<>();
+
+        // We start knowing that the current token is "stylesheet"
+
+        nextToken();
+
+        return null;
+    }
+
+    private void parseSetStatement() throws ParseException
+    {
+        LinkedList<Object> codes = new LinkedList<>();
+
+        // We start knowing that the current token is "set"
+
+        nextToken();
+
+        boolean foundUnits = false;
+        boolean foundDisplayPrecision = false;
+        boolean foundPrintPrecision = false;
+
+        double units = SetStatement.DEFAULT_UNITS;
+        double displayPrecision = SetStatement.DEFAULT_DISPLAY_PRECISION;
+        double printPrecision = SetStatement.DEFAULT_PRINT_PRECISION;
+
+        while (true) {
+
+            // We expect a name; if we don't get one, we're done
+
+            if (!isName()) break;
+
+            // Look for units
+
+            if (getString().equals("units")) {
+                if (foundUnits) {
+                    throwParseException("Units are set twice");
+                }
+
+                nextToken();
+                if (!isNumber()) {
+                    throwParseException("Units must be set to a floating point number >= 0");
+                }
+                units = getNumber();
+                nextToken();
+                foundUnits = true;
+            }
+
+            // Look for displayPrecision
+
+            else if (getString().equals("displayPrecision")) {
+                if (foundDisplayPrecision) {
+                    throwParseException("Display precision is set twice");
+                }
+
+               nextToken();
+                if (!isNumber()) {
+                    throwParseException("Display precision must be set to a floating point number >= 0");
+                }
+                displayPrecision = getNumber();
+                nextToken();
+                foundDisplayPrecision = true;
+            }
+
+            // Look for printPrecision
+
+            else if (getString().equals("printPrecision")) {
+                if (foundPrintPrecision) {
+                    throwParseException("Print precision is set twice");
+                }
+
+               nextToken();
+                if (!isNumber()) {
+                    throwParseException("Print precision must be set to a floating point number >= 0");
+                }
+                printPrecision = getNumber();
+                nextToken();
+                foundPrintPrecision = true;
+            }
+
+            // We're also done if we get any other name
+
+            else {
+                break;
+            }
+        }
+
+        setStatement.set(units, displayPrecision, printPrecision);
+    }
+
+    private LinkedList<Object> parsePrintStatement() throws ParseException
+    {
+        LinkedList<Object> codes = new LinkedList<>();
+
+        // We start knowing that the current token is "let"
+
+        nextToken();
+
+        codes.add(new SetPrecisionHCode(SetStatement.PrecisionType.PRINT));
+        codes.addAll(parseExpr());
+        codes.add(new PrintHCode());
+        codes.add(new SetPrecisionHCode(SetStatement.PrecisionType.DISPLAY));
+
+        return codes;
     }
 
     private LinkedList<Object> parseAssignmentStatement() throws ParseException

@@ -20,10 +20,12 @@ import gamma.GammaRuntimeException;
 import gamma.MainWindow;
 import gamma.ProgrammingException;
 import gamma.execution.hcode.HCode;
+import gamma.execution.hcode.SetStatement;
 import gamma.value.Color;
 import gamma.execution.lcode.Command;
 import gamma.execution.lcode.Struct;
 import gamma.execution.lcode.StyleStruct;
+import gamma.math.Util;
 import gamma.value.Coordinate;
 import gamma.value.Frame;
 import gamma.value.Observer;
@@ -44,8 +46,12 @@ public class HCodeEngine
     private static final Frame defFrame = new Frame(new Observer(new WInitializer(new Coordinate(0.0, 0.0), 0.0, 0.0), new ArrayList<>()), Frame.AtType.TAU, 0);
 
     private MainWindow window;
+    private final SetStatement setStatement;
     private final HCodeProgram program;
+
     private final AnimationSymbolTable animationTable;
+    private int precision;
+    private SetStatement.PrecisionType precisionType;
 
     SymbolTable table;
     private LCodeEngine lCodeEngine;
@@ -54,12 +60,15 @@ public class HCodeEngine
     private File file;
     private int lineNumber;
 
-    public HCodeEngine(MainWindow window, HCodeProgram program)
+    public HCodeEngine(MainWindow window, SetStatement setStatement, HCodeProgram program)
     {
         this.window = window;
+        this.setStatement = setStatement;
         this.program = program;
         this.animationTable = new AnimationSymbolTable(this);
         this.lCodeEngine = null;
+        precisionType = SetStatement.PrecisionType.DISPLAY;
+        setPrecision(precisionType);
     }
 
     private void initializeSymbolTable(SymbolTable table)
@@ -101,6 +110,26 @@ public class HCodeEngine
         table.protect("defFrame");
     }
 
+    public SetStatement getSetStatement()
+    {
+        return setStatement;
+    }
+
+    public void setPrecision(SetStatement.PrecisionType type)
+    {
+        if (type == SetStatement.PrecisionType.DISPLAY) {
+            precision = setStatement.getDisplayPrecision();
+        }
+        else {
+            precision = setStatement.getPrintPrecision();
+        }
+    }
+
+    public String toDisplayableString(Double d)
+    {
+        return Util.toString(d, precision);
+    }
+
     public HCodeProgram getProgram()
     {
         return program;
@@ -139,7 +168,7 @@ public class HCodeEngine
     public void setStyleDefaults(Style style)
     {
         styleDefaults = new StyleStruct();
-        Struct.initializeStruct(styleDefaults, "style", style);
+        Struct.initializeStruct(this, styleDefaults, "style", style);
     }
 
     public StyleStruct getStyleDefaults()
@@ -155,6 +184,11 @@ public class HCodeEngine
     public LCodeEngine getLCodeEngine()
     {
         return lCodeEngine;
+    }
+
+    public void print(String str)
+    {
+        window.print(str);
     }
 
     public void execute(boolean copyData)
@@ -200,6 +234,9 @@ public class HCodeEngine
                 throw new ProgrammingException("HCodeEngine.execute(): Execution ended but the data stack is not empty");
             }
         }
+        catch (ProgrammingException | ExecutionException e) {
+            throw e;
+        }
         catch (Throwable e) {
             throwGammaException(e);
         }
@@ -214,6 +251,7 @@ public class HCodeEngine
             lCodeEngine.setup();
         }
         else {
+            lCodeEngine.setUpDrawingFrame();
             lCodeEngine.execute();
         }
     }
@@ -231,12 +269,7 @@ public class HCodeEngine
     public void throwGammaException(Throwable e)
         throws GammaRuntimeException
     {
-        if (e instanceof GammaRuntimeException) {
             throw new GammaRuntimeException(file.getName() + ":" + lineNumber + ": " + e.getLocalizedMessage(), e);
-        }
-        else {
-            throw new GammaRuntimeException(file.getName() + ":" + lineNumber + ": " + e.getLocalizedMessage(), e);
-        }
     }
 
 }

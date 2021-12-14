@@ -24,6 +24,8 @@ import gamma.value.Observer;
 import gamma.value.Property;
 import gamma.value.PropertyList;
 import gamma.execution.ExecutionException;
+import gamma.execution.HCodeEngine;
+import gamma.value.Displayable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -186,7 +188,7 @@ public abstract class Struct
      *
      * @return
      */
-    public static Struct createNewStruct(String cmdName, PropertyList list)
+    public static Struct createNewStruct(HCodeEngine engine, String cmdName, PropertyList list)
     {
         try {
 
@@ -201,7 +203,7 @@ public abstract class Struct
             Constructor cmdStructConstructor = cmdStructClass.getConstructor();
             Struct cmdStruct = (Struct)cmdStructConstructor.newInstance();
 
-            initializeStruct(cmdStruct, cmdName, list);
+            initializeStruct(engine, cmdStruct, cmdName, list);
 
             return cmdStruct;
         }
@@ -218,7 +220,7 @@ public abstract class Struct
      * @param cmdName The name of the command.
      * @param list The property list used to initialize the structure.
      */
-    public static void initializeStruct(Struct cmdStruct, String cmdName, PropertyList list)
+    public static void initializeStruct(HCodeEngine engine, Struct cmdStruct, String cmdName, PropertyList list)
     {
         try {
             String capCmdName = cmdName.substring(0, 1).toUpperCase() + cmdName.substring(1);
@@ -243,7 +245,7 @@ public abstract class Struct
 
                 if (fieldMap.containsKey(propertyName)) {
                     Field field = fieldMap.get(propertyName);
-                    setValue(cmdStruct, fieldMap, field, property, methodMap);
+                    setValue(engine, cmdStruct, fieldMap, field, property, methodMap);
                 }
 
                 // This is not a command property or a style property
@@ -281,6 +283,7 @@ public abstract class Struct
     }
 
     private static void setValue(
+        HCodeEngine engine,
         Object instance,
         HashMap<String, Field> fieldMap, Field field,
         Property property,
@@ -295,10 +298,18 @@ public abstract class Struct
         }
 
         // Field is a string
-        // Property value can be anything
+        // Property value can be a Double or any Displayable
 
         else if (field.getType() == String.class) {
-            field.set(instance, propertyValue.toString());
+            if (propertyValue instanceof Double dbl) {
+                field.set(instance, engine.toDisplayableString(dbl));
+            }
+            else if (propertyValue instanceof Displayable displayable) {
+                field.set(instance, displayable.toDisplayableString(engine));
+            }
+            else {
+                throw new ExecutionException("Property " + propertyName + "'s value is of the wrong type");
+            }
         }
 
         // Property value is a Double

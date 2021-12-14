@@ -18,6 +18,7 @@ package gamma.value;
 
 import gamma.ProgrammingException;
 import gamma.execution.ExecutionException;
+import gamma.execution.HCodeEngine;
 import gamma.math.Relativity;
 import java.util.ArrayList;
 import java.util.ListIterator;
@@ -26,7 +27,7 @@ import java.util.ListIterator;
  *
  * @author Antonio Freixas
  */
-public class Worldline implements ExecutionMutable
+public class Worldline implements ExecutionMutable, Displayable
 {
     private final Coordinate origin;
     private final double tauInit;
@@ -446,6 +447,25 @@ public class Worldline implements ExecutionMutable
         }
 
         return str;
+    }
+
+    @Override
+    public String toDisplayableString(HCodeEngine engine)
+    {
+        StringBuilder str = new StringBuilder(
+            "origin " + origin.toDisplayableString(engine) +
+            ", tau at origin " + engine.toDisplayableString(tauInit) +
+            ", distance at origin " + engine.toDisplayableString(dInit) + "\n");
+
+        if (segments.size() > 0) {
+            for (int i = 0; i < segments.size(); i++) {
+                str.append(String.format("  %2d)", i + 1));
+                str.append(" ");
+                str.append(segments.get(i).toDisplayableString(engine));
+                str.append("\n");
+            }
+        }
+        return str.toString();
     }
 
 }

@@ -16,6 +16,7 @@
  */
 package gamma.value;
 
+import gamma.execution.HCodeEngine;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -26,7 +27,7 @@ import java.util.Iterator;
  *
  * @author Antonio Freixas
  */
-public class Observer implements ExecutionImmutable
+public class Observer implements ExecutionImmutable, Displayable
 {
     private final Worldline worldline;
 
@@ -302,6 +303,12 @@ public class Observer implements ExecutionImmutable
     public String toString()
     {
         return "Observer:\n" + worldline.toString().replaceAll("(?m)^", "  ");
+    }
+
+    @Override
+    public String toDisplayableString(HCodeEngine engine)
+    {
+        return "[ Observer " + worldline.toDisplayableString(engine) + "]";
     }
 
 
