@@ -82,7 +82,7 @@ public class AddHCode extends HCode
             if (isDouble2) {
                 string2 = engine.toDisplayableString((Double)arg2);
             }
-            else if (isDisplayable1) {
+            else if (isDisplayable2) {
                 string2 = ((Displayable)arg2).toDisplayableString(engine);
             }
             else {
