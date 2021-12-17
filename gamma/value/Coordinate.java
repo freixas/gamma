@@ -16,6 +16,7 @@
  */
 package gamma.value;
 
+import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
 import gamma.math.Relativity;
 import javafx.geometry.Point2D;
@@ -109,22 +110,36 @@ public class Coordinate extends ObjectContainer implements ExecutionMutable, Dis
     @Override
     public Object getProperty(String name)
     {
+        // The HCode that handles object properties will complain if an invalid
+        // property name is used, so we don't need to re-check here
+
         switch (name) {
-            case "x" -> { return this.x; }
-            case "t" -> { return this.t; }
-            default -> { return null; }
+            case "x" -> { return x; }
+            case "t" -> { return t; }
         }
+        return null;
     }
 
     @Override
     public void setProperty(String name, Object value)
     {
-        switch (name) {
-
-            case "x" -> { this.x = (Double)value; }
-            case "t" -> { this.t = (Double)value; }
-            default -> { /* Do nothing */ }
+        if (!(value instanceof Double)) {
+            throw new ExecutionException("Coordinate properties 'x' and 't' must be floating point numbers");
         }
+
+        // The HCode that handles object properties will complain if an invalid
+        // property name is used, so we don't need to re-check here
+
+        switch (name) {
+            case "x" -> { x = (Double)value; }
+            case "t" -> { t = (Double)value; }
+        }
+    }
+
+    @Override
+    public String toDisplayableString(HCodeEngine engine)
+    {
+        return "(" + engine.toDisplayableString(x) + ", " + engine.toDisplayableString(t) + ")";
     }
 
     @Override
@@ -159,12 +174,6 @@ public class Coordinate extends ObjectContainer implements ExecutionMutable, Dis
             return false;
         }
         return Double.doubleToLongBits(this.t) == Double.doubleToLongBits(other.t);
-    }
-
-    @Override
-    public String toDisplayableString(HCodeEngine engine)
-    {
-        return "(" + engine.toDisplayableString(x) + ", " + engine.toDisplayableString(t) + ")";
     }
 
 }
