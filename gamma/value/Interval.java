@@ -16,6 +16,7 @@
  */
 package gamma.value;
 
+import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
 
 /**
@@ -25,13 +26,37 @@ import gamma.execution.HCodeEngine;
  */
 public class Interval implements ExecutionImmutable, Displayable
 {
-    public double minT;
-    public double maxT;
+    public final double minX;
+    public final double maxX;
+    public final double minT;
+    public final double maxT;
 
-    public Interval(double t1, double t2)
+    public final boolean hasXRange;
+    public final boolean hasTRange;
+
+    public Interval(double x1, double x2, double t1, double t2)
     {
+        minX = Math.min(x1, x2);
+        maxX = Math.max(x1, x2);
         minT = Math.min(t1, t2);
         maxT = Math.max(t1, t2);
+
+        boolean isInfiniteX = Double.isInfinite(minX) && Double.isInfinite(maxX);
+        boolean isInfiniteT = Double.isInfinite(minT) && Double.isInfinite(maxT);
+
+        if (isInfiniteX && minX == maxX) {
+            throw new ExecutionException("Invalid x range in interval");
+        }
+        if (isInfiniteT && minT == maxT) {
+            throw new ExecutionException("Invalid t range in interval");
+        }
+
+        hasXRange = !isInfiniteX;
+        hasTRange = !isInfiniteT;
+
+        if (!hasXRange && !hasTRange) {
+            throw new ExecutionException("Invalid interval: all ranges are infinite");
+        }
     }
 
     /**
@@ -44,24 +69,42 @@ public class Interval implements ExecutionImmutable, Displayable
         // There's no need to sort as the other bounds will already
         // be sorted
 
+        this.minX = other.minX;
+        this.maxX = other.maxX;
         this.minT = other.minT;
         this.maxT = other.maxT;
+
+        this.hasXRange = other.hasXRange;
+        this.hasTRange = other.hasTRange;
     }
 
     /**
-     * Get the interval delta.
+     * Get the X interval delta.
      *
      * @return The interval delta.
      */
-    public double getDelta()
+    public double getXDelta()
+    {
+        return maxX - minX;
+    }
+
+     /**
+     * Get the T interval delta.
+     *
+     * @return The interval delta.
+     */
+    public double getTDelta()
     {
         return maxT - minT;
     }
 
-    @Override
+   @Override
     public String toDisplayableString(HCodeEngine engine)
     {
-        return "[ Interval T min " + engine.toDisplayableString(minT) + " max " + engine.toDisplayableString(maxT) + " ]";
+        return "[ Interval " +
+               "X min " + engine.toDisplayableString(minX) + " max " + engine.toDisplayableString(maxX) + " " +
+               "T min " + engine.toDisplayableString(minT) + " max " + engine.toDisplayableString(maxT) + " " +
+               " ]";
     }
 
  }
