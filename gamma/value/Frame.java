@@ -16,6 +16,7 @@
  */
 package gamma.value;
 
+import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
 import gamma.math.Relativity;
 import gamma.math.Util;
@@ -25,15 +26,17 @@ import java.util.Objects;
  *
  * @author Antonio Freixas
  */
-public class Frame implements ExecutionMutable, Displayable
+public class Frame  extends ObjectContainer implements ExecutionMutable, Displayable
 {
-   public enum AtType implements ExecutionImmutable
+    static private String[] propertyNames = { "v", "origin" };
+
+    public enum AtType implements ExecutionImmutable
     {
-        T, TAU, D
+        T, TAU, D, V
     };
 
-    private final Coordinate origin;
-    private final double v;
+    private Coordinate origin;
+    private double v;
 
     /**
      * Create a frame from the instantaneous moving frame (IMF) of some point on
@@ -59,6 +62,8 @@ public class Frame implements ExecutionMutable, Displayable
      */
     public Frame(Observer observer, AtType type, double value)
     {
+        super(propertyNames);
+
         double x;
         double t;
         double tau;
@@ -84,6 +89,14 @@ public class Frame implements ExecutionMutable, Displayable
                 x = observer.dToX(d);
                 t = observer.dToT(d);
                 tau = observer.dToTau(d);
+            }
+
+            case V -> {
+                v = value;
+                d = observer.vToD(v);
+                x = observer.vToX(v);
+                t = observer.vToT(v);
+                tau = observer.vToTau(v);
             }
 
             default -> {
@@ -114,12 +127,14 @@ public class Frame implements ExecutionMutable, Displayable
      */
     public Frame(Frame other)
     {
+        super(propertyNames);
         this.v = other.v;
         this.origin = new Coordinate(other.origin);
     }
 
-    private Frame(Coordinate origin, double v)
+    public Frame(Coordinate origin, double v)
     {
+        super(propertyNames);
         this.origin = origin;
         this.v = v;
     }
@@ -130,7 +145,45 @@ public class Frame implements ExecutionMutable, Displayable
         return new Frame(this);
     }
 
-    /**
+    @Override
+    public Object getProperty(String name)
+    {
+        // The HCode that handles object properties will complain if an invalid
+        // property name is used, so we don't need to re-check here
+
+        switch (name) {
+            case "v" -> { return v; }
+            case "origin" -> { return origin; }
+        }
+        return null;
+    }
+
+    @Override
+    public void setProperty(String name, Object value)
+    {
+        // The HCode that handles object properties will complain if an invalid
+        // property name is used, so we don't need to re-check here
+
+        switch (name) {
+            case "v" -> {
+                if (!(value instanceof Double)) {
+                    throw new ExecutionException("Frame property 'v' must be a floating point number");
+                }
+                v = (Double)value;
+            }
+            case "origin" -> {
+                if (!(value instanceof Coordinate)) {
+                    throw new ExecutionException("Frame property 'origin' must be a coordinate");
+                }
+                origin = (Coordinate)value;
+
+            }
+            default -> {
+            }
+        }
+    }
+
+     /**
      * Get the frame's velocity.
      *
      * @return The frame's velocity.
