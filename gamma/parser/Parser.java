@@ -800,6 +800,11 @@ public class Parser
                     nextToken();
                     codes.addAll(parseExpr());
                 }
+                case "velocity" -> {
+                    codes.add(WorldlineSegment.LimitType.V);
+                    nextToken();
+                    codes.addAll(parseExpr());
+                }
                 default -> throwParseException("Programming error");
             }
         }
@@ -818,45 +823,104 @@ public class Parser
         LinkedList<Object> codes = new LinkedList<>();
 
         // We start knowing that the current token points
-        // to "frame"
+        // to "frame". The next token must be either "observer" or "origin" or
+        // "velocity"
 
         nextToken();
-        codes.addAll(parseExpr());
 
-        if (isName() && getString().equals("at")) {
+        if (isName() && getString().equals("observer")) {
             nextToken();
-            switch (getString()) {
-                case "time" -> {
-                    codes.add(Frame.AtType.T);
-                    nextToken();
-                    codes.addAll(parseExpr());
-                }
-                case "tau" -> {
-                    codes.add(Frame.AtType.TAU);
-                    nextToken();
-                    codes.addAll(parseExpr());
-                }
-                case "distance" ->  {
-                    codes.add(Frame.AtType.D);
-                    nextToken();
-                    codes.addAll(parseExpr());
-                }
-                default -> throwParseException("Expected 'time', 'tau', or 'distance'");
-            }
-        }
+            codes.addAll(parseExpr());
 
-        // If no "at" clause, use a default
+            if (isName() && getString().equals("at")) {
+                nextToken();
+                switch (getString()) {
+                    case "time" -> {
+                        codes.add(Frame.AtType.T);
+                        nextToken();
+                        codes.addAll(parseExpr());
+                    }
+                    case "tau" -> {
+                        codes.add(Frame.AtType.TAU);
+                        nextToken();
+                        codes.addAll(parseExpr());
+                    }
+                    case "distance" ->  {
+                        codes.add(Frame.AtType.D);
+                        nextToken();
+                        codes.addAll(parseExpr());
+                    }
+                    case "velocity" ->  {
+                        codes.add(Frame.AtType.V);
+                        nextToken();
+                        codes.addAll(parseExpr());
+                    }
+                    default -> throwParseException("Expected 'time', 'tau', 'distance', or 'velocity'");
+                }
+            }
+
+            // If no "at" clause, use a default
+
+            else {
+                codes.add(Frame.AtType.TAU);
+                codes.add(0.0);
+            }
+
+            if (isDelimiter() && getChar() != ']') {
+                throwParseException("Expected ']'");
+            }
+
+            codes.add(new ObserverFrameHCode());
+        }
 
         else {
-            codes.add(Frame.AtType.TAU);
-            codes.add(0.0);
-        }
+            LinkedList<Object> originCodes = new LinkedList<>();
+            LinkedList<Object> vCodes = new LinkedList<>();
 
-        if (isDelimiter() && getChar() != ']') {
-            throwParseException("Expected ']'");
-        }
+            while (true) {
 
-        codes.add(new FrameHCode());
+                // We expect a name; if we don't get one, we're done
+
+                if (!isName()) break;
+
+                // Look for origin
+
+                if (getString().equals("origin")) {
+                    if (originCodes.size() > 0) {
+                        throwParseException("The frame's origin is set twice");
+                    }
+                    nextToken();
+                    originCodes.addAll(parseExpr());
+                }
+
+                // Look for velocity
+
+                else if (getString().equals("velocity")) {
+                    if (vCodes.size() > 0) {
+                        throwParseException("The frame's velocity is set twice");
+                    }
+                    nextToken();
+                    vCodes.addAll(parseExpr());
+                }
+
+                // We're also done if we get any other name
+
+                else {
+                    break;
+                }
+            }
+
+            if (originCodes.size() < 1) {
+                originCodes.add(new Coordinate(0, 0));
+            }
+            if (vCodes.size() < 1) {
+                vCodes.add(0.0);
+            }
+
+            codes.addAll(originCodes);
+            codes.addAll(vCodes);
+            codes.add(new FrameHCode());
+        }
 
         return codes;
     }
@@ -1002,16 +1066,67 @@ public class Parser
         // to "interval"
 
         nextToken();
-        codes.addAll(parseExpr());
 
-        if (!(isName() && getString().equals("to"))) {
-            throwParseException("Expected 'to'");
+        LinkedList<Object> xCodes = new LinkedList<>();
+        LinkedList<Object> tCodes = new LinkedList<>();
+
+        while (true) {
+
+            // We expect a name; if we don't get one, we're done
+
+            if (!isName()) break;
+
+            // Look for origin
+
+            if (getString().equals("x")) {
+                nextToken();
+                if (xCodes.size() > 0) {
+                    throwParseException("The interval already contains an x range");
+                }
+                xCodes.addAll(parseExpr());
+
+                if (!(isName() && getString().equals("to"))) {
+                    throwParseException("Expected 'to' for the interval's x range");
+                }
+                nextToken();
+                xCodes.addAll(parseExpr());
+            }
+
+            // Look for velocity
+
+            else if (getString().equals("t")) {
+                nextToken();
+                if (tCodes.size() > 0) {
+                    throwParseException("The interval already contains a t range");
+                }
+                tCodes.addAll(parseExpr());
+                if (!(isName() && getString().equals("to"))) {
+                    throwParseException("Expected 'to' for the interval's t range");
+                }
+                nextToken();
+                tCodes.addAll(parseExpr());
+            }
+
+            // We're also done if we get any other name
+
+            else {
+                break;
+            }
         }
 
-        nextToken();
-        codes.addAll(parseExpr());
+        if (xCodes.size() < 1) {
+            xCodes.add(Double.NEGATIVE_INFINITY);
+            xCodes.add(Double.POSITIVE_INFINITY);
+        }
+        if (tCodes.size() < 1) {
+            tCodes.add(Double.NEGATIVE_INFINITY);
+            tCodes.add(Double.POSITIVE_INFINITY);
+        }
 
+        codes.addAll(xCodes);
+        codes.addAll(tCodes);
         codes.add(new IntervalHCode());
+
         return codes;
     }
 
