@@ -162,6 +162,84 @@ public class Worldline implements ExecutionMutable, Displayable
 
     // **********************************************************
     // *
+    // * Source is v
+    // *
+    // **********************************************************
+
+    /**
+     * Given v, return x. If v matches no segment points, return NaN. If v
+     * matches all segment points return the x that occurs earliest in time.
+     *
+     * @param v The velocity.
+     * @return The position in the rest frame or NaN.
+     * @throws ExecutionException When there are no matching x's.
+     */
+    public double vToX(double v)
+    {
+        ListIterator<WorldlineSegment> iter = segments.listIterator();
+        while (iter.hasNext()) {
+            double x = iter.next().vToX(v);
+            if (!Double.isNaN(x)) return x;
+        }
+        throw new ExecutionException("vToX(): No matching x for velocity.");
+    }
+
+    /**
+     * Given v, return d. If v matches no segment points, return NaN. If v
+     * matches all segment points return the d that occurs earliest in time.
+     *
+     * @param v The velocity.
+     * @return The distance in the rest frame or NaN.
+     * @throws ExecutionException When there are no matching d's.
+     */
+    public double vToD(double v)
+    {
+        ListIterator<WorldlineSegment> iter = segments.listIterator();
+        while (iter.hasNext()) {
+            double d = iter.next().vToD(v);
+            if (!Double.isNaN(d)) return d;
+        }
+        throw new ExecutionException("vToD(): No matching distance for velocity.");
+    }
+
+    /**
+     * Given v, return t. If v matches no segment points, return NaN. If v
+     * matches all segment points return the earliest time.
+     *
+     * @param v The velocity.
+     * @return The time in the rest frame or NaN.
+     * @throws ExecutionException When there are no matching t's.
+     */
+    public double vToT(double v)
+    {
+        ListIterator<WorldlineSegment> iter = segments.listIterator();
+        while (iter.hasNext()) {
+            double t = iter.next().vToT(v);
+            if (!Double.isNaN(t)) return t;
+        }
+        throw new ExecutionException("vToT(): No matching time for velocity.");
+    }
+
+    /**
+     * Given v, return tau. If v matches no segment points, return NaN. If v
+     * matches all segment points return the earliest tau.
+     *
+     * @param v The velocity.
+     * @return The time in the accelerated frame or NaN.
+     * @throws ExecutionException When there are no matching tau's.
+     */
+    public double vToTau(double v)
+    {
+        ListIterator<WorldlineSegment> iter = segments.listIterator();
+        while (iter.hasNext()) {
+            double tau = iter.next().vToTau(v);
+            if (!Double.isNaN(tau)) return tau;
+        }
+        throw new ExecutionException("vToTau(): No matching tau for velocity.");
+    }
+
+    // **********************************************************
+    // *
     // * Source is d
     // *
     // **********************************************************
@@ -171,7 +249,7 @@ public class Worldline implements ExecutionMutable, Displayable
      *
      * @param d The distance in the rest frame.
      * @return The velocity.
-     * @throws ArithmeticException When there are no matching v's.
+     * @throws ExecutionException When there are no matching v's.
      */
     public double dToV(double d)
     {
@@ -188,7 +266,7 @@ public class Worldline implements ExecutionMutable, Displayable
      *
      * @param d The distance in the rest frame
      * @return The position in the rest frame.
-     * @throws ArithmeticException When there are no matching x's.
+     * @throws ExecutionException When there are no matching x's.
      */
     public double dToX(double d)
     {
@@ -205,7 +283,7 @@ public class Worldline implements ExecutionMutable, Displayable
      *
      * @param d The distance in the rest frame
      * @return The time in the rest frame.
-     * @throws ArithmeticException When there are no or infinite matching t's.
+     * @throws ExecutionException When there are no or infinite matching t's.
      */
     public double dToT(double d)
     {
@@ -222,7 +300,7 @@ public class Worldline implements ExecutionMutable, Displayable
      *
      * @param d The distance in the rest frame
      * @return The time in the accelerated frame.
-     * @throws ArithmeticException When there are no or infinite matching taus.
+     * @throws ExecutionException When there are no or infinite matching taus.
      */
     public double dToTau(double d)
     {

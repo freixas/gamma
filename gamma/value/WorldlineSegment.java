@@ -16,7 +16,6 @@
  */
 package gamma.value;
 
-import gamma.ProgrammingException;
 import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
 import gamma.math.OffsetAcceleration;
@@ -124,7 +123,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
      */
     public enum LimitType implements ExecutionImmutable
     {
-        NONE, T, TAU, D
+        NONE, T, TAU, D, V
     }
 
     private HyperbolaEndpoint min;
@@ -141,7 +140,8 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
      * Create a new WorldlineSegment.
      *
      * @param type The type of the delta value.
-     * @param delta A non-negative increment to the time, tau, or distance.
+     * @param limitValue A non-negative increment to the time, tau, or distance or
+     * any value for velocity.
      * @param a The acceleration.
      * @param v The velocity at vPoint.
      * @param vPoint A point at which the velocity of the acceleration curve is v.
@@ -149,10 +149,10 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
      * @param d Distance at vPoint.
      * @throws IllegalArgumentException if the type is invalid or delta is negative.
      */
-    public WorldlineSegment(LimitType type, double delta, double a, double v,
+    public WorldlineSegment(LimitType type, double limitValue, double a, double v,
                             Coordinate vPoint, double tau, double d)
     {
-        if (delta < 0) {
+        if (limitValue < 0 && type != LimitType.V) {
             throw new ExecutionException("Observer segment limit delta cannot be negative");
         }
 
@@ -168,28 +168,34 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
         {
             switch (type) {
                 case T ->
-                    maxT = vPoint.t + delta;
+                    maxT = vPoint.t + limitValue;
                 case TAU -> {
-                    double finalTau = tau + delta;
-                    if (delta == 0.0) {
+                    double finalTau = tau + limitValue;
+                    if (limitValue == 0.0) {
                         maxT = vPoint.t;
                     }
                     maxT = curve.tauToT(finalTau);
                 }
                 case D -> {
-                    double finalD = d + delta;
+                    double finalD = d + limitValue;
 
                     // If the distance moved is 0, we have a zero-length
                     // segment
 
-                    if (delta == 0.0) {
+                    if (limitValue == 0.0) {
                         maxT = vPoint.t;
                     }
-                    else if (delta > 0.0 && a == 0.0 && v == 0.0) {
+                    else if (limitValue > 0.0 && a == 0.0 && v == 0.0) {
                         throw new ExecutionException("Observer segment distance delta is > 0, but acceleration and velocity are 0");
                     }
                     else {
                         maxT = curve.dToT(finalD);
+                    }
+                }
+                case V -> {
+                    maxT = vToT(limitValue);
+                    if (Double.isNaN(maxT) || maxT < vPoint.t) {
+                        throw new ExecutionException("The observer segment's final velocity will never be reached.");
                     }
                 }
                 case NONE -> {
@@ -570,7 +576,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
 
     // **********************************************************
     // *
-    // * fromT methods
+    // * Source is t
     // *
     // **********************************************************
 

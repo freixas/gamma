@@ -16,6 +16,7 @@
  */
 package gamma.value;
 
+import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -31,9 +32,6 @@ public class Observer implements ExecutionImmutable, Displayable
 {
     private final Worldline worldline;
 
-//    private final WInitializer initializer;
-//    private final ArrayList<WSegment> segments;
-
     /**
      * Create an observer.
      *
@@ -45,9 +43,6 @@ public class Observer implements ExecutionImmutable, Displayable
      */
     public Observer(WInitializer initializer, ArrayList<WSegment> segments)
     {
-//        this.initializer = initializer;
-//        this.segments = segments;
-
         worldline = new Worldline(initializer);
 
         if (segments.size() < 1) {
@@ -109,6 +104,64 @@ public class Observer implements ExecutionImmutable, Displayable
 
     // **********************************************************
     // *
+    // * Source is v
+    // *
+    // **********************************************************
+
+    /**
+     * Given v, return x. If v matches no segment points, return NaN. If v
+     * matches all segment points return the x that occurs earliest in time.
+     *
+     * @param v The velocity.
+     * @return The position in the rest frame or NaN.
+     * @throws ExecutionException When there are no matching x's.
+     */
+    public double vToX(double v)
+    {
+        return worldline.vToX(v);
+    }
+
+    /**
+     * Given v, return d. If v matches no segment points, return NaN. If v
+     * matches all segment points return the d that occurs earliest in time.
+     *
+     * @param v The velocity.
+     * @return The distance in the rest frame or NaN.
+     * @throws ExecutionException When there are no matching d's.
+     */
+    public double vToD(double v)
+    {
+        return worldline.vToD(v);
+    }
+
+    /**
+     * Given v, return t. If v matches no segment points, return NaN. If v
+     * matches all segment points return the earliest time.
+     *
+     * @param v The velocity.
+     * @return The time in the rest frame or NaN.
+     * @throws ExecutionException When there are no matching t's.
+     */
+    public double vToT(double v)
+    {
+        return worldline.vToT(v);
+    }
+
+    /**
+     * Given v, return tau. If v matches no segment points, return NaN. If v
+     * matches all segment points return the earliest tau.
+     *
+     * @param v The velocity.
+     * @return The time in the accelerated frame or NaN.
+     * @throws ExecutionException When there are no matching tau's.
+     */
+    public double vToTau(double v)
+    {
+        return worldline.vToTau(v);
+    }
+
+    // **********************************************************
+    // *
     // * Source is d
     // *
     // **********************************************************
@@ -118,7 +171,7 @@ public class Observer implements ExecutionImmutable, Displayable
      *
      * @param d The distance in the rest frame.
      * @return The velocity.
-     * @throws ArithmeticException When there are no matching v's.
+     * @throws ExecutionException When there are no matching v's.
      */
     public double dToV(double d)
     {
@@ -130,7 +183,7 @@ public class Observer implements ExecutionImmutable, Displayable
      *
      * @param d The distance in the rest frame
      * @return The position in the rest frame.
-     * @throws ArithmeticException When there are no matching x's.
+     * @throws ExecutionException When there are no matching x's.
      */
     public double dToX(double d)
     {
@@ -142,7 +195,7 @@ public class Observer implements ExecutionImmutable, Displayable
      *
      * @param d The distance in the rest frame
      * @return The time in the rest frame.
-     * @throws ArithmeticException When there are no or infinite matching t's.
+     * @throws ExecutionException When there are no or infinite matching t's.
      */
     public double dToT(double d)
     {
@@ -154,7 +207,7 @@ public class Observer implements ExecutionImmutable, Displayable
      *
      * @param d The distance in the rest frame
      * @return The time in the accelerated frame.
-     * @throws ArithmeticException When there are no or infinite matching taus.
+     * @throws ExecutionException When there are no or infinite matching taus.
      */
     public double dToTau(double d)
     {
