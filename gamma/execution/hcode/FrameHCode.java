@@ -18,6 +18,7 @@ package gamma.execution.hcode;
 
 import gamma.execution.ArgInfo;
 import gamma.execution.HCodeEngine;
+import gamma.value.Coordinate;
 import gamma.value.Frame;
 import gamma.value.Observer;
 import java.util.ArrayList;
@@ -32,21 +33,19 @@ public class FrameHCode extends HCode
     private static final ArgInfo argInfo;
     static {
         ArrayList<ArgInfo.Type> argTypes = new ArrayList<>();
-        argTypes.add(ArgInfo.Type.OBSERVER);
-        argTypes.add(ArgInfo.Type.AT_TYPE);
+        argTypes.add(ArgInfo.Type.COORDINATE);
         argTypes.add(ArgInfo.Type.DOUBLE);
-        argInfo = new ArgInfo(3, argTypes);
+        argInfo = new ArgInfo(2, argTypes);
     }
 
     @Override
     public void execute(HCodeEngine engine, List<Object> data)
     {
-        Observer observer =   (Observer)    data.get(0);
-        Frame.AtType atType = (Frame.AtType)data.get(1);
-        Double atValue =      (Double)      data.get(2);
+        Coordinate origin = (Coordinate) data.get(0);
+        Double v          = (Double)     data.get(1);
         data.clear();
 
-        data.add(new Frame(observer, atType, atValue));
+        data.add(new Frame(origin, v));
     }
 
     @Override
