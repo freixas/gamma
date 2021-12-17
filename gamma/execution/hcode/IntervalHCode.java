@@ -39,19 +39,20 @@ public class IntervalHCode extends HCode
     static {
         ArrayList<ArgInfo.Type> argTypes = new ArrayList<>();
         argTypes.add(ArgInfo.Type.DOUBLE);
-        argTypes.add(ArgInfo.Type.DOUBLE);
-        argInfo = new ArgInfo(2, argTypes);
+        argInfo = new ArgInfo(4, argTypes);
     }
 
     @Override
     public void execute(HCodeEngine engine, List<Object> data)
     {
+        double x1 = (Double)data.get(0);
+        double x2 = (Double)data.get(1);
         double t1 = (Double)data.get(0);
         double t2 = (Double)data.get(1);
 
         data.clear();
 
-        data.add(new Interval(t1, t2));
+        data.add(new Interval(x1, x2, t1, t2));
     }
 
     @Override
