@@ -79,10 +79,10 @@ public class Color implements ExecutionImmutable
 
     public Color(double red, double green, double blue, double alpha)
     {
-        this.r = Util.toInt(red);
-        this.g = Util.toInt(green);
-        this.b = Util.toInt(blue);
-        this.a = Util.toInt(alpha);
+        this.r = Math.min(255, Math.max(0, Util.toInt(red)));
+        this.g = Math.min(255, Math.max(0, Util.toInt(green)));
+        this.b = Math.min(255, Math.max(0, Util.toInt(blue)));
+        this.a = Math.min(255, Math.max(0, Util.toInt(alpha)));
 
         javaFXColor = javafx.scene.paint.Color.rgb(this.r, this.b, this.g, this.a / 255.0);
     }
@@ -109,6 +109,20 @@ public class Color implements ExecutionImmutable
     static public double toColorDouble(long red, long green, long blue, long alpha)
     {
         return (double) ((red & 0xFF) << 24 | (green & 0xFF) << 16 | (blue & 0xFF) << 8 | (alpha & 0xFF));
+    }
+
+    static public double toColorDouble(double red, double green, double blue)
+    {
+        return toColorDouble(red, green, blue, 255.0);
+    }
+
+    static public double toColorDouble(double red, double green, double blue, double alpha)
+    {
+        long r = Math.min(255, Math.max(0, Util.toInt(red)));
+        long g = Math.min(255, Math.max(0, Util.toInt(green)));
+        long b = Math.min(255, Math.max(0, Util.toInt(blue)));
+        long a = Math.min(255, Math.max(0, Util.toInt(alpha)));
+        return (double) ((r & 0xFF) << 24 | (g & 0xFF) << 16 | (b & 0xFF) << 8 | (a & 0xFF));
     }
 
     static public javafx.scene.paint.Color toJavaFXColor(double color)
