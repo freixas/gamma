@@ -234,9 +234,6 @@ public class HCodeEngine
                 throw new ProgrammingException("HCodeEngine.execute(): Execution ended but the data stack is not empty");
             }
         }
-        catch (ProgrammingException | ExecutionException e) {
-            throw e;
-        }
         catch (Throwable e) {
             throwGammaException(e);
         }
