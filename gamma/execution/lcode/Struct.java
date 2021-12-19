@@ -26,6 +26,7 @@ import gamma.value.PropertyList;
 import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
 import gamma.value.Displayable;
+import gamma.value.ExecutionMutable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -293,8 +294,21 @@ public abstract class Struct
         String propertyName = property.getName();
         Object propertyValue = property.getValue();
 
+        // The Field and Property are of the same type
+
         if (propertyValue.getClass() == field.getType()) {
-            field.set(instance, propertyValue);
+
+            // If the property value can be changed, we need to store a copy
+
+            if (propertyValue instanceof ExecutionMutable executionMutable) {
+                field.set(instance, executionMutable.createCopy());
+            }
+
+            // If it is immutable (or a primitive), we can store a reference
+
+            else {
+                field.set(instance, propertyValue);
+            }
         }
 
         // Field is a string

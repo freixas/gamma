@@ -26,7 +26,7 @@ import java.util.List;
  *
  * @author Antonio Freixas
  */
-public class dToVFunction extends Function
+public class dToVFunction extends ArgInfoFunction
 {
     private static final ArgInfo argInfo;
 

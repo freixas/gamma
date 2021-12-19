@@ -121,22 +121,18 @@ public final class Util
         return angle - 180.0;
     }
 
-//    static public double asinh(double x)
-//    {
-//        return Math.log(x + Math.sqrt(x*x + 1.0));
-//    }
-
     static public double asinh(double x)
     {
         final double sign;
 
-        if (Double.doubleToRawLongBits(x) < 0) {
+        if (fuzzyLT(x, 0)) {
             x = Math.abs(x);
-            sign = -1.0d;
+            sign = -1d;
         }
         else {
-            sign = 1.0d;
+            sign = 1d;
         }
+
         return sign * Math.log(Math.sqrt(x * x + 1.0) + x);
     }
 
@@ -145,11 +141,6 @@ public final class Util
         return Math.log(x + Math.sqrt(x*x - 1.0));
     }
 
-//    static public double atanh(double x)
-//    {
-//        return Math.log((x + 1.0) / (x - 1.0)) / 2;
-//    }
-//
     /**
      * Calculates inverse hyperbolic tangent of a {@code double} value.
      * <p>

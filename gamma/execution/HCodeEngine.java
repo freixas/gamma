@@ -19,7 +19,11 @@ package gamma.execution;
 import gamma.GammaRuntimeException;
 import gamma.MainWindow;
 import gamma.ProgrammingException;
+import gamma.execution.function.FunctionExecutor;
+import gamma.execution.hcode.HCodeExecutor;
 import gamma.execution.hcode.HCode;
+import gamma.execution.hcode.ArgInfoHCode;
+import gamma.execution.hcode.GenericHCode;
 import gamma.execution.hcode.SetStatement;
 import gamma.value.Color;
 import gamma.execution.lcode.Command;
@@ -34,10 +38,12 @@ import gamma.value.WInitializer;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
+ * The HCodeEngine controls the execution of a specific HCodeProgram. The
+ * program is executed once for a non-animated diagram and multiple times for
+ * an animated diagram.
  *
  * @author Antonio Freixas
  */
@@ -45,16 +51,18 @@ public class HCodeEngine
 {
     private static final Frame defFrame = new Frame(new Observer(new WInitializer(new Coordinate(0.0, 0.0), 0.0, 0.0), new ArrayList<>()), Frame.AtType.TAU, 0);
 
-    private MainWindow window;
+    private final MainWindow window;
     private final SetStatement setStatement;
     private final HCodeProgram program;
 
     private final AnimationSymbolTable animationTable;
     private int precision;
-    private SetStatement.PrecisionType precisionType;
+    private final SetStatement.PrecisionType precisionType;
 
     SymbolTable table;
     private LCodeEngine lCodeEngine;
+    private final HCodeExecutor hCodeExecutor;
+    private final FunctionExecutor functionExecutor;
     private StyleStruct styleDefaults;
 
     private File file;
@@ -67,6 +75,9 @@ public class HCodeEngine
         this.program = program;
         this.animationTable = new AnimationSymbolTable(this);
         this.lCodeEngine = null;
+
+        this.hCodeExecutor = new HCodeExecutor(this);
+        this.functionExecutor = new FunctionExecutor();
         precisionType = SetStatement.PrecisionType.DISPLAY;
         setPrecision(precisionType);
     }
@@ -115,7 +126,7 @@ public class HCodeEngine
         return setStatement;
     }
 
-    public void setPrecision(SetStatement.PrecisionType type)
+    public final void setPrecision(SetStatement.PrecisionType type)
     {
         if (type == SetStatement.PrecisionType.DISPLAY) {
             precision = setStatement.getDisplayPrecision();
@@ -143,6 +154,16 @@ public class HCodeEngine
     public AnimationSymbolTable getAnimationSymbolTable()
     {
         return animationTable;
+    }
+
+    public HCodeExecutor getHCodeExecutor()
+    {
+        return hCodeExecutor;
+    }
+
+    public FunctionExecutor getFunctionExecutor()
+    {
+        return functionExecutor;
     }
 
     public File getFile()
@@ -216,18 +237,24 @@ public class HCodeEngine
             while (iter.hasNext()) {
                 HCode hCode = iter.next();
 
-                // Check the arguments
+                if (hCode instanceof ArgInfoHCode argInfoHCode) {
 
-                ArgInfo argInfo = hCode.getArgInfo();
+                    // Check the arguments
 
-                // Get the number of arguments
+                    ArgInfo argInfo = argInfoHCode.getArgInfo();
 
-                List<Object> data = program.getData(hCode);
-                argInfo.checkTypes(data);
+                    // Get the number of arguments
 
-                // Execute the hCode
+                    List<Object> data = program.getData(argInfoHCode);
+                    argInfo.checkTypes(data);
 
-                hCode.execute(this, data);
+                    // Execute the hCode
+
+                    argInfoHCode.execute(this, data);
+                }
+                else if (hCode instanceof GenericHCode genericHCode) {
+                    genericHCode.execute(this);
+                }
             }
 
             if (!program.isDataEmpty()) {
@@ -266,7 +293,9 @@ public class HCodeEngine
     public void throwGammaException(Throwable e)
         throws GammaRuntimeException
     {
-            throw new GammaRuntimeException(file.getName() + ":" + lineNumber + ": " + e.getLocalizedMessage(), e);
+        String msg = e.getLocalizedMessage();
+        if (msg == null) msg = e.getClass().getCanonicalName();
+            throw new GammaRuntimeException(file.getName() + ":" + lineNumber + ": " + msg, e);
     }
 
 }

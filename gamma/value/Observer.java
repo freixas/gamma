@@ -56,10 +56,7 @@ public class Observer implements ExecutionImmutable, Displayable
         while (iter.hasNext()) {
             WSegment wSegment = iter.next();
 
-        // Temporary hack - TO DO !!!!!!!!!!!
-        // Convert acceleration to proper units
-
-        double a = wSegment.getA() * 1.032295276;
+            double a = wSegment.getA();
 
             // Not the last segment
 

@@ -27,7 +27,7 @@ import java.util.List;
  *
  * @author Antonio Freixas
  */
-public class WInitializerHCode extends HCode
+public class WInitializerHCode extends ArgInfoHCode
 {
     private static final ArgInfo argInfo;
     static {

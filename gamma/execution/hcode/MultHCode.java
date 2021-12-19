@@ -29,7 +29,7 @@ import java.util.List;
  *
  * @author Antonio Freixas
  */
-public class MultHCode extends HCode
+public class MultHCode extends ArgInfoHCode
 {
     private static final ArgInfo argInfo;
     static {

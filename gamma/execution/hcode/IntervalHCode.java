@@ -33,7 +33,7 @@ import java.util.List;
  *
  * @author Antonio Freixas
  */
-public class IntervalHCode extends HCode
+public class IntervalHCode extends ArgInfoHCode
 {
     private static final ArgInfo argInfo;
     static {

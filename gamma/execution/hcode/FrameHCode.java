@@ -28,7 +28,7 @@ import java.util.List;
  *
  * @author Antonio Freixas
  */
-public class FrameHCode extends HCode
+public class FrameHCode extends ArgInfoHCode
 {
     private static final ArgInfo argInfo;
     static {

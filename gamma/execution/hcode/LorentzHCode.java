@@ -28,7 +28,7 @@ import java.util.List;
  *
  * @author Antonio Freixas
  */
-public class LorentzHCode extends HCode
+public class LorentzHCode extends ArgInfoHCode
 {
     private static final ArgInfo argInfo;
 

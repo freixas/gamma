@@ -19,15 +19,17 @@ package gamma.execution.hcode;
 import gamma.execution.ArgInfo;
 import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
+import gamma.execution.function.ArgInfoFunction;
 import gamma.execution.function.Function;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
  *
  * @author Antonio Freixas
  */
-public class FunctionHCode extends HCode
+public class FunctionHCode extends ArgInfoHCode
 {
     private static final ArgInfo argInfo;
 
@@ -48,36 +50,51 @@ public class FunctionHCode extends HCode
         }
 
         // The function arguments omit the argument count and function name
-        
-        List<Object> funcCode = data.subList(0, data.size() - 2);
 
-        // Check the arguments
+        List<Object> funcData = data.subList(0, data.size() - 2);
 
-        @SuppressWarnings("null")
-        ArgInfo funcArgInfo = function.getArgInfo();
+        // Execute a Function that uses ArgInfo
 
-        // Get the number of arguments
+        if (function instanceof ArgInfoFunction argInfoFunction) {
 
-        int numOfArgs = funcArgInfo.getNumberOfArgs();
+            // Check the arguments
 
-        if (numOfArgs == -1) numOfArgs = funcCode.size();
-        if (numOfArgs != funcCode.size()) {
-            throw new ExecutionException("Incorrect number of arguments for function '" + funcName + "'. Expected " + numOfArgs + ", received " + funcCode.size());
+            @SuppressWarnings("null")
+            ArgInfo funcArgInfo = argInfoFunction.getArgInfo();
+
+            // Get the number of arguments
+
+            int numOfArgs = funcArgInfo.getNumberOfArgs();
+
+            if (numOfArgs == -1) numOfArgs = funcData.size();
+            if (numOfArgs != funcData.size()) {
+                throw new ExecutionException("Incorrect number of arguments for function '" + funcName + "'. Expected " + numOfArgs + ", received " + funcData.size());
+            }
+
+            funcArgInfo.checkTypes(funcData);
+
+            // Execute the hCode
+
+            Object result = argInfoFunction.execute(engine, funcData);
+
+            // Remove all of the function hcode
+
+            data.clear();
+
+            // Add the result
+
+            data.add(result);
         }
 
-        funcArgInfo.checkTypes(funcCode);
+        // Execute a generic Function
 
-        // Execute the hCode
-
-        Object result = function.execute(engine, funcCode);
-
-        // Remove all of the function hcode
-
-        data.clear();
-
-        // Add the result
-
-        data.add(result);
+        else if (function instanceof GenericFunction genericFunction) {
+            LinkedList<Object> funcDataCopy = new LinkedList<>();
+            funcDataCopy.addAll(funcData);
+            genericFunction.execute(engine, funcDataCopy);
+            data.clear();
+            data.addAll(funcDataCopy);
+        }
     }
 
     @Override

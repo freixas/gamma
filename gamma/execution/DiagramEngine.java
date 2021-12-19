@@ -18,7 +18,7 @@ package gamma.execution;
 
 import gamma.MainWindow;
 import gamma.ProgrammingException;
-import gamma.execution.hcode.HCode;
+import gamma.execution.hcode.ArgInfoHCode;
 import gamma.execution.hcode.SetStatement;
 import gamma.parser.Token;
 import java.io.File;
@@ -151,7 +151,7 @@ public class DiagramEngine
                     String type;
                     String value;
 
-                    if (obj instanceof HCode) {
+                    if (obj instanceof ArgInfoHCode) {
                         type = "HCODE";
                         value = obj.getClass().getName();
                     }

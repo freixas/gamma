@@ -27,7 +27,7 @@ import java.util.List;
  *
  * @author Antonio Freixas
  */
-public class tauToTFunction extends Function
+public class tauToTFunction extends ArgInfoFunction
 {
     private static final ArgInfo argInfo;
 

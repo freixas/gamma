@@ -29,7 +29,7 @@ import java.util.List;
  *
  * @author Antonio Freixas
  */
-public class intersectFunction extends Function
+public class intersectFunction extends ArgInfoFunction
 {
     private static final ArgInfo argInfo;
 

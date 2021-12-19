@@ -439,11 +439,18 @@ public class Parser
 
         nextToken();
 
-        codes.add(new SetPrecisionHCode(SetStatement.PrecisionType.PRINT));
-        codes.addAll(parseExpr());
-        codes.add(new PrintHCode());
-        codes.add(new SetPrecisionHCode(SetStatement.PrecisionType.DISPLAY));
+        // If the new token is ';', print a blank line
 
+        if (isDelimiter()&& getChar() == ';') {
+            codes.add("");
+            codes.add(new PrintHCode());
+        }
+        else {
+            codes.add(new SetPrecisionHCode(SetStatement.PrecisionType.PRINT));
+            codes.addAll(parseExpr());
+            codes.add(new PrintHCode());
+            codes.add(new SetPrecisionHCode(SetStatement.PrecisionType.DISPLAY));
+        }
         return codes;
     }
 
@@ -1503,7 +1510,7 @@ public class Parser
         if (t.op.chr == '+' && t.op.isBinary) {
             return new AddHCode();
         } else if (t.op.chr == '-' && t.op.isBinary) {
-            return new SubHCode();
+            return new GenericHCode("sub");
         } else if  (t.op.chr == '+') {
             return new UnaryPlusHCode();
         } else if  (t.op.chr == '-') {

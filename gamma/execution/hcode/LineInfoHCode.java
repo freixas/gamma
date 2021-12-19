@@ -26,7 +26,7 @@ import java.util.List;
  *
  * @author Antonio Freixas
  */
-public class LineInfoHCode extends HCode
+public class LineInfoHCode extends ArgInfoHCode
 {
     private final static ArgInfo argInfo;
     static {

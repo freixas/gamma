@@ -28,7 +28,7 @@ import java.util.List;
  *
  * @author Antonio Freixas
  */
-public class UnaryMinusHCode extends HCode
+public class UnaryMinusHCode extends ArgInfoHCode
 {
     private static final ArgInfo argInfo;
     static {

@@ -25,7 +25,7 @@ import java.util.List;
  *
  * @author Antonio Freixas
  */
-public class SetPrecisionHCode extends HCode
+public class SetPrecisionHCode extends ArgInfoHCode
 {
     private final static ArgInfo argInfo;
     static {

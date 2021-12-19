@@ -29,7 +29,7 @@ import java.util.List;
  *
  * @author Antonio Freixas
  */
-public class AnimAssignHCode extends HCode
+public class AnimAssignHCode extends ArgInfoHCode
 {
     private static final ArgInfo argInfo;
 

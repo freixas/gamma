@@ -17,14 +17,14 @@
 package gamma.execution;
 
 import gamma.value.*;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import javafx.beans.property.Property;
 
 /**
- *
+ * The ArgInfo class is used to provide information about the arguments of
+ * an HCode or Function and to type-check those arguments.
+ * 
  * @author Antonio Freixas
  */
 public class ArgInfo
@@ -110,7 +110,7 @@ public class ArgInfo
             // last object is an integer which has already been checked, so we're done
 
             if (numberOfArgs == -1 && !iter.hasNext()) return;
-            
+
             switch (argTypes.get(argTypePtr)) {
                 case INTEGER ->             { if (!(obj instanceof Integer))                                throwTypeError("an integer"); }
                 case DOUBLE ->              { if (!(obj instanceof Double))                                 throwTypeError("a number"); }

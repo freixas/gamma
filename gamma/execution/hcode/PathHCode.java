@@ -27,7 +27,7 @@ import java.util.List;
  *
  * @author Antonio Freixas
  */
-public class PathHCode extends HCode
+public class PathHCode extends ArgInfoHCode
 {
     private static final ArgInfo argInfo;
 

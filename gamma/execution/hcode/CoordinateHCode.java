@@ -26,7 +26,7 @@ import java.util.List;
  *
  * @author Antonio Freixas
  */
-public class CoordinateHCode extends HCode
+public class CoordinateHCode extends ArgInfoHCode
 {
     private static final ArgInfo argInfo;
 

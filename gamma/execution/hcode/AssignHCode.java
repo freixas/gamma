@@ -33,7 +33,7 @@ import java.util.List;
  *
  * @author Antonio Freixas
  */
-public class AssignHCode extends HCode
+public class AssignHCode extends ArgInfoHCode
 {
     private static final ArgInfo argInfo;
 
@@ -48,17 +48,15 @@ public class AssignHCode extends HCode
     @SuppressWarnings("null")
     public void execute(HCodeEngine engine, List<Object> data)
     {
-        Object arg1 = data.get(0);
+        Address address = (Address)data.get(0);
         Object arg2 = data.get(1);
         data.clear();
-
-        Address address = (Address)arg1;
 
         // If it's a property value, it must exist and the type of the property
         // and the value must be the same.
 
         if (address instanceof ObjectPropertyAddress) {
-            if (!address.exists() || !address.typeMatches(arg1)) {
+            if (!address.exists() || !address.typeMatches(arg2)) {
                 throw new ExecutionException("Variable does not exist or is of the wrong type");
             }
         }
@@ -66,7 +64,7 @@ public class AssignHCode extends HCode
         // Otherwise, this is a symbol table address. We need to make sure we
         // are not assigning to an animation variable
 
-        if (address.exists()) {
+        else if (address.exists()) {
             String name = ((SymbolTableAddress)address).getName();
             if (engine.getAnimationSymbolTable().contains(name)) {
                 throw new ExecutionException("You cannot change the value of an animation variable");

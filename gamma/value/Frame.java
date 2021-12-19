@@ -93,7 +93,6 @@ public class Frame  extends ObjectContainer implements ExecutionMutable, Display
 
             case V -> {
                 v = value;
-                d = observer.vToD(v);
                 x = observer.vToX(v);
                 t = observer.vToT(v);
                 tau = observer.vToTau(v);

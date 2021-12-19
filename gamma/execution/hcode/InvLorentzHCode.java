@@ -28,7 +28,7 @@ import java.util.List;
  *
  * @author Antonio Freixas
  */
-public class InvLorentzHCode extends HCode
+public class InvLorentzHCode extends ArgInfoHCode
 {
     private static final ArgInfo argInfo;
 

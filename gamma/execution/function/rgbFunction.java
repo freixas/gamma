@@ -27,7 +27,7 @@ import java.util.List;
  *
  * @author Antonio Freixas
  */
-public class rgbFunction extends Function
+public class rgbFunction extends ArgInfoFunction
 {
     private static final ArgInfo argInfo;
 

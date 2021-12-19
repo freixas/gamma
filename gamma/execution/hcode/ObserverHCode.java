@@ -30,7 +30,7 @@ import java.util.List;
  *
  * @author Antonio Freixas
  */
-public class ObserverHCode extends HCode
+public class ObserverHCode extends ArgInfoHCode
 {
     private static final ArgInfo argInfo;
     static {

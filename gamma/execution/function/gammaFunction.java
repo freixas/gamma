@@ -29,7 +29,7 @@ import java.util.List;
  *
  * @author Antonio Freixas
  */
-public class gammaFunction extends Function
+public class gammaFunction extends ArgInfoFunction
 {
     private static final ArgInfo argInfo;
 

@@ -786,7 +786,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
     public String toDisplayableString(HCodeEngine engine)
     {
         return
-            "acceleration " + engine.toDisplayableString(a) +
+            "acceleration " + engine.toDisplayableString(a / (1.032295276 * engine.getSetStatement().getUnits())) + "g" +
             ", velocity " + engine.toDisplayableString(min.v) +
             " to " + engine.toDisplayableString(max.v);
     }

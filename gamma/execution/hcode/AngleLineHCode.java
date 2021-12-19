@@ -27,7 +27,7 @@ import java.util.List;
  *
  * @author Antonio Freixas
  */
-public class AngleLineHCode extends HCode
+public class AngleLineHCode extends ArgInfoHCode
 {
     private static final ArgInfo argInfo;
 

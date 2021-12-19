@@ -27,7 +27,7 @@ import java.util.List;
  *
  * @author Antonio Freixas
  */
-public class WSegmentHCode extends HCode
+public class WSegmentHCode extends ArgInfoHCode
 {
     private static final ArgInfo argInfo;
 
@@ -44,7 +44,11 @@ public class WSegmentHCode extends HCode
     public void execute(HCodeEngine engine, List<Object> data)
     {
         double v =     (Double)data.get(0);
-        double a =     (Double)data.get(1);
+
+        // Convert user acceleration (in g's) to the correct value ((ly/y^2) * user units)
+
+        double a =     (Double)data.get(1) * 1.032295276 * engine.getSetStatement().getUnits();
+        
         WorldlineSegment.LimitType limitType = (WorldlineSegment.LimitType)data.get(2);
         double delta = (Double)data.get(3);
         data.clear();

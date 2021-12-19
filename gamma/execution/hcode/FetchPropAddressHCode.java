@@ -29,7 +29,7 @@ import java.util.List;
  *
  * @author Antonio Freixas
  */
-public class FetchPropAddressHCode extends HCode
+public class FetchPropAddressHCode extends ArgInfoHCode
 {
     private static final ArgInfo argInfo;
     static {

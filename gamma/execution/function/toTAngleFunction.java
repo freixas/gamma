@@ -29,7 +29,7 @@ import java.util.List;
  *
  * @author Antonio Freixas
  */
-public class toTAngleFunction extends Function
+public class toTAngleFunction extends ArgInfoFunction
 {
     private static final ArgInfo argInfo;
 

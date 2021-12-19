@@ -29,7 +29,7 @@ import java.util.List;
  *
  * @author Antonio Freixas
  */
-public class SubHCode extends HCode
+public class SubHCode extends ArgInfoHCode
 {
     private static final ArgInfo argInfo;
     static {

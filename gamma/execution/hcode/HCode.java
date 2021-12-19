@@ -16,41 +16,35 @@
  */
 package gamma.execution.hcode;
 
-import gamma.execution.ArgInfo;
-import gamma.execution.HCodeEngine;
-import java.util.List;
-
 /**
- * An hcode is a high-level instruction for an imaginary machine which we
+ * An HCode is a high-level instruction for an imaginary machine which we
  * emulate using the HCodeEngine.
  *
  * @author Antonio Freixas
  */
-abstract public class HCode
+public abstract class HCode extends ExecutorContext
 {
     private int argOffset;
 
     /**
-     * Execute the HCode.
+     * Get the argument offset. This is a value set by the Parser and used
+     * to adjust the programs data pointer so that each HCode is matched to
+     * the correct data.
      *
-     * @param engine The HCode engine.
-     * @param data The arguments for this hCode instruction.
+     * @return The argument offset.
      */
-    abstract public void execute(HCodeEngine engine, List<Object> data);
-
-    /**
-     * Return the number of arguments required. -1 means the size is on the
-     * stack.
-     *
-     * @return The number of arguments required.
-     */
-    abstract public ArgInfo getArgInfo();
-
     public int getArgOffset()
     {
         return argOffset;
     }
 
+    /**
+     * Set the argument offset. This is a value set by the Parser and used to
+     * adjust the programs data pointer so that each HCode is matched to the
+     * correct data.
+     *
+     * @param argOffset
+     */
     public void setArgOffset(int argOffset)
     {
         this.argOffset = argOffset;
