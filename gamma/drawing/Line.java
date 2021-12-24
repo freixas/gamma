@@ -18,7 +18,9 @@ package gamma.drawing;
 
 import gamma.execution.lcode.LineStruct;
 import gamma.execution.lcode.StyleStruct;
-import gamma.value.Bounds;
+import gamma.value.BoundedLine;
+import gamma.value.ConcreteLine;
+import gamma.value.CurveSegment;
 import gamma.value.LineSegment;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.StrokeLineCap;
@@ -39,13 +41,73 @@ public class Line
      */
     public static void draw(Context context, LineStruct struct, StyleStruct styles)
     {
-//        Bounds clip = context.bounds.intersect(struct.clip);
-//        if (clip == null) return;
+        String arrowStyle = styles.arrow;
+
+        // Normal lines are infinite and have no arrowheads
+
+        if (struct.line instanceof ConcreteLine) {
+            styles.arrow = "none";
+        }
+
+        // Bounded lines are allowed arrows on any finite end
+
+        else if (struct.line instanceof BoundedLine boundedLine) {
+            if (boundedLine.isInfiniteMinus()) suppressStartArrow(styles);
+            if (boundedLine.isInfinitePlus()) suppressEndArrow(styles);
+        }
 
         LineSegment segment = struct.line.intersect(context.bounds);
-        if (segment == null) return;
 
-        draw(context, segment, styles);
+        // For bounded lines (which can have arrows), we need to find out if the
+        // arrow head has been clipped and disable it.
+
+        // NOTE: This method clips an arrowhead that might still be partly visible.
+        // An alternate method would be to resize the bounds to allow for a
+        // potential arrowhead
+
+        if (struct.line instanceof BoundedLine boundedLine) {
+            CurveSegment curve = boundedLine.getCurveSegment();
+
+            if (curve instanceof LineSegment lineSegment) {
+                if (!context.bounds.inside(lineSegment.getPoint1())) suppressStartArrow(styles);
+                if (!context.bounds.inside(lineSegment.getPoint2())) suppressEndArrow(styles);
+            }
+
+            else if (curve instanceof ConcreteLine concreteLine) {
+                if (!concreteLine.isInfiniteMinus() &&
+                    !context.bounds.inside(concreteLine.getCoordinate())) suppressStartArrow(styles);
+                if (!concreteLine.isInfinitePlus() &&
+                    !context.bounds.inside(concreteLine.getCoordinate())) suppressEndArrow(styles);
+            }
+        }
+
+        if (segment != null) {
+            draw(context, segment, styles);
+        }
+
+        // Restore the original arrow style
+        
+        styles.arrow = arrowStyle;
+    }
+
+    private static void suppressStartArrow(StyleStruct styles)
+    {
+        if (styles.arrow.equals("start")) {
+            styles.arrow = "none";
+        }
+        else if (styles.arrow.equals("both")) {
+            styles.arrow = "end";
+        }
+    }
+
+    private static void suppressEndArrow(StyleStruct styles)
+    {
+        if (styles.arrow.equals("end")) {
+            styles.arrow = "none";
+        }
+        else if (styles.arrow.equals("both")) {
+            styles.arrow = "start";
+        }
     }
 
     /**
@@ -87,8 +149,8 @@ public class Line
         // Draw the line
 
         gc.strokeLine(
-            segment.point1.x, segment.point1.t,
-            segment.point2.x, segment.point2.t);
+            segment.getPoint1().x, segment.getPoint1().t,
+            segment.getPoint2().x, segment.getPoint2().t);
 
         // Draw the arrowheads
 
@@ -102,10 +164,10 @@ public class Line
         }
 
         if (startArrow) {
-            Arrow.draw(context, segment.point1, angle + 180.0, styles);
+            Arrow.draw(context, segment.getPoint1(), angle + 180.0, styles);
         }
         if (endArrow) {
-            Arrow.draw(context, segment.point2, angle, styles);
+            Arrow.draw(context, segment.getPoint2(), angle, styles);
         }
     }
 

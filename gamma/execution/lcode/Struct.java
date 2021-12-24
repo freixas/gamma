@@ -16,6 +16,7 @@
  */
 package gamma.execution.lcode;
 
+import gamma.GammaRuntimeException;
 import gamma.value.Color;
 import gamma.ProgrammingException;
 import gamma.math.Util;
@@ -278,7 +279,13 @@ public abstract class Struct
                 }
             }
         }
-        catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+        catch (InvocationTargetException e) {
+            Throwable ex = e.getCause();
+            if (ex instanceof ExecutionException executionException) throw executionException;
+            if (ex instanceof ProgrammingException programmingException) throw programmingException;
+            throw new GammaRuntimeException(ex);
+        }
+        catch (IllegalAccessException | IllegalArgumentException e) {
             throw new ProgrammingException("Struct.initializeStruct()", e);
         }
     }
@@ -296,7 +303,8 @@ public abstract class Struct
 
         // The Field and Property are of the same type
 
-        if (propertyValue.getClass() == field.getType()) {
+//        if (propertyValue.getClass() == field.getType()) {
+        if (field.getType().isAssignableFrom(propertyValue.getClass())) {
 
             // If the property value can be changed, we need to store a copy
 
@@ -314,7 +322,8 @@ public abstract class Struct
         // Field is a string
         // Property value can be a Double or any Displayable
 
-        else if (field.getType() == String.class) {
+//        else if (field.getType() == String.class) {
+        else if (field.getType().isAssignableFrom(String.class)) {
             if (propertyValue instanceof Double dbl) {
                 field.set(instance, engine.toDisplayableString(dbl));
             }
@@ -329,7 +338,9 @@ public abstract class Struct
         // Property value is a Double
         // Field can be a double, int, color, or boolean
 
-        else if (propertyValue instanceof Double dbl) {
+//        else if (propertyValue instanceof Double dbl) {
+        else if (propertyValue.getClass().isAssignableFrom(Double.class)) {
+            Double dbl = (Double)propertyValue;
             if (field.getType() == double.class) {
                 field.setDouble(instance, dbl);
             }
@@ -350,7 +361,9 @@ public abstract class Struct
         // Property is an Observer
         // Field can be a Frame
 
-        else if (propertyValue instanceof Observer observer) {
+//        else if (propertyValue instanceof Observer observer) {
+        else if (propertyValue.getClass().isAssignableFrom(Observer.class)) {
+            Observer observer = (Observer)propertyValue;
             if (field.getType() == Frame.class) {
                 field.set(instance, new Frame(observer));
             }

@@ -21,6 +21,7 @@ import gamma.execution.HCodeEngine;
 /**
  *
  * @author Antonio Freixas
+ * @param <R>
  */
 @FunctionalInterface
 public interface VariableArg<R> extends LambdaFunction

@@ -16,6 +16,7 @@
  */
 package gamma.math;
 
+import gamma.value.ConcreteLine;
 import gamma.value.Coordinate;
 import gamma.value.ExecutionImmutable;
 import gamma.value.Line;
@@ -876,7 +877,7 @@ public class OffsetAcceleration implements ExecutionImmutable
      * @param stdTau A tau value on the standard curve
      * @return The equivalent stdTau on the offset curve.
      */
-    private final double toOffsetTau(double stdTau)
+    private double toOffsetTau(double stdTau)
     {
         return vPointTau + (stdTau - stdVPointTau);
     }
@@ -891,7 +892,7 @@ public class OffsetAcceleration implements ExecutionImmutable
      * @param tau A tau value on the standard curve
      * @return The equivalent tau on the offset curve.
      */
-    private final double toStdTau(double tau)
+    private double toStdTau(double tau)
     {
         return stdVPointTau + (tau - vPointTau);
     }
@@ -904,7 +905,7 @@ public class OffsetAcceleration implements ExecutionImmutable
      * @param x The position in the rest frame.
      * @return The time in the rest frame.
      */
-    private final double linearXToT(double x)
+    private double linearXToT(double x)
     {
         return ((x - offset.x) / vInit) + offset.t;
     }
@@ -917,7 +918,7 @@ public class OffsetAcceleration implements ExecutionImmutable
      * @param t The time in the rest frame
      * @return The position in the rest frame.
      */
-    private final double linearTToX(double t)
+    private double linearTToX(double t)
     {
         return ((t - offset.t) * vInit) + offset.x;
     }
@@ -930,7 +931,7 @@ public class OffsetAcceleration implements ExecutionImmutable
      * @param x The position in the rest frame.
      * @return The time in the accelerated frame.
      */
-    private final double linearXToTau(double x)
+    private double linearXToTau(double x)
     {
         return toOffsetTau(Relativity.tToTau((x - offset.x) / vInit, vInit));
     }
@@ -957,7 +958,7 @@ public class OffsetAcceleration implements ExecutionImmutable
         // line
 
         if (zeroAcceleration) {
-            return line.intersect(new Line(Line.AxisType.T, vInit, vPoint));
+            return line.intersect(new ConcreteLine(Line.AxisType.T, vInit, vPoint));
         }
 
         // Now we translate the curve and line to the standard system, intersect
@@ -965,7 +966,7 @@ public class OffsetAcceleration implements ExecutionImmutable
 
         Coordinate translatedCoord = new Coordinate(line.getCoordinate());
         translatedCoord.subtract(offset);
-        Line translatedLine = new Line(line.getAngle(), translatedCoord);
+        Line translatedLine = new ConcreteLine(line.getAngle(), translatedCoord);
 
         Coordinate intersection = Acceleration.intersect(a, translatedLine, later);
         if (intersection != null) {

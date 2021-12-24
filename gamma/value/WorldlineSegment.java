@@ -328,11 +328,11 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
     public void setInfinitePast()
     {
         if (curveSegment instanceof LineSegment) {
-            curveSegment = new Line(Line.AxisType.T, min.v, new Coordinate(min.x, min.t));
-            ((Line)curveSegment).setIsInfinitePlus(false);
+            ConcreteLine line = new ConcreteLine(Line.AxisType.T, min.v, new Coordinate(min.x, min.t));
+            curveSegment = new ConcreteLine(line, true, false);
         }
-        else if (curveSegment instanceof Line) {
-            ((Line)curveSegment).setIsInfiniteMinus(true);
+        else if (curveSegment instanceof ConcreteLine line) {
+            curveSegment = new ConcreteLine(line, true, line.isInfinitePlus());
         }
 
         double v = Util.fuzzyGT(a, 0) ? Double.NEGATIVE_INFINITY: (Util.fuzzyLT(a, 0) ? Double.POSITIVE_INFINITY : min.v);
@@ -353,11 +353,11 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
     public void setInfiniteFuture()
     {
         if (curveSegment instanceof LineSegment) {
-            curveSegment = new Line(Line.AxisType.T, max.v, new Coordinate(max.x, max.t));
-            ((Line)curveSegment).setIsInfiniteMinus(false);
+            ConcreteLine line = new ConcreteLine(Line.AxisType.T, min.v, new Coordinate(min.x, min.t));
+            curveSegment = new ConcreteLine(line, false, true);
         }
-        else if (curveSegment instanceof Line) {
-            ((Line)curveSegment).setIsInfinitePlus(true);
+        else if (curveSegment instanceof ConcreteLine line) {
+            curveSegment = new ConcreteLine(line, line.isInfiniteMinus(), true);
         }
 
         double v = Util.fuzzyGT(a, 0) ? Double.POSITIVE_INFINITY: (Util.fuzzyLT(a, 0) ? Double.NEGATIVE_INFINITY : max.v);

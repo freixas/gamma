@@ -16,6 +16,7 @@
  */
 package gamma.execution.hcode;
 
+import gamma.GammaRuntimeException;
 import gamma.ProgrammingException;
 import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
@@ -45,6 +46,8 @@ public abstract class Executor
     static final Class[] threeObjects = { HCodeEngine.class, Object.class, Object.class, Object.class };
     static final Class[] fourObjects =  { HCodeEngine.class, Object.class, Object.class, Object.class, Object.class };
 
+    static final Class[] varObjects =   { HCodeEngine.class, Object[].class };
+
     static final Class[][] objectTypes = { noObjects, oneObject, twoObjects, threeObjects, fourObjects };
 
     /**
@@ -60,23 +63,35 @@ public abstract class Executor
         // We need to know the number of arguments.
 
         List<Object> args = getData(context);
-
-        // Because -1 means that we have a variable amount of data, we need
-        // to update the numOfArgs to reflect the amount of data we received
-
         int numOfArgs = args.size();
+
+        boolean isVarArgs = func instanceof VariableArg || func instanceof VariableArgNoRet;
 
         // Use Reflection to find a method whose signature matches the types
         // of the data values
 
-        Class[] params = objectTypes[numOfArgs];
+        Class[] params;
+        if (isVarArgs) {
+            params = varObjects;
+        }
+        else {
+            params = objectTypes[numOfArgs];
+        }
         Method method = getMethod(func, params);
 
         // Execute the method and return the result
 
-        args.add(0, engine);            // The engine is the first parameter
+        Object[] reflectionArgs;
+        if (isVarArgs) {
+            Object[] varArgs = { engine, args.toArray() };
+            reflectionArgs = varArgs;
+        }
+        else {
+            args.add(0, engine);            // The engine is the first parameter
+            reflectionArgs = args.toArray();
+        }
+        Object result = executeImpl(method, engine, func, reflectionArgs);
 
-        Object result = executeImpl(method, engine, func, args.toArray());
         args.clear();
         if (getNumberOfReturnedValues(context, func) > 0) {
             args.add(result);
@@ -129,7 +144,13 @@ public abstract class Executor
         catch (IllegalArgumentException e) {
             throw new ExecutionException("Invalid Argument", e);
         }
-        catch (SecurityException | IllegalAccessException | InvocationTargetException e) {
+        catch (InvocationTargetException e) {
+            Throwable ex = e.getCause();
+            if (ex instanceof ExecutionException executionException) throw executionException;
+            if (ex instanceof ProgrammingException programmingException) throw programmingException;
+            throw new GammaRuntimeException(ex);
+        }
+        catch (SecurityException | IllegalAccessException e) {
             throw new ProgrammingException("Executor.executeImpl(): invoke() failed", e);
         }
         return result;

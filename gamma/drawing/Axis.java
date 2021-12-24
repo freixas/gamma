@@ -21,6 +21,7 @@ import gamma.execution.lcode.LabelStruct;
 import gamma.execution.lcode.StyleStruct;
 import gamma.math.Util;
 import gamma.value.Bounds;
+import gamma.value.ConcreteLine;
 import gamma.value.Coordinate;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
@@ -54,7 +55,7 @@ public class Axis
         // Get the values we need
 
         double v = struct.frame.getV();
-        gamma.value.Line line = new gamma.value.Line(axisStruct.axisType, struct.frame);
+        gamma.value.Line line = new ConcreteLine(axisStruct.axisType, struct.frame);
 
         // *********************************************
         // *** Find out the current invScale.           ***

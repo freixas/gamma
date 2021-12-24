@@ -17,12 +17,12 @@
 package gamma.value;
 
 /**
- * This class ties together LineSegments and HyperbolicSegments, both of
- * which could be parts of a worldline.
+ * This class ties together Lines, LineSegments and HyperbolicSegments, all of
+ * which can be parts of a worldline.
  *
  * @author Antonio Freixas
  */
-public abstract class CurveSegment
+public abstract class CurveSegment implements ExecutionImmutable
 {
     /**
      * Get the bounds of this curve.

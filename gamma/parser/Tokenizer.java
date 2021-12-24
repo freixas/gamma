@@ -26,7 +26,7 @@ import java.util.ArrayList;
 public class Tokenizer
 {
     static private final char EOF = '\1';
-    private ArrayList<Token> list = null;
+    private ArrayList<Token<?>> list = null;
     private final File file;
     private final String script;
 
@@ -59,7 +59,7 @@ public class Tokenizer
      * @return A list of Tokens.
      * @throws ParseException When an invalid token is found.
      */
-    public ArrayList<Token> tokenize() throws ParseException
+    public ArrayList<Token<?>> tokenize() throws ParseException
     {
         lineNumber = 1;
         lineNumberStart = 0;

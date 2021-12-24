@@ -16,6 +16,7 @@
  */
 package gamma.value;
 
+import gamma.ProgrammingException;
 import gamma.math.Util;
 
 /**
@@ -27,8 +28,9 @@ import gamma.math.Util;
  */
 public class LineSegment extends CurveSegment implements ExecutionImmutable
 {
-    public final Coordinate point1;
-    public final Coordinate point2;
+    private final Coordinate point1;
+    private final Coordinate point2;
+    private final Bounds bounds;
 
     public LineSegment(double x1, double t1, double x2, double t2)
     {
@@ -39,21 +41,60 @@ public class LineSegment extends CurveSegment implements ExecutionImmutable
     {
         this.point1 = new Coordinate(p1);
         this.point2 = new Coordinate(p2);
+        this.bounds = new Bounds(point1, point2);
     }
 
+    /**
+     * Copy constructor.
+     *
+     * @param other The other LineSegment to copy.
+     */
     public LineSegment(LineSegment other)
     {
-        this.point1 = new Coordinate(other.point1);
-        this.point2 = new Coordinate(other.point2);
+        if (other != null) {
+            this.point1 = new Coordinate(other.point1);
+            this.point2 = new Coordinate(other.point2);
+            this.bounds = other.bounds;
+        }
+        else {
+            throw new ProgrammingException("LineSegment: Trying to copy a null object");
+        }
+    }
+
+    /**
+     * Create a new version of this line segment that is relative to the
+     * given frame rather than relative to the rest frame.
+     *
+     * @param prime The frame to be relative to.
+     * @return The new line segment.
+     */
+    public LineSegment relativeTo(Frame prime)
+    {
+        Coordinate p1 = prime.toFrame(point1);
+        Coordinate p2 = prime.toFrame(point2);
+        return new LineSegment(p1, p2);
+    }
+
+    /**
+     * @return the point1
+     */
+    public Coordinate getPoint1()
+    {
+        return new Coordinate(point1);
+    }
+
+    /**
+     * @return the point2
+     */
+    public Coordinate getPoint2()
+    {
+        return new Coordinate(point2);
     }
 
     @Override
     public final Bounds getBounds()
     {
-        // Since this object is mutable, we need to ensure that the bounds
-        // actually reflect the current state of the object
-
-        return new Bounds(point1.x, point1.t, point2.x, point2.t);
+        return new Bounds(bounds);
     }
 
     /**
@@ -69,10 +110,11 @@ public class LineSegment extends CurveSegment implements ExecutionImmutable
     {
         // Copy this line segment
 
-	LineSegment segment = new LineSegment(this);
+	Coordinate p1 = new Coordinate(point1);
+	Coordinate p2 = new Coordinate(point2);
 
-	int outcode0 = bounds.computeOutCode(segment.point1);
-	int outcode1 = bounds.computeOutCode(segment.point2);
+	int outcode0 = bounds.computeOutCode(p1);
+	int outcode1 = bounds.computeOutCode(p2);
 	boolean accept = false;
 
         double slopeXT = Double.NaN;
@@ -121,52 +163,52 @@ public class LineSegment extends CurveSegment implements ExecutionImmutable
                 // Calculate the slopes if not yet set
 
                 if (Double.isNaN(slopeXT)) {
-                    if (Util.fuzzyEQ(segment.point2.t, segment.point1.t)) {
+                    if (Util.fuzzyEQ(p2.t, p1.t)) {
                         slopeXT = Double.POSITIVE_INFINITY;
                     }
                     else {
-                        slopeXT = (segment.point2.x - segment.point1.x) / (segment.point2.t - segment.point1.t);
+                        slopeXT = (p2.x - p1.x) / (p2.t - p1.t);
                     }
-                   if (Util.fuzzyEQ(segment.point2.x, segment.point1.x)) {
+                   if (Util.fuzzyEQ(p2.x, p1.x)) {
                         slopeTX = Double.POSITIVE_INFINITY;
                     }
                     else {
-                        slopeTX = (segment.point2.t - segment.point1.t) / (segment.point2.x - segment.point1.x);
+                        slopeTX = (p2.t - p1.t) / (p2.x - p1.x);
                     }
                 }
 
 		if ((outcodeOut & 0x08) != 0) { 	// Point is above the clip window
 		    t = bounds.max.t;
-		    x = segment.point1.x + slopeXT * (t - segment.point1.t);
+		    x = p1.x + slopeXT * (t - p1.t);
 		}
 		else if ((outcodeOut & 0x04) != 0) { // Point is below the clip window
 		    t = bounds.min.t;
-		    x = segment.point1.x + slopeXT * (t - segment.point1.t);
+		    x = p1.x + slopeXT * (t - p1.t);
 		}
 		else if ((outcodeOut & 0x02) != 0) {  // Point is to the right of clip window
 		    x = bounds.max.x;
-		    t = segment.point1.t + slopeTX * (x - segment.point1.x);
+		    t = p1.t + slopeTX * (x - p1.x);
 		}
 		else if ((outcodeOut & 0x01) != 0) {   // Point is to the left of clip window
 		    x = bounds.min.x;
-		    t = segment.point1.t + slopeTX * (x - segment.point1.x);
+		    t = p1.t + slopeTX * (x - p1.x);
 		}
 
 		// Now we move outside point to intersection point to clip
 		// and get ready for next pass.
 
 		if (outcodeOut == outcode0) {
-                    segment.point1.setTo(x, t);
-		    outcode0 = bounds.computeOutCode(segment.point1);
+                    p1.setTo(x, t);
+		    outcode0 = bounds.computeOutCode(p1);
 		}
 		else {
-		    segment.point2.setTo(x, t);
-		    outcode1 = bounds.computeOutCode(segment.point2);
+                    p2.setTo(x, t);
+		    outcode1 = bounds.computeOutCode(p2);
 		}
 	    }
 	}
 
-	if (accept) return segment;
+	if (accept) return new LineSegment(p1, p2);
 	return null;
     }
 
@@ -178,13 +220,13 @@ public class LineSegment extends CurveSegment implements ExecutionImmutable
      */
     public double getAngle()
     {
-        return Util.getAngle(point1, point2);
+        return Util.getAngle(getPoint1(), getPoint2());
     }
 
     @Override
     public String toString()
     {
-        return "LineSegment{" + " from " + point1 + " to " + point2 + '}';
+        return "LineSegment{" + " from " + getPoint1() + " to " + getPoint2() + '}';
     }
 
 

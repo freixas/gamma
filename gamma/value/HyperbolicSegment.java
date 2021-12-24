@@ -33,6 +33,7 @@ public class HyperbolicSegment extends CurveSegment implements ExecutionImmutabl
     private final HyperbolaEndpoint min;
     private final HyperbolaEndpoint max;
     private final OffsetAcceleration curve;
+    private final Bounds bounds;
 
     /**
      * Create a hyperbolic segment. The acceleration cannot be 0.
@@ -56,6 +57,7 @@ public class HyperbolicSegment extends CurveSegment implements ExecutionImmutabl
         this.min = min;
         this.max = max;
         this.curve = curve;
+        this.bounds = getBounds(min.x, min.t, max.x, max.t, curve);
     }
 
     /**
@@ -82,6 +84,7 @@ public class HyperbolicSegment extends CurveSegment implements ExecutionImmutabl
         this.min = new HyperbolaEndpoint(minT, curve);
         this.max = new HyperbolaEndpoint(maxT, curve);
         this.curve = curve;
+        this.bounds = getBounds(min.x, min.t, max.x, max.t, curve);
     }
 
     /**
@@ -95,19 +98,31 @@ public class HyperbolicSegment extends CurveSegment implements ExecutionImmutabl
         this.min = other.min;
         this.max = other.max;
         this.curve = other.curve;
+        this.bounds = other.bounds;
     }
 
     @Override
     public Bounds getBounds()
     {
-        // Since this object is mutable, we need to ensure that the bounds
-        // actually reflect the current state of the object
-
-        return getBounds(min.x, min.t, max.x, max.t, curve);
+        return new Bounds(bounds);
     }
 
-    public static Bounds getBounds(double minX, double minT, double maxX,
-                                double maxT, OffsetAcceleration curve)
+    /**
+     * Get the bounding box for an offset acceleration curve with the given
+     * minimum and maximum values.
+     *
+     * @param minX The minimum X coordinate.
+     * @param minT The minimum T coordinate. This should be less than the
+     * maximum T coordinate.
+     * @param maxX The maximum X coordinate.
+     * @param maxT The maximum T coordinate. This should be greater than the
+     * maximum T coordinate.
+     * @param curve The offset acceleration curve.
+     *
+     * @return The bounding box for the offset acceleration curve.
+     */
+    private static Bounds getBounds(
+        double minX, double minT, double maxX, double maxT, OffsetAcceleration curve)
     {
         Coordinate offset = curve.getOffset();
         Bounds bounds;

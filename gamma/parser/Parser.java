@@ -112,7 +112,7 @@ public class Parser
 
     class OpToken<T> extends Token<T>
     {
-        private final Token token;
+        private final Token<T> token;
         private final Op op;
 
         OpToken(Token<T> token, Op op)
@@ -132,7 +132,7 @@ public class Parser
 
     private final File file;
     private final String script;
-    private ArrayList<Token> tokens;
+    private ArrayList<Token<?>> tokens;
     private LinkedList<Object> hCodes;
 
     private boolean animationStatementIsPresent = false;
@@ -140,7 +140,7 @@ public class Parser
 
     private SetStatement setStatement;
 
-    private final Token dummyToken = new Token<>(Token.Type.DELIMITER, '~', null, 0, 0);
+    private final Token<?> dummyToken = new Token<>(Token.Type.DELIMITER, '~', null, 0, 0);
 
     private int tokenPtr;
     private Token<?> curToken;
@@ -176,7 +176,7 @@ public class Parser
      *
      * @return The tokens produced by parsing.
      */
-    public ArrayList<Token> getTokens()
+    public ArrayList<Token<?>> getTokens()
     {
         return this.tokens;
     }
@@ -314,7 +314,7 @@ public class Parser
             }
             String includeScript = Files.readString(includeFile.toPath());
             Tokenizer tokenizer = new Tokenizer(includeFile, includeScript);
-            ArrayList<Token> includeTokens = tokenizer.tokenize();
+            ArrayList<Token<?>> includeTokens = tokenizer.tokenize();
 
             // tokenPtr points to the current token, the include file name.
             // tokenPtr - 1 points to "include"
@@ -353,8 +353,6 @@ public class Parser
 
     private void parseSetStatement() throws ParseException
     {
-        LinkedList<Object> codes = new LinkedList<>();
-
         // We start knowing that the current token is "set"
 
         nextToken();
@@ -367,64 +365,47 @@ public class Parser
         double displayPrecision = SetStatement.DEFAULT_DISPLAY_PRECISION;
         double printPrecision = SetStatement.DEFAULT_PRINT_PRECISION;
 
+        OUTER:
         while (true) {
-
-            // We expect a name; if we don't get one, we're done
-
             if (!isName()) break;
-
             // Look for units
-
-            if (getString().equals("units")) {
-                if (foundUnits) {
-                    throwParseException("Units are set twice");
+            switch (getString()) {
+                case "units" -> {
+                    if (foundUnits) {
+                        throwParseException("Units are set twice");
+                    }
+                    nextToken();
+                    if (!isNumber()) {
+                        throwParseException("Units must be set to a floating point number >= 0");
+                    }   units = getNumber();
+                    nextToken();
+                    foundUnits = true;
                 }
-
-                nextToken();
-                if (!isNumber()) {
-                    throwParseException("Units must be set to a floating point number >= 0");
+                case "displayPrecision" -> {
+                    if (foundDisplayPrecision) {
+                        throwParseException("Display precision is set twice");
+                    }
+                    nextToken();
+                    if (!isNumber()) {
+                        throwParseException("Display precision must be set to a floating point number >= 0");
+                    }   displayPrecision = getNumber();
+                    nextToken();
+                    foundDisplayPrecision = true;
                 }
-                units = getNumber();
-                nextToken();
-                foundUnits = true;
-            }
-
-            // Look for displayPrecision
-
-            else if (getString().equals("displayPrecision")) {
-                if (foundDisplayPrecision) {
-                    throwParseException("Display precision is set twice");
+                case "printPrecision" -> {
+                    if (foundPrintPrecision) {
+                        throwParseException("Print precision is set twice");
+                    }
+                    nextToken();
+                    if (!isNumber()) {
+                        throwParseException("Print precision must be set to a floating point number >= 0");
+                    }   printPrecision = getNumber();
+                    nextToken();
+                    foundPrintPrecision = true;
                 }
-
-               nextToken();
-                if (!isNumber()) {
-                    throwParseException("Display precision must be set to a floating point number >= 0");
+                default -> {
+                    break OUTER;
                 }
-                displayPrecision = getNumber();
-                nextToken();
-                foundDisplayPrecision = true;
-            }
-
-            // Look for printPrecision
-
-            else if (getString().equals("printPrecision")) {
-                if (foundPrintPrecision) {
-                    throwParseException("Print precision is set twice");
-                }
-
-               nextToken();
-                if (!isNumber()) {
-                    throwParseException("Print precision must be set to a floating point number >= 0");
-                }
-                printPrecision = getNumber();
-                nextToken();
-                foundPrintPrecision = true;
-            }
-
-            // We're also done if we get any other name
-
-            else {
-                break;
             }
         }
 
@@ -443,12 +424,12 @@ public class Parser
 
         if (isDelimiter()&& getChar() == ';') {
             codes.add("");
-            codes.add(new PrintHCode());
+            codes.add(new GenericHCode(HCode.Type.PRINT));
         }
         else {
             codes.add(new SetPrecisionHCode(SetStatement.PrecisionType.PRINT));
             codes.addAll(parseExpr());
-            codes.add(new PrintHCode());
+            codes.add(new GenericHCode(HCode.Type.PRINT));
             codes.add(new SetPrecisionHCode(SetStatement.PrecisionType.DISPLAY));
         }
         return codes;
@@ -457,8 +438,8 @@ public class Parser
     private LinkedList<Object> parseAssignmentStatement() throws ParseException
     {
         LinkedList<Object> codes = new LinkedList<>();
-        Token toToken = null;
-        Token stepToken = null;
+        Token<?> toToken = null;
+        Token<?> stepToken = null;
 
         // We start knowing that the current token is "let"
 
@@ -520,7 +501,7 @@ public class Parser
         }
 
         codes.addAll(parsePropertyList());
-        codes.add(new SetStyleHCode());
+        codes.add(new GenericHCode(HCode.Type.SET_STYLE));
 
         return codes;
     }
@@ -545,7 +526,7 @@ public class Parser
             !name.equals("label")) {
             throwParseException("Unknown command name '" + name + "'");
         }
-        Token nameToken = curToken;
+        Token<?> nameToken = curToken;
 
         if (name.equals("animation")) this.animationStatementIsPresent = true;
 
@@ -561,7 +542,7 @@ public class Parser
         }
 
         codes.add(nameToken.getValue());
-        codes.add(new CommandHCode());
+        codes.add(new GenericHCode(HCode.Type.COMMAND));
 
         return codes;
     }
@@ -581,10 +562,10 @@ public class Parser
 
             codes.add(curToken.getValue());
             if (topNameSeen) {
-                codes.add(new FetchPropAddressHCode());
+                codes.add(new GenericHCode(HCode.Type.FETCH_PROP_ADDRESS));
             }
             else {
-                codes.add(new FetchAddressHCode());
+                codes.add(new GenericHCode(HCode.Type.FETCH_ADDRESS));
                 topNameSeen = true;
             }
 
@@ -623,6 +604,9 @@ public class Parser
                 }
                 case "path" -> {
                     return parsePathObj();
+                }
+                case "bounds" -> {
+                    return parseBoundsObj();
                 }
                 case "interval" -> {
                     return parseIntervalObj();
@@ -726,7 +710,7 @@ public class Parser
             codes.add(0.0);
         }
 
-       codes.add(new WInitializerHCode());
+       codes.add(new GenericHCode(HCode.Type.W_INITIALIZER));
 
        return codes;
     }
@@ -820,7 +804,7 @@ public class Parser
             codes.add(Double.NaN);
         }
 
-        codes.add(new WSegmentHCode());
+        codes.add(new GenericHCode(HCode.Type.W_SEGMENT));
 
         return codes;
     }
@@ -877,44 +861,42 @@ public class Parser
                 throwParseException("Expected ']'");
             }
 
-            codes.add(new ObserverFrameHCode());
+            codes.add(new GenericHCode(HCode.Type.OBSERVER_FRAME));
         }
 
         else {
             LinkedList<Object> originCodes = new LinkedList<>();
             LinkedList<Object> vCodes = new LinkedList<>();
 
+            OUTER:
             while (true) {
-
-                // We expect a name; if we don't get one, we're done
-
                 if (!isName()) break;
 
-                // Look for origin
+                // Look for origin and velocity, in either order
 
-                if (getString().equals("origin")) {
-                    if (originCodes.size() > 0) {
-                        throwParseException("The frame's origin is set twice");
+                switch (getString()) {
+                    case "origin" -> {
+                        if (originCodes.size() > 0) {
+                            throwParseException("The frame's origin is set twice");
+                        }
+                        nextToken();
+                        originCodes.addAll(parseExpr());
                     }
-                    nextToken();
-                    originCodes.addAll(parseExpr());
-                }
-
-                // Look for velocity
-
-                else if (getString().equals("velocity")) {
-                    if (vCodes.size() > 0) {
-                        throwParseException("The frame's velocity is set twice");
+                    case "velocity" -> {
+                        if (vCodes.size() > 0) {
+                            throwParseException("The frame's velocity is set twice");
+                        }
+                        nextToken();
+                        vCodes.addAll(parseExpr());
                     }
-                    nextToken();
-                    vCodes.addAll(parseExpr());
+                    default -> {
+                        break OUTER;
+                    }
                 }
+            }
 
-                // We're also done if we get any other name
-
-                else {
-                    break;
-                }
+            if (originCodes.size() < 1 && vCodes.size() < 1) {
+                throwParseException("Expected 'observer', 'velocity', or 'origin'");
             }
 
             if (originCodes.size() < 1) {
@@ -926,7 +908,7 @@ public class Parser
 
             codes.addAll(originCodes);
             codes.addAll(vCodes);
-            codes.add(new FrameHCode());
+            codes.add(new GenericHCode(HCode.Type.FRAME));
         }
 
         return codes;
@@ -994,7 +976,7 @@ public class Parser
             codes.add(0.0);
         }
 
-        codes.add(new AxisLineHCode());
+        codes.add(new GenericHCode(HCode.Type.AXIS_LINE));
 
         return codes;
     }
@@ -1017,7 +999,7 @@ public class Parser
             throwParseException("Expected 'through'");
         }
 
-        codes.add(new AngleLineHCode());
+        codes.add(new GenericHCode(HCode.Type.ANGLE_LINE));
 
         return codes;
     }
@@ -1040,7 +1022,7 @@ public class Parser
             throwParseException("Expected 'to'");
         }
 
-        codes.add(new EndpointLineHCode());
+        codes.add(new GenericHCode(HCode.Type.ENDPOINT_LINE));
 
         return codes;
     }
@@ -1060,7 +1042,22 @@ public class Parser
         } while (isDelimiter() && getChar() == ',');
 
         codes.add(count);
-        codes.add(new PathHCode());
+        codes.add(new GenericHCode(HCode.Type.PATH));
+
+        return codes;
+    }
+
+    private LinkedList<Object> parseBoundsObj() throws ParseException
+    {
+        LinkedList<Object> codes = new LinkedList<>();
+
+        // We start knowing that the current token points
+        // to "bounds"
+
+        nextToken();
+        codes.addAll(parseExpr());
+        codes.addAll(parseExpr());
+        codes.add(new GenericHCode(HCode.Type.BOUNDS));
 
         return codes;
     }
@@ -1077,47 +1074,40 @@ public class Parser
         LinkedList<Object> xCodes = new LinkedList<>();
         LinkedList<Object> tCodes = new LinkedList<>();
 
+        OUTER:
         while (true) {
-
-            // We expect a name; if we don't get one, we're done
-
             if (!isName()) break;
-
             // Look for origin
+            switch (getString()) {
+                case "x" -> {
+                    nextToken();
 
-            if (getString().equals("x")) {
-                nextToken();
-                if (xCodes.size() > 0) {
-                    throwParseException("The interval already contains an x range");
+                    if (xCodes.size() > 0) {
+                        throwParseException("The interval already contains an x range");
+                    }
+                    xCodes.addAll(parseExpr());
+
+                    if (!(isName() && getString().equals("to"))) {
+                        throwParseException("Expected 'to' for the interval's x range");
+                    }   nextToken();
+                    xCodes.addAll(parseExpr());
                 }
-                xCodes.addAll(parseExpr());
+                case "t" -> {
+                    nextToken();
 
-                if (!(isName() && getString().equals("to"))) {
-                    throwParseException("Expected 'to' for the interval's x range");
+                    if (tCodes.size() > 0) {
+                        throwParseException("The interval already contains a t range");
+                    }
+                    tCodes.addAll(parseExpr());
+
+                    if (!(isName() && getString().equals("to"))) {
+                        throwParseException("Expected 'to' for the interval's t range");
+                    }   nextToken();
+                    tCodes.addAll(parseExpr());
                 }
-                nextToken();
-                xCodes.addAll(parseExpr());
-            }
-
-            // Look for velocity
-
-            else if (getString().equals("t")) {
-                nextToken();
-                if (tCodes.size() > 0) {
-                    throwParseException("The interval already contains a t range");
+                default -> {
+                    break OUTER;
                 }
-                tCodes.addAll(parseExpr());
-                if (!(isName() && getString().equals("to"))) {
-                    throwParseException("Expected 'to' for the interval's t range");
-                }
-                nextToken();
-                tCodes.addAll(parseExpr());
-            }
-
-            // We're also done if we get any other name
-
-            else {
-                break;
             }
         }
 
@@ -1147,7 +1137,7 @@ public class Parser
         nextToken();
         codes.addAll(parsePropertyList());
 
-        codes.add(new StyleHCode());
+        codes.add(new GenericHCode(HCode.Type.STYLE));
 
         return codes;
     }
@@ -1169,7 +1159,7 @@ public class Parser
             // Empty property list
 
             codes.add(0);
-            codes.add(new PropertyListHCode());
+            codes.add(new GenericHCode(HCode.Type.PROPERTY_LIST));
             return codes;
         }
 
@@ -1188,7 +1178,7 @@ public class Parser
                 nextToken();         // Current token is now ':'
                 nextToken();         // Current toke is now start of expr
                 codes.addAll(parseExpr());
-                codes.add(new PropertyHCode());
+                codes.add(new GenericHCode(HCode.Type.PROPERTY));
             }
             else {
                 codes.addAll(parseExpr());
@@ -1204,7 +1194,7 @@ public class Parser
         }
 
         codes.add(count);
-        codes.add(new PropertyListHCode());
+        codes.add(new GenericHCode(HCode.Type.PROPERTY_LIST));
 
         return codes;
     }
@@ -1216,10 +1206,10 @@ public class Parser
         // We start knowing only that an expr is expected
         // starting with the current token
 
-        Stack<OpToken> ops = new Stack<>();
+        Stack<OpToken<?>> ops = new Stack<>();
         int level = -1;
         ArrayList<Integer> argCount = new ArrayList<>();
-        Token lastToken = null;
+        Token<?> lastToken = null;
 
         // Let's check that this is the start of an expression
 
@@ -1241,7 +1231,7 @@ public class Parser
             else if (isName()) {
                 codes.add(curToken.getValue());
                 if (lastToken == null || !lastToken.isOperator() || lastToken.getChar() != '.') {
-                    codes.add(new FetchHCode());
+                    codes.add(new GenericHCode(HCode.Type.FETCH));
                 }
             }
 
@@ -1268,7 +1258,7 @@ public class Parser
                 if (level < 0) throw new ProgrammingException("Parser.parseExp(): Comma without preceding '('");
 
                 while (!ops.isEmpty()) {
-                    OpToken t = ops.pop();
+                    OpToken<?> t = ops.pop();
                     if (t.op.chr != '(') {
                         codes.add(opTokenToHCode(t));
                     }
@@ -1320,7 +1310,7 @@ public class Parser
                 // reach a "(". Then pop the "(" and discard it.
 
                 while (!ops.isEmpty()) {
-                    OpToken t = ops.pop();
+                    OpToken<?> t = ops.pop();
                    if (t.op.chr != '(') {
                         codes.add(opTokenToHCode(t));
                     }
@@ -1334,7 +1324,7 @@ public class Parser
                 // all the arguments plus the function name
 
                 if (ops.size() > 0 && ops.peek().op.chr == '!') {
-                    OpToken t = ops.pop();
+                    OpToken<?> t = ops.pop();
                     codes.add(t.token.getValue());
                     codes.add(argCount.get(level) + 1);
                     codes.add(new FunctionHCode());
@@ -1344,7 +1334,7 @@ public class Parser
                 // two arguments
 
                 else if (argCount.get(level) == 2) {
-                    codes.add(new CoordinateHCode());
+                    codes.add(new GenericHCode(HCode.Type.COORDINATE));
                 }
 
                 // If we have any other argCount value at this point (other than
@@ -1383,7 +1373,7 @@ public class Parser
                     Op topOp = ops.peek().op;
                     if ((op.isLeftAssoc && op.precedence <= topOp.precedence) ||
                         (!op.isLeftAssoc && op.precedence < topOp.precedence)) {
-                        OpToken topToken = ops.pop();
+                        OpToken<?> topToken = ops.pop();
                         if (topToken.op.chr != '(') {
                             codes.add(opTokenToHCode(topToken));
                         }
@@ -1494,15 +1484,15 @@ public class Parser
 
     }
 
-    private HCode opTokenToHCode(OpToken t)
+    private HCode opTokenToHCode(OpToken<?> t)
     {
         switch (t.op.chr) {
-            case '^' -> { return new ExpHCode(); }
-            case '*' -> { return new MultHCode(); }
-            case '/' -> { return new DivHCode(); }
-            case '<' -> { return new InvLorentzHCode(); }
-            case '>' -> { return new LorentzHCode(); }
-            case '.' -> { return new FetchPropHCode(); }
+            case '^' -> { return new GenericHCode(HCode.Type.EXP); }
+            case '*' -> { return new GenericHCode(HCode.Type.MULT); }
+            case '/' -> { return new GenericHCode(HCode.Type.DIV); }
+            case '<' -> { return new GenericHCode(HCode.Type.INV_LORENTZ); }
+            case '>' -> { return new GenericHCode(HCode.Type.LORENTZ); }
+            case '.' -> { return new GenericHCode(HCode.Type.FETCH_PROP); }
             default -> {
             }
         }
@@ -1510,11 +1500,11 @@ public class Parser
         if (t.op.chr == '+' && t.op.isBinary) {
             return new AddHCode();
         } else if (t.op.chr == '-' && t.op.isBinary) {
-            return new GenericHCode("sub");
+            return new GenericHCode(HCode.Type.SUB);
         } else if  (t.op.chr == '+') {
-            return new UnaryPlusHCode();
+            return new GenericHCode(HCode.Type.UNARY_PLUS);
         } else if  (t.op.chr == '-') {
-            return new UnaryMinusHCode();
+            return new GenericHCode(HCode.Type.UNARY_MINUS);
         }
 
         // Should never be reached

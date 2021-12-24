@@ -16,9 +16,8 @@
  */
 package gamma.execution.hcode;
 
-import gamma.execution.ExecutionException;
+import gamma.ProgrammingException;
 import gamma.execution.HCodeEngine;
-import java.util.HashMap;
 
 /**
  * A GenericHCode can stand in for many individual HCode classes.
@@ -34,28 +33,21 @@ import java.util.HashMap;
  */
 public class GenericHCode extends HCode
 {
-    static final HashMap<String, LambdaFunction> map = new HashMap<>();
-
-    static final FunctionalTwoArg<Double, Double, Double> sub = (engine, arg1, arg2) -> arg1 - arg2;
-
-    static {
-        map.put("sub", sub);
-    }
-
     private final LambdaFunction func;
     private HCodeExecutor hCodeExecutor;
+    private final HCode.Type type;
 
     /**
-     * Create a generic HCode. The name identifies the desired HCode
-     * functionality.
+     * Create a generic HCode.
      *
-     * @param name The name associated with the HCode's lambda function.
+     * @param type The type used to locate the HCode's lambda function.
      */
-    public GenericHCode(String name)
+    public GenericHCode(HCode.Type type)
     {
-        func = map.get(name);
+        this.type = type;
+        func = HCode.map.get(type);
         if (func == null) {
-            throw new ExecutionException("GenericHCode(): Failed to find '" + name + "'");
+            throw new ProgrammingException("GenericHCode(): Failed to find '" + type + "' hCode");
         }
     }
 
@@ -66,6 +58,7 @@ public class GenericHCode extends HCode
      */
     public void execute(HCodeEngine engine)
     {
+        // System.out.println("Executing " + type);
         this.hCodeExecutor = engine.getHCodeExecutor();
         engine.getHCodeExecutor().execute(this, engine, func);
     }

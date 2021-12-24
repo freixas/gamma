@@ -196,6 +196,11 @@ public final class Util
         return Math.abs(d1 - d2) < EPSILON;
     }
 
+    static public boolean fuzzyNE(double d1, double d2)
+    {
+        return Math.abs(d1 - d2) >= EPSILON;
+    }
+
     static public boolean fuzzyLT(double d1, double d2)
     {
         if (fuzzyEQ(d1, d2)) return false;
@@ -237,7 +242,7 @@ public final class Util
 
     static public boolean toBoolean(double d)
     {
-        return d != 0.0;
+        return !fuzzyZero(d);
     }
 
     /**

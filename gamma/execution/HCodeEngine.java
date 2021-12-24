@@ -19,7 +19,7 @@ package gamma.execution;
 import gamma.GammaRuntimeException;
 import gamma.MainWindow;
 import gamma.ProgrammingException;
-import gamma.execution.function.FunctionExecutor;
+import gamma.execution.hcode.FunctionExecutor;
 import gamma.execution.hcode.HCodeExecutor;
 import gamma.execution.hcode.HCode;
 import gamma.execution.hcode.ArgInfoHCode;

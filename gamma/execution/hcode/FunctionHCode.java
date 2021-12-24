@@ -19,8 +19,6 @@ package gamma.execution.hcode;
 import gamma.execution.ArgInfo;
 import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
-import gamma.execution.function.ArgInfoFunction;
-import gamma.execution.function.Function;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;

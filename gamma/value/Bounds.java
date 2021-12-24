@@ -16,6 +16,8 @@
  */
 package gamma.value;
 
+import gamma.ProgrammingException;
+import gamma.execution.HCodeEngine;
 import gamma.math.Util;
 import javafx.geometry.Point2D;
 import javafx.scene.transform.Affine;
@@ -25,7 +27,7 @@ import javafx.scene.transform.Affine;
  *
  * @author Antonio Freixas
  */
-public class Bounds implements ExecutionMutable
+public class Bounds implements ExecutionMutable, Displayable
 {
     public static Bounds INFINITE_BOUNDS = new Bounds(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 
@@ -58,11 +60,16 @@ public class Bounds implements ExecutionMutable
      */
     public Bounds(Bounds other)
     {
-        // There's no need to sort as the other bounds will already
-        // be sorted
+        if (other != null) {
+            // There's no need to sort as the other bounds will already
+            // be sorted
 
-        this.min = new Coordinate(other.min);
-        this.max = new Coordinate(other.max);
+            this.min = new Coordinate(other.min);
+            this.max = new Coordinate(other.max);
+        }
+        else {
+            throw new ProgrammingException("Bounds: Trying to copy a null object");
+        }
     }
 
     /**
@@ -229,8 +236,8 @@ public class Bounds implements ExecutionMutable
      */
     public boolean completelyInsideClip(LineSegment segment)
     {
-	int outcode0 = computeOutCode(segment.point1);
-	int outcode1 = computeOutCode(segment.point2);
+	int outcode0 = computeOutCode(segment.getPoint1());
+	int outcode1 = computeOutCode(segment.getPoint2());
 	return (outcode0 | outcode1) == 0;
     }
 
@@ -243,8 +250,8 @@ public class Bounds implements ExecutionMutable
 
     public boolean completelyOutsideClip(LineSegment segment)
     {
-	int outcode0 = computeOutCode(segment.point1);
-	int outcode1 = computeOutCode(segment.point2);
+	int outcode0 = computeOutCode(segment.getPoint1());
+	int outcode1 = computeOutCode(segment.getPoint2());
 	return (outcode0 & outcode1) != 0;
     }
 
@@ -276,13 +283,26 @@ public class Bounds implements ExecutionMutable
      */
     public Bounds intersect(Bounds other)
     {
+        // If the min and max values are the same and infinite, we have a bounding
+        // box that will never bound anything, so we'll return null instead
+
+        if (min.x == max.x && Double.isInfinite(min.x)) return null;
+        if (min.t == max.t && Double.isInfinite(min.t)) return null;
+
+        if (other.min.x == other.max.x && Double.isInfinite(other.min.x)) return null;
+        if (other.min.t == other.max.t && Double.isInfinite(other.min.t)) return null;
+
+        // Check for intersection
+
         if (!intersects(other)) return null;
+
+        // Create the intersecting bounds
+
         return new Bounds(
             Math.max(min.x, other.min.x),
             Math.max(min.t, other.min.t),
             Math.min(max.x, other.max.x),
             Math.min(max.t, other.max.t));
-
     }
     /**
      * Intersect a line segment with this bounds. This method returns
@@ -299,8 +319,8 @@ public class Bounds implements ExecutionMutable
 
 	segment = new LineSegment(segment);
 
-	int outcode0 = computeOutCode(segment.point1);
-	int outcode1 = computeOutCode(segment.point2);
+	int outcode0 = computeOutCode(segment.getPoint1());
+	int outcode1 = computeOutCode(segment.getPoint2());
 	boolean accept = false;
 
         double slopeXT = Double.NaN;
@@ -349,47 +369,47 @@ public class Bounds implements ExecutionMutable
                 // Calculate the slopes if not yet set
 
                 if (Double.isNaN(slopeXT)) {
-                    if (Util.fuzzyEQ(segment.point2.t, segment.point1.t)) {
+                    if (Util.fuzzyEQ(segment.getPoint2().t, segment.getPoint1().t)) {
                         slopeXT = Double.POSITIVE_INFINITY;
                     }
                     else {
-                        slopeXT = (segment.point2.x - segment.point1.x) / (segment.point2.t - segment.point1.t);
+                        slopeXT = (segment.getPoint2().x - segment.getPoint1().x) / (segment.getPoint2().t - segment.getPoint1().t);
                     }
-                   if (Util.fuzzyEQ(segment.point2.x, segment.point1.x)) {
+                   if (Util.fuzzyEQ(segment.getPoint2().x, segment.getPoint1().x)) {
                         slopeTX = Double.POSITIVE_INFINITY;
                     }
                     else {
-                        slopeTX = (segment.point2.t - segment.point1.t) / (segment.point2.x - segment.point1.x);
+                        slopeTX = (segment.getPoint2().t - segment.getPoint1().t) / (segment.getPoint2().x - segment.getPoint1().x);
                     }
                 }
 
 		if ((outcodeOut & 0x08) != 0) { 	// Point is above the clip window
 		    t = max.t;
-		    x = segment.point1.x + slopeXT * (t - segment.point1.t);
+		    x = segment.getPoint1().x + slopeXT * (t - segment.getPoint1().t);
 		}
 		else if ((outcodeOut & 0x04) != 0) { // Point is below the clip window
 		    t = min.t;
-		    x = segment.point1.x + slopeXT * (t - segment.point1.t);
+		    x = segment.getPoint1().x + slopeXT * (t - segment.getPoint1().t);
 		}
 		else if ((outcodeOut & 0x02) != 0) {  // Point is to the right of clip window
 		    x = max.x;
-		    t = segment.point1.t + slopeTX * (x - segment.point1.x);
+		    t = segment.getPoint1().t + slopeTX * (x - segment.getPoint1().x);
 		}
 		else if ((outcodeOut & 0x01) != 0) {   // Point is to the left of clip window
 		    x = min.x;
-		    t = segment.point1.t + slopeTX * (x - segment.point1.x);
+		    t = segment.getPoint1().t + slopeTX * (x - segment.getPoint1().x);
 		}
 
 		// Now we move outside point to intersection point to clip
 		// and get ready for next pass.
 
 		if (outcodeOut == outcode0) {
-                    segment.point1.setTo(x, t);
-		    outcode0 = computeOutCode(segment.point1);
+                    segment.getPoint1().setTo(x, t);
+		    outcode0 = computeOutCode(segment.getPoint1());
 		}
 		else {
-		    segment.point2.setTo(x, t);
-		    outcode1 = computeOutCode(segment.point2);
+		    segment.getPoint2().setTo(x, t);
+		    outcode1 = computeOutCode(segment.getPoint2());
 		}
 	    }
 	}
@@ -419,6 +439,12 @@ public class Bounds implements ExecutionMutable
             Math.min(Math.min(p1.getY(), p2.getY()), Math.min(p3.getY(), p4.getY())),
             Math.max(Math.max(p1.getX(), p2.getX()), Math.max(p3.getX(), p4.getX())),
             Math.max(Math.max(p1.getY(), p2.getY()), Math.max(p3.getY(), p4.getY())));
+    }
+
+    @Override
+    public String toDisplayableString(HCodeEngine engine)
+    {
+        return "[ Bounds from " + min.toDisplayableString(engine) + " to " + max.toDisplayableString(engine) + " ]";
     }
 
     @Override

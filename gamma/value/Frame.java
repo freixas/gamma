@@ -16,6 +16,7 @@
  */
 package gamma.value;
 
+import gamma.ProgrammingException;
 import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
 import gamma.math.Relativity;
@@ -127,8 +128,13 @@ public class Frame  extends ObjectContainer implements ExecutionMutable, Display
     public Frame(Frame other)
     {
         super(propertyNames);
-        this.v = other.v;
-        this.origin = new Coordinate(other.origin);
+        if (other != null) {
+            this.v = other.v;
+            this.origin = new Coordinate(other.origin);
+            }
+        else {
+            throw new ProgrammingException("Frame: Trying to copy a null object");
+        }
     }
 
     public Frame(Coordinate origin, double v)
@@ -142,6 +148,22 @@ public class Frame  extends ObjectContainer implements ExecutionMutable, Display
     public Object createCopy()
     {
         return new Frame(this);
+    }
+
+    /**
+     * This method promotes an Observer to a Frame, if the object is not
+     * already a Frame.
+     *
+     * @param obj The object presumed to be either a Frame or Observer.
+     *
+     * @return A Frame, either the original object or the promoted Observer.
+     * If the object is neither a Frame or Observer, this method returns null.
+     */
+    static public Frame promote(Object obj)
+    {
+        if (obj instanceof Frame frame) return frame;
+        if (obj instanceof Observer observer) return new Frame(observer);
+        return null;
     }
 
     @Override
