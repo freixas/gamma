@@ -30,7 +30,7 @@ import gamma.execution.HCodeEngine;
  */
 public class BoundedLine extends Line
 {
-    private ConcreteLine line;
+    private final ConcreteLine line;
     private final CurveSegment segment;
     private final Bounds originalBounds;
     private final Bounds bounds;
@@ -63,6 +63,9 @@ public class BoundedLine extends Line
         }
         else if (line instanceof ConcreteLine concreteLine) {
             this.line = concreteLine;
+        }
+        else {
+            throw new ProgrammingException("BoundedLine: line is not a bounded or concrete line");
         }
 
         // Save the original bounding box. We don't use it for anything
@@ -210,6 +213,12 @@ public class BoundedLine extends Line
         }
         return null;
     }
+
+    // **********************************************************************
+    // *
+    // * Display support
+    // *
+    // **********************************************************************
 
    @Override
     public String toDisplayableString(HCodeEngine engine)

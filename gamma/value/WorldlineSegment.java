@@ -126,11 +126,11 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
         NONE, T, TAU, D, V
     }
 
-    private HyperbolaEndpoint min;
-    private HyperbolaEndpoint max;
+    private WorldlineEndpoint min;
+    private WorldlineEndpoint max;
 
-    private final HyperbolaEndpoint originalMin;
-    private final HyperbolaEndpoint originalMax;
+    private final WorldlineEndpoint originalMin;
+    private final WorldlineEndpoint originalMax;
 
     private final double a;
     private final OffsetAcceleration curve;
@@ -157,7 +157,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
         }
 
         this.a = a;
-        this.min = new HyperbolaEndpoint(v, vPoint.x, vPoint.t, tau, d);
+        this.min = new WorldlineEndpoint(v, vPoint.x, vPoint.t, tau, d);
 
         // Create the offset curve
 
@@ -207,7 +207,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
         // Generate the max limit. The x value won't be correct if the segment
         // includes the curve's turn-around point
 
-        this.max = new HyperbolaEndpoint(maxT, curve);
+        this.max = new WorldlineEndpoint(maxT, curve);
 
         // At this point:
         //
@@ -235,8 +235,8 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
         // We sometimes need to get the original endpoints and not ones
         // that have perhaps been modified to be at +/- infinity.
 
-        this.originalMin = new HyperbolaEndpoint(min);
-        this.originalMax = new HyperbolaEndpoint(max);
+        this.originalMin = new WorldlineEndpoint(min);
+        this.originalMax = new WorldlineEndpoint(max);
     }
 
     /**
@@ -255,14 +255,14 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
                             Coordinate end, double tau, double d)
     {
         this.a = a;
-        this.min = new HyperbolaEndpoint(v, start.x, start.t, tau, d);
+        this.min = new WorldlineEndpoint(v, start.x, start.t, tau, d);
         this.curve = new OffsetAcceleration(a, v, start, tau, d);
-        this.max = new HyperbolaEndpoint(end.t, curve);
+        this.max = new WorldlineEndpoint(end.t, curve);
 
         assert Util.fuzzyEQ(max.x, end.x);
 
-        this.originalMin = new HyperbolaEndpoint(min);
-        this.originalMax = new HyperbolaEndpoint(max);
+        this.originalMin = new WorldlineEndpoint(min);
+        this.originalMax = new WorldlineEndpoint(max);
 
         if (Util.fuzzyZero(a)) {
 
@@ -312,12 +312,12 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
         return curveSegment;
     }
 
-    public HyperbolaEndpoint getOriginalMin()
+    public WorldlineEndpoint getOriginalMin()
     {
         return originalMin;
     }
 
-    public HyperbolaEndpoint getOriginalMax()
+    public WorldlineEndpoint getOriginalMax()
     {
         return originalMax;
     }
@@ -341,7 +341,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
         double d = Util.fuzzyZero(a) && Util.fuzzyZero(min.v) ? min.d : Double.NEGATIVE_INFINITY;
         double tau = Double.NEGATIVE_INFINITY;
 
-        min = new HyperbolaEndpoint(v, x, t, tau, d);
+        min = new WorldlineEndpoint(v, x, t, tau, d);
         if (curveSegment instanceof HyperbolicSegment) {
             curveSegment = new HyperbolicSegment(a, min, max, curve);
         }
@@ -366,7 +366,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
         double d = Util.fuzzyZero(a) && Util.fuzzyZero(max.v) ? max.d : Double.POSITIVE_INFINITY;
         double tau = Double.POSITIVE_INFINITY;
 
-        max = new HyperbolaEndpoint(v, x, t, tau, d);
+        max = new WorldlineEndpoint(v, x, t, tau, d);
         if (curveSegment instanceof HyperbolicSegment) {
             curveSegment = new HyperbolicSegment(a, min, max, curve);
         }
@@ -380,7 +380,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
      * @return A structure holding the x, v, t, tau, and d values associated
      * with the earlier endpoint.
      */
-    public final HyperbolaEndpoint getMin()
+    public final WorldlineEndpoint getMin()
     {
         return min;
     }
@@ -393,7 +393,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
      * @return A structure holding the x, v, t, tau, and d values associated
      * with the later endpoint.
      */
-    public final HyperbolaEndpoint getMax()
+    public final WorldlineEndpoint getMax()
     {
         return max;
     }

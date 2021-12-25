@@ -17,6 +17,9 @@
 package gamma.value;
 
 import gamma.execution.ExecutionException;
+import gamma.execution.HCodeEngine;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * An observer has an initial origin, tau and distance. The observer then
@@ -25,14 +28,64 @@ import gamma.execution.ExecutionException;
  *
  * @author Antonio Freixas
  */
-abstract public class Observer implements ExecutionImmutable, Displayable
+public class ConcreteObserver extends Observer
 {
+    private final Worldline worldline;
+
     /**
-     * Get the Worldline for this Observer.
+     * Create an observer.
      *
-     * @return The Worldline for this Observer.
+     * @param initializer The data used to start the worldline.
+     * @param segments  A list of segments with the information needed to
+     * create the worldline segments. The segment list may be empty, All
+     * segments must have a limit other than NONE except the last segment (where
+     * we ignored the limit type anyway).
      */
-    abstract public Worldline getWorldline();
+    public ConcreteObserver(WInitializer initializer, ArrayList<WSegment> segments)
+    {
+        worldline = new Worldline(initializer);
+
+        if (segments.size() < 1) {
+
+            // Create a default segment
+
+            segments.add(new WSegment(0.0, 0.0, WorldlineSegment.LimitType.NONE, Double.NaN));
+        }
+
+        Iterator<WSegment> iter = segments.iterator();
+        while (iter.hasNext()) {
+            WSegment wSegment = iter.next();
+
+            double a = wSegment.getA();
+
+            // Not the last segment
+
+            if (iter.hasNext()) {
+                worldline.addSegment(
+                        wSegment.getType(),
+                        wSegment.getDelta(),
+                        a,
+                        wSegment.getV());
+            }
+
+            // The last segment
+
+            else {
+                worldline.addFinalSegment(a, wSegment.getV());
+            }
+        }
+    }
+
+    private ConcreteObserver(Worldline worldline)
+    {
+        this.worldline = worldline;
+    }
+
+    @Override
+    public Worldline getWorldline()
+    {
+        return worldline;
+    }
 
     /**
      * Create a new version of this observer that is relative to the given
@@ -41,7 +94,12 @@ abstract public class Observer implements ExecutionImmutable, Displayable
      * @param prime The frame to be relative to.
      * @return The new observer.
      */
-    abstract public Observer relativeTo(Frame prime);
+    @Override
+    public Observer relativeTo(Frame prime)
+    {
+        Worldline newWorldline = worldline.relativeTo(prime);
+        return new ConcreteObserver(newWorldline);
+    }
 
     // **********************************************************
     // *
@@ -57,7 +115,11 @@ abstract public class Observer implements ExecutionImmutable, Displayable
      * @return The position in the rest frame or NaN.
      * @throws ExecutionException When there are no matching x's.
      */
-    abstract public double vToX(double v);
+    @Override
+    public double vToX(double v)
+    {
+        return worldline.vToX(v);
+    }
 
     /**
      * Given v, return d. If v matches no segment points, return NaN. If v
@@ -67,7 +129,11 @@ abstract public class Observer implements ExecutionImmutable, Displayable
      * @return The distance in the rest frame or NaN.
      * @throws ExecutionException When there are no matching d's.
      */
-    abstract public double vToD(double v);
+    @Override
+    public double vToD(double v)
+    {
+        return worldline.vToD(v);
+    }
 
     /**
      * Given v, return t. If v matches no segment points, return NaN. If v
@@ -77,7 +143,11 @@ abstract public class Observer implements ExecutionImmutable, Displayable
      * @return The time in the rest frame or NaN.
      * @throws ExecutionException When there are no matching t's.
      */
-    abstract public double vToT(double v);
+    @Override
+    public double vToT(double v)
+    {
+        return worldline.vToT(v);
+    }
 
     /**
      * Given v, return tau. If v matches no segment points, return NaN. If v
@@ -87,7 +157,11 @@ abstract public class Observer implements ExecutionImmutable, Displayable
      * @return The time in the accelerated frame or NaN.
      * @throws ExecutionException When there are no matching tau's.
      */
-    abstract public double vToTau(double v);
+    @Override
+    public double vToTau(double v)
+    {
+        return worldline.vToTau(v);
+    }
 
     // **********************************************************
     // *
@@ -102,7 +176,11 @@ abstract public class Observer implements ExecutionImmutable, Displayable
      * @return The velocity.
      * @throws ExecutionException When there are no matching v's.
      */
-    abstract public double dToV(double d);
+    @Override
+    public double dToV(double d)
+    {
+        return worldline.dToV(d);
+    }
 
     /**
      * Given d, return x.
@@ -111,7 +189,11 @@ abstract public class Observer implements ExecutionImmutable, Displayable
      * @return The position in the rest frame.
      * @throws ExecutionException When there are no matching x's.
      */
-    abstract public double dToX(double d);
+    @Override
+    public double dToX(double d)
+    {
+        return worldline.dToX(d);
+   }
 
     /**
      * Given d, return t.
@@ -120,7 +202,11 @@ abstract public class Observer implements ExecutionImmutable, Displayable
      * @return The time in the rest frame.
      * @throws ExecutionException When there are no or infinite matching t's.
      */
-    abstract public double dToT(double d);
+    @Override
+    public double dToT(double d)
+    {
+        return worldline.dToT(d);
+    }
 
     /**
      * Given d, return tau.
@@ -129,7 +215,11 @@ abstract public class Observer implements ExecutionImmutable, Displayable
      * @return The time in the accelerated frame.
      * @throws ExecutionException When there are no or infinite matching taus.
      */
-    abstract public double dToTau(double d);
+    @Override
+    public double dToTau(double d)
+    {
+        return worldline.dToTau(d);
+    }
 
     // **********************************************************
     // *
@@ -143,7 +233,11 @@ abstract public class Observer implements ExecutionImmutable, Displayable
      * @param t The time in the rest frame.
      * @return The velocity.
      */
-    abstract public double tToV(double t);
+    @Override
+    public double tToV(double t)
+    {
+        return worldline.tToV(t);
+     }
 
     /**
      * Given t, return x.
@@ -151,7 +245,11 @@ abstract public class Observer implements ExecutionImmutable, Displayable
      * @param t The time in the rest frame.
      * @return The position in the rest frame.
      */
-    abstract public double tToX(double t);
+    @Override
+    public double tToX(double t)
+    {
+        return worldline.tToX(t);
+    }
 
     /**
      * Given t, return d.
@@ -159,7 +257,11 @@ abstract public class Observer implements ExecutionImmutable, Displayable
      * @param t The time in the rest frame.
      * @return The distance in the rest frame.
      */
-    abstract public double tToD(double t);
+    @Override
+    public double tToD(double t)
+    {
+        return worldline.tToD(t);
+    }
 
     /**
      * Given t, calculate tau.
@@ -167,7 +269,11 @@ abstract public class Observer implements ExecutionImmutable, Displayable
      * @param t The time in the rest frame.
      * @return The time in the accelerated frame.
      */
-    abstract public double tToTau(double t);
+    @Override
+    public double tToTau(double t)
+    {
+        return worldline.tToTau(t);
+    }
 
     // **********************************************************
     // *
@@ -181,7 +287,11 @@ abstract public class Observer implements ExecutionImmutable, Displayable
      * @param tau The time in the accelerated frame.
      * @return The velocity.
      */
-    abstract public double tauToV(double tau);
+    @Override
+    public double tauToV(double tau)
+    {
+        return worldline.tauToV(tau);
+    }
 
     /**
      * Given tau, return x.
@@ -189,7 +299,11 @@ abstract public class Observer implements ExecutionImmutable, Displayable
      * @param tau The time in the accelerated frame.
      * @return The position in the rest frame.
      */
-    abstract public double tauToX(double tau);
+    @Override
+    public double tauToX(double tau)
+    {
+        return worldline.tauToX(tau);
+    }
 
     /**
      * Given tau, return d.
@@ -199,7 +313,11 @@ abstract public class Observer implements ExecutionImmutable, Displayable
      * @param tau The time in the accelerated frame.
      * @return The distance in the rest frame.
      */
-    abstract public double tauToD(double tau);
+    @Override
+    public double tauToD(double tau)
+    {
+        return worldline.tauToD(tau);
+    }
 
     /**
      * Given tau, return t.
@@ -207,7 +325,11 @@ abstract public class Observer implements ExecutionImmutable, Displayable
      * @param tau The time in the accelerated frame.
      * @return The time in the rest frame.
      */
-    abstract public double tauToT(double tau);
+    @Override
+    public double tauToT(double tau)
+    {
+        return worldline.tauToT(tau);
+    }
 
     // **********************************************************
     // *
@@ -224,7 +346,11 @@ abstract public class Observer implements ExecutionImmutable, Displayable
      * @param line The line to intersect with.
      * @return The intersection or null if none.
      */
-    abstract public Coordinate intersect(Line line);
+    @Override
+    public Coordinate intersect(Line line)
+    {
+        return worldline.intersect(line);
+    }
 
     /**
      * Find the intersection of this worldline with another. We check segments
@@ -236,6 +362,34 @@ abstract public class Observer implements ExecutionImmutable, Displayable
      * @param other The other observer.
      * @return The intersection or null if none.
      */
-    abstract public Coordinate intersect(Observer other);
+    @Override
+    public Coordinate intersect(Observer other)
+    {
+        if (other instanceof ConcreteObserver concreteObserver) {
+            return worldline.intersect(concreteObserver.worldline);
+        }
+        else if (other instanceof IntervalObserver intervalObserver) {
+            return intervalObserver.intersect(this);
+        }
+        return null;
+    }
+
+    // **********************************************************************
+    // *
+    // * Display support
+    // *
+    // **********************************************************************
+
+    @Override
+    public String toDisplayableString(HCodeEngine engine)
+    {
+        return "[ Observer " + worldline.toDisplayableString(engine) + "]";
+    }
+
+    @Override
+    public String toString()
+    {
+        return "Observer:\n" + worldline.toString().replaceAll("(?m)^", "  ");
+    }
 
 }

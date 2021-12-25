@@ -76,7 +76,7 @@ public class Worldline implements ExecutionMutable, Displayable
         // Add any segment that is not the first and not the last
 
         else {
-            HyperbolaEndpoint maxLimit = lastSegment.getMax();
+            WorldlineEndpoint maxLimit = lastSegment.getMax();
             if (Double.isNaN(v)) v = maxLimit.v;
             segment = new WorldlineSegment(type, delta, a, v, new Coordinate(maxLimit.x, maxLimit.t), maxLimit.tau, maxLimit.d);
         }
@@ -97,7 +97,7 @@ public class Worldline implements ExecutionMutable, Displayable
             segment.setInfiniteFuture();
         }
         else {
-            HyperbolaEndpoint maxLimit = lastSegment.getMax();
+            WorldlineEndpoint maxLimit = lastSegment.getMax();
             if (Double.isNaN(v)) v = maxLimit.v;
             segment = new WorldlineSegment(WorldlineSegment.LimitType.T, 0, a, v, new Coordinate(maxLimit.x, maxLimit.t), maxLimit.tau, maxLimit.d);
             segment.setInfiniteFuture();

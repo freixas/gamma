@@ -688,6 +688,12 @@ public class ConcreteLine extends Line
 	return null;
     }
 
+    // **********************************************************************
+    // *
+    // * Display support
+    // *
+    // **********************************************************************
+
     @Override
     public String toDisplayableString(HCodeEngine engine)
     {

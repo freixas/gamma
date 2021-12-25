@@ -30,8 +30,8 @@ import gamma.math.Util;
 public class HyperbolicSegment extends CurveSegment implements ExecutionImmutable
 {
     private final double a;
-    private final HyperbolaEndpoint min;
-    private final HyperbolaEndpoint max;
+    private final WorldlineEndpoint min;
+    private final WorldlineEndpoint max;
     private final OffsetAcceleration curve;
     private final Bounds bounds;
 
@@ -44,8 +44,8 @@ public class HyperbolicSegment extends CurveSegment implements ExecutionImmutabl
      * @param curve The OffsetAcceleration curve along which this hyperbolic
      * segment lies.
      */
-    public HyperbolicSegment(double a, HyperbolaEndpoint min,
-                             HyperbolaEndpoint max, OffsetAcceleration curve)
+    public HyperbolicSegment(double a, WorldlineEndpoint min,
+                             WorldlineEndpoint max, OffsetAcceleration curve)
     {
         if (Util.fuzzyZero(a)) {
             throw new ProgrammingException("Hyperbolic Segment(): Acceleration is 0");
@@ -81,8 +81,8 @@ public class HyperbolicSegment extends CurveSegment implements ExecutionImmutabl
             throw new ProgrammingException("Hypebolic Segment(): Min time is greater than max time");
         }
         this.a = a;
-        this.min = new HyperbolaEndpoint(minT, curve);
-        this.max = new HyperbolaEndpoint(maxT, curve);
+        this.min = new WorldlineEndpoint(minT, curve);
+        this.max = new WorldlineEndpoint(maxT, curve);
         this.curve = curve;
         this.bounds = getBounds(min.x, min.t, max.x, max.t, curve);
     }
@@ -168,7 +168,7 @@ public class HyperbolicSegment extends CurveSegment implements ExecutionImmutabl
      *
      * @return The minimum endpoint.
      */
-    public HyperbolaEndpoint getMin()
+    public WorldlineEndpoint getMin()
     {
         return min;
     }
@@ -178,7 +178,7 @@ public class HyperbolicSegment extends CurveSegment implements ExecutionImmutabl
      *
      * @return The minimum endpoint.
      */
-   public HyperbolaEndpoint getMax()
+   public WorldlineEndpoint getMax()
     {
         return max;
     }

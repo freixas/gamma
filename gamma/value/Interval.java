@@ -16,8 +16,8 @@
  */
 package gamma.value;
 
-import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
+import gamma.math.Relativity;
 
 /**
  * Create an interval.
@@ -26,37 +26,19 @@ import gamma.execution.HCodeEngine;
  */
 public class Interval implements ExecutionImmutable, Displayable
 {
-    public final double minX;
-    public final double maxX;
-    public final double minT;
-    public final double maxT;
+    public enum Type {
+        T, TAU, D
+    }
 
-    public final boolean hasXRange;
-    public final boolean hasTRange;
+    private final Type type;
+    private final double min;
+    private final double max;
 
-    public Interval(double x1, double x2, double t1, double t2)
+    public Interval(Type type, double min, double max)
     {
-        minX = Math.min(x1, x2);
-        maxX = Math.max(x1, x2);
-        minT = Math.min(t1, t2);
-        maxT = Math.max(t1, t2);
-
-        boolean isInfiniteX = Double.isInfinite(minX) && Double.isInfinite(maxX);
-        boolean isInfiniteT = Double.isInfinite(minT) && Double.isInfinite(maxT);
-
-        if (isInfiniteX && minX == maxX) {
-            throw new ExecutionException("Invalid x range in interval");
-        }
-        if (isInfiniteT && minT == maxT) {
-            throw new ExecutionException("Invalid t range in interval");
-        }
-
-        hasXRange = !isInfiniteX;
-        hasTRange = !isInfiniteT;
-
-        if (!hasXRange && !hasTRange) {
-            throw new ExecutionException("Invalid interval: all ranges are infinite");
-        }
+        this.type = type;
+        this.min = Math.min(min, max);
+        this.max = Math.max(min, max);
     }
 
     /**
@@ -66,44 +48,85 @@ public class Interval implements ExecutionImmutable, Displayable
      */
     public Interval(Interval other)
     {
-        // There's no need to sort as the other bounds will already
-        // be sorted
-
-        this.minX = other.minX;
-        this.maxX = other.maxX;
-        this.minT = other.minT;
-        this.maxT = other.maxT;
-
-        this.hasXRange = other.hasXRange;
-        this.hasTRange = other.hasTRange;
+        this.type = other.type;
+        this.min = other.min;
+        this.max = other.max;
     }
 
     /**
-     * Get the X interval delta.
+     * Get the interval type.
      *
      * @return The interval delta.
      */
-    public double getXDelta()
+    public Type getType()
     {
-        return maxX - minX;
+        return type;
     }
 
-     /**
-     * Get the T interval delta.
+    /**
+     * Get the interval's minimum value.
+     *
+     * @return The interval's minimum value.
+     */
+    public double getMin()
+    {
+        return min;
+    }
+
+    /**
+     * Get the interval's maximum value.
+     *
+     * @return The interval's maximum value.
+     */
+    public double getMax()
+    {
+        return max;
+    }
+
+    /**
+     * Get the interval delta.
      *
      * @return The interval delta.
      */
-    public double getTDelta()
+    public double getDelta()
     {
-        return maxT - minT;
+        return max - min;
     }
+
+    // **********************************************************************
+    // *
+    // * Drawing frame support
+    // *
+    // **********************************************************************
+
+    /**
+     * Create a new version of this interval that is relative to the given
+     * frame rather than relative to the rest frame.
+     *
+     * @param prime The frame to be relative to.
+     * @return The new interval.
+     */
+    public IntervalObserver relativeTo(Frame prime)
+    {
+        // TAU and D aren't affected by the frame
+
+        if (type == Type.T) {
+            ???l
+        }
+
+    }
+
+    // **********************************************************************
+    // *
+    // * Display support
+    // *
+    // **********************************************************************
 
    @Override
     public String toDisplayableString(HCodeEngine engine)
     {
         return "[ Interval " +
-               "X min " + engine.toDisplayableString(minX) + " max " + engine.toDisplayableString(maxX) + " " +
-               "T min " + engine.toDisplayableString(minT) + " max " + engine.toDisplayableString(maxT) + " " +
+               "min " + engine.toDisplayableString(min) + " max " + engine.toDisplayableString(max) +
                " ]";
     }
 

@@ -16,7 +16,6 @@
  */
 package gamma.value;
 
-import gamma.math.Relativity;
 import gamma.math.OffsetAcceleration;
 
 /**
@@ -25,7 +24,7 @@ import gamma.math.OffsetAcceleration;
  *
  * @author Antonio Freixas
  */
-public class HyperbolaEndpoint implements ExecutionImmutable
+public class WorldlineEndpoint implements ExecutionImmutable
 {
     public final double v;
     public final double x;
@@ -33,7 +32,7 @@ public class HyperbolaEndpoint implements ExecutionImmutable
     public final double tau;
     public final double d;
 
-    HyperbolaEndpoint(double v, double x, double t, double tau, double d)
+    WorldlineEndpoint(double v, double x, double t, double tau, double d)
     {
         this.v = v;
         this.x = x;
@@ -42,7 +41,7 @@ public class HyperbolaEndpoint implements ExecutionImmutable
         this.d = d;
     }
 
-    HyperbolaEndpoint(HyperbolaEndpoint other)
+    WorldlineEndpoint(WorldlineEndpoint other)
     {
         this.v = other.v;
         this.x = other.x;
@@ -52,13 +51,13 @@ public class HyperbolaEndpoint implements ExecutionImmutable
     }
 
     /**
-     * Initialize all the endpoint values from the time value and the offset
+     * Initialize all the endpoint values from the time value and an offset
      * acceleration curve.
      *
      * @param t The time.
      * @param curve The offset acceleration curve.
      */
-    HyperbolaEndpoint(double t, OffsetAcceleration curve)
+    WorldlineEndpoint(double t, OffsetAcceleration curve)
     {
         this.v = curve.tToV(t);
         this.x = curve.tToX(t);
