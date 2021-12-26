@@ -625,6 +625,7 @@ public final class Acceleration
         // positive and negative t's.
 
         if (Util.fuzzyZero(t)) t = 0.0;
+        if (Double.isInfinite(t)) return Util.sign(a) * Util.sign(t);      // Inf t means v = 1 or -1
         return (a * t) / Math.sqrt(1 + (a * a * t * t));
     }
 

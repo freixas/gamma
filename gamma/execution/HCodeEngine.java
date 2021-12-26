@@ -30,9 +30,9 @@ import gamma.execution.lcode.Command;
 import gamma.execution.lcode.Struct;
 import gamma.execution.lcode.StyleStruct;
 import gamma.math.Util;
+import gamma.value.ConcreteObserver;
 import gamma.value.Coordinate;
 import gamma.value.Frame;
-import gamma.value.Observer;
 import gamma.value.Style;
 import gamma.value.WInitializer;
 import java.io.File;
@@ -49,7 +49,7 @@ import java.util.List;
  */
 public class HCodeEngine
 {
-    private static final Frame defFrame = new Frame(new Observer(new WInitializer(new Coordinate(0.0, 0.0), 0.0, 0.0), new ArrayList<>()), Frame.AtType.TAU, 0);
+    private static final Frame defFrame = new Frame(new ConcreteObserver(new WInitializer(new Coordinate(0.0, 0.0), 0.0, 0.0), new ArrayList<>()), Frame.AtType.TAU, 0);
 
     private final MainWindow window;
     private final SetStatement setStatement;

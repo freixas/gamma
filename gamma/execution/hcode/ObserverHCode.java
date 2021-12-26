@@ -19,7 +19,7 @@ package gamma.execution.hcode;
 import gamma.execution.ArgInfo;
 import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
-import gamma.value.Observer;
+import gamma.value.ConcreteObserver;
 import gamma.value.WInitializer;
 import gamma.value.WSegment;
 import gamma.value.WorldlineSegment;
@@ -73,7 +73,7 @@ public class ObserverHCode extends ArgInfoHCode
 
         data.clear();
 
-        data.add(new Observer(initializer, segments));
+        data.add(new ConcreteObserver(initializer, segments));
     }
 
     @Override

@@ -17,6 +17,7 @@
 package gamma.value;
 
 import gamma.execution.ExecutionException;
+import java.util.ArrayList;
 
 /**
  * An observer has an initial origin, tau and distance. The observer then
@@ -27,12 +28,18 @@ import gamma.execution.ExecutionException;
  */
 abstract public class Observer implements ExecutionImmutable, Displayable
 {
+    // **********************************************************************
+    // *
+    // * Getters
+    // *
+    // **********************************************************************
+
     /**
-     * Get the Worldline for this Observer.
+     * Get the worldline segments in this worldline.
      *
-     * @return The Worldline for this Observer.
+     * @return The worldline segments in this worldline.
      */
-    abstract public Worldline getWorldline();
+    abstract public ArrayList<WorldlineSegment> getSegments();
 
     /**
      * Create a new version of this observer that is relative to the given

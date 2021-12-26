@@ -134,6 +134,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
 
     private final double a;
     private final OffsetAcceleration curve;
+    private boolean isLastSegment;
     private CurveSegment curveSegment;
 
     /**
@@ -237,6 +238,11 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
 
         this.originalMin = new WorldlineEndpoint(min);
         this.originalMax = new WorldlineEndpoint(max);
+
+        // We need to know if we're the last segment in a worldline. For
+        // now, assume we're not
+
+        isLastSegment = false;
     }
 
     /**
@@ -276,6 +282,8 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
 
             curveSegment = new HyperbolicSegment(a, min, max, curve);
        }
+
+       isLastSegment = false;
     }
 
     /**
@@ -294,6 +302,8 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
         this.a = other.a;
         this.curve = other.curve;
         this.curveSegment = other.curveSegment;
+
+        this.isLastSegment = other.isLastSegment;
     }
 
     @Override
@@ -370,6 +380,8 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
         if (curveSegment instanceof HyperbolicSegment) {
             curveSegment = new HyperbolicSegment(a, min, max, curve);
         }
+
+        isLastSegment = true;
     }
 
     /**
@@ -436,7 +448,9 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
         if (Util.fuzzyLT(min.v, max.v) && (Util.fuzzyLT(v, min.v) || Util.fuzzyGT(v, max.v))) return Double.NaN;
         if (Util.fuzzyGT(min.v, max.v) && (Util.fuzzyLT(v, max.v) || Util.fuzzyGT(v, min.v))) return Double.NaN;
         if (Util.fuzzyEQ(min.v, max.v)) return min.x;
-        return curve.vToX(v);
+        double x = curve.vToX(v);
+        if (!isLastSegment && Util.fuzzyEQ(x, max.x)) return Double.NaN;
+        return x;
     }
 
     /**
@@ -451,7 +465,9 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
         if (Util.fuzzyLT(min.v, max.v) && (Util.fuzzyLT(v, min.v) || Util.fuzzyGT(v, max.v))) return Double.NaN;
         if (Util.fuzzyGT(min.v, max.v) && (Util.fuzzyLT(v, max.v) || Util.fuzzyGT(v, min.v))) return Double.NaN;
         if (Util.fuzzyEQ(min.v, max.v)) return min.d;
-        return curve.vToD(v);
+        double d = curve.vToD(v);
+        if (!isLastSegment && Util.fuzzyEQ(d, max.d)) return Double.NaN;
+        return d;
     }
 
     /**
@@ -466,7 +482,9 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
         if (Util.fuzzyLT(min.v, max.v) && (Util.fuzzyLT(v, min.v) || Util.fuzzyGT(v, max.v))) return Double.NaN;
         if (Util.fuzzyGT(min.v, max.v) && (Util.fuzzyLT(v, max.v) || Util.fuzzyGT(v, min.v))) return Double.NaN;
         if (Util.fuzzyEQ(min.v, max.v)) return min.t;
-        return curve.vToT(v);
+        double t = curve.vToT(v);
+        if (!isLastSegment && Util.fuzzyEQ(t, max.x)) return Double.NaN;
+        return t;
     }
 
     /**
@@ -481,23 +499,25 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
         if (Util.fuzzyLT(min.v, max.v) && (Util.fuzzyLT(v, min.v) || Util.fuzzyGT(v, max.v))) return Double.NaN;
         if (Util.fuzzyGT(min.v, max.v) && (Util.fuzzyLT(v, max.v) || Util.fuzzyGT(v, min.v))) return Double.NaN;
         if (Util.fuzzyEQ(min.v, max.v)) return min.tau;
-         return curve.vToTau(v);
+        double tau = curve.vToTau(v);
+        if (!isLastSegment && Util.fuzzyEQ(tau, max.tau)) return Double.NaN;
+        return tau;
     }
 
-    /**
-     * Given v, return gamma. If v matches no segment points, return NaN. If v
-     * matches all segment points return gamma for the v that occurs earliest in
-     * time.
-     *
-     * @param v The velocity.
-     * @return Gamma of NaN.
-     */
-    public double vToGamma(double v)
-    {
-        if (Util.fuzzyLT(min.v, max.v) && (Util.fuzzyLT(v, min.v) || Util.fuzzyGT(v, max.v))) return Double.NaN;
-        if (Util.fuzzyGT(min.v, max.v) && (Util.fuzzyLT(v, max.v) || Util.fuzzyGT(v, min.v))) return Double.NaN;
-        return curve.vToGamma(v);
-    }
+//    /**
+//     * Given v, return gamma. If v matches no segment points, return NaN. If v
+//     * matches all segment points return gamma for the v that occurs earliest in
+//     * time.
+//     *
+//     * @param v The velocity.
+//     * @return Gamma of NaN.
+//     */
+//    public double vToGamma(double v)
+//    {
+//        if (Util.fuzzyLT(min.v, max.v) && (Util.fuzzyLT(v, min.v) || Util.fuzzyGT(v, max.v))) return Double.NaN;
+//        if (Util.fuzzyGT(min.v, max.v) && (Util.fuzzyLT(v, max.v) || Util.fuzzyGT(v, min.v))) return Double.NaN;
+//        return curve.vToGamma(v);
+//    }
 
     // **********************************************************
     // *
@@ -516,6 +536,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
     {
         if (Util.fuzzyLT(d, min.d) || Util.fuzzyGT(d, max.d)) return Double.NaN;
         if (Util.fuzzyEQ(min.d, max.d)) return min.v;
+        if (!isLastSegment && Util.fuzzyEQ(d, max.d)) return Double.NaN;
         return curve.dToV(d);
      }
 
@@ -528,7 +549,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
     public double dToX(double d)
     {
         if (Util.fuzzyLT(d, min.d) || Util.fuzzyGT(d, max.d)) return Double.NaN;
-        if (Util.fuzzyEQ(min.d, max.d)) return min.x;
+        if (!isLastSegment && Util.fuzzyEQ(min.d, max.d)) return min.x;
         return curve.dToX(d);
     }
 
@@ -543,6 +564,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
     {
         if (Util.fuzzyLT(d, min.d) || Util.fuzzyGT(d, max.d)) return Double.NaN;
         if (Util.fuzzyEQ(min.d, max.d)) return min.t;
+        if (!isLastSegment && Util.fuzzyEQ(d, max.d)) return Double.NaN;
         return curve.dToT(d);
     }
 
@@ -557,6 +579,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
     {
         if (Util.fuzzyLT(d, min.d) || Util.fuzzyGT(d, max.d)) return Double.NaN;
         if (Util.fuzzyEQ(min.d, max.d)) return min.tau;
+        if (!isLastSegment && Util.fuzzyEQ(d, max.d)) return Double.NaN;
         return curve.dToTau(d);
     }
 
@@ -571,6 +594,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
     {
         if (Util.fuzzyLT(d, min.d) || Util.fuzzyGT(d, max.d)) return Double.NaN;
         if (Util.fuzzyEQ(min.d, max.d)) return curve.vToGamma(min.v);
+        if (!isLastSegment && Util.fuzzyEQ(d, max.d)) return Double.NaN;
         return curve.dToGamma(d);
     }
 
@@ -590,6 +614,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
     {
         if (Util.fuzzyLT(t, min.t) || Util.fuzzyGT(t, max.t)) return Double.NaN;
         if (Util.fuzzyEQ(min.t, max.t)) return min.v;
+        if (!isLastSegment && Util.fuzzyEQ(t, max.t)) return Double.NaN;
         return curve.tToV(t);
     }
 
@@ -603,6 +628,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
     {
         if (Util.fuzzyLT(t, min.t) || Util.fuzzyGT(t, max.t)) return Double.NaN;
         if (Util.fuzzyEQ(min.t, max.t)) return min.x;
+        if (!isLastSegment && Util.fuzzyEQ(t, max.t)) return Double.NaN;
         return curve.tToX(t);
     }
 
@@ -616,6 +642,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
     {
         if (Util.fuzzyLT(t, min.t) || Util.fuzzyGT(t, max.t)) return Double.NaN;
         if (Util.fuzzyEQ(min.t, max.t)) return min.d;
+        if (!isLastSegment && Util.fuzzyEQ(t, max.t)) return Double.NaN;
         return curve.tToD(t);
     }
 
@@ -629,20 +656,21 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
     {
         if (Util.fuzzyLT(t, min.t) || Util.fuzzyGT(t, max.t)) return Double.NaN;
         if (Util.fuzzyEQ(min.t, max.t)) return min.tau;
+        if (!isLastSegment && Util.fuzzyEQ(t, max.t)) return Double.NaN;
         return curve.tToTau(t);
     }
 
-    /**
-     * Given t, return gamma. If t matches no segment points, return NaN.
-     *
-     * @param t The time in the rest frame.
-     * @return Gamma.
-     */
-    public double tToGamma(double t)
-    {
-        if (Util.fuzzyLT(t, min.t) || Util.fuzzyGT(t, max.t)) return Double.NaN;
-        return curve.tToGamma(t);
-    }
+//    /**
+//     * Given t, return gamma. If t matches no segment points, return NaN.
+//     *
+//     * @param t The time in the rest frame.
+//     * @return Gamma.
+//     */
+//    public double tToGamma(double t)
+//    {
+//        if (Util.fuzzyLT(t, min.t) || Util.fuzzyGT(t, max.t)) return Double.NaN;
+//        return curve.tToGamma(t);
+//    }
 
     // **********************************************************
     // *
@@ -660,6 +688,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
     {
         if (Util.fuzzyLT(tau, min.tau) || Util.fuzzyGT(tau, max.tau)) return Double.NaN;
         if (Util.fuzzyEQ(min.tau, max.tau)) return min.v;
+        if (!isLastSegment && Util.fuzzyEQ(tau, max.tau)) return Double.NaN;
         return curve.tauToV(tau);
     }
 
@@ -673,6 +702,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
     {
         if (Util.fuzzyLT(tau, min.tau) || Util.fuzzyGT(tau, max.tau)) return Double.NaN;
         if (Util.fuzzyEQ(min.tau, max.tau)) return min.x;
+        if (!isLastSegment && Util.fuzzyEQ(tau, max.tau)) return Double.NaN;
         return curve.tauToX(tau);
     }
 
@@ -688,7 +718,8 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
     {
         if (Util.fuzzyLT(tau, min.tau) || Util.fuzzyGT(tau, max.tau)) return Double.NaN;
         if (Util.fuzzyEQ(min.tau, max.tau)) return min.d;
-        return curve.tauToD(tau);
+        if (!isLastSegment && Util.fuzzyEQ(tau, max.tau)) return Double.NaN;
+       return curve.tauToD(tau);
     }
 
     /**
@@ -701,20 +732,21 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
     {
         if (Util.fuzzyLT(tau, min.tau) || Util.fuzzyGT(tau, max.tau)) return Double.NaN;
         if (Util.fuzzyEQ(min.tau, max.tau)) return min.t;
+        if (!isLastSegment && Util.fuzzyEQ(tau, max.tau)) return Double.NaN;
         return curve.tauToT(tau);
     }
 
-   /**
-     * Given tau, return gamma. If tau matches no segment points, return NaN.
-     *
-     * @param tau The time in the accelerated frame or NaN.
-     * @return Gamma.
-     */
-    public double tauToGamma(double tau)
-    {
-        if (Util.fuzzyLT(tau, min.tau) || Util.fuzzyGT(tau, max.tau)) return Double.NaN;
-        return curve.tauToGamma(tau);
-    }
+//   /**
+//     * Given tau, return gamma. If tau matches no segment points, return NaN.
+//     *
+//     * @param tau The time in the accelerated frame or NaN.
+//     * @return Gamma.
+//     */
+//    public double tauToGamma(double tau)
+//    {
+//        if (Util.fuzzyLT(tau, min.tau) || Util.fuzzyGT(tau, max.tau)) return Double.NaN;
+//        return curve.tauToGamma(tau);
+//    }
 
     // **********************************************************
     // *

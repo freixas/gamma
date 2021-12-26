@@ -74,7 +74,7 @@ public class EventStruct extends Struct
 
                 boostX = Math.abs(x) > Math.abs(t);
 
-                // Swap the x and t coordinatesso the x coordinate is always the
+                // Swap the x and t coordinates so the x coordinate is always the
                 // larger one
 
                 if (!boostX) {

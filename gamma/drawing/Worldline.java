@@ -18,9 +18,16 @@ package gamma.drawing;
 
 import gamma.execution.lcode.StyleStruct;
 import gamma.execution.lcode.WorldlineStruct;
+import gamma.math.Relativity;
+import gamma.math.Util;
+import gamma.value.Bounds;
+import gamma.value.ConcreteObserver;
+import gamma.value.Coordinate;
 import gamma.value.CurveSegment;
 import gamma.value.HyperbolicSegment;
+import gamma.value.IntervalObserver;
 import gamma.value.LineSegment;
+import gamma.value.WorldlineEndpoint;
 import gamma.value.WorldlineSegment;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -40,57 +47,194 @@ public class Worldline
 
         gc.save();
         String savedArrow = styles.arrow;
+        styles.arrow = "none";
 
         // Set up the gc for line drawing
 
         Line.setupLineGc(context, styles);
-        styles.arrow = "none";
 
-        gamma.value.Worldline worldline = struct.observer.getWorldline();
-        ArrayList<WorldlineSegment>segments = worldline.getSegments();
+        gamma.value.Observer observer = struct.observer;
 
-        Iterator<WorldlineSegment> iter = segments.iterator();
-        while (iter.hasNext()) {
+        if (observer instanceof ConcreteObserver concreteObserver) {
+            ArrayList<WorldlineSegment>segments = concreteObserver.getSegments();
 
-            WorldlineSegment segment = iter.next();
-            CurveSegment curveSegment = segment.getCurveSegment();
+            Iterator<WorldlineSegment> iter = segments.iterator();
+            while (iter.hasNext()) {
 
-            // Is this a line segment? If so, intersect it with the viewport and
-            // draw the intersecting segment, if any
+                WorldlineSegment segment = iter.next();
+                CurveSegment curveSegment = segment.getCurveSegment();
 
-            if (curveSegment instanceof LineSegment lineSegment) {
-                lineSegment = lineSegment.intersect(context.bounds);
-                if (lineSegment != null) {
-                    Line.drawRaw(context, lineSegment, styles);
+                // Is this a line segment? If so, intersect it with the viewport and
+                // draw the intersecting segment, if any
+
+                if (curveSegment instanceof LineSegment lineSegment) {
+                    lineSegment = lineSegment.intersect(context.bounds);
+                    if (lineSegment != null) {
+                        Line.drawRaw(context, lineSegment, styles);
+                    }
+                }
+
+                // Is this a hyperbolic segment? If so, intersect it with the
+                // viewport and draw the intersecting curve, if any
+
+                else if (curveSegment instanceof HyperbolicSegment hyperbolicSegment) {
+                    hyperbolicSegment = hyperbolicSegment.intersect(context.bounds);
+                    if (hyperbolicSegment != null) {
+                        Hyperbola.drawRaw(context, hyperbolicSegment);
+                    }
+                }
+
+                // Is this a line segment with one or two infinite ends (e.g. a
+                // line). If so, intersect it with the viewport and draw the
+                // intersecting line segment, if any
+
+                else if (curveSegment instanceof gamma.value.Line line) {
+                    LineSegment lineSegment = line.intersect(context.bounds);
+                    if (lineSegment != null) {
+                        Line.drawRaw(context, lineSegment, styles);
+                    }
+                }
+            }
+        }
+        else if (observer instanceof IntervalObserver intervalObserver) {
+            WorldlineEndpoint min = intervalObserver.getMin();
+            WorldlineEndpoint max = intervalObserver.getMax();
+
+            Bounds intervalBounds = new Bounds(Double.NEGATIVE_INFINITY, min.t, Double.POSITIVE_INFINITY, max.t);
+            Bounds bounds = context.bounds.intersect(intervalBounds);
+            if (bounds != null) {
+                ArrayList<WorldlineSegment>segments = intervalObserver.getSegments();
+
+                Iterator<WorldlineSegment> iter = segments.iterator();
+                while (iter.hasNext()) {
+                    WorldlineSegment segment = iter.next();
+                    int inRange = intervalObserver.inRange(segment);
+                    if (inRange == 1) break;
+
+                    if (inRange == 0) {
+                        CurveSegment curveSegment = segment.getCurveSegment();
+
+                        // Is this a line segment? If so, intersect it with the viewport and
+                        // draw the intersecting segment, if any
+
+                        if (curveSegment instanceof LineSegment lineSegment) {
+                            lineSegment = lineSegment.intersect(bounds);
+                            if (lineSegment != null) {
+                                 Line.drawRaw(context, lineSegment, styles);
+                            }
+                        }
+
+                        // Is this a hyperbolic segment? If so, intersect it with the
+                        // viewport and draw the intersecting curve, if any
+
+                        else if (curveSegment instanceof HyperbolicSegment hyperbolicSegment) {
+                            hyperbolicSegment = hyperbolicSegment.intersect(bounds);
+                            if (hyperbolicSegment != null) {
+                                Hyperbola.drawRaw(context, hyperbolicSegment);
+                            }
+                        }
+
+                        // Is this a line segment with one or two infinite ends (e.g. a
+                        // line). If so, intersect it with the viewport and draw the
+                        // intersecting line segment, if any
+
+                        else if (curveSegment instanceof gamma.value.Line line) {
+                            LineSegment lineSegment = line.intersect(bounds);
+                            if (lineSegment != null) {
+                               Line.drawRaw(context, lineSegment, styles);
+                            }
+                        }
+                    }
+                }
+
+                // We know we drew something because the bounding box isn't null
+                // Add the arrows
+
+                styles.arrow = savedArrow;
+                if (!styles.arrow.equals("none")) {
+                    double[] angles = getAngles(min, max);
+                    if (styles.arrow.equals("start") || styles.arrow.equals("both")) {
+                        if (context.bounds.inside(min.x, min.t)) {
+                            Arrow.draw(context, new Coordinate(min.x, min.t), angles[0], styles);
+                        }
+                    }
+                    if (styles.arrow.equals("end") || styles.arrow.equals("both")) {
+                        if (context.bounds.inside(max.x, max.t)) {
+                            Arrow.draw(context, new Coordinate(max.x, max.t), angles[1], styles);
+                        }
+                    }
                 }
             }
 
-            // Is this a hyperbolic segment? If so, intersect it with the
-            // viewport and draw the intersecting curve, if any
-
-            else if (curveSegment instanceof HyperbolicSegment hyperbolicSegment) {
-                hyperbolicSegment = hyperbolicSegment.intersect(context.bounds);
-                if (hyperbolicSegment != null) {
-                    Hyperbola.drawRaw(context, hyperbolicSegment);
-                }
-            }
-
-            // Is this a line segment with one or two infinite ends (e.g. a
-            // line). If so, intersect it with the viewport and draw the
-            // intersecting line segment, if any
-
-            else if (curveSegment instanceof gamma.value.Line line) {
-                LineSegment lineSegment = line.intersect(context.bounds);
-                if (lineSegment != null) {
-                    Line.drawRaw(context, lineSegment, styles);
-                }
-            }
         }
 
         // Restore the original graphics context
 
         styles.arrow = savedArrow;
         gc.restore();
+    }
+
+//    private static void suppressStartArrow(StyleStruct styles)
+//    {
+//        if (styles.arrow.equals("start")) {
+//            styles.arrow = "none";
+//        }
+//        else if (styles.arrow.equals("both")) {
+//            styles.arrow = "end";
+//        }
+//    }
+//
+//    private static void suppressEndArrow(StyleStruct styles)
+//    {
+//        if (styles.arrow.equals("end")) {
+//            styles.arrow = "none";
+//        }
+//        else if (styles.arrow.equals("both")) {
+//            styles.arrow = "start";
+//        }
+//    }
+
+    private static double[] getAngles(WorldlineEndpoint min, WorldlineEndpoint max)
+    {
+        double angleAtStart, angleAtEnd;
+        double vStart = min.v;
+        double vEnd = max.v;
+
+        angleAtStart = Relativity.vToTAngle(vStart);
+        angleAtEnd   = Relativity.vToTAngle(vEnd);
+
+        double signStart = Util.sign(vStart);
+        double signEnd   = Util.sign(vEnd  );
+
+        if (signStart < 0) {
+            if (Util.fuzzyZero(vStart)) {
+                angleAtStart = 90.0;
+            }
+        }
+        else {
+            if (Util.fuzzyZero(vStart)) {
+                angleAtStart = -90.0;
+            }
+            else {
+                angleAtStart += 180.0;
+            }
+        }
+
+        if (signEnd < 0) {
+            if (Util.fuzzyZero(vEnd)) {
+                angleAtEnd = -90.0;
+            }
+            else {
+                angleAtEnd += 180.0;
+            }
+        }
+        else {
+            if (Util.fuzzyZero(vEnd)) {
+                angleAtEnd = 90.0;
+            }
+        }
+        double[] angles = { angleAtStart, angleAtEnd };
+        return angles;
     }
 
 }

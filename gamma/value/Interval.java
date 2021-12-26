@@ -17,7 +17,6 @@
 package gamma.value;
 
 import gamma.execution.HCodeEngine;
-import gamma.math.Relativity;
 
 /**
  * Create an interval.
@@ -26,7 +25,8 @@ import gamma.math.Relativity;
  */
 public class Interval implements ExecutionImmutable, Displayable
 {
-    public enum Type {
+    public enum Type  implements ExecutionImmutable
+    {
         T, TAU, D
     }
 
@@ -91,29 +91,6 @@ public class Interval implements ExecutionImmutable, Displayable
     public double getDelta()
     {
         return max - min;
-    }
-
-    // **********************************************************************
-    // *
-    // * Drawing frame support
-    // *
-    // **********************************************************************
-
-    /**
-     * Create a new version of this interval that is relative to the given
-     * frame rather than relative to the rest frame.
-     *
-     * @param prime The frame to be relative to.
-     * @return The new interval.
-     */
-    public IntervalObserver relativeTo(Frame prime)
-    {
-        // TAU and D aren't affected by the frame
-
-        if (type == Type.T) {
-            ???l
-        }
-
     }
 
     // **********************************************************************

@@ -815,6 +815,7 @@ public class OffsetAcceleration implements ExecutionImmutable
     public final double tauToX(double tau)
     {
 	if (zeroAcceleration) {
+            if (zeroVelocity) return vPoint.x;
 	    return vInit * Relativity.tauToT(toStdTau(tau), vInit) + offset.x;
         }
 	return Acceleration.tauToX(a, toStdTau(tau)) + offset.x;
@@ -907,6 +908,12 @@ public class OffsetAcceleration implements ExecutionImmutable
      */
     private double linearXToT(double x)
     {
+        if (x == Double.NEGATIVE_INFINITY) {
+            return Util.fuzzyGE(vInit, 0) ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY;
+        }
+        else if (x == Double.POSITIVE_INFINITY) {
+            return Util.fuzzyGE(vInit, 0) ? Double.POSITIVE_INFINITY : Double.NEGATIVE_INFINITY;
+        }
         return ((x - offset.x) / vInit) + offset.t;
     }
 
@@ -920,6 +927,12 @@ public class OffsetAcceleration implements ExecutionImmutable
      */
     private double linearTToX(double t)
     {
+        if (t == Double.NEGATIVE_INFINITY) {
+            return zeroVelocity ? vPoint.x : (vInit > 0 ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY);
+        }
+        else if (t == Double.POSITIVE_INFINITY) {
+            return zeroVelocity ? vPoint.x : (vInit > 0 ? Double.POSITIVE_INFINITY : Double.NEGATIVE_INFINITY);
+        }
         return ((t - offset.t) * vInit) + offset.x;
     }
 
@@ -933,6 +946,12 @@ public class OffsetAcceleration implements ExecutionImmutable
      */
     private double linearXToTau(double x)
     {
+        if (x == Double.NEGATIVE_INFINITY) {
+            return Util.fuzzyGE(vInit, 0) ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY;
+        }
+        else if (x == Double.POSITIVE_INFINITY) {
+            return Util.fuzzyGE(vInit, 0) ? Double.POSITIVE_INFINITY : Double.NEGATIVE_INFINITY;
+        }
         return toOffsetTau(Relativity.tToTau((x - offset.x) / vInit, vInit));
     }
 

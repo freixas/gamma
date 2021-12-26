@@ -19,6 +19,11 @@ package gamma.value;
 import gamma.ProgrammingException;
 import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
+import gamma.math.OffsetAcceleration;
+import gamma.math.Relativity;
+import gamma.math.Util;
+import java.util.ArrayList;
+import java.util.ListIterator;
 
 /**
  * An observer has an initial origin, tau and distance. The observer then
@@ -57,6 +62,8 @@ public class IntervalObserver extends Observer
             throw new ProgrammingException("IntervalLine: line is not a interval or concrete line");
         }
 
+        // The interval is never used except in the constructor and for display
+
 	this.interval = interval;
 
         double minT = 0;
@@ -92,6 +99,31 @@ public class IntervalObserver extends Observer
             this.observer.tToD(maxT));
     }
 
+    private IntervalObserver(Observer observer, Interval interval,
+                              WorldlineEndpoint min, WorldlineEndpoint max)
+    {
+        if (observer == null) {
+            throw new ProgrammingException("BoundedLine: Trying to attach an interval to a null observer");
+        }
+
+        if (observer instanceof IntervalObserver intervalObserver) {
+            this.observer = intervalObserver.observer;
+        }
+        else if (observer instanceof ConcreteObserver concreteObserver) {
+            this.observer = concreteObserver;
+        }
+        else {
+            throw new ProgrammingException("IntervalLine: line is not a interval or concrete line");
+        }
+
+        // The interval is never used except in the constructor and for display
+
+	this.interval = interval;
+
+        this.min = min;
+        this.max = max;
+    }
+
     // **********************************************************************
     // *
     // * Getters
@@ -108,18 +140,62 @@ public class IntervalObserver extends Observer
         return this.observer;
     }
 
-    @Override
-    public Worldline getWorldline()
+    /**
+     * Get the minimum worldline endpoint.
+     *
+     * @return The minimum worldline endpoint.
+     */
+    public WorldlineEndpoint getMin()
     {
-        return observer.getWorldline();
+        return min;
     }
+
+    /**
+     * Get the maximum worldline endpoint.
+     *
+     * @return The maximum worldline endpoint.
+     */
+    public WorldlineEndpoint getMax()
+    {
+        return max;
+    }
+
+    @Override
+    public ArrayList<WorldlineSegment> getSegments()
+    {
+        return observer.getSegments();
+    }
+
+    // **********************************************************************
+    // *
+    // * Drawing frame support
+    // *
+    // **********************************************************************
 
     @Override
     public IntervalObserver relativeTo(Frame prime)
     {
-        ConcreteObserver relObserver = (ConcreteObserver)observer.relativeTo(prime);
-        ???;
-        return new IntervalObserver(relObserver, relInterval);
+        ConcreteObserver relObserver = observer.relativeTo(prime);
+        Coordinate endPoint = prime.toFrame(min.x, min.t);
+        WorldlineEndpoint relMin = new WorldlineEndpoint(
+            Relativity.vPrime(min.v, prime.getV()),
+            endPoint.x,
+            endPoint.t,
+            relObserver.tToTau(endPoint.t),
+            relObserver.tToD(endPoint.t)
+        );
+        endPoint = prime.toFrame(max.x, max.t);
+        WorldlineEndpoint relMax = new WorldlineEndpoint(
+            Relativity.vPrime(max.v, prime.getV()),
+            endPoint.x,
+            endPoint.t,
+            relObserver.tToTau(endPoint.t),
+            relObserver.tToD(endPoint.t)
+        );
+
+        // The interval is not changed
+
+        return new IntervalObserver(relObserver, interval, relMin, relMax);
     }
 
     // **********************************************************
@@ -128,28 +204,131 @@ public class IntervalObserver extends Observer
     // *
     // **********************************************************
 
+    /**
+     * Given v, return x. If v matches no segment points, return NaN. If v
+     * matches all segment points return the x that occurs earliest in time.
+     *
+     * @param v The velocity.
+     * @return The position in the rest frame or NaN.
+     * @throws ExecutionException When there are no matching x's.
+     */
     @Override
     public double vToX(double v)
     {
-	double x = observer.vToX(v);
+        ListIterator<WorldlineSegment> iter = observer.getSegments().listIterator();
+        while (iter.hasNext()) {
+            WorldlineSegment segment = iter.next();
+            int inRange = inRange(segment);
+            if (inRange == 1) break;
+            if (inRange == 0) {
+
+                // If the velocity and acceleration are 0, then the x value will
+                // be the same everywhere in the segment, so we need do nothing
+                // special
+
+                double x = segment.vToX(v);
+                if (!Double.isNaN(x)) return x;
+            }
+        }
+        throw new ExecutionException("vToX(): No matching x for velocity.");
     }
 
+    /**
+     * Given v, return d. If v matches no segment points, return NaN. If v
+     * matches all segment points return the d that occurs earliest in time.
+     *
+     * @param v The velocity.
+     * @return The distance in the rest frame or NaN.
+     * @throws ExecutionException When there are no matching d's.
+     */
     @Override
     public double vToD(double v)
     {
-	return observer.vToD(v);
+        ListIterator<WorldlineSegment> iter = observer.getSegments().listIterator();
+        while (iter.hasNext()) {
+            WorldlineSegment segment = iter.next();
+            int inRange = inRange(segment);
+            if (inRange == 1) break;
+            if (inRange == 0) {
+
+                // If the velocity and acceleration are 0, then the d value will
+                // be the same everywhere in the segment, so we need do nothing
+                // special
+
+                double d = segment.vToD(v);
+                if (!Double.isNaN(d)) return d;
+            }
+        }
+        throw new ExecutionException("vToD(): No matching distance for velocity.");
     }
 
+    /**
+     * Given v, return t. If v matches no segment points, return NaN. If v
+     * matches all segment points return the earliest time.
+     *
+     * @param v The velocity.
+     * @return The time in the rest frame or NaN.
+     * @throws ExecutionException When there are no matching t's.
+     */
     @Override
     public double vToT(double v)
     {
-	return observer.vToT(v);
+        ListIterator<WorldlineSegment> iter = observer.getSegments().listIterator();
+        while (iter.hasNext()) {
+            WorldlineSegment segment = iter.next();
+            int inRange = inRange(segment);
+            if (inRange == 1) break;
+            if (inRange == 0) {
+
+                // If the velocity and acceleration are 0, then we need to make
+                // sure we get a t value within the range
+
+                WorldlineEndpoint sMin = segment.getMin();
+                WorldlineEndpoint sMax = segment.getMax();
+                if (Util.fuzzyLT(sMin.v, sMax.v) && (Util.fuzzyLT(v, sMax.v) || Util.fuzzyGT(v, sMax.v))) return Double.NaN;
+                if (Util.fuzzyGT(sMin.v, sMax.v) && (Util.fuzzyLT(v, sMax.v) || Util.fuzzyGT(v, sMin.v))) return Double.NaN;
+                if (Util.fuzzyEQ(sMin.v, sMax.v)) return min.t;
+
+                double t = segment.vToT(v);
+                if (!Double.isNaN(t)) return t;
+            }
+        }
+        throw new ExecutionException("vToT(): No matching time for velocity.");
     }
 
+    /**
+     * Given v, return tau. If v matches no segment points, return NaN. If v
+     * matches all segment points return the earliest tau.
+     *
+     * @param v The velocity.
+     * @return The time in the accelerated frame or NaN.
+     * @throws ExecutionException When there are no matching tau's.
+     */
     @Override
     public double vToTau(double v)
     {
-	return observer.vToTau(v);
+        ListIterator<WorldlineSegment> iter = observer.getSegments().listIterator();
+        while (iter.hasNext()) {
+            WorldlineSegment segment = iter.next();
+            int inRange = inRange(segment);
+            if (inRange == 1) break;
+            if (inRange == 0) {
+
+                // If the velocity and acceleration are 0, then we need to make
+                // sure we get a tau value within the range
+
+                WorldlineEndpoint sMin = segment.getMin();
+                WorldlineEndpoint sMax = segment.getMax();
+                if (Util.fuzzyLT(sMin.v, sMax.v) && (Util.fuzzyLT(v, sMax.v) || Util.fuzzyGT(v, sMax.v))) return Double.NaN;
+                if (Util.fuzzyGT(sMin.v, sMax.v) && (Util.fuzzyLT(v, sMax.v) || Util.fuzzyGT(v, sMin.v))) return Double.NaN;
+                if (Util.fuzzyEQ(sMin.v, sMax.v)) return min.tau;
+
+                double tau = segment.vToTau(v);
+                if (!Double.isNaN(tau)) return tau;
+            }
+
+        }
+        throw new ExecutionException("vToTau(): No matching tau for velocity.");
     }
 
     // **********************************************************
@@ -158,28 +337,119 @@ public class IntervalObserver extends Observer
     // *
     // **********************************************************
 
+    /**
+     * Given d, return v.
+     *
+     * @param d The distance in the rest frame.
+     * @return The velocity.
+     * @throws ExecutionException When there are no matching v's.
+     */
     @Override
     public double dToV(double d)
     {
-	return observer.dToV(d);
+        ListIterator<WorldlineSegment> iter = observer.getSegments().listIterator();
+        while (iter.hasNext()) {
+            WorldlineSegment segment = iter.next();
+            int inRange = inRange(segment);
+            if (inRange == 1) break;
+            if (inRange == 0) {
+
+                // If the distance doesn't change, the velocity will be the same
+                // (0) at every point
+
+                double v = segment.dToV(d);
+                if (!Double.isNaN(d)) return v;
+            }
+        }
+        throw new ExecutionException("dToV(): No matching velocity for d.");
     }
 
+    /**
+     * Given d, return x.
+     *
+     * @param d The distance in the rest frame
+     * @return The position in the rest frame.
+     * @throws ExecutionException When there are no matching x's.
+     */
     @Override
     public double dToX(double d)
     {
-	return observer.dToX(d);
-    }
+        ListIterator<WorldlineSegment> iter = observer.getSegments().listIterator();
+        while (iter.hasNext()) {
+            WorldlineSegment segment = iter.next();
+            int inRange = inRange(segment);
+            if (inRange == 1) break;
+            if (inRange == 0) {
 
+                // If the distance doesn't change, neither does the X value
+
+                double x = segment.dToX(d);
+                if (!Double.isNaN(x)) return x;
+            }
+        }
+        throw new ExecutionException("dToX(): No matching x coordinate for d.");
+   }
+
+    /**
+     * Given d, return t.
+     *
+     * @param d The distance in the rest frame
+     * @return The time in the rest frame.
+     * @throws ExecutionException When there are no or infinite matching t's.
+     */
     @Override
     public double dToT(double d)
     {
-	return observer.dToT(d);
+        ListIterator<WorldlineSegment> iter = observer.getSegments().listIterator();
+        while (iter.hasNext()) {
+            WorldlineSegment segment = iter.next();
+            int inRange = inRange(segment);
+            if (inRange == 1) break;
+            if (inRange == 0) {
+
+                // If the distance doesn't change, get the correct T value
+
+                WorldlineEndpoint sMin = segment.getMin();
+                WorldlineEndpoint sMax = segment.getMax();
+                if (Util.fuzzyLT(d, sMin.d) || Util.fuzzyGT(d, sMin.d)) return Double.NaN;
+                if (Util.fuzzyEQ(sMin.d, sMin.d)) return min.t;
+
+                double t = segment.dToT(d);
+                if (!Double.isNaN(t)) return t;
+            }
+        }
+        throw new ExecutionException("dToT(): No or infinite matching times for d.");
     }
 
+    /**
+     * Given d, return tau.
+     *
+     * @param d The distance in the rest frame
+     * @return The time in the accelerated frame.
+     * @throws ExecutionException When there are no or infinite matching taus.
+     */
     @Override
     public double dToTau(double d)
     {
-	return observer.dToTau(d);
+        ListIterator<WorldlineSegment> iter = observer.getSegments().listIterator();
+        while (iter.hasNext()) {
+            WorldlineSegment segment = iter.next();
+            int inRange = inRange(segment);
+            if (inRange == 1) break;
+            if (inRange == 0) {
+
+                // If the distance doesn't change, get the correct T value
+
+                WorldlineEndpoint sMin = segment.getMin();
+                WorldlineEndpoint sMax = segment.getMax();
+                if (Util.fuzzyLT(d, sMin.d) || Util.fuzzyGT(d, sMin.d)) return Double.NaN;
+                if (Util.fuzzyEQ(sMin.d, sMin.d)) return min.tau;
+
+                double tau = segment.dToTau(d);
+                if (!Double.isNaN(tau)) return tau;
+            }
+        }
+        throw new ExecutionException("dToTau(): No or infinite matching taus for d.");
     }
 
     // **********************************************************
@@ -188,28 +458,93 @@ public class IntervalObserver extends Observer
     // *
     // **********************************************************
 
+    /**
+     * Given t, return v.
+     *
+     * @param t The time in the rest frame.
+     * @return The velocity.
+     */
     @Override
     public double tToV(double t)
     {
-	return observer.tToV(t);
-    }
+        ListIterator<WorldlineSegment> iter = observer.getSegments().listIterator();
+        while (iter.hasNext()) {
+            WorldlineSegment segment = iter.next();
+            int inRange = inRange(segment);
+            if (inRange == 1) break;
+            if (inRange == 0) {
+                double v = segment.tToV(t);
+                if (!Double.isNaN(v)) return v;
+            }
+        }
+        throw new ProgrammingException("tToV(): No matching velocity for t.");
+     }
 
+    /**
+     * Given t, return x.
+     *
+     * @param t The time in the rest frame.
+     * @return The position in the rest frame.
+     */
     @Override
     public double tToX(double t)
     {
-	return observer.tToX(t);
+        ListIterator<WorldlineSegment> iter = observer.getSegments().listIterator();
+        while (iter.hasNext()) {
+            WorldlineSegment segment = iter.next();
+            int inRange = inRange(segment);
+            if (inRange == 1) break;
+            if (inRange == 0) {
+                double x = segment.tToX(t);
+                if (!Double.isNaN(x)) return x;
+            }
+        }
+        throw new ProgrammingException("tToX(): No matching x coordiante for t.");
     }
 
+    /**
+     * Given t, return d.
+     *
+     * @param t The time in the rest frame.
+     * @return The distance in the rest frame.
+     */
     @Override
     public double tToD(double t)
     {
-	return observer.tToD(t);
+        ListIterator<WorldlineSegment> iter = observer.getSegments().listIterator();
+        while (iter.hasNext()) {
+            WorldlineSegment segment = iter.next();
+            int inRange = inRange(segment);
+            if (inRange == 1) break;
+            if (inRange == 0) {
+
+                double d = segment.tToD(t);
+                if (!Double.isNaN(d)) return d;
+            }
+        }
+        throw new ProgrammingException("tToD(): No matching distance for t.");
     }
 
+    /**
+     * Given t, calculate tau.
+     *
+     * @param t The time in the rest frame.
+     * @return The time in the accelerated frame.
+     */
     @Override
     public double tToTau(double t)
     {
-	return observer.tToTau(t);
+        ListIterator<WorldlineSegment> iter = observer.getSegments().listIterator();
+        while (iter.hasNext()) {
+            WorldlineSegment segment = iter.next();
+            int inRange = inRange(segment);
+            if (inRange == 1) break;
+            if (inRange == 0) {
+                double tau = segment.tToTau(t);
+                if (!Double.isNaN(tau)) return tau;
+            }
+        }
+       throw new ProgrammingException("tToTau(): No matching tau for t.");
     }
 
     // **********************************************************
@@ -218,28 +553,94 @@ public class IntervalObserver extends Observer
     // *
     // **********************************************************
 
+    /**
+     * Given tau, return v.
+     *
+     * @param tau The time in the accelerated frame.
+     * @return The velocity.
+     */
     @Override
     public double tauToV(double tau)
     {
-	return observer.tauToV(tau);
+        ListIterator<WorldlineSegment> iter = observer.getSegments().listIterator();
+        while (iter.hasNext()) {
+            WorldlineSegment segment = iter.next();
+            int inRange = inRange(segment);
+            if (inRange == 1) break;
+            if (inRange == 0) {
+                double v = segment.tauToV(tau);
+                if (!Double.isNaN(v)) return v;
+            }
+        }
+        throw new ProgrammingException("tauToV(): No matching velocity for tau.");
     }
 
+    /**
+     * Given tau, return x.
+     *
+     * @param tau The time in the accelerated frame.
+     * @return The position in the rest frame.
+     */
     @Override
     public double tauToX(double tau)
     {
-	return observer.tauToX(tau);
+        ListIterator<WorldlineSegment> iter = observer.getSegments().listIterator();
+        while (iter.hasNext()) {
+            WorldlineSegment segment = iter.next();
+            int inRange = inRange(segment);
+            if (inRange == 1) break;
+            if (inRange == 0) {
+                double x = segment.tauToX(tau);
+                if (!Double.isNaN(x)) return x;
+            }
+        }
+        throw new ProgrammingException("tauToX(): No matching x coordinate for tau.");
     }
 
+    /**
+     * Given tau, return d.
+     * <p>
+     * Since initially v = 0, if the acceleration is 0, then d = 0.
+     *
+     * @param tau The time in the accelerated frame.
+     * @return The distance in the rest frame.
+     */
     @Override
     public double tauToD(double tau)
     {
-	return observer.tauToD(tau);
+        ListIterator<WorldlineSegment> iter = observer.getSegments().listIterator();
+        while (iter.hasNext()) {
+            WorldlineSegment segment = iter.next();
+            int inRange = inRange(segment);
+            if (inRange == 1) break;
+            if (inRange == 0) {
+                double d = segment.tauToD(tau);
+                if (!Double.isNaN(d)) return d;
+            }
+        }
+         throw new ProgrammingException("tauToD(): No matching distance for tau.");
     }
 
+    /**
+     * Given tau, return t.
+     *
+     * @param tau The time in the accelerated frame.
+     * @return The time in the rest frame.
+     */
     @Override
     public double tauToT(double tau)
     {
-	return observer.tauToT(tau);
+        ListIterator<WorldlineSegment> iter = observer.getSegments().listIterator();
+        while (iter.hasNext()) {
+            WorldlineSegment segment = iter.next();
+            int inRange = inRange(segment);
+            if (inRange == 1) break;
+            if (inRange == 0) {
+                double t = segment.tauToT(tau);
+                if (!Double.isNaN(t)) return t;
+            }
+        }
+        throw new ProgrammingException("tauToT(): No matching time for tau.");
     }
 
     // **********************************************************
@@ -248,16 +649,112 @@ public class IntervalObserver extends Observer
     // *
     // **********************************************************
 
+    /**
+     * Find the intersection of this worldline with a line. We
+     * check segments one at a time from earliest to latest. We return the
+     * first intersection with the earliest time coordinate. If there is no
+     * intersection with any segment, we return null.
+     *
+     * @param line The line to intersect with.
+     * @return The intersection or null if none.
+     */
     @Override
     public Coordinate intersect(Line line)
     {
-	return observer.intersect(line);
+        ListIterator<WorldlineSegment> iter = observer.getSegments().listIterator();
+        while (iter.hasNext()) {
+            WorldlineSegment segment = iter.next();
+            int inRange = inRange(segment);
+            if (inRange == 1) break;
+            if (inRange == 0) {
+                OffsetAcceleration curve = segment.getCurve();
+                CurveSegment curveSegment = segment.getCurveSegment();
+
+                Coordinate intersection = curve.intersect(line, false);
+                if (intersection == null) continue;
+
+                // Find out if this intersection occurs within the bounds of this
+                // segment and within our interval
+
+                if (curveSegment.getBounds().inside(intersection) && inRange(intersection)) return intersection;
+
+                // Try the other possible intersection
+
+                intersection = curve.intersect(line, true);
+                if (intersection == null) continue;
+
+                // Find out if this intersection occurs within the bounds of this
+                // segment.
+
+                if (curveSegment.getBounds().inside(intersection)) return intersection;
+            }
+        }
+        return null;
     }
 
+    /**
+     * Find the intersection of this worldline with another. We check segments
+     * one at a time from earliest to latest. We check our first segment against
+     * all of the other worldline's segments, then our second segment, etc. We
+     * return the first intersection with the earliest time coordinate. If there
+     * is no intersection with any segment, we return null.
+     *
+     * @param other The other observer.
+     * @return The intersection or null if none.
+     */
     @Override
     public Coordinate intersect(Observer other)
     {
-	return observer.intersect(other);
+        if (other instanceof IntervalObserver intervalObserver) {
+            return intervalObserver.intersect(this);
+        }
+        else if (other instanceof ConcreteObserver otherObserver) {
+            ListIterator<WorldlineSegment> iter = otherObserver.getSegments().listIterator();
+            while (iter.hasNext()) {
+                WorldlineSegment segment1 = iter.next();
+                ListIterator<WorldlineSegment> iter2 = observer.getSegments().listIterator();
+                while (iter2.hasNext()) {
+                    WorldlineSegment segment2 = iter2.next();
+                    Coordinate coord = segment1.intersect(segment2);
+                    if (coord != null) return coord;
+                }
+            }
+        }
+        return null;
+    }
+
+    // **********************************************************
+    // *
+    // * Support methods
+    // *
+    // **********************************************************
+
+    /**
+     * Determine the relationship between the interval and the segment's
+     * range.
+     * <ul>
+     * <li>Return -1 if the interval is completely less than the segment's range.
+     * <li>Return 1 if the interval is completely greater than the segment's range.
+     * <li>Return 0 if any part of the interval is within the segment's range.
+     * </ul>
+     *
+     * @param segment The segment whose range we want to check.
+     * @return A value that specifies the relationship between the interval
+     * and the segment's range.
+     */
+    public int inRange(WorldlineSegment segment)
+    {
+        if (Util.fuzzyGE(min.t, segment.getMax().t)) return -1;
+        if (Util.fuzzyGT(segment.getMin().t, max.t)) return  1;
+        return 0;
+    }
+
+    public boolean inRange(Coordinate c)
+    {
+        // We don't need to check the X coordinate. If the T coordinate is in
+        // the interval, the X coordinate will be as well
+
+        return Util.fuzzyGE(min.t, c.t) && Util.fuzzyLE(max.t, c.t);
     }
 
     // **********************************************************************

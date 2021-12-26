@@ -39,7 +39,7 @@ public abstract class HCode extends ExecutorContext
         FETCH, FETCH_PROP, FETCH_ADDRESS, FETCH_PROP_ADDRESS,
         UNARY_MINUS, UNARY_PLUS, SUB, MULT, DIV, EXP, LORENTZ, INV_LORENTZ,
         W_INITIALIZER, W_SEGMENT, PROPERTY, PROPERTY_LIST,
-        FRAME, OBSERVER_FRAME, AXIS_LINE, ANGLE_LINE, ENDPOINT_LINE, PATH, BOUNDS, STYLE, COORDINATE,
+        FRAME, OBSERVER_FRAME, AXIS_LINE, ANGLE_LINE, ENDPOINT_LINE, PATH, BOUNDS, INTERVAL, STYLE, COORDINATE,
         COMMAND
     }
 
@@ -211,6 +211,8 @@ public abstract class HCode extends ExecutorContext
     };
     // BOUNDS
     static final FunctionalTwoArg<Coordinate, Coordinate, Bounds> bounds = (engine, min, max) -> new Bounds(min, max);
+    // INTERVAL
+    static final FunctionalThreeArg<Interval.Type, Double, Double, Interval> interval = (engine, type, min, max) -> new Interval(type, min, max);
     // STYLE
     static final FunctionalOneArg<PropertyList, Style> style = (engine, properties) -> {
         @SuppressWarnings("LocalVariableHidesMemberVariable")
@@ -260,6 +262,7 @@ public abstract class HCode extends ExecutorContext
         map.put(Type.ENDPOINT_LINE, endpointLine);
         map.put(Type.PATH, path);
         map.put(Type.BOUNDS, bounds);
+        map.put(Type.INTERVAL, interval);
         map.put(Type.STYLE, style);
         map.put(Type.COORDINATE, coordinate);
 

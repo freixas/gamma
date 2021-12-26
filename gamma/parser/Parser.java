@@ -20,6 +20,7 @@ import gamma.ProgrammingException;
 import gamma.execution.hcode.*;
 import gamma.value.Coordinate;
 import gamma.value.Frame;
+import gamma.value.Interval;
 import gamma.value.Line;
 import gamma.value.PropertyList;
 import gamma.value.WorldlineSegment;
@@ -1071,58 +1072,37 @@ public class Parser
 
         nextToken();
 
-        LinkedList<Object> xCodes = new LinkedList<>();
-        LinkedList<Object> tCodes = new LinkedList<>();
-
-        OUTER:
-        while (true) {
-            if (!isName()) break;
-            // Look for origin
+        if (isName()) {
             switch (getString()) {
-                case "x" -> {
-                    nextToken();
-
-                    if (xCodes.size() > 0) {
-                        throwParseException("The interval already contains an x range");
-                    }
-                    xCodes.addAll(parseExpr());
-
-                    if (!(isName() && getString().equals("to"))) {
-                        throwParseException("Expected 'to' for the interval's x range");
-                    }   nextToken();
-                    xCodes.addAll(parseExpr());
-                }
                 case "t" -> {
-                    nextToken();
-
-                    if (tCodes.size() > 0) {
-                        throwParseException("The interval already contains a t range");
-                    }
-                    tCodes.addAll(parseExpr());
-
-                    if (!(isName() && getString().equals("to"))) {
-                        throwParseException("Expected 'to' for the interval's t range");
-                    }   nextToken();
-                    tCodes.addAll(parseExpr());
+                    codes.add(Interval.Type.T);
+                }
+                case "tau" -> {
+                    codes.add(Interval.Type.TAU);
+                }
+                case "d" -> {
+                    codes.add(Interval.Type.D);
                 }
                 default -> {
-                    break OUTER;
+                    throwParseException("Expected 't', 'tau' or 'd'");
                 }
             }
         }
-
-        if (xCodes.size() < 1) {
-            xCodes.add(Double.NEGATIVE_INFINITY);
-            xCodes.add(Double.POSITIVE_INFINITY);
-        }
-        if (tCodes.size() < 1) {
-            tCodes.add(Double.NEGATIVE_INFINITY);
-            tCodes.add(Double.POSITIVE_INFINITY);
+        else {
+            throwParseException("Expected 't', 'tau' or 'd'");
         }
 
-        codes.addAll(xCodes);
-        codes.addAll(tCodes);
-        codes.add(new IntervalHCode());
+        nextToken();
+        codes.addAll(parseExpr());
+
+        if (!isName() || !getString().equals("to")) {
+            throwParseException("Expected 'to'");
+        }
+        nextToken();
+
+        codes.addAll(parseExpr());
+
+        codes.add(new GenericHCode(HCode.Type.INTERVAL));
 
         return codes;
     }
