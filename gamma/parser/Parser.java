@@ -136,8 +136,9 @@ public class Parser
     private ArrayList<Token<?>> tokens;
     private LinkedList<Object> hCodes;
 
-    private boolean animationStatementIsPresent = false;
-    private boolean animationVariableIsPresent = false;
+    private boolean animationStatementIsPresent;
+    private boolean animationVariableIsPresent;
+    private boolean displayVariableIsPresent;
 
     private SetStatement setStatement;
 
@@ -203,6 +204,16 @@ public class Parser
     }
 
     /**
+     * Returns true if display variables exist.
+     *
+     * @return True if the "animation" command was seen.
+     */
+    public boolean hasDisplayVariables()
+    {
+        return displayVariableIsPresent;
+    }
+
+    /**
      * Get the set statement. This contains information which needs to be
      * processed before the HCodeEngine runs.
      *
@@ -222,6 +233,8 @@ public class Parser
     {
         animationStatementIsPresent = false;
         animationVariableIsPresent = false;
+        displayVariableIsPresent = false;
+
         setStatement = new SetStatement();
 
         Tokenizer tokenizer = new Tokenizer(file, script);
@@ -260,6 +273,17 @@ public class Parser
                     case "include" -> parseIncludeStatement();
                     case "stylesheet" -> parseStylesheetStatement();
                     case "set" -> parseSetStatement();
+                    case "enable" -> {
+
+                        // We need to make sure the enable statement is always
+                        // executed. While the enable HCode is always executed,
+                        // other HCodes won't necessarily be executed, so we
+                        // add the equivalent of "enable true;" in front
+
+                        codes.add(1.0);
+                        codes.add(new GenericHCode(HCode.Type.ENABLE));
+                        codes.addAll(parseEnableStatement());
+                    }
                     case "print" -> codes.addAll(parsePrintStatement());
                     case "let" -> codes.addAll(parseAssignmentStatement());
                     case "style" -> codes.addAll(parseStyleStatement());
@@ -413,11 +437,31 @@ public class Parser
         setStatement.set(units, displayPrecision, printPrecision);
     }
 
+    private LinkedList<Object> parseEnableStatement() throws ParseException
+    {
+        LinkedList<Object> codes = new LinkedList<>();
+
+        // We start knowing that the current token is "enabled"
+
+        nextToken();
+
+        // If the new token is ';', enable
+
+        if (isDelimiter()&& getChar() == ';') {
+            codes.add(1.0);
+        }
+        else {
+            codes.addAll(parseExpr());
+        }
+        codes.add(new GenericHCode(HCode.Type.ENABLE));
+        return codes;
+    }
+
     private LinkedList<Object> parsePrintStatement() throws ParseException
     {
         LinkedList<Object> codes = new LinkedList<>();
 
-        // We start knowing that the current token is "let"
+        // We start knowing that the current token is "print"
 
         nextToken();
 
@@ -454,35 +498,88 @@ public class Parser
         nextToken();
         codes.addAll(parseExpr());
 
-        if (isName() && getString().equals("to")) {
-            toToken = curToken;
-            nextToken();
-            codes.addAll(parseExpr());
-        }
+        // Look for an animation variable
 
-        if (isName() && getString().equals("step")) {
-
-            // If the to value was omitted, put in NaN
-
-            if (toToken == null) {
-                codes.add(Double.NaN);
+        if (isName() && (getString().equals("to") || getString().equals("step"))) {
+            if (getString().equals("to")) {
+                toToken = curToken;
+                nextToken();
+                codes.addAll(parseExpr());
             }
 
-            stepToken = curToken;
-            nextToken();
-            codes.addAll(parseExpr());
-        }
+            // "to" is optional; "step" is required
 
-        // Can't have 'to' without 'step'
+            if (isName() && getString().equals("step")) {
 
-        if (toToken != null && stepToken == null) {
-            throwParseException("Missing 'step' in animation assignment");
-        }
+                // If the to value was omitted, put in NaN
 
-        if (stepToken != null) {
+                if (toToken == null) {
+                    codes.add(Double.NaN);
+                }
+
+                stepToken = curToken;
+                nextToken();
+                codes.addAll(parseExpr());
+            }
+            else {
+                throwParseException("Missing 'step' in animation assignment");
+            }
+
             animationVariableIsPresent = true;
             codes.add(new AnimAssignHCode());
         }
+
+        // Look for a display variable
+
+        else if (isName() && getString().equals("display")) {
+            nextToken();
+
+            // Look for range display variable
+
+            if (isName() && getString().equals("from")) {
+                nextToken();
+                codes.addAll(parseExpr());
+                if (isName() && getString().equals("to")) {
+                    nextToken();
+                    codes.addAll(parseExpr());
+                }
+                else {
+                    throwParseException("Expected 'to' in display variable assignment");
+                }
+
+                if (isName() && getString().equals("label")) {
+                    nextToken();
+                    codes.addAll(parseExpr());
+                }
+                else {
+                    throwParseException("Expected 'label' in display variable assignment");
+                }
+                displayVariableIsPresent = true;
+                codes.add(new RangeDisplayAssignHCode());
+            }
+
+            // Look for boolean display variable
+
+            else if (isName() && getString().equals("boolean")) {
+                nextToken();
+                if (isName() && getString().equals("label")) {
+                    nextToken();
+                    codes.addAll(parseExpr());
+                }
+                else {
+                    throwParseException("Expected 'label' in display variable assignment");
+                }
+                displayVariableIsPresent = true;
+                codes.add(new BooleanDisplayAssignHCode());
+            }
+
+            else {
+                throwParseException("Expected 'from' or 'boolean' in display variable assignment");
+            }
+        }
+
+        // We have a normal assignment
+
         else {
             codes.add(new AssignHCode());
         }

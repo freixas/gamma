@@ -49,7 +49,7 @@ public class HCodeProgram
         this.hCodes = new ArrayList<>();
         this.masterData = new LinkedList<>();
 
-        ListIterator iter = codes.listIterator();
+        ListIterator<Object> iter = codes.listIterator();
         int argOffset = 0;
 
         while (iter.hasNext()) {
@@ -93,7 +93,7 @@ public class HCodeProgram
             data = masterData;
         }
 
-        return (Iterator<HCode>)hCodes.iterator();
+        return hCodes.iterator();
     }
 
     /**

@@ -40,15 +40,15 @@ import java.util.List;
  */
 public abstract class Executor
 {
-    static final Class[] noObjects =    { HCodeEngine.class };
-    static final Class[] oneObject =    { HCodeEngine.class, Object.class };
-    static final Class[] twoObjects =   { HCodeEngine.class, Object.class, Object.class };
-    static final Class[] threeObjects = { HCodeEngine.class, Object.class, Object.class, Object.class };
-    static final Class[] fourObjects =  { HCodeEngine.class, Object.class, Object.class, Object.class, Object.class };
+    static final Class<?>[] noObjects =    { HCodeEngine.class };
+    static final Class<?>[] oneObject =    { HCodeEngine.class, Object.class };
+    static final Class<?>[] twoObjects =   { HCodeEngine.class, Object.class, Object.class };
+    static final Class<?>[] threeObjects = { HCodeEngine.class, Object.class, Object.class, Object.class };
+    static final Class<?>[] fourObjects =  { HCodeEngine.class, Object.class, Object.class, Object.class, Object.class };
 
-    static final Class[] varObjects =   { HCodeEngine.class, Object[].class };
+    static final Class<?>[] varObjects =   { HCodeEngine.class, Object[].class };
 
-    static final Class[][] objectTypes = { noObjects, oneObject, twoObjects, threeObjects, fourObjects };
+    static final Class<?>[][] objectTypes = { noObjects, oneObject, twoObjects, threeObjects, fourObjects };
 
     /**
      * Execute code that is implemented using the LambdaFunction interface.
@@ -57,8 +57,10 @@ public abstract class Executor
      * @param engine The HCode engine.
      * @param func A LambdaFunction class typically created using a lamdba
      * expression.
+     * @param execute True if this function should be executed. If false, the
+     * stack state is maintained, but the function is not executed.
      */
-    public void execute(ExecutorContext context, HCodeEngine engine, LambdaFunction func)
+    public void execute(ExecutorContext context, HCodeEngine engine, LambdaFunction func, boolean execute)
     {
         // We need to know the number of arguments.
 
@@ -70,7 +72,7 @@ public abstract class Executor
         // Use Reflection to find a method whose signature matches the types
         // of the data values
 
-        Class[] params;
+        Class<?>[] params;
         if (isVarArgs) {
             params = varObjects;
         }
@@ -90,7 +92,14 @@ public abstract class Executor
             args.add(0, engine);            // The engine is the first parameter
             reflectionArgs = args.toArray();
         }
-        Object result = executeImpl(method, engine, func, reflectionArgs);
+
+        Object result;
+        if (execute) {
+            result = executeImpl(method, engine, func, reflectionArgs);
+        }
+        else {
+            result = new Object();      // Dummy return value
+        }
 
         args.clear();
         if (getNumberOfReturnedValues(context, func) > 0) {

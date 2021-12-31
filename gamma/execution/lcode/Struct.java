@@ -301,9 +301,9 @@ public abstract class Struct
         String propertyName = property.getName();
         Object propertyValue = property.getValue();
 
-        // The Field and Property are of the same type
+        // The Field and Property are of the same type or the Field is a
+        // super-class of Property
 
-//        if (propertyValue.getClass() == field.getType()) {
         if (field.getType().isAssignableFrom(propertyValue.getClass())) {
 
             // If the property value can be changed, we need to store a copy
@@ -319,11 +319,10 @@ public abstract class Struct
             }
         }
 
-        // Field is a string
+        // Field is a string or a subclass of String
         // Property value can be a Double or any Displayable
 
-//        else if (field.getType() == String.class) {
-        else if (field.getType().isAssignableFrom(String.class)) {
+        else if (String.class.isAssignableFrom(field.getType())) {
             if (propertyValue instanceof Double dbl) {
                 field.set(instance, engine.toDisplayableString(dbl));
             }
@@ -335,11 +334,10 @@ public abstract class Struct
             }
         }
 
-        // Property value is a Double
+        // Property value is a Double or a subclass of Double
         // Field can be a double, int, color, or boolean
 
-//        else if (propertyValue instanceof Double dbl) {
-        else if (propertyValue.getClass().isAssignableFrom(Double.class)) {
+        else if (Double.class.isAssignableFrom(propertyValue.getClass())) {
             Double dbl = (Double)propertyValue;
             if (field.getType() == double.class) {
                 field.setDouble(instance, dbl);
@@ -358,11 +356,10 @@ public abstract class Struct
             }
         }
 
-        // Property is an Observer
+        // Property is an Observer or subclass of Observer
         // Field can be a Frame
 
-//        else if (propertyValue instanceof Observer observer) {
-        else if (propertyValue.getClass().isAssignableFrom(Observer.class)) {
+        else if (Observer.class.isAssignableFrom(propertyValue.getClass())) {
             Observer observer = (Observer)propertyValue;
             if (field.getType() == Frame.class) {
                 field.set(instance, new Frame(observer));

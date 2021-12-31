@@ -19,6 +19,7 @@ package gamma.value;
 import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
 import gamma.math.Relativity;
+import gamma.math.Util;
 import javafx.geometry.Point2D;
 
 /**
@@ -87,6 +88,8 @@ public class Coordinate extends ObjectContainer implements ExecutionMutable, Dis
      * Add a coordinate to this one.
      *
      * @param other The other coordinate to add.
+     *
+     * @return This coordinate.
      */
     public Coordinate add(Coordinate other)
     {
@@ -99,6 +102,8 @@ public class Coordinate extends ObjectContainer implements ExecutionMutable, Dis
      * Subtract a coordinate from this one.
      *
      * @param other The other coordinate to subtract.
+     *
+     * @return This coordinate.
      */
     public Coordinate subtract(Coordinate other)
     {
@@ -157,6 +162,11 @@ public class Coordinate extends ObjectContainer implements ExecutionMutable, Dis
         return hash;
     }
 
+    public boolean fuzzyEQ(Coordinate other)
+    {
+        return Util.fuzzyEQ(this.x, other.x) && Util.fuzzyEQ(this.t, other.t);
+    }
+
     @Override
     public boolean equals(Object obj)
     {
@@ -170,9 +180,6 @@ public class Coordinate extends ObjectContainer implements ExecutionMutable, Dis
             return false;
         }
         final Coordinate other = (Coordinate)obj;
-        if (Double.doubleToLongBits(this.x) != Double.doubleToLongBits(other.x)) {
-            return false;
-        }
         return Double.doubleToLongBits(this.t) == Double.doubleToLongBits(other.t);
     }
 

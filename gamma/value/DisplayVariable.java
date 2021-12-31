@@ -17,15 +17,37 @@
 package gamma.value;
 
 /**
- * This interface signals that this is an object that can appear in the
- * data portion of an HCodeProgram, but cannot be changed during execution of
- * the program. It can be changed between executions of the same program.
- * <p>
- * Object properties must either be final or ExecutionImmutable.
+ * Display variables are used to allow the user to control the diagram
+ * script variables through a GUI.
  *
  * @author Antonio Freixas
  */
-public interface ExecutionImmutable
+abstract public class DisplayVariable extends DynamicVariable
 {
+    public enum Type
+    {
+        RANGE, BOOLEAN
+    }
+
+    /**
+     * Get the type of this display variable.
+     *
+     * @return The type of this display variable.
+     */
+    abstract public Type getType();
+
+    /**
+     * Set the current value of this dynamic variable.
+     *
+     * @param value The value to set.
+     */
+    abstract public void setCurrentValue(double value);
+
+    /**
+     * Get the display variable's label.
+     *
+     * @return The display variable's label.
+     */
+    abstract public String getLabel();
 
 }

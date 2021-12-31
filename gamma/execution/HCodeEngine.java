@@ -24,6 +24,7 @@ import gamma.execution.hcode.HCodeExecutor;
 import gamma.execution.hcode.HCode;
 import gamma.execution.hcode.ArgInfoHCode;
 import gamma.execution.hcode.GenericHCode;
+import gamma.execution.hcode.LineInfoHCode;
 import gamma.execution.hcode.SetStatement;
 import gamma.value.Color;
 import gamma.execution.lcode.Command;
@@ -32,6 +33,7 @@ import gamma.execution.lcode.StyleStruct;
 import gamma.math.Util;
 import gamma.value.ConcreteObserver;
 import gamma.value.Coordinate;
+import gamma.value.Displayable;
 import gamma.value.Frame;
 import gamma.value.Style;
 import gamma.value.WInitializer;
@@ -55,9 +57,11 @@ public class HCodeEngine
     private final SetStatement setStatement;
     private final HCodeProgram program;
 
-    private final AnimationSymbolTable animationTable;
+    private final DynamicSymbolTable dynamicTable;
     private int precision;
     private final SetStatement.PrecisionType precisionType;
+
+    private boolean isExecutionEnabled;
 
     SymbolTable table;
     private LCodeEngine lCodeEngine;
@@ -73,12 +77,13 @@ public class HCodeEngine
         this.window = window;
         this.setStatement = setStatement;
         this.program = program;
-        this.animationTable = new AnimationSymbolTable(this);
+        this.dynamicTable = new DynamicSymbolTable(this);
         this.lCodeEngine = null;
 
         this.hCodeExecutor = new HCodeExecutor(this);
         this.functionExecutor = new FunctionExecutor();
         precisionType = SetStatement.PrecisionType.DISPLAY;
+        isExecutionEnabled = true;
         setPrecision(precisionType);
     }
 
@@ -121,6 +126,11 @@ public class HCodeEngine
         table.protect("defFrame");
     }
 
+    public MainWindow getMainWindow()
+    {
+        return window;
+    }
+
     public SetStatement getSetStatement()
     {
         return setStatement;
@@ -136,9 +146,20 @@ public class HCodeEngine
         }
     }
 
-    public String toDisplayableString(Double d)
+    public String toDisplayableString(Object obj)
     {
-        return Util.toString(d, precision);
+        if (obj instanceof String str) {
+            return str;
+        }
+        else if (obj instanceof Double dbl) {
+            return Util.toString(dbl, precision);
+        }
+        else if (obj instanceof Displayable displayable) {
+            return displayable.toDisplayableString(this);
+        }
+        else {
+            throw new ProgrammingException("HCodeEngine.toDisplayableString(): Couldn't convert object to string");
+        }
     }
 
     public HCodeProgram getProgram()
@@ -151,9 +172,9 @@ public class HCodeEngine
         return table;
     }
 
-    public AnimationSymbolTable getAnimationSymbolTable()
+    public DynamicSymbolTable getDynamicSymbolTable()
     {
-        return animationTable;
+        return dynamicTable;
     }
 
     public HCodeExecutor getHCodeExecutor()
@@ -164,6 +185,46 @@ public class HCodeEngine
     public FunctionExecutor getFunctionExecutor()
     {
         return functionExecutor;
+    }
+
+    public boolean isExecutionEnabled()
+    {
+        return isExecutionEnabled;
+    }
+
+    public void setExecutionEnabled(boolean isExecutionEnabled)
+    {
+        this.isExecutionEnabled = isExecutionEnabled;
+    }
+
+    /**
+     * Decide if we should execute a non-generic HCode. Unless the HCode
+     * is on a list of always-execute exemptions, it will be executed based on
+     * isExecutionEnabled(). Generic HCodes are handled by executeGenericHCode().
+     *
+     * @param hCode The HCode to check for an exemption.
+     *
+     * @return True if we should execute this HCode
+     */
+    public boolean executeHCode(HCode hCode)
+    {
+        if (hCode instanceof LineInfoHCode) return true;
+        return isExecutionEnabled();
+    }
+
+    /**
+     * Decide if we should execute a generic HCode. Unless the HCode
+     * is on a list of always-execute exemptions, it will be executed based on
+     * isExecutionEnabled(). Non-generic HCodes are handled by executeHCode().
+     *
+     * @param type The generic HCode type to check for an exemption.
+     *
+     * @return True if we should execute this generic HCode
+     */
+    public boolean executeGenericHCode(HCode.Type type)
+    {
+        if (type == HCode.Type.ENABLE) return true;
+        return isExecutionEnabled();
     }
 
     public File getFile()
@@ -233,6 +294,10 @@ public class HCodeEngine
 
         Iterator<HCode> iter = program.reset(copyData);
 
+        // Always start out with execution enabled
+
+        isExecutionEnabled = true;
+
         try {
             while (iter.hasNext()) {
                 HCode hCode = iter.next();
@@ -246,11 +311,23 @@ public class HCodeEngine
                     // Get the number of arguments
 
                     List<Object> data = program.getData(argInfoHCode);
-                    argInfo.checkTypes(data);
 
                     // Execute the hCode
 
-                    argInfoHCode.execute(this, data);
+                    if (executeHCode(hCode)) {
+                        argInfo.checkTypes(data);
+                        argInfoHCode.execute(this, data);
+                    }
+
+                    // Skip execution, but maintain the stack by clearing
+                    // the arguments and adding a potential return value
+
+                    else {
+                        data.clear();
+                        if (argInfo.getNumberOfReturnedValues() == 1) {
+                            data.add(new Object());
+                        }
+                    }
                 }
                 else if (hCode instanceof GenericHCode genericHCode) {
                     genericHCode.execute(this);

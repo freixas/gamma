@@ -20,7 +20,7 @@ package gamma.value;
  *
  * @author Antonio Freixas
  */
-public class AnimationVariable implements ExecutionImmutable
+public class AnimationVariable extends DynamicVariable implements ExecutionImmutable
 {
     private final double initialValue;
     private final double finalValue;
@@ -56,10 +56,10 @@ public class AnimationVariable implements ExecutionImmutable
         currentValue = initialValue + ((frame - 1) * stepSize);
     }
 
+    @Override
     public double getCurrentValue()
     {
         return this.currentValue;
     }
-
 
 }

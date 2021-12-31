@@ -108,6 +108,22 @@ abstract public class Line extends CurveSegment implements ExecutionImmutable, D
 
     // **********************************************************************
     // *
+    // * Offset support
+    // *
+    // **********************************************************************
+
+    /**
+     * Create a new line offset by the given coordinate.
+     *
+     * @param offset The coordinate to offset by. A point (x, t) on the line
+     * becomes (x - offset.x, t - offset.t) in the new line.
+     *
+     * @return A new offset line.
+     */
+    abstract public Line offsetLine(Coordinate offset);
+
+    // **********************************************************************
+    // *
     // * Drawing frame support
     // *
     // **********************************************************************

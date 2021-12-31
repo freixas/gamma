@@ -21,6 +21,7 @@ import gamma.execution.ExecutionException;
 import gamma.execution.SymbolTable;
 import gamma.execution.lcode.Command;
 import gamma.execution.lcode.CommandFactory;
+import gamma.math.Util;
 import gamma.value.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,7 +36,7 @@ public abstract class HCode extends ExecutorContext
 {
     public enum Type
     {
-        PRINT, SET_STYLE,
+        ENABLE, PRINT, SET_STYLE,
         FETCH, FETCH_PROP, FETCH_ADDRESS, FETCH_PROP_ADDRESS,
         UNARY_MINUS, UNARY_PLUS, SUB, MULT, DIV, EXP, LORENTZ, INV_LORENTZ,
         W_INITIALIZER, W_SEGMENT, PROPERTY, PROPERTY_LIST,
@@ -49,16 +50,14 @@ public abstract class HCode extends ExecutorContext
     // * Misc
     // ****************************************
 
+    // ENABLE
+    static final FunctionalOneArgNoRet<Double> enable = (engine, dbl) -> {
+        engine.setExecutionEnabled(!Util.fuzzyZero(dbl));
+    };
     // PRINT
     static final FunctionalOneArgNoRet<Object> print = (engine, obj) -> {
-        if (obj instanceof String str) {
-            engine.print(str);
-        }
-        else if (obj instanceof Double dbl) {
-            engine.print(engine.toDisplayableString(dbl));
-        }
-        else if (obj instanceof Displayable displayable) {
-            engine.print(displayable.toDisplayableString(engine));
+        if (engine.isExecutionEnabled()) {
+            engine.print(engine.toDisplayableString(obj));
         }
     };
     //SET_STYLE
@@ -233,6 +232,7 @@ public abstract class HCode extends ExecutorContext
         engine.addCommand(command);
     };
     static {
+        map.put(Type.ENABLE, enable);
         map.put(Type.PRINT, print);
         map.put(Type.SET_STYLE, setStyle);
 

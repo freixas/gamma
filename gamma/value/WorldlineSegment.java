@@ -137,6 +137,16 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
     private boolean isLastSegment;
     private CurveSegment curveSegment;
 
+    private final boolean zeroAcceleration;
+    private final boolean constantVelocity;
+    private final boolean zeroVelocity;
+    private final boolean increasingVelocity;
+    private final boolean decreasingVelocity;
+
+    private boolean constantTime;
+    private boolean constantTau;
+    private boolean constantDistance;
+
     /**
      * Create a new WorldlineSegment.
      *
@@ -159,6 +169,8 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
 
         this.a = a;
         this.min = new WorldlineEndpoint(v, vPoint.x, vPoint.t, tau, d);
+
+        zeroAcceleration = Util.fuzzyZero(a);
 
         // Create the offset curve
 
@@ -220,7 +232,16 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
         //
         // Comparisons with v need to be done carefully
 
-        if (Util.fuzzyZero(a)) {
+        constantVelocity = zeroAcceleration && Util.fuzzyEQ(min.v, max.v);
+        zeroVelocity = zeroAcceleration && constantVelocity && Util.fuzzyZero(v);
+        increasingVelocity = Util.fuzzyLT(min.v, max.v);
+        decreasingVelocity = Util.fuzzyGT(min.v, max.v);
+
+        constantTime = Util.fuzzyEQ(min.t, max.t);
+        constantTau = Util.fuzzyEQ(min.tau, max.tau);
+        constantDistance = Util.fuzzyEQ(min.d, max.d);
+
+        if (zeroAcceleration) {
 
             // We have a line segment
 
@@ -243,6 +264,8 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
         // now, assume we're not
 
         isLastSegment = false;
+
+
     }
 
     /**
@@ -270,7 +293,17 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
         this.originalMin = new WorldlineEndpoint(min);
         this.originalMax = new WorldlineEndpoint(max);
 
-        if (Util.fuzzyZero(a)) {
+        zeroAcceleration = Util.fuzzyZero(a);
+        constantVelocity = Util.fuzzyEQ(min.v, max.v);
+        zeroVelocity = zeroAcceleration && constantVelocity && Util.fuzzyZero(v);
+        increasingVelocity = Util.fuzzyLT(min.v, max.v);
+        decreasingVelocity = Util.fuzzyGT(min.v, max.v);
+
+        constantTime = Util.fuzzyEQ(min.t, max.t);
+        constantTau = Util.fuzzyEQ(min.tau, max.tau);
+        constantDistance = Util.fuzzyEQ(min.d, max.d);
+
+        if (zeroAcceleration) {
 
             // We have a line segment
 
@@ -304,6 +337,16 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
         this.curveSegment = other.curveSegment;
 
         this.isLastSegment = other.isLastSegment;
+
+        this.zeroAcceleration = other.zeroAcceleration;
+        this.constantVelocity = other.constantVelocity;
+        this.zeroVelocity = other.zeroVelocity;
+        this.increasingVelocity = other.increasingVelocity;
+        this.decreasingVelocity = other.decreasingVelocity;
+
+        this.constantTime = other.constantTime;
+        this.constantTau = other.constantTau;
+        this.constantDistance = other.constantDistance;
     }
 
     @Override
@@ -348,13 +391,17 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
         double v = Util.fuzzyGT(a, 0) ? Double.NEGATIVE_INFINITY: (Util.fuzzyLT(a, 0) ? Double.POSITIVE_INFINITY : min.v);
         double x = Util.fuzzyGT(a, 0) ? Double.POSITIVE_INFINITY : (Util.fuzzyLT(a, 0) ? Double.NEGATIVE_INFINITY : (Util.fuzzyGT(min.v, 0) ? Double.NEGATIVE_INFINITY : (Util.fuzzyLT(min.v, 0) ? Double.POSITIVE_INFINITY : min.x)));
         double t = Double.NEGATIVE_INFINITY;
-        double d = Util.fuzzyZero(a) && Util.fuzzyZero(min.v) ? min.d : Double.NEGATIVE_INFINITY;
+        double d = zeroVelocity ? min.d : Double.NEGATIVE_INFINITY;
         double tau = Double.NEGATIVE_INFINITY;
 
         min = new WorldlineEndpoint(v, x, t, tau, d);
         if (curveSegment instanceof HyperbolicSegment) {
             curveSegment = new HyperbolicSegment(a, min, max, curve);
         }
+
+        constantTime = Util.fuzzyEQ(min.t, max.t);
+        constantTau = Util.fuzzyEQ(min.tau, max.tau);
+        constantDistance = Util.fuzzyEQ(min.d, max.d);
     }
 
     /**
@@ -373,13 +420,17 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
         double v = Util.fuzzyGT(a, 0) ? Double.POSITIVE_INFINITY: (Util.fuzzyLT(a, 0) ? Double.NEGATIVE_INFINITY : max.v);
         double x = Util.fuzzyGT(a, 0) ? Double.POSITIVE_INFINITY : (Util.fuzzyLT(a, 0) ? Double.NEGATIVE_INFINITY : (Util.fuzzyGT(max.v, 0) ? Double.POSITIVE_INFINITY : (Util.fuzzyLT(max.v, 0) ? Double.NEGATIVE_INFINITY : max.x)));
         double t = Double.POSITIVE_INFINITY;
-        double d = Util.fuzzyZero(a) && Util.fuzzyZero(max.v) ? max.d : Double.POSITIVE_INFINITY;
+        double d = zeroVelocity ? max.d : Double.POSITIVE_INFINITY;
         double tau = Double.POSITIVE_INFINITY;
 
         max = new WorldlineEndpoint(v, x, t, tau, d);
         if (curveSegment instanceof HyperbolicSegment) {
             curveSegment = new HyperbolicSegment(a, min, max, curve);
         }
+
+        constantTime = Util.fuzzyEQ(min.t, max.t);
+        constantTau = Util.fuzzyEQ(min.tau, max.tau);
+        constantDistance = Util.fuzzyEQ(min.d, max.d);
 
         isLastSegment = true;
     }
@@ -445,9 +496,9 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
      */
     public double vToX(double v)
     {
-        if (Util.fuzzyLT(min.v, max.v) && (Util.fuzzyLT(v, min.v) || Util.fuzzyGT(v, max.v))) return Double.NaN;
-        if (Util.fuzzyGT(min.v, max.v) && (Util.fuzzyLT(v, max.v) || Util.fuzzyGT(v, min.v))) return Double.NaN;
-        if (Util.fuzzyEQ(min.v, max.v)) return min.x;
+        if (increasingVelocity && (Util.fuzzyLT(v, min.v) || Util.fuzzyGT(v, max.v))) return Double.NaN;
+        if (decreasingVelocity && (Util.fuzzyLT(v, max.v) || Util.fuzzyGT(v, min.v))) return Double.NaN;
+        if (constantVelocity) return min.x;
         double x = curve.vToX(v);
         if (!isLastSegment && Util.fuzzyEQ(x, max.x)) return Double.NaN;
         return x;
@@ -462,9 +513,9 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
      */
     public double vToD(double v)
     {
-        if (Util.fuzzyLT(min.v, max.v) && (Util.fuzzyLT(v, min.v) || Util.fuzzyGT(v, max.v))) return Double.NaN;
-        if (Util.fuzzyGT(min.v, max.v) && (Util.fuzzyLT(v, max.v) || Util.fuzzyGT(v, min.v))) return Double.NaN;
-        if (Util.fuzzyEQ(min.v, max.v)) return min.d;
+        if (increasingVelocity && (Util.fuzzyLT(v, min.v) || Util.fuzzyGT(v, max.v))) return Double.NaN;
+        if (decreasingVelocity && (Util.fuzzyLT(v, max.v) || Util.fuzzyGT(v, min.v))) return Double.NaN;
+        if (constantVelocity) return min.d;
         double d = curve.vToD(v);
         if (!isLastSegment && Util.fuzzyEQ(d, max.d)) return Double.NaN;
         return d;
@@ -479,9 +530,9 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
      */
     public double vToT(double v)
     {
-        if (Util.fuzzyLT(min.v, max.v) && (Util.fuzzyLT(v, min.v) || Util.fuzzyGT(v, max.v))) return Double.NaN;
-        if (Util.fuzzyGT(min.v, max.v) && (Util.fuzzyLT(v, max.v) || Util.fuzzyGT(v, min.v))) return Double.NaN;
-        if (Util.fuzzyEQ(min.v, max.v)) return min.t;
+        if (increasingVelocity && (Util.fuzzyLT(v, min.v) || Util.fuzzyGT(v, max.v))) return Double.NaN;
+        if (decreasingVelocity && (Util.fuzzyLT(v, max.v) || Util.fuzzyGT(v, min.v))) return Double.NaN;
+        if (constantVelocity) return min.t;
         double t = curve.vToT(v);
         if (!isLastSegment && Util.fuzzyEQ(t, max.x)) return Double.NaN;
         return t;
@@ -496,9 +547,9 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
      */
     public double vToTau(double v)
     {
-        if (Util.fuzzyLT(min.v, max.v) && (Util.fuzzyLT(v, min.v) || Util.fuzzyGT(v, max.v))) return Double.NaN;
-        if (Util.fuzzyGT(min.v, max.v) && (Util.fuzzyLT(v, max.v) || Util.fuzzyGT(v, min.v))) return Double.NaN;
-        if (Util.fuzzyEQ(min.v, max.v)) return min.tau;
+        if (increasingVelocity && (Util.fuzzyLT(v, min.v) || Util.fuzzyGT(v, max.v))) return Double.NaN;
+        if (decreasingVelocity && (Util.fuzzyLT(v, max.v) || Util.fuzzyGT(v, min.v))) return Double.NaN;
+        if (constantVelocity) return min.tau;
         double tau = curve.vToTau(v);
         if (!isLastSegment && Util.fuzzyEQ(tau, max.tau)) return Double.NaN;
         return tau;
@@ -514,8 +565,8 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
 //     */
 //    public double vToGamma(double v)
 //    {
-//        if (Util.fuzzyLT(min.v, max.v) && (Util.fuzzyLT(v, min.v) || Util.fuzzyGT(v, max.v))) return Double.NaN;
-//        if (Util.fuzzyGT(min.v, max.v) && (Util.fuzzyLT(v, max.v) || Util.fuzzyGT(v, min.v))) return Double.NaN;
+//        if (increasingVelocity && (Util.fuzzyLT(v, min.v) || Util.fuzzyGT(v, max.v))) return Double.NaN;
+//        if (decreasingVelocity && (Util.fuzzyLT(v, max.v) || Util.fuzzyGT(v, min.v))) return Double.NaN;
 //        return curve.vToGamma(v);
 //    }
 
@@ -535,7 +586,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
     public double dToV(double d)
     {
         if (Util.fuzzyLT(d, min.d) || Util.fuzzyGT(d, max.d)) return Double.NaN;
-        if (Util.fuzzyEQ(min.d, max.d)) return min.v;
+        if (constantDistance) return min.v;
         if (!isLastSegment && Util.fuzzyEQ(d, max.d)) return Double.NaN;
         return curve.dToV(d);
      }
@@ -549,7 +600,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
     public double dToX(double d)
     {
         if (Util.fuzzyLT(d, min.d) || Util.fuzzyGT(d, max.d)) return Double.NaN;
-        if (!isLastSegment && Util.fuzzyEQ(min.d, max.d)) return min.x;
+        if (!isLastSegment && constantDistance) return min.x;
         return curve.dToX(d);
     }
 
@@ -563,7 +614,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
     public double dToT(double d)
     {
         if (Util.fuzzyLT(d, min.d) || Util.fuzzyGT(d, max.d)) return Double.NaN;
-        if (Util.fuzzyEQ(min.d, max.d)) return min.t;
+        if (constantDistance) return min.t;
         if (!isLastSegment && Util.fuzzyEQ(d, max.d)) return Double.NaN;
         return curve.dToT(d);
     }
@@ -578,7 +629,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
     public double dToTau(double d)
     {
         if (Util.fuzzyLT(d, min.d) || Util.fuzzyGT(d, max.d)) return Double.NaN;
-        if (Util.fuzzyEQ(min.d, max.d)) return min.tau;
+        if (constantDistance) return min.tau;
         if (!isLastSegment && Util.fuzzyEQ(d, max.d)) return Double.NaN;
         return curve.dToTau(d);
     }
@@ -593,7 +644,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
      public double dToGamma(double d)
     {
         if (Util.fuzzyLT(d, min.d) || Util.fuzzyGT(d, max.d)) return Double.NaN;
-        if (Util.fuzzyEQ(min.d, max.d)) return curve.vToGamma(min.v);
+        if (constantDistance) return curve.vToGamma(min.v);
         if (!isLastSegment && Util.fuzzyEQ(d, max.d)) return Double.NaN;
         return curve.dToGamma(d);
     }
@@ -613,7 +664,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
     public double tToV(double t)
     {
         if (Util.fuzzyLT(t, min.t) || Util.fuzzyGT(t, max.t)) return Double.NaN;
-        if (Util.fuzzyEQ(min.t, max.t)) return min.v;
+        if (constantTime) return min.v;
         if (!isLastSegment && Util.fuzzyEQ(t, max.t)) return Double.NaN;
         return curve.tToV(t);
     }
@@ -627,7 +678,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
     public double tToX(double t)
     {
         if (Util.fuzzyLT(t, min.t) || Util.fuzzyGT(t, max.t)) return Double.NaN;
-        if (Util.fuzzyEQ(min.t, max.t)) return min.x;
+        if (constantTime) return min.x;
         if (!isLastSegment && Util.fuzzyEQ(t, max.t)) return Double.NaN;
         return curve.tToX(t);
     }
@@ -641,7 +692,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
     public double tToD(double t)
     {
         if (Util.fuzzyLT(t, min.t) || Util.fuzzyGT(t, max.t)) return Double.NaN;
-        if (Util.fuzzyEQ(min.t, max.t)) return min.d;
+        if (constantTime) return min.d;
         if (!isLastSegment && Util.fuzzyEQ(t, max.t)) return Double.NaN;
         return curve.tToD(t);
     }
@@ -655,7 +706,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
     public double tToTau(double t)
     {
         if (Util.fuzzyLT(t, min.t) || Util.fuzzyGT(t, max.t)) return Double.NaN;
-        if (Util.fuzzyEQ(min.t, max.t)) return min.tau;
+        if (constantTime) return min.tau;
         if (!isLastSegment && Util.fuzzyEQ(t, max.t)) return Double.NaN;
         return curve.tToTau(t);
     }
@@ -687,7 +738,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
     public double tauToV(double tau)
     {
         if (Util.fuzzyLT(tau, min.tau) || Util.fuzzyGT(tau, max.tau)) return Double.NaN;
-        if (Util.fuzzyEQ(min.tau, max.tau)) return min.v;
+        if (constantTau) return min.v;
         if (!isLastSegment && Util.fuzzyEQ(tau, max.tau)) return Double.NaN;
         return curve.tauToV(tau);
     }
@@ -701,7 +752,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
     public double tauToX(double tau)
     {
         if (Util.fuzzyLT(tau, min.tau) || Util.fuzzyGT(tau, max.tau)) return Double.NaN;
-        if (Util.fuzzyEQ(min.tau, max.tau)) return min.x;
+        if (constantTau) return min.x;
         if (!isLastSegment && Util.fuzzyEQ(tau, max.tau)) return Double.NaN;
         return curve.tauToX(tau);
     }
@@ -717,7 +768,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
     public double tauToD(double tau)
     {
         if (Util.fuzzyLT(tau, min.tau) || Util.fuzzyGT(tau, max.tau)) return Double.NaN;
-        if (Util.fuzzyEQ(min.tau, max.tau)) return min.d;
+        if (constantTau) return min.d;
         if (!isLastSegment && Util.fuzzyEQ(tau, max.tau)) return Double.NaN;
        return curve.tauToD(tau);
     }
@@ -731,7 +782,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
     public double tauToT(double tau)
     {
         if (Util.fuzzyLT(tau, min.tau) || Util.fuzzyGT(tau, max.tau)) return Double.NaN;
-        if (Util.fuzzyEQ(min.tau, max.tau)) return min.t;
+        if (constantTau) return min.t;
         if (!isLastSegment && Util.fuzzyEQ(tau, max.tau)) return Double.NaN;
         return curve.tauToT(tau);
     }
@@ -766,27 +817,18 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
     {
         // Find where the segment's curve intersects the line (if anywhere)
 
-        Coordinate intersection = curve.intersect(line, false);
-        if (intersection == null) {
+        Coordinate[] results = curve.intersect(line);
+        if (results == null) {
             return null;
         }
 
-        // Find out if this intersection occurs within the bounds of this
-        // segment.
+        // Return the first intersection that occurs within the bounds
+        // of this segment (if any)
 
-        if (curveSegment.getBounds().inside(intersection)) return intersection;
-
-        // Try the other possible intersection
-
-        intersection = curve.intersect(line, true);
-        if (intersection == null) {
-            return null;
+        for (Coordinate intersection : results) {
+            if (curveSegment.getBounds().inside(intersection)) return intersection;
         }
 
-        // Find out if this intersection occurs within the bounds of this
-        // segment.
-
-        if (curveSegment.getBounds().inside(intersection)) return intersection;
         return null;
     }
 

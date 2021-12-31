@@ -71,7 +71,7 @@ public class FunctionHCode extends ArgInfoHCode
 
             funcArgInfo.checkTypes(funcData);
 
-            // Execute the hCode
+            // Execute the function
 
             Object result = argInfoFunction.execute(engine, funcData);
 

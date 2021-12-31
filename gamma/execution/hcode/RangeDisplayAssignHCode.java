@@ -20,7 +20,7 @@ import gamma.execution.ArgInfo;
 import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
 import gamma.value.Address;
-import gamma.value.AnimationVariable;
+import gamma.value.RangeDisplayVariable;
 import gamma.value.SymbolTableAddress;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +29,7 @@ import java.util.List;
  *
  * @author Antonio Freixas
  */
-public class AnimAssignHCode extends ArgInfoHCode
+public class RangeDisplayAssignHCode extends ArgInfoHCode
 {
     private static final ArgInfo argInfo;
 
@@ -39,7 +39,8 @@ public class AnimAssignHCode extends ArgInfoHCode
         argTypes.add(ArgInfo.Type.DOUBLE);
         argTypes.add(ArgInfo.Type.DOUBLE);
         argTypes.add(ArgInfo.Type.DOUBLE);
-        argInfo = new ArgInfo(4, argTypes, 0);
+        argTypes.add(ArgInfo.Type.ANY);
+        argInfo = new ArgInfo(5, argTypes, 0);
     }
 
 
@@ -48,36 +49,26 @@ public class AnimAssignHCode extends ArgInfoHCode
     {
         Address address =     (Address)data.get(0);
         double initialValue = (Double) data.get(1);
-        double finalValue =   (Double) data.get(2);
-        double stepSize =     (Double) data.get(3);
+        double minValue =     (Double) data.get(2);
+        double maxValue =     (Double) data.get(3);
+        Object object =                data.get(4);
         data.clear();
-
-        // Check for a valid step size
-
-        if (stepSize == 0) {
-            throw new ExecutionException("The step size cannot be zero");
-        }
-
-        // Check that the final value matches the step size
-
-        if (!Double.isNaN(finalValue)) {
-            if ((stepSize < 0 && finalValue > initialValue) ||
-                (stepSize > 0 && finalValue < initialValue)) {
-                throw new ExecutionException("Invalid final value");
-            }
-        }
 
         // Make sure this is a symbol table address
 
         if (!(address instanceof SymbolTableAddress)) {
-            throw new ExecutionException("An animation variable cannot be assigned to an object");
+            throw new ExecutionException("A display variable cannot be assigned to an object");
         }
 
         // Check to see if this animation variable has already been defined.
 
         if (address.exists()) {
-            throw new ExecutionException("This animation variable has already been defined");
+            throw new ExecutionException("This display variable has already been defined");
         }
+
+        // Convert the label object to a string
+
+        String label = engine.toDisplayableString(object);
 
         // Set the value in the regular symbol table
 
@@ -86,7 +77,10 @@ public class AnimAssignHCode extends ArgInfoHCode
         // Set the value in the animation symbol table
 
         String name = ((SymbolTableAddress)address).getName();
-        AnimationVariable var = new AnimationVariable(initialValue, finalValue, stepSize);
+        RangeDisplayVariable var =
+            new RangeDisplayVariable(
+                engine.getMainWindow().getDiagramEngine(),
+                initialValue, minValue, maxValue, label);
         engine.getDynamicSymbolTable().put(name, var);
     }
 

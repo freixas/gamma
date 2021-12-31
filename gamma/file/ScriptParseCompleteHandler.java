@@ -42,7 +42,7 @@ public class ScriptParseCompleteHandler implements Runnable
         // The parser has finished. Start up the diagrame engine.
 
         DiagramEngine dEngine =
-            new DiagramEngine(window, parser.getHCodes(), parser.isAnimated(), parser.getSetStatement());
+            new DiagramEngine(window, parser.getHCodes(), parser.isAnimated(), parser.hasDisplayVariables(), parser.getSetStatement());
         dEngine.execute();
     }
 

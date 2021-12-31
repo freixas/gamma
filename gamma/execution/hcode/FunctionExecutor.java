@@ -16,9 +16,6 @@
  */
 package gamma.execution.hcode;
 
-import gamma.execution.hcode.GenericFunction;
-import gamma.execution.hcode.Executor;
-import gamma.execution.hcode.ExecutorContext;
 import java.util.List;
 
 /**

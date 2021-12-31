@@ -670,23 +670,19 @@ public class IntervalObserver extends Observer
                 OffsetAcceleration curve = segment.getCurve();
                 CurveSegment curveSegment = segment.getCurveSegment();
 
-                Coordinate intersection = curve.intersect(line, false);
-                if (intersection == null) continue;
+                Coordinate[] results = curve.intersect(line);
+                if (results == null) continue;
 
-                // Find out if this intersection occurs within the bounds of this
-                // segment and within our interval
+                // Return the first intersection that occurs within the bounds
+                // of this segment (if any)
 
-                if (curveSegment.getBounds().inside(intersection) && inRange(intersection)) return intersection;
+                for (Coordinate intersection : results) {
 
-                // Try the other possible intersection
+                    // Find out if this intersection occurs within the bounds of this
+                    // segment and within our interval
 
-                intersection = curve.intersect(line, true);
-                if (intersection == null) continue;
-
-                // Find out if this intersection occurs within the bounds of this
-                // segment.
-
-                if (curveSegment.getBounds().inside(intersection)) return intersection;
+                    if (curveSegment.getBounds().inside(intersection) && inRange(intersection)) return intersection;
+                }
             }
         }
         return null;

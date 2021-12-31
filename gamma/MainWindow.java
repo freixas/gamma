@@ -30,12 +30,14 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 import gamma.file.FileWatcher;
+import gamma.value.BooleanDisplayVariable;
+import gamma.value.DisplayVariable;
+import gamma.value.RangeDisplayVariable;
+import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.DialogPane;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
 
 /**
  * This class manages the view / controller / model for one main window. It
@@ -57,15 +59,17 @@ public final class MainWindow extends Stage
     private MenuItem fileMenuPrint;
     private MenuItem fileMenuClose = null;
 
+    private ScrollPane scrollPane;
+    private VBox displayControlArea;
+
     private FileWatcher watcher = null;
     private Thread watcherThread = null;
 
     private DiagramEngine diagramEngine = null;
-//    private LCodeEngine lCodeEngine = null;
     private Canvas canvas;
 
     private PrintDialog printDialog = null;
-    private TextArea printDialogTextArea = null;
+    private final TextArea printDialogTextArea = null;
 
     /**
      * Create a main window.
@@ -228,6 +232,11 @@ public final class MainWindow extends Stage
         }
 
         canvas = (Canvas)getScene().lookup("#diagramArea");
+        scrollPane = (ScrollPane)getScene().lookup("#scrollPane");
+        scrollPane.managedProperty().bind(scrollPane.visibleProperty());
+        scrollPane.setVisible(false);
+        displayControlArea = (VBox)getScene().lookup("#displayControlArea");
+
         canvas.setFocusTraversable(true);
     }
 
@@ -249,19 +258,7 @@ public final class MainWindow extends Stage
 
     }
 
-//    /**
-//     * Set the current LCodeEngine. If a prior engine exists, close it
-//     * down.
-//     *
-//     * @param lCodeEngine The lcode engine to set.
-//     */
-//    public void setLCodeEngine(LCodeEngine lCodeEngine)
-//    {
-//        if (this.lCodeEngine != null) this.lCodeEngine.close();
-//        this.lCodeEngine = lCodeEngine;
-//    }
-//
-     /**
+    /**
      * Get the current DiagramEngine, if any.
      *
      * @return The current diagram engine, or null if none.
@@ -281,6 +278,11 @@ public final class MainWindow extends Stage
     {
         if (this.diagramEngine != null) this.diagramEngine.close();
         this.diagramEngine = diagramEngine;
+
+        // Clean up any display variables we may have added
+
+        scrollPane.setVisible(false);
+        displayControlArea.getChildren().clear();
     }
 
    /**
@@ -339,6 +341,44 @@ public final class MainWindow extends Stage
     public void clearPrintDialog()
     {
         if (printDialog != null) printDialog.clear();
+    }
+
+    public void addDisplayControl(DisplayVariable var) {
+        scrollPane.setVisible(true);
+        if (var instanceof RangeDisplayVariable range) {
+            RangeDisplayVariable temp = range;
+            Label label = new Label(range.getLabel());
+            label.setPadding(new Insets(10.0));
+            displayControlArea.getChildren().add(label);
+
+            Slider slider = new Slider(range.getMinValue(), range.getMaxValue(), range.getInitialValue());
+            slider.setShowTickMarks​(true);
+            slider.setShowTickLabels(true);
+
+            double delta = range.getMaxValue() - range.getMinValue();
+            slider.setMajorTickUnit(delta / 10.0);
+            slider.setMinorTickCount(5);
+            slider.setBlockIncrement(delta / 100.0);
+            slider.setPrefWidth(200);
+            displayControlArea.getChildren().add(slider);
+
+            slider.valueProperty().addListener(
+                (value, oldValue, newValue) -> range.setCurrentValue((Double)newValue));
+
+        }
+        else if (var instanceof BooleanDisplayVariable bool) {
+            RadioButton button = new RadioButton(bool.getLabel());
+            button.setSelected(bool.getBooleanCurrentValue());
+            button.setPadding(new Insets(10.0));
+            displayControlArea.getChildren().add(button);
+
+            button.selectedProperty().addListener(
+                (value, oldValue, newValue) -> bool.setBooleanCurrentValue(newValue));
+        }
+
+        Separator separator = new Separator(Orientation.HORIZONTAL);
+        separator.setPrefWidth(200);
+        displayControlArea.getChildren().add(separator);
     }
 
     @Override

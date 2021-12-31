@@ -26,7 +26,6 @@ import java.util.Iterator;
 import java.util.ListIterator;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
@@ -90,6 +89,7 @@ public class LCodeEngine
 
         this.displayCommand = new Command(new DisplayStruct(), new StyleStruct(), new DisplayCommandExec());
         this.frameCommand = new Command(new FrameStruct(), new StyleStruct(), new FrameCommandExec());
+        this.animationCommand = new Command(new AnimationStruct(), new StyleStruct(), new AnimationCommandExec());
         this.setupComplete = false;
 
         lastWidth = -1.0;

@@ -21,6 +21,8 @@ import gamma.execution.hcode.SetStatement;
 import gamma.execution.lcode.AnimationStruct;
 import gamma.math.Util;
 import gamma.value.AnimationVariable;
+import gamma.value.DisplayVariable;
+import gamma.value.DynamicVariable;
 import java.util.Iterator;
 import java.util.Set;
 import javafx.animation.AnimationTimer;
@@ -70,10 +72,10 @@ public class AnimationEngine
             this.direction = (int)Util.sign(direction);
         }
 
+        @Override
         public final void stop()
         {
             super.stop();
-            System.err.println("Timer stopped");
         }
 
         @Override
@@ -83,7 +85,6 @@ public class AnimationEngine
             totalFrameCount = 0;
 
             super.start();
-            System.err.println("Timer started");
         }
 
         @Override
@@ -141,8 +142,9 @@ public class AnimationEngine
     private final MainWindow window;
     private final SetStatement setStatement;
     private final HCodeProgram program;
+    private final boolean hasDisplayVariables;
 
-    private AnimationSymbolTable animationSymbolTable;
+    private DynamicSymbolTable dynamicSymbolTable;
     private Set<String> symbolNames;
 
     private HCodeEngine hCodeEngine;
@@ -173,11 +175,12 @@ public class AnimationEngine
     private int absFrame;
     private int absMaxFrame;
 
-    public AnimationEngine(MainWindow window, SetStatement setStatement, HCodeProgram program)
+    public AnimationEngine(MainWindow window, SetStatement setStatement, HCodeProgram program, boolean hasDisplayVariables)
     {
         this.window = window;
         this.setStatement = setStatement;
         this.program = program;
+        this.hasDisplayVariables = hasDisplayVariables;
 
         this.hCodeEngine = null;
         this.timer = null;
@@ -409,13 +412,28 @@ public class AnimationEngine
         hCodeEngine = new HCodeEngine(window, setStatement, program);
         hCodeEngine.execute(true);
 
-        // We don"t have the animation statement settings or the variables until
+        // We don't have the animation statement settings or dynamic variables until
         // after the first execution
+
+        dynamicSymbolTable = hCodeEngine.getDynamicSymbolTable();
+        symbolNames = dynamicSymbolTable.getSymbolNames();
+
+        // Start by adding display variables, if we have any
+
+        if (hasDisplayVariables) {
+            Iterator<String> iter = symbolNames.iterator();
+            while (iter.hasNext()) {
+                DynamicVariable dynamicVariable = dynamicSymbolTable.getDynamicVariable(iter.next());
+                if (dynamicVariable instanceof DisplayVariable var) {
+                    window.addDisplayControl(var);
+                }
+            }
+        }
+
+        // Handle the animation statement and animation variables
 
         AnimationStruct animationStruct =
             (AnimationStruct)hCodeEngine.getLCodeEngine().getAnimationCommand().getCmdStruct();
-
-        animationSymbolTable = hCodeEngine.getAnimationSymbolTable();
 
         boolean isLoop = animationStruct.control.equals("loop");
         int reps = animationStruct.reps;
@@ -495,8 +513,10 @@ public class AnimationEngine
         // frame value
 
         while (iter.hasNext()) {
-            AnimationVariable var = animationSymbolTable.getAnimationVariable(iter.next());
-            var.setCurrentValue(frame);
+            DynamicVariable dynamicVariable = dynamicSymbolTable.getDynamicVariable(iter.next());
+            if (dynamicVariable instanceof AnimationVariable var) {
+                var.setCurrentValue(frame);
+            }
         }
 
         // Execute the HCode and LCode again
@@ -513,64 +533,33 @@ public class AnimationEngine
         return absFrame >= absMaxFrame;
     }
 
-    // TO DO
-
-    // * If the script file changes while we're running, we need to stop
-    // * Need to hook up buttons
-    // * Need to maintain running state
-
-    // If we're not optimizing
-    // Serialize the hCodes, an empty symbol table, and an empty container
-    // for lCodes.
-
-    // In either case, initialize the frame counts and create a new
-    // AnimationSymbolTable.
-    // Deserialize the saved hCodes, symbol table and lCodes.
-    // Pass all these plus the animation symbol table to the HCodeEngine
-    // (we may need an alternate execute() method) for execution
-
-    // After the first execution, get the AnimationSymbolTable and
-    // compute the maximum number of frames (which could be +infinity).
-    // Also, get the animation command parameters: reps, loop/cycle, and
-    // speed
-
-    // Set up a callback to generate the next frame in x seconds, where x
-    // is determined by the playback speed
-    // Enable the video controls and set up their callbacks
-
-    // For each frame we draw, we'll update the animation symbol table values
-    // for each animation variable (or rather, we will give each one the
-    // appropriate frame number and let it calculate its own value).
-    // Then we'll deserialize the saved hCodes, symbol table and lCodes and
-    // pass them again to the HCodeEngine (along with the AnimationTable)
-
     private int getMaxFrames(HCodeEngine hCodeEngine)
     {
-        symbolNames = animationSymbolTable.getSymbolNames();
-
         Iterator<String> iter = symbolNames.iterator();
 
         int maxFrames = 1;
         while (iter.hasNext()) {
-            AnimationVariable var = animationSymbolTable.getAnimationVariable(iter.next());
-            if (Double.isNaN(var.getFinalValue())) {
-                maxFrames = MAX_FRAMES;
-                break;
-            }
+            DynamicVariable dynamicVariable = dynamicSymbolTable.getDynamicVariable(iter.next());
+            if (dynamicVariable instanceof AnimationVariable var) {
+                if (Double.isNaN(var.getFinalValue())) {
+                    maxFrames = MAX_FRAMES;
+                    break;
+                }
 
-            double start = var.getInitialValue();
-            double step  = var.getStepSize();
-            double end   = var.getFinalValue();
+                double start = var.getInitialValue();
+                double step  = var.getStepSize();
+                double end   = var.getFinalValue();
 
-            int numSteps;
+                int numSteps;
 
-            if (start < end) {
-                numSteps = Util.toInt((end - start) / step) + 1;
+                if (start < end) {
+                    numSteps = Util.toInt((end - start) / step) + 1;
+                }
+                else {
+                    numSteps = Util.toInt((start - end) / -step) + 1;
+                }
+                maxFrames = Math.max(maxFrames, numSteps);
             }
-            else {
-                numSteps = Util.toInt((start - end) / -step) + 1;
-            }
-            maxFrames = Math.max(maxFrames, numSteps);
         }
         return maxFrames;
     }
@@ -585,6 +574,18 @@ public class AnimationEngine
         }
     }
 
+    /**
+     * This is called when a display variable is changed. If the animation
+     * is running, we don't need to do anything--the next frame will get the
+     * latest display variable value. If the animation is not running, we
+     * need to redisplay the current frame.
+     */
+    public void updateForDisplayVariable()
+    {
+        if (state != State.RUNNING) {
+            hCodeEngine.execute(true);
+        }
+    }
     /**
      * Remove all the listeners attached to this lcode engine
      */

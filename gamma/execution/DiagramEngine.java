@@ -21,6 +21,9 @@ import gamma.ProgrammingException;
 import gamma.execution.hcode.ArgInfoHCode;
 import gamma.execution.hcode.SetStatement;
 import gamma.parser.Token;
+import gamma.value.AnimationVariable;
+import gamma.value.DisplayVariable;
+import gamma.value.DynamicVariable;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -28,8 +31,10 @@ import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
+import java.util.Set;
 import javafx.scene.control.Alert;
 
 /**
@@ -47,18 +52,23 @@ public class DiagramEngine
     private final MainWindow window;
     private final HCodeProgram program;
     private final boolean isAnimated;
+    private final boolean hasDisplayVariables;
     private final SetStatement setStatement;
+
+    private DynamicSymbolTable dynamicSymbolTable;
+    private Set<String> symbolNames;
 
     private AnimationEngine animationEngine;
     private HCodeEngine hCodeEngine;
 
     @SuppressWarnings("LeakingThisInConstructor")
-    public DiagramEngine(MainWindow window, LinkedList<Object> hCodes, boolean isAnimated, SetStatement setStatement)
+    public DiagramEngine(MainWindow window, LinkedList<Object> hCodes, boolean isAnimated, boolean hasDisplayVariables, SetStatement setStatement)
     {
         this.window = window;
         this.program = new HCodeProgram(hCodes);
         this.isAnimated = isAnimated;
         this.setStatement = setStatement;
+        this.hasDisplayVariables = hasDisplayVariables;
 
         this.animationEngine = null;
         this.hCodeEngine = null;
@@ -74,10 +84,10 @@ public class DiagramEngine
         window.clearPrintDialog();
 
         try {
-            // Execute animated scripts
+           // Execute animated scripts
 
             if (isAnimated) {
-                animationEngine = new AnimationEngine(window, setStatement, program);
+                animationEngine = new AnimationEngine(window, setStatement, program, hasDisplayVariables);
                 animationEngine.execute();
             }
 
@@ -85,11 +95,41 @@ public class DiagramEngine
 
             else {
                 hCodeEngine = new HCodeEngine(window, setStatement, program);
-                hCodeEngine.execute(false);
-            }
+                hCodeEngine.execute(hasDisplayVariables);
+          
+                // If we have dynamic variables, we need add the controls to the main window
+
+                if (hasDisplayVariables) {
+                    dynamicSymbolTable = hCodeEngine.getDynamicSymbolTable();
+                    symbolNames = dynamicSymbolTable.getSymbolNames();
+
+                    Iterator<String> iter = symbolNames.iterator();
+                    while (iter.hasNext()) {
+                        DynamicVariable dynamicVariable = dynamicSymbolTable.getDynamicVariable(iter.next());
+                        if (dynamicVariable instanceof DisplayVariable var) {
+                            window.addDisplayControl(var);
+                        }
+                    }
+                }
+             }
         }
         catch (Throwable e) {
             handleExeception(e);
+        }
+    }
+
+    /**
+     * This is called when a display variable is changed. If the script is
+     * animated, we let the animation engine handle this. Otherwise, we
+     * redraw.
+     */
+    public void updateForDisplayVariable()
+    {
+        if (isAnimated) {
+            animationEngine.updateForDisplayVariable();
+        }
+        else {
+            hCodeEngine.execute(true);
         }
     }
 
@@ -98,7 +138,7 @@ public class DiagramEngine
      * while running a program. During animation, errors can occur in separate
      * threads, so try-catch won't handle everything.
      *
-     * @param e The exeception.
+     * @param e The exception.
      */
     public void handleExeception(Throwable e)
     {

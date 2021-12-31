@@ -206,7 +206,31 @@ public class ConcreteLine extends Line
 	this.isInfinitePlus = isInfinitePlus;
         this.unsortedBounds = getUnsortedBounds();
         this.bounds = new Bounds(unsortedBounds.min, unsortedBounds.max);
-   }
+    }
+
+    /**
+     * Create a new line offset from an existing line.
+     *
+     * @param other The line on which to base the new line.
+     * @param offset The offset to use. The offset is subtracted so that a
+     * line going through (x, t) will go through (x - offset.x, t - offset.t).
+     */
+
+    public ConcreteLine(ConcreteLine other, Coordinate offset)
+    {
+	this.angle = other.angle;
+        Coordinate offsetCoord = new Coordinate(other.coord);
+        offsetCoord.subtract(offset);
+	this.coord = offsetCoord;
+	this.slope = other.slope;
+        this.mXOrigin = this.slope * this.coord.x;
+        this.t1MinusMX1 = this.coord.t - this.mXOrigin;
+
+	this.isInfiniteMinus = other.isInfiniteMinus;
+	this.isInfinitePlus = other.isInfinitePlus;
+        this.unsortedBounds = getUnsortedBounds();
+        this.bounds = new Bounds(unsortedBounds.min, unsortedBounds.max);
+    }
 
     /**
      * A private method used to calculate the bounds of the line for
@@ -266,6 +290,7 @@ public class ConcreteLine extends Line
      *
      * @return The point through which the line crosses.
      */
+    @Override
     public Coordinate getCoordinate()
     {
         return new Coordinate(coord);
@@ -276,6 +301,7 @@ public class ConcreteLine extends Line
      *
      * @return The angle of the line in degrees.
      */
+    @Override
     public double getAngle()
     {
         return angle;
@@ -286,6 +312,7 @@ public class ConcreteLine extends Line
      *
      * @return The slope of the line.
      */
+    @Override
     public double getSlope()
     {
         return this.slope;
@@ -297,6 +324,7 @@ public class ConcreteLine extends Line
      *
      * @return The line's offset.
      */
+    @Override
     public double getConstantOffset()
     {
         return this.t1MinusMX1;
@@ -308,6 +336,7 @@ public class ConcreteLine extends Line
      *
      * @return True if the line starts at some infinite distance.
      */
+    @Override
     public boolean isInfiniteMinus()
     {
         return isInfiniteMinus;
@@ -319,6 +348,7 @@ public class ConcreteLine extends Line
      *
      * @return True if the line ends at some infinite distance.
      */
+    @Override
     public boolean isInfinitePlus()
     {
         return isInfinitePlus;
@@ -339,6 +369,26 @@ public class ConcreteLine extends Line
     public Bounds getBounds()
     {
         return new Bounds(bounds);
+    }
+
+    // **********************************************************************
+    // *
+    // * Offset support
+    // *
+    // **********************************************************************
+
+    /**
+     * Create a new line offset by the given coordinate.
+     *
+     * @param offset The coordinate to offset by. A point (x, t) on the line
+     * becomes (x - offset.x, t - offset.t) in the new line.
+     *
+     * @return A new offset line.
+     */
+    @Override
+    public Line offsetLine(Coordinate offset)
+    {
+        return new ConcreteLine(this, offset);
     }
 
     // **********************************************************************
@@ -367,7 +417,8 @@ public class ConcreteLine extends Line
     // **********************************************************************
 
     /**
-     * Intersect this line with another.
+     * Intersect this line with another. If there are infinite matches,
+     * return the earliest one. This could generate an infinite coordinate.
      *
      * @param other The other line to intersect with.
      *
@@ -378,10 +429,30 @@ public class ConcreteLine extends Line
     {
         if (other != null) {
 
-            // Check for parallel lines
-            // This assumes we've normalized the angles
+            Bounds intersectionBounds = bounds.intersect(other.getBounds());
+            if (intersectionBounds == null) return null;
 
-            if (this.slope == other.getSlope()) return null;
+            // Check for parallel lines
+
+            if (Util.fuzzyEQ(this.slope, other.getSlope())) {
+
+                // Both vertical and overlapping?
+
+                if (Double.isInfinite(this.slope) && coord.fuzzyEQ(other.getCoordinate())) {
+                    return new Coordinate(coord.x, intersectionBounds.min.t);
+                }
+
+                // Both horizontal and overlapping?
+
+                else if (Util.fuzzyZero(this.slope) && coord.fuzzyEQ(other.getCoordinate())) {
+                    return new Coordinate(intersectionBounds.min.x, coord.t);
+                }
+
+                // We can't come up with a coordinate for parallel lines that
+                // aren't horizontal or vertical
+
+                return null;
+            }
 
             // The equation for the line is t = m * (x - x1) + t1
             // where (x1, t1) is the point through which the line crosses
@@ -501,7 +572,7 @@ public class ConcreteLine extends Line
         // Make sure the line segment's first point is always earlier in time
         // than its second
 
-        if (segment.getPoint1().t > segment.getPoint2().t) {
+        if (segment != null && segment.getPoint1().t > segment.getPoint2().t) {
             segment = new LineSegment(segment.getPoint2(), segment.getPoint1());
         }
         return segment;

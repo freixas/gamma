@@ -828,17 +828,18 @@ public final class Acceleration
     // **********************************************************
 
     /**
-     * Find the intersection of a standard acceleration curve with a line.
+     * Find the intersection of a standard acceleration curve with a line. If
+     * there are an infinite number of matches, we return the earliest, which
+     * might include one coordinate value located at infinity. Lines sloped at
+     * multiples of 45 degrees can intersect with both values are infinity.
      *
      * @param a The acceleration.
      * @param line The line to intersect with.
-     * @param later True if we should return the later of the two possible
-     * results.
      *
-     * @return The intersection or null if there are no intersections or an
-     * infinite number of intersections.
+     * @return The intersections. There can be zero, one, or two intersections.
+     * If there are zero intersections, the returned value is null.
      */
-    public static Coordinate intersect(double a, Line line, boolean later)
+    public static Coordinate[] intersect(double a, Line line)
     {
         // Basics:
         // The line formula is t = mx + k.
@@ -846,25 +847,124 @@ public final class Acceleration
 
         // Get m and k for the line
 
+        double angle = line.getAngle();
         double m = line.getSlope();
         double k = line.getConstantOffset();
+        Coordinate coord = line.getCoordinate();
+        boolean zeroAcceleration = Util.fuzzyZero(a);
 
-        // If the acceleration is 0, our curve is a vertical line with the
-        // formula x = 0.
 
-        if (Util.fuzzyZero(a)) {
+        // Special cases when the line is vertical
 
-            // If the line is vertical, there are either no intersections or
-            // infinite intersections, so return null
+        if (Util.fuzzyEQ(angle, 90.0))  {
+            double minT = line.getBounds().min.t;
 
-            if (Double.isInfinite(m)) return null;
+            // Is the acceleration also 0 (meaning that the acceleration
+            // curve is also a vertical line)? If so, it's formula is x = 0
 
-            // Since we know x is 0, the intersection is at (0, k)
+            if (zeroAcceleration) {
 
-            System.out.println("------");
-            System.out.println(new Coordinate(0, k));
-            return new Coordinate(0, k);
+                // If the line also has the formula x = 0, then return the
+                // earliest point that intersects the line
+
+                if (Util.fuzzyZero(coord.x)) {
+                    Coordinate[] result = { new Coordinate(coord.x, minT) };
+                    return result;
+                }
+
+                return null;
+            }
+
+            // The acceleration is not zero
+
+            if (Util.fuzzyZero(coord.x)) {
+                if (Util.fuzzyLE(minT, 0)) {
+                    Coordinate[] result = { new Coordinate(coord.x, 0) };
+                    return result;
+                }
+                return null;
+            }
+            else if (coord.x < 0.0 && a > 0.0) {
+                return null;
+            }
+            else if (coord.x > 0.0 & a < 0.0) {
+                return null;
+            }
+
+            // We drop through for other vertical line cases
+
         }
+
+        // Special cases when the line is horizontal
+
+        else if (Util.fuzzyZero(angle))  {
+
+            // Is the acceleration 0 (meaning that the acceleration
+            // curve is a vertical line)? If so, it's formula is x = 0 and
+            // there is always one intersection
+
+            if (zeroAcceleration) {
+                Coordinate[] result = { new Coordinate(0, coord.t) };
+                return result;
+            }
+
+            // We drop through for other horizontal cases
+
+        }
+
+        // Special cases when the line is +/- 45 degrees
+
+        else if (Util.fuzzyEQ(Math.abs(angle), 45.0)) {
+            double ak = a * k;
+            double x;
+            double t;
+            if (angle > 0.0) {                  // +45
+                if (Util.fuzzyEQ(ak, 1.0)) {
+                    if (Util.fuzzyGT(a, 0) && line.isInfinitePlus()) {
+                        x = Double.POSITIVE_INFINITY;
+                        t = Double.POSITIVE_INFINITY;
+                    }
+                    else if (Util.fuzzyLT(a, 0) && line.isInfiniteMinus()) {
+                        x = Double.NEGATIVE_INFINITY;
+                        t = Double.NEGATIVE_INFINITY;
+                    }
+                    else {
+                        return null;
+                    }
+                }
+                else {
+                    x = -(ak * k) / (2 * (ak - 1));
+                    t = m * x + k;
+                }
+            }
+            else /* if (angle < 0.0) */{        // -45
+                if (Util.fuzzyEQ(ak, 1.0)) {
+                    if (Util.fuzzyGT(a, 0) && line.isInfinitePlus()) {
+                        x = Double.POSITIVE_INFINITY;
+                        t = Double.NEGATIVE_INFINITY;
+                    }
+                    else if (Util.fuzzyLT(a, 0) && line.isInfiniteMinus()) {
+                        x = Double.NEGATIVE_INFINITY;
+                        t = Double.POSITIVE_INFINITY;
+                    }
+                    else {
+                        return null;
+                    }
+                }
+                else {
+                    x = (ak * k) / (2 * (ak + 1));
+                    t = m * x + k;
+                }
+            }
+            Coordinate[] result = { new Coordinate(x, t) };
+            return result;
+        }
+
+        // Handle all remainining cases:
+        //
+        // * Vertical line crossing an accelerating curve at two points
+        // * Horizontal line crossing an accelerating curve at one point
+        // * All other lines, except ones sloped +/- 45 degrees
 
         double x1;
         double t1;
@@ -895,16 +995,52 @@ public final class Acceleration
             double km = k * m;
             double m21 = m *m - 1;
 
-            double root = Math.sqrt(ak * (ak - 2 * m) + 1);
+            // If we are going to take the square root of a negative number,
+            // we don't have an intersection
+
+            double root = (ak * (ak - 2 * m) + 1);
+            if (root < 0) {
+                return null;
+            }
+
+            root = Math.sqrt(root);
             x1 = ((-root + 1)/a - km) / m21;
             x2 = ((+root + 1)/a - km) / m21;
 
             t1 = m * x1 + k;
             t2 = m * x2 + k;
-      }
+        }
 
-        if ((later && t2 > t1) || (!later && t2 <= t1)) return new Coordinate(x2, t2);
-        return new Coordinate(x1, t1);
+        // Discard intersections not within the lines bounds
+
+        Coordinate result1 = new Coordinate(x1, t1);
+        Coordinate result2 = new Coordinate(x2, t2);
+        boolean inside1 = line.getBounds().inside(result1);
+        boolean inside2 = line.getBounds().inside(result2);
+
+        if (inside1 && inside2) {
+            // Sort by time
+
+            if (result1.t <= result2.t) {
+                Coordinate[] result = { result1, result2 };
+                return result;
+            }
+            else {
+                Coordinate[] result = { result2, result1 };
+                return result;
+            }
+        }
+        else if (inside1) {
+            Coordinate[] result = { result1 };
+            return result;
+        }
+        else if (inside2) {
+            Coordinate[] result = { result2 };
+            return result;
+        }
+        else {
+            return null;
+        }
     }
 
     /**

@@ -99,6 +99,35 @@ public class BoundedLine extends Line
     }
 
     /**
+     * Create a new line offset from an existing line.
+     *
+     * @param other The line on which to base the new line.
+     * @param offset The offset to use. The offset is subtracted so that a
+     * line going through (x, t) will go through (x - offset.x, t - offset.t).
+     */
+
+    public BoundedLine(BoundedLine other, Coordinate offset)
+    {
+        this.line = new ConcreteLine(other.line, offset);
+        this.originalBounds = new Bounds(
+            other.bounds.min.subtract(offset),
+            other.bounds.max.subtract(offset));
+        segment = this.line.infiniteIntersect(this.originalBounds);
+        if (segment != null) {
+            this.bounds = segment.getBounds();
+        }
+        else {
+            this.bounds = null;
+        }
+    }
+
+    // **********************************************************************
+    // *
+    // * Getters
+    // *
+    // **********************************************************************
+
+    /**
      * Return the ConcreteLine wrapped inside this BoundedLine.
      *
      * @return The ConcreteLine wrapped inside this BoundedLine.
@@ -174,12 +203,44 @@ public class BoundedLine extends Line
         return new Bounds(bounds);
     }
 
+    // **********************************************************************
+    // *
+    // * Offset support
+    // *
+    // **********************************************************************
+
+    /**
+     * Create a new line offset by the given coordinate.
+     *
+     * @param offset The coordinate to offset by. A point (x, t) on the line
+     * becomes (x - offset.x, t - offset.t) in the new line.
+     *
+     * @return A new offset line.
+     */
     @Override
+    public Line offsetLine(Coordinate offset)
+    {
+        return new BoundedLine(this, offset);
+    }
+
+    // **********************************************************************
+    // *
+    // * Drawing frame support
+    // *
+    // **********************************************************************
+
+     @Override
     public BoundedLine relativeTo(Frame prime)
     {
         //return new BoundedLine(line.relativeTo(prime));
         return null;
     }
+
+    // **********************************************************************
+    // *
+    // * Intersections
+    // *
+    // **********************************************************************
 
     @Override
     public Coordinate intersect(Line other)

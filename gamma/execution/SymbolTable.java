@@ -52,8 +52,8 @@ public class SymbolTable
      * Get a symbol from the symbol table. Since this always returns a value,
      * use contains() to ensure the symbol is in the symbol table.
      * <p>
-     * If the variable is an animation variable, we get it from the
-     * animation symbol table instead.
+     * If the variable is an dynamic variable, we get it from the
+     * dynamic symbol table instead.
      *
      * @param symbol The name of the symbol.
      * @return The symbol's value or null if it is not in the table.
@@ -63,8 +63,8 @@ public class SymbolTable
         // If this is an animation variable, get it from the animation symbol
         // table
 
-        AnimationSymbolTable animationTable = engine.getAnimationSymbolTable();
-        Object value = animationTable.get(symbol);
+        DynamicSymbolTable dynamicTable = engine.getDynamicSymbolTable();
+        Object value = dynamicTable.get(symbol);
         if (value == null) {
             value = table.get(symbol);
         }

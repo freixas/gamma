@@ -965,33 +965,33 @@ public class OffsetAcceleration implements ExecutionImmutable
      * Find the intersection of an offset acceleration curve with a line.
      *
      * @param line The line to intersect with.
-     * @param later True if we should return the later of the two possible
-     * results.
      *
-     * @return The intersection or null if there are no intersections or an
-     * infinite number of intersections.
+     * @return The intersections. There can be zero, one, or two intersections.
+     * If there are zero intersections, the returned value is null.
      */
-    public final Coordinate intersect(Line line, boolean later)
+    public final Coordinate[] intersect(Line line)
     {
         // If the acceleration is 0, our offset acceleration curve is also a
         // line
 
         if (zeroAcceleration) {
-            return line.intersect(new ConcreteLine(Line.AxisType.T, vInit, vPoint));
+            Coordinate intersection = line.intersect(new ConcreteLine(Line.AxisType.T, vInit, vPoint));
+            if (intersection == null) return null;
+            Coordinate[] results = { intersection };
+            return results;
         }
 
         // Now we translate the curve and line to the standard system, intersect
         // there and translate the results back
 
-        Coordinate translatedCoord = new Coordinate(line.getCoordinate());
-        translatedCoord.subtract(offset);
-        Line translatedLine = new ConcreteLine(line.getAngle(), translatedCoord);
-
-        Coordinate intersection = Acceleration.intersect(a, translatedLine, later);
-        if (intersection != null) {
-            intersection.add(offset);
+        Line translatedLine = line.offsetLine(offset);
+        Coordinate[] results = Acceleration.intersect(a, translatedLine);
+        if (results != null) {
+            for (Coordinate intersection : results) {
+                intersection.add(offset);
+            }
         }
-        return intersection;
+        return results;
     }
 
     /**

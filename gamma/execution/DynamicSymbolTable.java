@@ -16,7 +16,7 @@
  */
 package gamma.execution;
 
-import gamma.value.AnimationVariable;
+import gamma.value.DynamicVariable;
 
 /**
  * Animation variables are stored in this table and in the regular Symbol
@@ -26,9 +26,9 @@ import gamma.value.AnimationVariable;
  *
  * @author Antonio Freixas
  */
-public class AnimationSymbolTable extends SymbolTable
+public class DynamicSymbolTable extends SymbolTable
 {
-    public AnimationSymbolTable(HCodeEngine engine)
+    public DynamicSymbolTable(HCodeEngine engine)
     {
         super(engine);
     }
@@ -38,26 +38,37 @@ public class AnimationSymbolTable extends SymbolTable
     {
         Object var = directGet(symbol);
         if (var == null) return null;
-        return ((AnimationVariable)var).getCurrentValue();
+        return ((DynamicVariable)var).getCurrentValue();
     }
 
-    public AnimationVariable getAnimationVariable(String symbol)
+    public DynamicVariable getDynamicVariable(String symbol)
     {
         Object var = directGet(symbol);
         if (var == null) return null;
-        return (AnimationVariable)var;
+        return (DynamicVariable)var;
     }
 
+    /**
+     * Set the value of a symbol. If the symbol doesn't exist, create it.
+     * <p>
+     * The dynamic symbol table exist through multiple executions of a script.
+     * The first time a dynamic symbol is created, it is placed in the dynamic
+     * symbol table and is assigned the given value. In later executions, the
+     * symbol if left alone. The symbol's value is changed by changing the
+     * dynamic variable in some other manner.
+     *
+     * @param symbol The name of the symbol.
+     * @param value The symbol's value.
+     */
     @Override
     public void put(String symbol, Object value)
     {
         // If the symbol is already here, then it means this is not the initial
-        // frame of the animation
+        // execution of the script
 
         if (contains(symbol)) return;
 
         super.put(symbol, value);
-
     }
 
 }
