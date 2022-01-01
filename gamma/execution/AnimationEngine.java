@@ -410,7 +410,7 @@ public class AnimationEngine
         // First execution
 
         hCodeEngine = new HCodeEngine(window, setStatement, program);
-        hCodeEngine.execute(true);
+        hCodeEngine.execute();
 
         // We don't have the animation statement settings or dynamic variables until
         // after the first execution
@@ -521,7 +521,7 @@ public class AnimationEngine
 
         // Execute the HCode and LCode again
 
-        hCodeEngine.execute(true);
+        hCodeEngine.execute();
 
         // Try to see if we can keep the focus while the animation is running
 
@@ -583,7 +583,7 @@ public class AnimationEngine
     public void updateForDisplayVariable()
     {
         if (state != State.RUNNING) {
-            hCodeEngine.execute(true);
+            hCodeEngine.execute();
         }
     }
     /**

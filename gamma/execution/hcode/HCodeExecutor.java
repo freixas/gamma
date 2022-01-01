@@ -38,15 +38,7 @@ public class HCodeExecutor extends Executor
     @Override
     public List<Object> getData(ExecutorContext context)
     {
-        List<Object> data = program.getData((HCode)context);
-
-        // If we got the data size from the stack, we need to remove it
-        // before returning it. We only want the actual parameters
-
-        if (context.getNumberOfArgs() == -1) {
-            data.remove(data.size() - 1);
-        }
-        return data;
+        return program.getData((HCode)context);
     }
 
 }

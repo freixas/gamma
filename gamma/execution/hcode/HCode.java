@@ -269,30 +269,4 @@ public abstract class HCode extends ExecutorContext
         map.put(Type.COMMAND, command);
     }
 
-    private int argOffset;
-
-    /**
-     * Get the argument offset. This is a value set by the Parser and used
-     * to adjust the programs data pointer so that each HCode is matched to
-     * the correct data.
-     *
-     * @return The argument offset.
-     */
-    public int getArgOffset()
-    {
-        return argOffset;
-    }
-
-    /**
-     * Set the argument offset. This is a value set by the Parser and used to
-     * adjust the programs data pointer so that each HCode is matched to the
-     * correct data.
-     *
-     * @param argOffset
-     */
-    public void setArgOffset(int argOffset)
-    {
-        this.argOffset = argOffset;
-    }
-
 }

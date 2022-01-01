@@ -18,18 +18,15 @@ package gamma.execution;
 
 import gamma.ProgrammingException;
 import gamma.execution.hcode.HCode;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
-import gamma.value.ExecutionMutableSupport;
 
 /**
  * The HCodeProgram receives the hCode produced by the parser and transforms
  * it into separate HCode and data stacks. A master copy of the data can be
  * saved if the program will be executed multiple times.
- *  <p>
+ * <p>
  * One of the main tasks of the HCodeProgram is to fetch the data corresponding
  * to a given HCode.
  *
@@ -37,63 +34,29 @@ import gamma.value.ExecutionMutableSupport;
  */
 public class HCodeProgram
 {
-    private final ArrayList<HCode> hCodes;
-    private final LinkedList<Object> masterData;
+    private final LinkedList<Object> program;
     private LinkedList<Object> data;
-
-    private int dataPtr;
-    private int lastHCodeReturnCount;
 
     public HCodeProgram(LinkedList<Object> codes)
     {
-        this.hCodes = new ArrayList<>();
-        this.masterData = new LinkedList<>();
-
-        ListIterator<Object> iter = codes.listIterator();
-        int argOffset = 0;
-
-        while (iter.hasNext()) {
-            Object obj = iter.next();
-            if (obj instanceof HCode hCode) {
-                hCode.setArgOffset(argOffset);
-                argOffset = 0;
-                hCodes.add(hCode);
-            }
-            else {
-                masterData.add(obj);
-                argOffset++;
-            }
-        }
+        this.program = codes;
     }
 
     /**
-     * Reset the program for a new execution. This is called even for the
-     * first execution.
+     * Reset the program for a new execution. This is called even for the first
+     * execution.
      *
-     * @param copyData If true, the master data is copied and the copy is
-     * used for execution. If false, the master data is used directly (and
-     * consumed).
-     *
-     * @return An HCode iterator which traverses the HCode (not the data) stack.
+     * @return An iterator which traverses the program.
      */
-    public Iterator<HCode> reset(boolean copyData)
+    public Iterator<Object> initialize()
     {
-        dataPtr = 0;
-        lastHCodeReturnCount = 0;
+        data = new LinkedList<>();
+        return program.iterator();
+    }
 
-        if (copyData) {
-            ListIterator<Object> iter = masterData.listIterator();
-            data = new LinkedList<>();
-            while (iter.hasNext()) {
-                Object obj = iter.next();
-                data.add(ExecutionMutableSupport.copy(obj));
-            }
-        }
-        else {
-            data = masterData;
-        }
-
-        return hCodes.iterator();
+    public void pushData(Object obj)
+    {
+        data.add(obj);
     }
 
     /**
@@ -102,6 +65,7 @@ public class HCodeProgram
      * program.
      *
      * @param hCode The HCode whose data we want.
+     * 
      * @return A list of the matching data. While this list contains only the
      * data for the current HCode, changes to the returned data affect the
      * data stack. The data should be cleared when done and a result, if any,
@@ -110,39 +74,24 @@ public class HCodeProgram
     public List<Object> getData(HCode hCode)
     {
         int numOfArgs = hCode.getNumberOfArgs();
-        int numOfRets = hCode.getNumberOfReturnedValues();
-        int argOffset = hCode.getArgOffset();
-
-        dataPtr += lastHCodeReturnCount;
 
         // If the number of args is -1, get the number of args from the stack
 
         if (numOfArgs == -1) {
-            int lastArgPtr = dataPtr + argOffset - 1;
-            if (lastArgPtr >= data.size()) {
-                throw new ProgrammingException("CodeProgram.getData(): hCode arguments are missing");
-            }
-            Object obj = data.get(lastArgPtr);
+            Object obj = data.removeLast();         // Remove the count
             if (!(obj instanceof Integer)) {
                 throw new ProgrammingException("HCodeProgram.getData(): Expected the number of hCode arguments");
             }
-
-            // We add 1 to allow for the count
-
-            numOfArgs = (Integer)obj + 1;
+            numOfArgs = (Integer)obj;
         }
-
-        // Adjust the data ptr to point to the beginning of the arguments
-
-        dataPtr += argOffset - numOfArgs;
-
-        // Grab the count of values returned for next time
-
-        lastHCodeReturnCount = numOfRets;
 
         // Create a sublist of just the arguments
 
-        return data.subList(dataPtr, dataPtr + numOfArgs);
+        if (data.size() < numOfArgs) {
+            throw new ProgrammingException("HCodeProgram.getData(): Too few elements on the data stack");
+        }
+
+        return data.subList(data.size() - numOfArgs, data.size());
     }
 
     /**

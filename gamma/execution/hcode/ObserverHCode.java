@@ -44,9 +44,9 @@ public class ObserverHCode extends ArgInfoHCode
     public void execute(HCodeEngine engine, List<Object> data)
     {
         // The total number of segments is the size of the code stack, minus
-        // the worldline initializer and the argument count
+        // the worldline initializer
 
-        int numOfSegments = data.size() - 2;
+        int numOfSegments = data.size() - 1;
 
         // Grab the worldline initializer
 

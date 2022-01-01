@@ -40,16 +40,16 @@ public class FunctionHCode extends ArgInfoHCode
     @Override
     public void execute(HCodeEngine engine, List<Object> data)
     {
-        String funcName = (String)data.get(data.size() - 2);
+        String funcName = (String)data.get(data.size() - 1);
 
         Function function = Function.get(funcName);
         if (function == null) {
             throw new ExecutionException("Uknown function '" + funcName + "'");
         }
 
-        // The function arguments omit the argument count and function name
+        // The function arguments function name
 
-        List<Object> funcData = data.subList(0, data.size() - 2);
+        List<Object> funcData = data.subList(0, data.size() - 1);
 
         // Execute a Function that uses ArgInfo
 

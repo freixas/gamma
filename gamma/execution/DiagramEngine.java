@@ -95,8 +95,8 @@ public class DiagramEngine
 
             else {
                 hCodeEngine = new HCodeEngine(window, setStatement, program);
-                hCodeEngine.execute(hasDisplayVariables);
-          
+                hCodeEngine.execute();
+
                 // If we have dynamic variables, we need add the controls to the main window
 
                 if (hasDisplayVariables) {
@@ -129,7 +129,7 @@ public class DiagramEngine
             animationEngine.updateForDisplayVariable();
         }
         else {
-            hCodeEngine.execute(true);
+            hCodeEngine.execute();
         }
     }
 

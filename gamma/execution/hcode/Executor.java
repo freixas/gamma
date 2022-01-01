@@ -117,7 +117,7 @@ public abstract class Executor
      * reflecting all their generic arguments as type Object.
      * @return The method.
      */
-    private Method getMethod(LambdaFunction func, Class[] params)
+    private Method getMethod(LambdaFunction func, Class<?>[] params)
     {
         Method method = null;
         try {

@@ -273,7 +273,7 @@ public class HCodeEngine
         window.print(str);
     }
 
-    public void execute(boolean copyData)
+    public void execute()
     {
         lineNumber = 0;
         styleDefaults = new StyleStruct();
@@ -292,7 +292,7 @@ public class HCodeEngine
         table = new SymbolTable(this);
         initializeSymbolTable(table);
 
-        Iterator<HCode> iter = program.reset(copyData);
+        Iterator<Object> iter = program.initialize();
 
         // Always start out with execution enabled
 
@@ -300,40 +300,50 @@ public class HCodeEngine
 
         try {
             while (iter.hasNext()) {
-                HCode hCode = iter.next();
+                Object obj = iter.next();
+                if (!(obj instanceof HCode)) {
+                    program.pushData(obj);
+                }
+                else {
+                    HCode hCode = (HCode)obj;
 
-                if (hCode instanceof ArgInfoHCode argInfoHCode) {
+                    // Individual HCode using ArgInfo method
 
-                    // Check the arguments
+                    if (hCode instanceof ArgInfoHCode argInfoHCode) {
 
-                    ArgInfo argInfo = argInfoHCode.getArgInfo();
+                        // Check the arguments
 
-                    // Get the number of arguments
+                        ArgInfo argInfo = argInfoHCode.getArgInfo();
 
-                    List<Object> data = program.getData(argInfoHCode);
+                        // Get the number of arguments
 
-                    // Execute the hCode
+                        List<Object> data = program.getData(argInfoHCode);
 
-                    if (executeHCode(hCode)) {
-                        argInfo.checkTypes(data);
-                        argInfoHCode.execute(this, data);
-                    }
+                        // Execute the hCode
 
-                    // Skip execution, but maintain the stack by clearing
-                    // the arguments and adding a potential return value
+                        if (executeHCode(hCode)) {
+                            argInfo.checkTypes(data);
+                            argInfoHCode.execute(this, data);
+                        }
 
-                    else {
-                        data.clear();
-                        if (argInfo.getNumberOfReturnedValues() == 1) {
-                            data.add(new Object());
+                        // Skip execution, but maintain the stack by clearing
+                        // the arguments and adding a potential return value
+
+                        else {
+                            data.clear();
+                            if (argInfo.getNumberOfReturnedValues() == 1) {
+                                data.add(new Object());
+                            }
                         }
                     }
-                }
-                else if (hCode instanceof GenericHCode genericHCode) {
-                    genericHCode.execute(this);
+
+                    // Generic HCode method
+
+                    else if (hCode instanceof GenericHCode genericHCode) {
+                        genericHCode.execute(this);
+                    }
                 }
             }
-
             if (!program.isDataEmpty()) {
                 throw new ProgrammingException("HCodeEngine.execute(): Execution ended but the data stack is not empty");
             }
