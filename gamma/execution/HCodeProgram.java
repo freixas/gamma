@@ -18,7 +18,9 @@ package gamma.execution;
 
 import gamma.ProgrammingException;
 import gamma.execution.hcode.HCode;
-import java.util.Iterator;
+import gamma.execution.hcode.Jump;
+import gamma.execution.hcode.Label;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -40,18 +42,51 @@ public class HCodeProgram
     public HCodeProgram(LinkedList<Object> codes)
     {
         this.program = codes;
+
+        // Convert labels to program locations. We start by finding all the
+        // labels. We scan backwards in case we have multiple labels in
+        // a sequence. All of them should point to the first non-label item
+        // that follows
+
+        HashMap<Integer, Integer> labels = new HashMap<>();
+        int lastNonLabel = codes.size();
+
+        for (int i = codes.size() - 1; i > -1; i--) {
+            Object code = codes.get(i);
+            if (code instanceof Label label) {
+                labels.put(label.getId(), lastNonLabel);
+            }
+            else {
+                lastNonLabel = i;
+            }
+        }
+
+        // Now that we know where every label's location is, let's find all the
+        // Jump instructions and convert their label to a location
+
+        for (int i = 0; i < codes.size(); i++) {
+            Object code = codes.get(i);
+            if (code instanceof Jump jump) {
+                Integer id = jump.getId();
+                if (!labels.containsKey(id)) {
+                    throw new ProgrammingException("HCodeProgram: Label '" + jump.getId() + "' not found");
+                }
+               int location = labels.get(id);
+               jump.setJumpLocation(location);
+            }
+        }
     }
 
     /**
      * Reset the program for a new execution. This is called even for the first
      * execution.
      *
-     * @return An iterator which traverses the program.
+     * @return The program.
      */
-    public Iterator<Object> initialize()
+    public LinkedList<Object> initialize()
     {
         data = new LinkedList<>();
-        return program.iterator();
+        return program;
     }
 
     public void pushData(Object obj)
@@ -65,7 +100,7 @@ public class HCodeProgram
      * program.
      *
      * @param hCode The HCode whose data we want.
-     * 
+     *
      * @return A list of the matching data. While this list contains only the
      * data for the current HCode, changes to the returned data affect the
      * data stack. The data should be cleared when done and a result, if any,

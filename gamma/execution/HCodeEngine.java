@@ -24,6 +24,7 @@ import gamma.execution.hcode.HCodeExecutor;
 import gamma.execution.hcode.HCode;
 import gamma.execution.hcode.ArgInfoHCode;
 import gamma.execution.hcode.GenericHCode;
+import gamma.execution.hcode.Label;
 import gamma.execution.hcode.LineInfoHCode;
 import gamma.execution.hcode.SetStatement;
 import gamma.value.Color;
@@ -39,7 +40,7 @@ import gamma.value.Style;
 import gamma.value.WInitializer;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -56,12 +57,11 @@ public class HCodeEngine
     private final MainWindow window;
     private final SetStatement setStatement;
     private final HCodeProgram program;
+    private int programCounter;
 
     private final DynamicSymbolTable dynamicTable;
     private int precision;
     private final SetStatement.PrecisionType precisionType;
-
-    private boolean isExecutionEnabled;
 
     SymbolTable table;
     private LCodeEngine lCodeEngine;
@@ -83,7 +83,6 @@ public class HCodeEngine
         this.hCodeExecutor = new HCodeExecutor(this);
         this.functionExecutor = new FunctionExecutor();
         precisionType = SetStatement.PrecisionType.DISPLAY;
-        isExecutionEnabled = true;
         setPrecision(precisionType);
     }
 
@@ -187,46 +186,6 @@ public class HCodeEngine
         return functionExecutor;
     }
 
-    public boolean isExecutionEnabled()
-    {
-        return isExecutionEnabled;
-    }
-
-    public void setExecutionEnabled(boolean isExecutionEnabled)
-    {
-        this.isExecutionEnabled = isExecutionEnabled;
-    }
-
-    /**
-     * Decide if we should execute a non-generic HCode. Unless the HCode
-     * is on a list of always-execute exemptions, it will be executed based on
-     * isExecutionEnabled(). Generic HCodes are handled by executeGenericHCode().
-     *
-     * @param hCode The HCode to check for an exemption.
-     *
-     * @return True if we should execute this HCode
-     */
-    public boolean executeHCode(HCode hCode)
-    {
-        if (hCode instanceof LineInfoHCode) return true;
-        return isExecutionEnabled();
-    }
-
-    /**
-     * Decide if we should execute a generic HCode. Unless the HCode
-     * is on a list of always-execute exemptions, it will be executed based on
-     * isExecutionEnabled(). Non-generic HCodes are handled by executeHCode().
-     *
-     * @param type The generic HCode type to check for an exemption.
-     *
-     * @return True if we should execute this generic HCode
-     */
-    public boolean executeGenericHCode(HCode.Type type)
-    {
-        if (type == HCode.Type.ENABLE) return true;
-        return isExecutionEnabled();
-    }
-
     public File getFile()
     {
         return file;
@@ -292,21 +251,16 @@ public class HCodeEngine
         table = new SymbolTable(this);
         initializeSymbolTable(table);
 
-        Iterator<Object> iter = program.initialize();
-
-        // Always start out with execution enabled
-
-        isExecutionEnabled = true;
+        LinkedList<Object> code = program.initialize();
+        programCounter = 0;
 
         try {
-            while (iter.hasNext()) {
-                Object obj = iter.next();
-                if (!(obj instanceof HCode)) {
+            while (programCounter < code.size()) {
+                Object obj = code.get(programCounter);
+                if (!(obj instanceof HCode) && !(obj instanceof Label)) {
                     program.pushData(obj);
                 }
-                else {
-                    HCode hCode = (HCode)obj;
-
+                else if (obj instanceof HCode hCode) {
                     // Individual HCode using ArgInfo method
 
                     if (hCode instanceof ArgInfoHCode argInfoHCode) {
@@ -321,20 +275,8 @@ public class HCodeEngine
 
                         // Execute the hCode
 
-                        if (executeHCode(hCode)) {
-                            argInfo.checkTypes(data);
-                            argInfoHCode.execute(this, data);
-                        }
-
-                        // Skip execution, but maintain the stack by clearing
-                        // the arguments and adding a potential return value
-
-                        else {
-                            data.clear();
-                            if (argInfo.getNumberOfReturnedValues() == 1) {
-                                data.add(new Object());
-                            }
-                        }
+                        argInfo.checkTypes(data);
+                        argInfoHCode.execute(this, data);
                     }
 
                     // Generic HCode method
@@ -343,6 +285,7 @@ public class HCodeEngine
                         genericHCode.execute(this);
                     }
                 }
+                programCounter++;
             }
             if (!program.isDataEmpty()) {
                 throw new ProgrammingException("HCodeEngine.execute(): Execution ended but the data stack is not empty");
@@ -365,6 +308,14 @@ public class HCodeEngine
             lCodeEngine.setUpDrawingFrame();
             lCodeEngine.execute();
         }
+    }
+
+    public void goTo(int location)
+    {
+        // The program counter will be incremented after executing a jump
+        // instruction, so we decrement the given location by one
+
+        programCounter = location - 1;
     }
 
     public void close()

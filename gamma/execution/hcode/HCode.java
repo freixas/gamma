@@ -25,6 +25,7 @@ import gamma.math.Util;
 import gamma.value.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import jdk.jshell.spi.ExecutionControl;
 
 /**
  * An HCode is a high-level instruction for an imaginary machine which we
@@ -36,9 +37,11 @@ public abstract class HCode extends ExecutorContext
 {
     public enum Type
     {
-        ENABLE, PRINT, SET_STYLE,
-        FETCH, FETCH_PROP, FETCH_ADDRESS, FETCH_PROP_ADDRESS,
-        UNARY_MINUS, UNARY_PLUS, SUB, MULT, DIV, EXP, LORENTZ, INV_LORENTZ,
+        PRINT, SET_STYLE,
+        DYNAMIC_NAME, FETCH, FETCH_PROP, FETCH_ADDRESS, FETCH_PROP_ADDRESS,
+        NOT, TO_BOOLEAN, OR, AND,
+        EQ, NE, LT, GT, LE, GE,
+        UNARY_MINUS, UNARY_PLUS, SUB, MULT, DIV, REMAINDER, EXP, LORENTZ, INV_LORENTZ,
         W_INITIALIZER, W_SEGMENT, PROPERTY, PROPERTY_LIST,
         FRAME, OBSERVER_FRAME, AXIS_LINE, ANGLE_LINE, ENDPOINT_LINE, PATH, BOUNDS, INTERVAL, STYLE, COORDINATE,
         COMMAND
@@ -50,15 +53,9 @@ public abstract class HCode extends ExecutorContext
     // * Misc
     // ****************************************
 
-    // ENABLE
-    static final FunctionalOneArgNoRet<Double> enable = (engine, dbl) -> {
-        engine.setExecutionEnabled(!Util.fuzzyZero(dbl));
-    };
     // PRINT
     static final FunctionalOneArgNoRet<Object> print = (engine, obj) -> {
-        if (engine.isExecutionEnabled()) {
-            engine.print(engine.toDisplayableString(obj));
-        }
+        engine.print(engine.toDisplayableString(obj));
     };
     //SET_STYLE
     static final FunctionalOneArgNoRet<PropertyList> setStyle = (engine, properties) -> {
@@ -75,6 +72,19 @@ public abstract class HCode extends ExecutorContext
     // * Fetching
     // ****************************************
 
+    // DYNAMIC_NAME
+    static final FunctionalTwoArg<Object, String, String> dynamicName = (engine, obj, baseName) -> {
+        if (obj instanceof Double dbl) {
+            int index = Util.toInt(dbl);
+            return baseName + "$" + index;
+        }
+        else if (obj instanceof String str) {
+            return baseName + "$" + str;
+        }
+        else {
+            throw new ExecutionException("Array index must be a number or a string");
+        }
+    };
     // FETCH
     static final FunctionalOneArg<String, Object> fetch = (engine, symbol) -> {
         SymbolTable table = engine.getSymbolTable();
@@ -106,6 +116,28 @@ public abstract class HCode extends ExecutorContext
     // * Operators
     // ****************************************
 
+    // NOT
+    static final FunctionalOneArg<Double, Double> not = (engine, arg1) -> Util.fuzzyZero(arg1) ? 1.0 : 0.0;
+    // TO_BOOLEAN
+    static final FunctionalOneArg<Double, Double> toBoolean = (engine, arg1) -> Util.fuzzyZero(arg1) ? 0.0 : 1.0;
+    // OR
+    static final FunctionalTwoArg<Double, Double, Double> or = (engine, arg1, arg2) -> !Util.fuzzyZero(arg1) || !Util.fuzzyZero(arg2) ? 1.0 : 0.0;
+    //AND
+    static final FunctionalTwoArg<Double, Double, Double> and = (engine, arg1, arg2) -> !Util.fuzzyZero(arg1) && !Util.fuzzyZero(arg2) ? 1.0 : 0.0;
+
+    // EQ
+    static final FunctionalTwoArg<Double, Double, Double> eq = (engine, arg1, arg2) -> Util.fuzzyEQ(arg1, arg2) ? 1.0 : 0.0;
+    // NE
+    static final FunctionalTwoArg<Double, Double, Double> ne = (engine, arg1, arg2) -> Util.fuzzyNE(arg1, arg2) ? 1.0 : 0.0;
+    // LT
+    static final FunctionalTwoArg<Double, Double, Double> lt = (engine, arg1, arg2) -> Util.fuzzyLT(arg1, arg2) ? 1.0 : 0.0;
+    // GT
+    static final FunctionalTwoArg<Double, Double, Double> gt = (engine, arg1, arg2) -> Util.fuzzyGT(arg1, arg2) ? 1.0 : 0.0;
+    // LE
+    static final FunctionalTwoArg<Double, Double, Double> le = (engine, arg1, arg2) -> Util.fuzzyLE(arg1, arg2) ? 1.0 : 0.0;
+    // GE
+    static final FunctionalTwoArg<Double, Double, Double> ge = (engine, arg1, arg2) -> Util.fuzzyGE(arg1, arg2) ? 1.0 : 0.0;
+
     // UNARY_MINUS
     static final FunctionalOneArg<Double, Double> unaryMinus = (engine, arg1) -> -arg1;
      // UNARY_PLUS
@@ -116,6 +148,8 @@ public abstract class HCode extends ExecutorContext
     static final FunctionalTwoArg<Double, Double, Double> mult = (engine, arg1, arg2) -> arg1 * arg2;
     // DIV
     static final FunctionalTwoArg<Double, Double, Double> div = (engine, arg1, arg2) -> arg1 / arg2;
+    // REMAINDER
+    static final FunctionalTwoArg<Double, Double, Double> remainder = (engine, arg1, arg2) -> arg1 % arg2;
     // EXP
     static final FunctionalTwoArg<Double, Double, Double> exp = (engine, arg1, arg2) -> Math.pow(arg1, arg2);
     // LORENTZ
@@ -232,20 +266,34 @@ public abstract class HCode extends ExecutorContext
         engine.addCommand(command);
     };
     static {
-        map.put(Type.ENABLE, enable);
         map.put(Type.PRINT, print);
         map.put(Type.SET_STYLE, setStyle);
 
+        map.put(Type.DYNAMIC_NAME, dynamicName);
         map.put(Type.FETCH, fetch);
         map.put(Type.FETCH_PROP, fetchProp);
         map.put(Type.FETCH_ADDRESS, fetchAddress);
         map.put(Type.FETCH_PROP_ADDRESS, fetchPropAddress);
 
+        map.put(Type.NOT, not);
+        map.put(Type.TO_BOOLEAN, toBoolean);
+        map.put(Type.OR, or);
+        map.put(Type.AND, and);
+
+        map.put(Type.EQ, eq);
+        map.put(Type.NE, ne);
+        map.put(Type.LT, lt);
+        map.put(Type.GT, gt);
+        map.put(Type.LE, le);
+        map.put(Type.GE, ge);
+
+        map.put(Type.NOT, not);
         map.put(Type.UNARY_MINUS, unaryMinus);
         map.put(Type.UNARY_PLUS, unaryPlus);
         map.put(Type.SUB, sub);
         map.put(Type.MULT, mult);
         map.put(Type.DIV, div);
+        map.put(Type.REMAINDER, remainder);
         map.put(Type.EXP, exp);
         map.put(Type.LORENTZ, lorentz);
         map.put(Type.INV_LORENTZ, invLorentz);

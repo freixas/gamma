@@ -60,7 +60,7 @@ public abstract class Executor
      * @param execute True if this function should be executed. If false, the
      * stack state is maintained, but the function is not executed.
      */
-    public void execute(ExecutorContext context, HCodeEngine engine, LambdaFunction func, boolean execute)
+    public void execute(ExecutorContext context, HCodeEngine engine, LambdaFunction func)
     {
         // We need to know the number of arguments.
 
@@ -93,13 +93,7 @@ public abstract class Executor
             reflectionArgs = args.toArray();
         }
 
-        Object result;
-        if (execute) {
-            result = executeImpl(method, engine, func, reflectionArgs);
-        }
-        else {
-            result = new Object();      // Dummy return value
-        }
+        Object result = executeImpl(method, engine, func, reflectionArgs);
 
         args.clear();
         if (getNumberOfReturnedValues(context, func) > 0) {
@@ -123,7 +117,7 @@ public abstract class Executor
         try {
             method = func.getClass().getMethod("execute", params);
         }
-        catch (NoSuchMethodException e) {
+        catch (NoSuchMethodException | ClassCastException e) {
             throw new ExecutionException("Incorrect number or types of arguments");
         }
         catch (IllegalArgumentException e) {
@@ -150,7 +144,7 @@ public abstract class Executor
             // result = ((FunctionalOneArg<Double, Double>)func).execute(engine, (Double)args[1]);
             result = method.invoke(func, args);
         }
-        catch (IllegalArgumentException e) {
+        catch (IllegalArgumentException | ClassCastException e) {
             throw new ExecutionException("Invalid Argument", e);
         }
         catch (InvocationTargetException e) {

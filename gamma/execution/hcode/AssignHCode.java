@@ -52,31 +52,28 @@ public class AssignHCode extends ArgInfoHCode
         Object arg2 = data.get(1);
         data.clear();
 
-        if (engine.isExecutionEnabled()) {
-            
-            // If it's a property value, it must exist and the type of the property
-            // and the value must be the same.
+        // If it's a property value, it must exist and the type of the property
+        // and the value must be the same.
 
-            if (address instanceof ObjectPropertyAddress) {
-                if (!address.exists() || !address.typeMatches(arg2)) {
-                    throw new ExecutionException("Variable does not exist or is of the wrong type");
-                }
+        if (address instanceof ObjectPropertyAddress) {
+            if (!address.exists() || !address.typeMatches(arg2)) {
+                throw new ExecutionException("Variable does not exist or is of the wrong type");
             }
-
-            // Otherwise, this is a symbol table address. We need to make sure we
-            // are not assigning to an animation variable
-
-            else if (address.exists()) {
-                String name = ((SymbolTableAddress)address).getName();
-                if (engine.getDynamicSymbolTable().contains(name)) {
-                    throw new ExecutionException("You cannot change the value of an animation variable");
-                }
-            }
-
-            // Set the symbol pointed to by the address to the given value
-
-            address.setValue(arg2);
         }
+
+        // Otherwise, this is a symbol table address. We need to make sure we
+        // are not assigning to an animation variable
+
+        else if (address.exists()) {
+            String name = ((SymbolTableAddress)address).getName();
+            if (engine.getDynamicSymbolTable().contains(name)) {
+                throw new ExecutionException("You cannot change the value of an animation variable");
+            }
+        }
+
+        // Set the symbol pointed to by the address to the given value
+
+        address.setValue(arg2);
     }
 
     @Override

@@ -61,7 +61,7 @@ public class GenericFunction extends Function
     {
         this.data = data;
         this.functionExecutor = engine.getFunctionExecutor();
-        functionExecutor.execute(this, engine, func, true);
+        functionExecutor.execute(this, engine, func);
     }
 
     public List<Object> getData()

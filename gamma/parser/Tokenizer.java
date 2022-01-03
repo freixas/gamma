@@ -38,8 +38,8 @@ public class Tokenizer
     private int lineNumberStart;
     private int charNumber;
 
-    private final String operators = "+-*/^.<>";
-    private final String delimiters = ";,:=[]()";
+    private final String operators = "+-*/^.<>!&|%=";
+    private final String delimiters = ";,:=[](){}";
     private final String hexDigits = "01234567890ABCDEFabcdef";
 
     public Tokenizer(File file, String script)
@@ -89,11 +89,22 @@ public class Tokenizer
                 lineNumber++;
                 cPtr++;
                 lineNumberStart = cPtr;
+                continue;
+            }
+
+            // Handle operators
+
+            if (operators.indexOf(c) != -1) {
+                String operator = getOperator();
+                if (operator != null) {
+                    list.add(new Token<>(Token.Type.OPERATOR, operator, file, lineNumber, charNumber));
+                    continue;
+                }
             }
 
             // Handle delimiters
 
-            else if (delimiters.indexOf(c) != -1) {
+            if (delimiters.indexOf(c) != -1) {
                 list.add(new Token<>(Token.Type.DELIMITER, c, file, lineNumber, charNumber));
                 cPtr++;
             }
@@ -116,13 +127,6 @@ public class Tokenizer
                      (c == '.' && Character.isDigit(cNext))  ||
                      Character.isDigit(c)) {
                 list.add(new Token<>(Token.Type.NUMBER, getNumber(), file, lineNumber, charNumber));
-            }
-
-            // Handle operators
-
-            else if (operators.indexOf(c) != -1) {
-                list.add(new Token<>(Token.Type.OPERATOR, c, file, lineNumber, charNumber));
-                cPtr++;
             }
 
             // Skip whitespace
@@ -261,8 +265,6 @@ public class Tokenizer
     private double getNumber()
             throws ParseException
     {
-        int startCPtr = cPtr;
-
         // Check for color numbers
 
         StringBuilder number = new StringBuilder();
@@ -331,11 +333,38 @@ public class Tokenizer
             throw new ParseException(
                 file, lineNumber, charNumber, "Invalid number: '" + number.toString() + "'");
         }
+    }
 
+    private String getOperator()
+    {
+        // Check for two-character operators
+        // Boolean: &&, ||, ==, !=, <=, >=
+        // Lorentz transform: <-, ->
+
+        // We know the first character is an operator
+
+        if (c == '&' && cNext == '&') { cPtr += 2; return "&&"; }
+        if (c == '|' && cNext == '|') { cPtr += 2; return "||"; }
+        if (c == '!' && cNext == '=') { cPtr += 2; return "!="; }
+        if (c == '=' && cNext == '=') { cPtr += 2; return "=="; }
+        if (c == '<' && cNext == '=') { cPtr += 2; return "<="; }
+        if (c == '>' && cNext == '=') { cPtr += 2; return ">="; }
+        if (c == '<' && cNext == '-') { cPtr += 2; return "<-"; }
+        if (c == '-' && cNext == '>') { cPtr += 2; return "->"; }
+
+        // Some single characters aren't operators
+
+        if ( c == '&' || c == '|' || c == '=' || (c == '.' && Character.isDigit(cNext))) {
+            return null;
+        }
+
+        cPtr++;
+        return Character.toString(c);
     }
 
     private boolean isHexDigit(char c)
     {
         return hexDigits.indexOf(c) != -1;
     }
+
 }

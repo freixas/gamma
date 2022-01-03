@@ -65,7 +65,7 @@ public class GenericHCode extends HCode
     {
         // System.out.println("Executing " + type);
         this.hCodeExecutor = engine.getHCodeExecutor();
-        engine.getHCodeExecutor().execute(this, engine, func, engine.executeGenericHCode(type));
+        engine.getHCodeExecutor().execute(this, engine, func);
     }
 
     @Override

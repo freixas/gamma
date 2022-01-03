@@ -43,18 +43,18 @@ public class Parser
     {
         static private boolean initialized = false;
 
-        final char chr;
+        final String operator;
         final boolean isLeftAssoc;
         final boolean isBinary;
         final int precedence;
 
-        static HashMap<Character, Op> binary = new HashMap<>();
-        static HashMap<Character, Op> unary = new HashMap<>();
+        static HashMap<String, Op> binary = new HashMap<>();
+        static HashMap<String, Op> unary = new HashMap<>();
 
         @SuppressWarnings("LeakingThisInConstructor")
-        Op(char chr, boolean isLeftAssoc, boolean isBinary, int precedence)
+        Op(String operator, boolean isLeftAssoc, boolean isBinary, int precedence)
         {
-            this.chr = chr;
+            this.operator = operator;
             this.isLeftAssoc = isLeftAssoc;
             this.isBinary = isBinary;
             this.precedence = precedence;
@@ -63,33 +63,33 @@ public class Parser
             // instances
 
             if (isBinary) {
-                binary.put(chr, this);
+                binary.put(operator, this);
             }
             else {
-                unary.put(chr, this);
+                unary.put(operator, this);
             }
 
             initialized = true;
         }
 
         /**
-         * A factory method for creating operators. Given a character,
-         * it finds an returns and matching operator.
+         * A factory method for creating operators. Given an operator string,
+         * it finds and returns a matching operator.
          *
          * @param chr
          * @return
          */
-        static Op find(char chr, boolean isBinary)
+        static Op find(String operator, boolean isBinary)
         {
             Op result;
             if (isBinary) {
-                result = binary.get(chr);
+                result = binary.get(operator);
             }
             else {
-                result = unary.get(chr);
+                result = unary.get(operator);
             }
             if (result == null) {
-                throw new RuntimeException("Op.find failed to find chr '" + chr + "' in " + (isBinary ? "binary" : "unary") + " table");
+                throw new RuntimeException("Op.find failed to find chr '" + operator + "' in " + (isBinary ? "binary" : "unary") + " table");
             }
             return result;
         }
@@ -107,7 +107,7 @@ public class Parser
         @Override
         public String toString()
         {
-            return "Op{" + "chr=" + chr + '}';
+            return "Op{" + "operator=" + operator + '}';
         }
     }
 
@@ -115,12 +115,24 @@ public class Parser
     {
         private final Token<T> token;
         private final Op op;
+        private int id;
 
         OpToken(Token<T> token, Op op)
         {
             super(token.getType(), token.getValue(), token.getFile(), token.getLineNumber(), token.getCharNumber());
             this.token = token;
             this.op = op;
+            this.id = -1;
+        }
+
+        public void setId(int id)
+        {
+            this.id = id;
+        }
+
+        public int getId()
+        {
+            return id;
         }
 
         @Override
@@ -140,6 +152,8 @@ public class Parser
     private boolean animationVariableIsPresent;
     private boolean displayVariableIsPresent;
 
+    private int labelId;
+
     private SetStatement setStatement;
 
     private final Token<?> dummyToken = new Token<>(Token.Type.DELIMITER, '~', null, 0, 0);
@@ -158,18 +172,37 @@ public class Parser
         // We only need to initialize the opcode tables once.
 
         if (!Op.isInitialized()) {
-            new Op('^', false, true, 15);
-            new Op('*', true, true, 14);
-            new Op('/', true, true, 14);
-            new Op('+', true, true, 13);
-            new Op('-', true, true, 13);
-            new Op('<', true, true, 12);
-            new Op('>', true, true, 12);
-            new Op('+', false, false, 16);
-            new Op('-', false, false, 16);
-            new Op('.', true, true, 20);
-            new Op('(', false, true, 21);
-            new Op('!', true, true, 1000); // Used for function names
+            new Op("<-", true,  true,  8);
+            new Op("->", true,  true,  8);
+
+            new Op("||", true,  true,  9);
+            new Op("&&", true,  true,  10);
+
+            new Op("==", true,  true,  11);
+            new Op("!=", true,  true,  11);
+
+            new Op("<",  true,  true,  12);
+            new Op(">",  true,  true,  12);
+            new Op("<=", true,  true,  12);
+            new Op(">=", true,  true,  12);
+
+            new Op("+",  true,  true,  13);
+            new Op("-",  true,  true,  13);
+
+            new Op("*",  true,  true,  14);
+            new Op("/",  true,  true,  14);
+            new Op("%",  true,  true,  14);
+
+            new Op("^",  false, true,  15);
+
+            new Op("!",  false, false, 16);
+            new Op("+",  false, false, 16);
+            new Op("-",  false, false, 16);
+
+            new Op(".",  true,  true,  20);
+
+            new Op("(",  false, true,  21);
+            new Op("FUNC",  true,  true,  1000); // Used for function names
         }
     }
 
@@ -237,6 +270,8 @@ public class Parser
 
         setStatement = new SetStatement();
 
+        labelId = 0;
+
         Tokenizer tokenizer = new Tokenizer(file, script);
         tokens = tokenizer.tokenize();
 
@@ -264,40 +299,96 @@ public class Parser
 
         nextToken();
         while (!isEOF()) {
+            codes.addAll(parseStatementBlock());
+        }
 
-            // A statement can be empty
+        return codes;
+    }
 
-            if (isName()) {
-                codes.add(new LineInfoHCode(curToken.getFile(), curToken.getLineNumber()));
-                switch (getString()) {
-                    case "include" -> parseIncludeStatement();
-                    case "stylesheet" -> parseStylesheetStatement();
-                    case "set" -> parseSetStatement();
-                    case "enable" -> {
+    private LinkedList<Object> parseStatementBlock() throws ParseException
+    {
+        LinkedList<Object> codes = new LinkedList<>();
 
-                        // We need to make sure the enable statement is always
-                        // executed. While the enable HCode is always executed,
-                        // other HCodes won't necessarily be executed, so we
-                        // add the equivalent of "enable true;" in front
+        while (!isEOF() && !(isDelimiter() && getChar() == '}')) {
 
-                        codes.add(1.0);
-                        codes.add(new GenericHCode(HCode.Type.ENABLE));
-                        codes.addAll(parseEnableStatement());
-                    }
-                    case "print" -> codes.addAll(parsePrintStatement());
-                    case "let" -> codes.addAll(parseAssignmentStatement());
-                    case "style" -> codes.addAll(parseStyleStatement());
-                    default -> codes.addAll(parseCommandStatement());
+            // A statement block can be a statement block within braces
+
+            if (isDelimiter() && getChar() == '{') {
+                nextToken();
+                codes.addAll(parseStatementBlock());
+                if (!isDelimiter() || getChar() != '}') {
+                    throwParseException("Expected a '}'");
                 }
+                nextToken();
             }
 
-            // Deliberately fall through
+            // Or a statement
 
-            if (!isDelimiter() || getChar() != ';') {
-                throwParseException("Expected the start of a statement");
+            else {
+                codes.addAll(parseStatement());
             }
+        }
 
+        return codes;
+    }
+
+    private LinkedList<Object> parseStatement() throws ParseException
+    {
+        LinkedList<Object> codes = new LinkedList<>();
+
+        if (isName()) {
+            codes.add(new LineInfoHCode(curToken.getFile(), curToken.getLineNumber()));
+            switch (getString()) {
+                case "if" -> codes.addAll(parseIfStatement());
+                case "while" -> codes.addAll(parseWhileStatement());
+                case "for" -> codes.addAll(parseForStatement());
+                default -> codes.addAll(parseSemiStatement());
+            }
+        }
+        else if (isDelimiter() && getChar() == '{') {
             nextToken();
+            codes.addAll(parseStatementBlock());
+            if (!isDelimiter() || getChar() != '}') {
+                throwParseException("Expected a '}'");
+            }
+            nextToken();
+        }
+        else {
+            throwParseException("Expected the start of a statement");
+        }
+
+        return codes;
+    }
+
+    private LinkedList<Object> parseSemiStatement() throws ParseException
+    {
+        LinkedList<Object> codes = new LinkedList<>();
+
+        codes.addAll(parseSimpleStatement());
+
+        if (!isDelimiter() || getChar() != ';') {
+            throwParseException("Expected a ';'");
+        }
+        nextToken();
+
+        return codes;
+    }
+
+    private LinkedList<Object> parseSimpleStatement() throws ParseException
+    {
+        LinkedList<Object> codes = new LinkedList<>();
+
+        if (isName()) {
+            switch (getString()) {
+                case "include" -> parseIncludeStatement();
+                case "stylesheet" -> parseStylesheetStatement();
+                case "set" -> parseSetStatement();
+                case "print" -> codes.addAll(parsePrintStatement());
+                case "let" -> codes.addAll(parseAssignmentStatement());
+                case "style" -> codes.addAll(parseStyleStatement());
+                case "if" -> codes.addAll(parseIfStatement());
+                default -> codes.addAll(parseCommandStatement());
+            }
         }
 
         return codes;
@@ -305,8 +396,6 @@ public class Parser
 
     private void parseIncludeStatement() throws ParseException
     {
-        LinkedList<Object> codes = new LinkedList<>();
-
         // We start knowing that the current token is "include"
 
         nextToken();
@@ -367,8 +456,6 @@ public class Parser
 
     private LinkedList<Object> parseStylesheetStatement() throws ParseException
     {
-         LinkedList<Object> codes = new LinkedList<>();
-
         // We start knowing that the current token is "stylesheet"
 
         nextToken();
@@ -434,27 +521,9 @@ public class Parser
             }
         }
 
-        setStatement.set(units, displayPrecision, printPrecision);
-    }
-
-    private LinkedList<Object> parseEnableStatement() throws ParseException
-    {
-        LinkedList<Object> codes = new LinkedList<>();
-
-        // We start knowing that the current token is "enabled"
-
-        nextToken();
-
-        // If the new token is ';', enable
-
-        if (isDelimiter()&& getChar() == ';') {
-            codes.add(1.0);
-        }
-        else {
-            codes.addAll(parseExpr());
-        }
-        codes.add(new GenericHCode(HCode.Type.ENABLE));
-        return codes;
+        if (foundUnits) setStatement.setUnits(units);
+        if (foundDisplayPrecision) setStatement.setDisplayPrecision(displayPrecision);
+        if (foundPrintPrecision) setStatement.setPrintPrecision(printPrecision);
     }
 
     private LinkedList<Object> parsePrintStatement() throws ParseException
@@ -658,7 +727,7 @@ public class Parser
                 throwParseException("Variable name expected");
             }
 
-            codes.add(curToken.getValue());
+            codes.addAll(parseVariable());
             if (topNameSeen) {
                 codes.add(new GenericHCode(HCode.Type.FETCH_PROP_ADDRESS));
             }
@@ -670,17 +739,66 @@ public class Parser
             // An object property might be specified. If there's no object
             // property, we're done
 
-            if (!peek.isOperator() || peek.getChar() != '.') {
+            if (!peek.isOperator() || !peek.getString().equals(".")) {
                 nextToken();
                 return codes;
             }
 
             // Parse the property
+
             else {
                 nextToken();    // Cur token is now '.'
                 nextToken();    // Cur token should now be a name
             }
         }
+    }
+
+    private LinkedList<Object> parseVariable() throws ParseException
+    {
+        LinkedList<Object> codes = new LinkedList<>();
+
+        // We start knowing that we found a name where we need a variable
+
+        // Grab the variable name
+
+        String variable = curToken.getString();
+
+        // If it's followed immediately by a '[', it's an array variable
+
+        if (peek.isDelimiter() && peek.getChar() == '[') {
+
+            // Skip the name and '['
+
+             nextToken();
+             nextToken();
+
+             // Parse the index
+
+             LinkedList<Object> index = parseExpr();
+
+             // We need to end with a ']'
+
+             if (!isDelimiter() || getChar() != ']') {
+                 throwParseException("Expected a ']'");
+             }
+
+             // Add the index and then the name. We will create a new name
+             // from these
+
+             codes.addAll(index);
+             codes.add(variable);
+             codes.add(new GenericHCode(HCode.Type.DYNAMIC_NAME));
+         }
+
+        // Otherwise, we have a regular non-array variable
+
+         else {
+             codes.add(variable);
+         }
+
+        // Leave the last token for the calling routine to consume
+
+        return codes;
     }
 
     private LinkedList<Object> parseObject() throws ParseException
@@ -1276,6 +1394,242 @@ public class Parser
         return codes;
     }
 
+    private LinkedList<Object> parseIfStatement() throws ParseException
+    {
+        LinkedList<Object> codes = new LinkedList<>();
+
+        // We start knowing only that the current token points to "if"
+
+        nextToken();
+        if (!isDelimiter() || getChar() != '(') {
+            throwParseException("Expected '('");
+        }
+
+        // Add the conditional expression
+
+        nextToken();
+        codes.addAll(parseExpr());
+
+        if (!isDelimiter() || getChar() != ')') {
+            throwParseException("Expected ')'");
+        }
+
+        nextToken();
+        LinkedList<Object> ifCodes = parseStatement();
+        LinkedList<Object> elseCodes = new LinkedList<>();
+
+
+        if (isName() && getString().equals("else")) {
+            nextToken();
+            elseCodes = parseStatement();
+        }
+
+        Label labelDone = new Label(labelId++);
+        Label labelElse = labelDone;
+        if (elseCodes.size() > 0) labelElse = new Label(labelId++);
+
+        // Add the test for the conditional expression. If false, this
+        // jumps to the else clause (if any) or to the next statement. If
+        // true, it falls through to the if clause
+
+        codes.add(new JumpIfFalseHCode(labelElse.getId()));
+
+        // Add the if true clause
+
+        codes.addAll(ifCodes);
+
+        // If we have an else clause, we need to let the if clause jump to
+        // the next statement. Then we add the label that marks the start of
+        // the else clause and add the else clause code
+
+        if (elseCodes.size() > 0) {
+            codes.add(new JumpHCode(labelDone.getId()));
+            codes.add(labelElse);
+            codes.addAll(elseCodes);
+        }
+
+        // Finally we label the end of the entire if statement
+
+        codes.add(labelDone);
+
+        return codes;
+    }
+
+    private LinkedList<Object> parseWhileStatement() throws ParseException
+    {
+        LinkedList<Object> codes = new LinkedList<>();
+
+        Label labelStart = new Label(labelId++);
+        Label labelDone = new Label(labelId++);
+
+        // We start knowing only that the current token points to "while"
+
+        nextToken();
+        if (!isDelimiter() || getChar() != '(') {
+            throwParseException("Expected '('");
+        }
+
+        // Add the conditional expression
+
+        nextToken();
+        codes.add(labelStart);
+        codes.addAll(parseExpr());
+
+        if (!isDelimiter() || getChar() != ')') {
+            throwParseException("Expected ')'");
+        }
+
+        nextToken();
+
+        codes.add(new JumpIfFalseHCode(labelDone.getId()));
+
+        codes.addAll(parseStatement());
+        codes.add(new JumpHCode(labelStart.getId()));
+        codes.add(labelDone);
+
+        return codes;
+    }
+
+    private LinkedList<Object> parseForStatement() throws ParseException
+    {
+        LinkedList<Object> codes = new LinkedList<>();
+
+        Label labelStart = new Label(labelId++);
+        Label labelDone = new Label(labelId++);
+
+        // We start knowing only that the current token points to "for"
+
+        nextToken();
+
+        // Variable to loop over
+
+        if (!isName()) {
+            throwParseException("Expected a variable");
+        }
+        String loopVariable = curToken.getString();
+        nextToken();
+
+        // Initial value
+
+        if (!isName() || !getString().equals("from")) {
+            throwParseException("Expected 'from'");
+        }
+        nextToken();
+        LinkedList<Object> initialValue = parseExpr();
+
+        // Final value
+
+        if (!isName() || !getString().equals("to")) {
+            throwParseException("Expected 'to'");
+        }
+        nextToken();
+        LinkedList<Object> finalValue = parseExpr();
+
+        // Step value
+
+        if (!isName() || !getString().equals("step")) {
+            throwParseException("Expected 'step'");
+        }
+        nextToken();
+        LinkedList<Object> stepValue = parseExpr();
+
+        // Code to loop over
+
+        LinkedList<Object> forLoop = parseStatement();
+
+        // Initialize the loop variable
+
+        codes.add(loopVariable);
+        codes.add(new GenericHCode(HCode.Type.FETCH_ADDRESS));
+        codes.addAll(initialValue);
+        codes.add(new AssignHCode());
+
+        // Calculate and save the final and step values
+
+        String finalVariable = loopVariable + "$$final";
+        codes.add(finalVariable);
+        codes.add(new GenericHCode(HCode.Type.FETCH_ADDRESS));
+        codes.addAll(finalValue);
+        codes.add(new AssignHCode());
+
+        String stepVariable = loopVariable + "$$step";
+        codes.add(stepVariable);
+        codes.add(new GenericHCode(HCode.Type.FETCH_ADDRESS));
+        codes.addAll(stepValue);
+        codes.add(new AssignHCode());
+
+        codes.add(labelStart);
+
+        // Test: if (loopVariable$$step == 0) exit
+
+        codes.add(stepVariable);
+        codes.add(new GenericHCode(HCode.Type.FETCH));
+        codes.add(0.0);
+        codes.add(new GenericHCode(HCode.Type.EQ));
+        codes.add(new JumpIfTrueHCode(labelDone.getId()));
+
+        // Test: if (loopVariable$$step > 0 && loopVariable >= loopVariable$$final) ||
+        //          (loopVariable$$step < 0 && loopVariable <= loopVariable$$final)) exit
+
+        Label label1 = new Label(labelId++);
+        Label label2 = new Label(labelId++);
+        Label label3 = new Label(labelId++);
+
+        codes.add(stepVariable);
+        codes.add(new GenericHCode(HCode.Type.FETCH));
+        codes.add(0.0);
+        codes.add(new GenericHCode(HCode.Type.GT));
+        codes.add(new JumpAndHCode(label1.getId()));
+        codes.add(loopVariable);
+        codes.add(new GenericHCode(HCode.Type.FETCH));
+        codes.add(finalVariable);
+        codes.add(new GenericHCode(HCode.Type.FETCH));
+        codes.add(new GenericHCode(HCode.Type.LE));
+        codes.add(new GenericHCode(HCode.Type.AND));
+        codes.add(label1);
+        codes.add(new JumpOrHCode(label2.getId()));
+        codes.add(stepVariable);
+        codes.add(new GenericHCode(HCode.Type.FETCH));
+        codes.add(0.0);
+        codes.add(new GenericHCode(HCode.Type.LT));
+        codes.add(new JumpAndHCode(label3.getId()));
+        codes.add(loopVariable);
+        codes.add(new GenericHCode(HCode.Type.FETCH));
+        codes.add(finalVariable);
+        codes.add(new GenericHCode(HCode.Type.FETCH));
+        codes.add(new GenericHCode(HCode.Type.GE));
+        codes.add(new GenericHCode(HCode.Type.AND));
+        codes.add(label3);
+        codes.add(new GenericHCode(HCode.Type.OR));
+        codes.add(label2);
+        codes.add(new JumpIfFalseHCode(labelDone.getId()));
+
+        // Execute the body
+
+        codes.addAll(forLoop);
+
+        // Increment: loopVariable = loopVariable + loopVariable$$step
+
+        codes.add(loopVariable);
+        codes.add(new GenericHCode(HCode.Type.FETCH_ADDRESS));
+        codes.add(loopVariable);
+        codes.add(new GenericHCode(HCode.Type.FETCH));
+        codes.add(stepVariable);
+        codes.add(new GenericHCode(HCode.Type.FETCH));
+        codes.add(new AddHCode());
+        codes.add(new AssignHCode());
+
+        // Jump back to the start of the loop
+
+        codes.add(new JumpHCode(labelStart.getId()));
+
+        // Label for exit
+
+        codes.add(labelDone);
+
+        return codes;
+    }
+
     private LinkedList<Object> parseExpr() throws ParseException
     {
         LinkedList<Object> codes = new LinkedList<>();
@@ -1300,14 +1654,14 @@ public class Parser
             // Function names are always followed by a '('.
 
             if (isName() && peek.isDelimiter() && peek.getChar() == '(') {
-                ops.push(new OpToken<>(curToken, Op.find('!', true)));
+                ops.push(new OpToken<>(curToken, Op.find("FUNC", true)));
             }
 
             // If we have a variable, push it on the codes stack
 
             else if (isName()) {
-                codes.add(curToken.getValue());
-                if (lastToken == null || !lastToken.isOperator() || lastToken.getChar() != '.') {
+                codes.addAll(parseVariable());
+                if (lastToken == null || !lastToken.isOperator() || !lastToken.getString().equals(".")) {
                     codes.add(new GenericHCode(HCode.Type.FETCH));
                 }
             }
@@ -1335,12 +1689,14 @@ public class Parser
                 if (level < 0) throw new ProgrammingException("Parser.parseExp(): Comma without preceding '('");
 
                 while (!ops.isEmpty()) {
-                    OpToken<?> t = ops.pop();
-                    if (t.op.chr != '(') {
-                        codes.add(opTokenToHCode(t));
+                    OpToken<?> topToken = ops.pop();
+                    if (!topToken.op.operator.equals("(")) {
+                        codes.add(opTokenToHCode(topToken));
+                        int id  = topToken.getId();
+                        if (id != -1) codes.add(new Label(id));
                     }
                     else {
-                        ops.push(t);
+                        ops.push(topToken);
                         break;
                     }
                 }
@@ -1358,7 +1714,7 @@ public class Parser
             // If we have a "(", push it on the operator stack
 
             else if (isDelimiter() && getChar() == '(') {
-               ops.push(new OpToken<>(curToken, Op.find('(', true)));
+                ops.push(new OpToken<>(curToken, Op.find("(", true)));
                 level++;                    // Begin a new parenthesis level
 
                 // Record the number of arguments seen so far (0)
@@ -1387,9 +1743,11 @@ public class Parser
                 // reach a "(". Then pop the "(" and discard it.
 
                 while (!ops.isEmpty()) {
-                    OpToken<?> t = ops.pop();
-                   if (t.op.chr != '(') {
-                        codes.add(opTokenToHCode(t));
+                    OpToken<?> topToken = ops.pop();
+                    if (!topToken.op.operator.equals("(")) {
+                        codes.add(opTokenToHCode(topToken));
+                        int id  = topToken.getId();
+                        if (id != -1) codes.add(new Label(id));
                     }
                     else {
                         break;
@@ -1400,7 +1758,7 @@ public class Parser
                 // the function name on the codes stack, along with the total of
                 // all the arguments plus the function name
 
-                if (ops.size() > 0 && ops.peek().op.chr == '!') {
+                if (ops.size() > 0 && ops.peek().op.operator.equals("FUNC")) {
                     OpToken<?> t = ops.pop();
                     codes.add(t.token.getValue());
                     codes.add(argCount.get(level) + 1);
@@ -1441,7 +1799,7 @@ public class Parser
                         (lastToken.isDelimiter() && (lastToken.getChar() == '(' || lastToken.getChar() == ',')) ||
                         lastToken.isOperator();
 
-                Op op = Op.find(getChar(), !isUnary);
+                Op op = Op.find(getString(), !isUnary);
 
                 // Depending on precedence, we may first transfer some operators to
                 // the codes stack
@@ -1451,8 +1809,10 @@ public class Parser
                     if ((op.isLeftAssoc && op.precedence <= topOp.precedence) ||
                         (!op.isLeftAssoc && op.precedence < topOp.precedence)) {
                         OpToken<?> topToken = ops.pop();
-                        if (topToken.op.chr != '(') {
+                        if (!topToken.op.operator.equals("(")) {
                             codes.add(opTokenToHCode(topToken));
+                            int id  = topToken.getId();
+                            if (id != -1) codes.add(new Label(id));
                         }
                         else {
                             ops.push(topToken);
@@ -1464,9 +1824,25 @@ public class Parser
                     }
                 }
 
+                OpToken<?> newOpToken = new OpToken<>(curToken, op);
+
+                // && and || operators need special handling
+
+                if (getString().equals("&&")) {
+                    int id = labelId++;
+                    codes.add(new JumpAndHCode(id));
+                    newOpToken.setId(id);
+                }
+
+                else if (getString().equals("||")) {
+                    int id = labelId++;
+                    codes.add(new JumpOrHCode(id));
+                    newOpToken.setId(id);
+                }
+
                 // Add the new operator to the operator stack
 
-                ops.push(new OpToken<>(curToken, op));
+                ops.push(newOpToken);
             }
 
             // Since we are not using recursive descent to parse expressions,
@@ -1533,7 +1909,10 @@ public class Parser
                 // stack
 
                 while (ops.size() > 0) {
-                    codes.add(opTokenToHCode(ops.pop()));
+                    OpToken<?> topToken = ops.pop();
+                    codes.add(opTokenToHCode(topToken));
+                    int id  = topToken.getId();
+                    if (id != -1) codes.add(new Label(id));
                 }
 
                 break;
@@ -1557,30 +1936,47 @@ public class Parser
                isString() ||
                isName() ||
                (isDelimiter() && (getChar() == '(' || getChar() == '[')) ||
-               (isOperator() && (getChar() == '+' || getChar() == '-'));
+               (isOperator() && (getString().equals("+") || getString().equals("-") || getString().equals("!")));
 
     }
 
     private HCode opTokenToHCode(OpToken<?> t)
     {
-        switch (t.op.chr) {
-            case '^' -> { return new GenericHCode(HCode.Type.EXP); }
-            case '*' -> { return new GenericHCode(HCode.Type.MULT); }
-            case '/' -> { return new GenericHCode(HCode.Type.DIV); }
-            case '<' -> { return new GenericHCode(HCode.Type.INV_LORENTZ); }
-            case '>' -> { return new GenericHCode(HCode.Type.LORENTZ); }
-            case '.' -> { return new GenericHCode(HCode.Type.FETCH_PROP); }
-            default -> {
-            }
+        switch (t.op.operator) {
+            case "<-" -> { return new GenericHCode(HCode.Type.INV_LORENTZ); }
+            case "->" -> { return new GenericHCode(HCode.Type.LORENTZ); }
+
+            case "||" -> { return new GenericHCode(HCode.Type.OR); }
+            case "&&" -> { return new GenericHCode(HCode.Type.AND); }
+
+            case "==" -> { return new GenericHCode(HCode.Type.EQ); }
+            case "!=" -> { return new GenericHCode(HCode.Type.NE); }
+
+            case "<" ->  { return new GenericHCode(HCode.Type.LT); }
+            case ">" ->  { return new GenericHCode(HCode.Type.GT); }
+            case "<=" ->  { return new GenericHCode(HCode.Type.LE); }
+            case ">=" ->  { return new GenericHCode(HCode.Type.GE); }
+
+            case "*" ->  { return new GenericHCode(HCode.Type.MULT); }
+            case "/" ->  { return new GenericHCode(HCode.Type.DIV); }
+            case "%" ->  { return new GenericHCode(HCode.Type.REMAINDER); }
+
+            case "^" ->  { return new GenericHCode(HCode.Type.EXP); }
+
+            case "!" ->  { return new GenericHCode(HCode.Type.NOT); }
+
+            case "." ->  { return new GenericHCode(HCode.Type.FETCH_PROP); }
+
+            default ->   {  }
         }
 
-        if (t.op.chr == '+' && t.op.isBinary) {
+        if (t.op.operator.equals("+") && t.op.isBinary) {
             return new AddHCode();
-        } else if (t.op.chr == '-' && t.op.isBinary) {
+        } else if (t.op.operator.equals("-") && t.op.isBinary) {
             return new GenericHCode(HCode.Type.SUB);
-        } else if  (t.op.chr == '+') {
+        } else if  (t.op.operator.equals("+")) {
             return new GenericHCode(HCode.Type.UNARY_PLUS);
-        } else if  (t.op.chr == '-') {
+        } else if  (t.op.operator.equals("-")) {
             return new GenericHCode(HCode.Type.UNARY_MINUS);
         }
 

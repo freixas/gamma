@@ -18,22 +18,11 @@ package gamma.execution;
 
 import gamma.MainWindow;
 import gamma.ProgrammingException;
-import gamma.execution.hcode.ArgInfoHCode;
 import gamma.execution.hcode.SetStatement;
-import gamma.parser.Token;
-import gamma.value.AnimationVariable;
 import gamma.value.DisplayVariable;
 import gamma.value.DynamicVariable;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.ListIterator;
 import java.util.Set;
 import javafx.scene.control.Alert;
 
@@ -170,81 +159,81 @@ public class DiagramEngine
     // *
     // **********************************************************
 
-    @SuppressWarnings("null")
-    private void debugHCode(LinkedList<Object> hCodes)
-    {
-        try {
-            File logDir  = new File("D:/users/tony/Documents/Gamma/Logs");
-            logDir.mkdirs();
+//    @SuppressWarnings("null")
+//    private void debugHCode(LinkedList<Object> hCodes)
+//    {
+//        try {
+//            File logDir  = new File("D:/users/tony/Documents/Gamma/Logs");
+//            logDir.mkdirs();
+//
+//            String timestamp = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss").format(new Date());
+//            File log = new File(logDir, timestamp +" Log.csv");
+//            log.createNewFile();
+//
+//            FileOutputStream out = new FileOutputStream(log);
+//            try (PrintWriter writer = new PrintWriter(out)) {
+//                ListIterator<Object> iter = hCodes.listIterator();
+//                writer.write("Type, Value\n");
+//
+//                while (iter.hasNext()) {
+//                    Object obj = iter.next();
+//                    String type;
+//                    String value;
+//
+//                    if (obj instanceof ArgInfoHCode) {
+//                        type = "HCODE";
+//                        value = obj.getClass().getName();
+//                    }
+//                    else {
+//                        type = "VALUE";
+//                        value = valueToString(obj);
+//                        if (value.equals("")) {
+//                            value = obj.getClass().getName();
+//                        }
+//                    }
+//
+//                    writer.write(
+//                        type + "," +
+//                        value + "\n");
+//                }
+//            }
+//        }
+//        catch (IOException e) {
+//
+//        }
+//    }
 
-            String timestamp = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss").format(new Date());
-            File log = new File(logDir, timestamp +" Log.csv");
-            log.createNewFile();
-
-            FileOutputStream out = new FileOutputStream(log);
-            try (PrintWriter writer = new PrintWriter(out)) {
-                ListIterator<Object> iter = hCodes.listIterator();
-                writer.write("Type, Value\n");
-
-                while (iter.hasNext()) {
-                    Object obj = iter.next();
-                    String type;
-                    String value;
-
-                    if (obj instanceof ArgInfoHCode) {
-                        type = "HCODE";
-                        value = obj.getClass().getName();
-                    }
-                    else {
-                        type = "VALUE";
-                        value = valueToString(obj);
-                        if (value.equals("")) {
-                            value = obj.getClass().getName();
-                        }
-                    }
-
-                    writer.write(
-                        type + "," +
-                        value + "\n");
-                }
-            }
-        }
-        catch (IOException e) {
-
-        }
-    }
-
-    private void debugTokens(ArrayList<Token> tokens)
-    {
-        try {
-            File logDir  = new File("D:/users/tony/Documents/Gamma/Logs");
-            logDir.mkdirs();
-
-            String timestamp = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss").format(new Date());
-            File log = new File(logDir, timestamp +" Log.csv");
-            log.createNewFile();
-            FileOutputStream out = new FileOutputStream(log);
-            try (PrintWriter writer = new PrintWriter(out)) {
-                ListIterator<Token> iter = tokens.listIterator();
-                writer.write("Line Number,Char Number,Type,Value\n");
-
-                while (iter.hasNext()) {
-                    Token token = iter.next();
-
-                    String value = valueToString(token.getValue());
-
-                    writer.write(
-                            token.getLineNumber() + "," +
-                        token.getCharNumber() + "," +
-                        token.getType() + "," +
-                        value + "\n");
-                }
-            }
-        }
-        catch (IOException e) {
-
-        }
-    }
+//    private void debugTokens(ArrayList<Token> tokens)
+//    {
+//        try {
+//            File logDir  = new File("D:/users/tony/Documents/Gamma/Logs");
+//            logDir.mkdirs();
+//
+//            String timestamp = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss").format(new Date());
+//            File log = new File(logDir, timestamp +" Log.csv");
+//            log.createNewFile();
+//            FileOutputStream out = new FileOutputStream(log);
+//            try (PrintWriter writer = new PrintWriter(out)) {
+//                ListIterator<Token> iter = tokens.listIterator();
+//                writer.write("Line Number,Char Number,Type,Value\n");
+//
+//                while (iter.hasNext()) {
+//                    Token token = iter.next();
+//
+//                    String value = valueToString(token.getValue());
+//
+//                    writer.write(
+//                            token.getLineNumber() + "," +
+//                        token.getCharNumber() + "," +
+//                        token.getType() + "," +
+//                        value + "\n");
+//                }
+//            }
+//        }
+//        catch (IOException e) {
+//
+//        }
+//    }
 
     private String valueToString(Object value)
     {
