@@ -30,13 +30,17 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 import gamma.file.FileWatcher;
-import gamma.value.BooleanDisplayVariable;
+import gamma.value.ChoiceVariable;
+import gamma.value.ToggleVariable;
 import gamma.value.DisplayVariable;
-import gamma.value.RangeDisplayVariable;
+import gamma.value.RangeVariable;
+import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 /**
@@ -58,7 +62,13 @@ public final class MainWindow extends Stage
     private MenuItem fileMenuExportVideo;
     private MenuItem fileMenuPrint;
     private MenuItem fileMenuClose = null;
+    private MenuItem fileMenuPreferences;
 
+    private boolean hasDisplayControls;
+
+    private HBox diagramContainer;
+    private SplitPane controlsSplitter;
+    private VBox diagramParent;
     private ScrollPane scrollPane;
     private VBox displayControlArea;
 
@@ -96,6 +106,8 @@ public final class MainWindow extends Stage
         controller = (MainWindowController) loader.getController();
         controller.setMainWindow(this);
         setScene(new Scene(root));
+
+        hasDisplayControls = false;
 
         // Handle tasks that can only be performed on instantiated window.
 
@@ -138,6 +150,12 @@ public final class MainWindow extends Stage
             // Update the title bar
 
             setTitle("Gamma - " + file.getName());
+
+            // Stop any existing watcher
+
+            if (watcherThread != null) {
+                watcher.stopThread();
+            }
 
             watcher = new FileWatcher(file, this);
             watcherThread = new Thread(watcher);
@@ -223,7 +241,7 @@ public final class MainWindow extends Stage
                                 fileMenuPrint = menuItem;
                             case "fileMenuClose" ->
                                 fileMenuClose = menuItem;
-                            default -> {
+                             default -> {
                             }
                         }
                     }
@@ -231,13 +249,26 @@ public final class MainWindow extends Stage
             }
         }
 
+        diagramContainer = (HBox)getScene().lookup("#diagramContainer");
+        controlsSplitter = (SplitPane)getScene().lookup("#controlsSplitter");
+
+        diagramParent = (VBox)getScene().lookup("#diagramParent");
         canvas = (Canvas)getScene().lookup("#diagramArea");
+
         scrollPane = (ScrollPane)getScene().lookup("#scrollPane");
         scrollPane.managedProperty().bind(scrollPane.visibleProperty());
         scrollPane.setVisible(false);
         displayControlArea = (VBox)getScene().lookup("#displayControlArea");
 
         canvas.setFocusTraversable(true);
+
+        // We start out with no display controls, so we need to remove the split
+        // pane from the diagram container and reparent the diagram area
+
+        controlsSplitter.getItems().remove(diagramParent);
+        diagramContainer.getChildren().remove(controlsSplitter);
+        diagramContainer.getChildren().add(diagramParent);
+        HBox.setHgrow(diagramParent, Priority.ALWAYS);
     }
 
     /**
@@ -283,6 +314,16 @@ public final class MainWindow extends Stage
 
         scrollPane.setVisible(false);
         displayControlArea.getChildren().clear();
+
+        // Remove the split pane
+
+        if (hasDisplayControls) {
+            controlsSplitter.getItems().remove(diagramParent);
+            diagramContainer.getChildren().remove(controlsSplitter);
+            diagramContainer.getChildren().add(diagramParent);
+            HBox.setHgrow(diagramParent, Priority.ALWAYS);
+            hasDisplayControls = false;
+        }
     }
 
    /**
@@ -345,8 +386,17 @@ public final class MainWindow extends Stage
 
     public void addDisplayControl(DisplayVariable var) {
         scrollPane.setVisible(true);
-        if (var instanceof RangeDisplayVariable range) {
-            RangeDisplayVariable temp = range;
+
+        if (!hasDisplayControls) {
+            diagramContainer.getChildren().remove(diagramParent);
+            diagramContainer.getChildren().add(controlsSplitter);
+            controlsSplitter.getItems().add(0, diagramParent);
+            controlsSplitter.setDividerPositions(1.0, 0.0);
+            hasDisplayControls = true;
+        }
+
+        if (var instanceof RangeVariable range) {
+            RangeVariable temp = range;
             Label label = new Label(range.getLabel());
             label.setPadding(new Insets(10.0));
             displayControlArea.getChildren().add(label);
@@ -360,20 +410,39 @@ public final class MainWindow extends Stage
             slider.setMinorTickCount(5);
             slider.setBlockIncrement(delta / 100.0);
             slider.setPrefWidth(200);
+            slider.setMaxWidth(Double.MAX_VALUE);
             displayControlArea.getChildren().add(slider);
 
             slider.valueProperty().addListener(
                 (value, oldValue, newValue) -> range.setCurrentValue((Double)newValue));
 
         }
-        else if (var instanceof BooleanDisplayVariable bool) {
-            RadioButton button = new RadioButton(bool.getLabel());
+        else if (var instanceof ToggleVariable bool) {
+            CheckBox button = new CheckBox(bool.getLabel());
+            button.setAllowIndeterminate(false);
             button.setSelected(bool.getBooleanCurrentValue());
             button.setPadding(new Insets(10.0));
+            button.setPrefWidth(200);
+            button.setMaxWidth(Double.MAX_VALUE);
             displayControlArea.getChildren().add(button);
 
             button.selectedProperty().addListener(
                 (value, oldValue, newValue) -> bool.setBooleanCurrentValue(newValue));
+        }
+        else if (var instanceof ChoiceVariable choice) {
+            Label label = new Label(choice.getLabel());
+            label.setPadding(new Insets(10.0));
+            displayControlArea.getChildren().add(label);
+
+            String[] choices = choice.getChoices();
+            ChoiceBox<String> box = new ChoiceBox<>(FXCollections.observableArrayList(choices));
+            box.getSelectionModel().select(choice.getIntCurrentValue() - 1);
+            box.setPrefWidth(200);
+            box.setMaxWidth(Double.MAX_VALUE);
+            displayControlArea.getChildren().add(box);
+
+            box.getSelectionModel().selectedIndexProperty().addListener(
+                (value, oldValue, newValue) -> choice.setIntCurrentValue(newValue.intValue() + 1));
         }
 
         Separator separator = new Separator(Orientation.HORIZONTAL);
