@@ -57,13 +57,19 @@ public class MainWindowController implements Initializable
     @FXML
     private MenuItem fileMenuClose;
     @FXML
+    private MenuItem fileMenuPreferences;
+    @FXML
     private MenuItem fileMenuExit;
+    @FXML
+    private MenuItem windowMenuNewWindow;
     @FXML
     private MenuItem helpMenuContents;
     @FXML
     private MenuItem helpMenuAbout;
     @FXML
     private Menu fileMenu;
+    @FXML
+    private Menu windowMenu;
     @FXML
     private Menu helpMenu;
 
@@ -93,12 +99,7 @@ public class MainWindowController implements Initializable
         File selectedFile;
         while ((selectedFile = fileChooser.showSaveDialog(mainWindow)) != null) {
             if (selectedFile.createNewFile()) {
-                if (mainWindow.getFile() == null) {
-                    mainWindow.setFile(selectedFile);
-                }
-                else {
-                    Gamma.newMainWindow(selectedFile);
-                }
+                mainWindow.setFile(selectedFile);
                 return;
             }
             new Alert(Alert.AlertType.ERROR, "Use File/Open to open an existing script.").showAndWait();
@@ -114,20 +115,14 @@ public class MainWindowController implements Initializable
         fileChooser.getExtensionFilters().addAll(
                 new ExtensionFilter("All Files", "*.*"));
         fileChooser.setInitialDirectory(mainWindow.getFileDirectory());
-        
+
         // NOTE: Need to check that the selected file is not already open -
         // not that it would hurt anything
 
         File selectedFile = fileChooser.showOpenDialog(mainWindow);
         if (selectedFile != null) {
-            if (mainWindow.getFile() == null) {
                 mainWindow.setFile(selectedFile);
-            }
-            else {
-                Gamma.newMainWindow(selectedFile);
-            }
         }
-
     }
 
     @FXML
@@ -155,9 +150,21 @@ public class MainWindowController implements Initializable
     }
 
     @FXML
+    private void fileMenuPreferences(ActionEvent event)
+    {
+        new Alert(Alert.AlertType.INFORMATION, "Preferences called!").show();
+    }
+
+    @FXML
     private void fileMenuExit(ActionEvent event)
     {
         Gamma.exit();
+    }
+
+    @FXML
+    private void windowMenuNewWindow(ActionEvent event) throws Exception
+    {
+        Gamma.newMainWindow(null);
     }
 
     @FXML
