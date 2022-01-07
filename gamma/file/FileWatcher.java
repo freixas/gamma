@@ -32,6 +32,7 @@ import java.nio.file.WatchService;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javafx.application.Platform;
 
@@ -118,40 +119,55 @@ public class FileWatcher extends Thread
             long lastModTime = 0L;
 
             while (poll) {
-                WatchKey key = watchService.take();
-                for (WatchEvent<?> event : key.pollEvents()) {
-                    WatchEvent.Kind<?> kind = event.kind();
-                    System.err.println("Event kind : " + kind + " - File : " + event.context());
 
-                    if (kind == StandardWatchEventKinds.ENTRY_CREATE ||
-                        kind == StandardWatchEventKinds.ENTRY_MODIFY) {
+                // Wait up to 5 seconds. This means that it can take up to
+                // 5 seconds to kill the thread
 
-                        @SuppressWarnings("unchecked")
-                        Path filename = ((WatchEvent<Path>)event).context();
-                        System.err.print("Filename is " + filename + "\n");
+                WatchKey key = watchService.poll(5, TimeUnit.SECONDS);
 
-                        if (filename.toString().equals(file.getName())) {
-                            Long modTime = file.lastModified();
-                            if (modTime > lastModTime + 1000) {
-                                System.err.println("doOnChange()\n");
-                                doOnChange();
-                                lastModTime = modTime;
+                // Check to see if we should terminate
+
+                if (isStopped()) {
+                    System.err.println("Stop request detected. Terminating file watcher for " + file);
+                    return;
+                }
+
+                // Check for any events that occurred
+
+                if (key != null) {
+                    for (WatchEvent<?> event : key.pollEvents()) {
+                        WatchEvent.Kind<?> kind = event.kind();
+                        System.err.println("Event kind : " + kind + " - File : " + event.context());
+
+                        if (kind == StandardWatchEventKinds.ENTRY_CREATE ||
+                            kind == StandardWatchEventKinds.ENTRY_MODIFY) {
+
+                            @SuppressWarnings("unchecked")
+                            Path filename = ((WatchEvent<Path>)event).context();
+                            System.err.print("Filename is " + filename + "\n");
+
+                            if (filename.toString().equals(file.getName())) {
+                                Long modTime = file.lastModified();
+                                if (modTime > lastModTime + 1000) {
+                                    System.err.println("doOnChange()\n");
+                                    doOnChange();
+                                    lastModTime = modTime;
+                                }
+                            }
+                        }
+
+                        else if (kind == StandardWatchEventKinds.ENTRY_DELETE) {
+                            @SuppressWarnings("unchecked")
+                            Path filename = ((WatchEvent<Path>)event).context();
+                            System.err.print("Filename is " + filename + "\n");
+
+                            if (filename.toString().equals(file.getName())) {
+                                // ???
                             }
                         }
                     }
-
-                    else if (kind == StandardWatchEventKinds.ENTRY_DELETE) {
-                        @SuppressWarnings("unchecked")
-                        Path filename = ((WatchEvent<Path>)event).context();
-                        System.err.print("Filename is " + filename + "\n");
-
-                        if (filename.toString().equals(file.getName())) {
-                            // ???
-                        }
-                    }
-
+                    poll = key.reset();
                 }
-                poll = key.reset();
             }
         }
         catch (IOException e) {
