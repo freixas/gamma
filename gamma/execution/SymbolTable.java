@@ -16,6 +16,7 @@
  */
 package gamma.execution;
 
+import gamma.ProgrammingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
@@ -88,6 +89,14 @@ public class SymbolTable
             throw new ExecutionException("You cannot change the value of '" + symbol + "'");
         }
         table.put(symbol, value);
+    }
+
+    public void remove(String symbol)
+    {
+        if (protectedSymbols.contains(symbol)) {
+            throw new ProgrammingException("SymbolTable.remove(): Trying to remove protect symbol '" + symbol + "'");
+        }
+        table.remove(symbol);
     }
 
     /**
