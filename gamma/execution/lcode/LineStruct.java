@@ -16,8 +16,6 @@
  */
 package gamma.execution.lcode;
 
-import gamma.value.Bounds;
-import gamma.value.Coordinate;
 import gamma.value.Frame;
 import gamma.value.Line;
 
@@ -29,7 +27,6 @@ public class LineStruct extends Struct
 {
     public Line line;
     public boolean lineSet = false;
-    public Bounds clip = null;
 
     public LineStruct()
     {
@@ -39,6 +36,5 @@ public class LineStruct extends Struct
     public void relativeTo(Frame prime)
     {
         line = line.relativeTo(prime);
-        // clip = new Bounds(prime.toFrame(clip.min), prime.toFrame(clip.max));
     }
 }
