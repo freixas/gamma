@@ -22,7 +22,6 @@ import gamma.drawing.Context;
 import gamma.execution.lcode.*;
 import gamma.value.Frame;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.ListIterator;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -251,8 +250,6 @@ public class LCodeEngine
         // but is modified whenever the zoom/pan changes or when the canvas
         // is resized
 
-        DisplayStruct dStruct = (DisplayStruct)displayCommand.getCmdStruct();
-
         // Create the graphics context
 
         context = new Context(this, canvas);
@@ -277,7 +274,6 @@ public class LCodeEngine
         FrameStruct fStruct = (FrameStruct)frameCommand.getCmdStruct();
         if (!fStruct.frame.equals(HCodeEngine.getDefFrame())) {
             final Frame prime = fStruct.frame;
-            Iterator<Command> iter = (Iterator<Command>)commands.iterator();
             commands.forEach((Command command) -> {
                 command.getCmdStruct().relativeTo(prime);
             });
