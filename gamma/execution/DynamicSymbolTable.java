@@ -16,7 +16,14 @@
  */
 package gamma.execution;
 
+import gamma.MainWindow;
+import gamma.value.DisplayVariable;
 import gamma.value.DynamicVariable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.ListIterator;
+import java.util.Set;
 
 /**
  * Animation variables are stored in this table and in the regular Symbol
@@ -28,9 +35,12 @@ import gamma.value.DynamicVariable;
  */
 public class DynamicSymbolTable extends SymbolTable
 {
+    private int lastOrderNumber;
+
     public DynamicSymbolTable(HCodeEngine engine)
     {
         super(engine);
+        lastOrderNumber = -1;
     }
 
     @Override
@@ -68,7 +78,45 @@ public class DynamicSymbolTable extends SymbolTable
 
         if (contains(symbol)) return;
 
+        if (value instanceof DisplayVariable displayVar) {
+            displayVar.setDisplayOrder(++lastOrderNumber);
+        }
         super.put(symbol, value);
+    }
+
+    /**
+     * Add display controls to the main window. This is used by the
+     * DiagramEngine as well as the AnimationEngine.
+     *
+     * @param window The main window.
+     */
+
+    public void addDisplayControls(MainWindow window)
+    {
+        Set<String> symbolNames = getSymbolNames();
+
+        // Grab all display variables and place them in a collection
+
+        ArrayList<DisplayVariable> list = new ArrayList<>();
+
+        Iterator<String> iter = symbolNames.iterator();
+        while (iter.hasNext()) {
+            DynamicVariable dynamicVariable = getDynamicVariable(iter.next());
+            if (dynamicVariable instanceof DisplayVariable var) {
+                list.add(var);
+            }
+        }
+
+        // Now we need to sort the list into display order
+
+        Collections.sort(list, (first, second) -> first.getDisplayOrder() - second.getDisplayOrder());
+
+        // Display the items
+
+        ListIterator<DisplayVariable> iter2 = list.listIterator();
+        while (iter2.hasNext()) {
+            window.addDisplayControl(iter2.next());
+        }
     }
 
 }
