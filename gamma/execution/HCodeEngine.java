@@ -25,7 +25,6 @@ import gamma.execution.hcode.HCode;
 import gamma.execution.hcode.ArgInfoHCode;
 import gamma.execution.hcode.GenericHCode;
 import gamma.execution.hcode.Label;
-import gamma.execution.hcode.LineInfoHCode;
 import gamma.execution.hcode.SetStatement;
 import gamma.value.Color;
 import gamma.execution.lcode.Command;
@@ -93,9 +92,12 @@ public class HCodeEngine
         // Infinity values
 
         table.put("inf", Double.POSITIVE_INFINITY);
-        // Not sure if -inf will work on its own
-
         table.protect("inf");
+
+        // Null
+
+        table.put("null", null);
+        table.protect("null");
 
         // Add colors
 
@@ -256,14 +258,20 @@ public class HCodeEngine
 
         try {
             while (programCounter < code.size()) {
+//                System.err.print(programCounter + ": ");
                 Object obj = code.get(programCounter);
                 if (!(obj instanceof HCode) && !(obj instanceof Label)) {
+//                    System.err.print("PUSH " + toDisplayableString(obj));
                     program.pushData(obj);
                 }
                 else if (obj instanceof HCode hCode) {
                     // Individual HCode using ArgInfo method
 
                     if (hCode instanceof ArgInfoHCode argInfoHCode) {
+//                        System.err.print("HCODE " + hCode.getClass().getName());
+//                        if (hCode instanceof Jump jump) {
+//                            System.err.print(" " + jump.getJumpLocation());
+//                        }
 
                         // Check the arguments
 
@@ -282,9 +290,14 @@ public class HCodeEngine
                     // Generic HCode method
 
                     else if (hCode instanceof GenericHCode genericHCode) {
+//                        System.err.print("HCODE " + genericHCode.getType());
                         genericHCode.execute(this);
                     }
+//                    else if (obj instanceof Label label) {
+//                        System.err.print("LABEL " + label.getId());
+//                    }
                 }
+//                System.err.println();
                 programCounter++;
             }
             if (!program.isDataEmpty()) {
