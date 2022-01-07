@@ -19,9 +19,6 @@ package gamma.execution;
 import gamma.MainWindow;
 import gamma.ProgrammingException;
 import gamma.execution.hcode.SetStatement;
-import gamma.value.DisplayVariable;
-import gamma.value.DynamicVariable;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
 import javafx.scene.control.Alert;
@@ -88,17 +85,9 @@ public class DiagramEngine
 
                 // If we have dynamic variables, we need add the controls to the main window
 
+                dynamicSymbolTable = hCodeEngine.getDynamicSymbolTable();
                 if (hasDisplayVariables) {
-                    dynamicSymbolTable = hCodeEngine.getDynamicSymbolTable();
-                    symbolNames = dynamicSymbolTable.getSymbolNames();
-
-                    Iterator<String> iter = symbolNames.iterator();
-                    while (iter.hasNext()) {
-                        DynamicVariable dynamicVariable = dynamicSymbolTable.getDynamicVariable(iter.next());
-                        if (dynamicVariable instanceof DisplayVariable var) {
-                            window.addDisplayControl(var);
-                        }
-                    }
+                    dynamicSymbolTable.addDisplayControls(window);
                 }
              }
         }
@@ -108,14 +97,16 @@ public class DiagramEngine
     }
 
     /**
-     * This is called when a display variable is changed. If the script is
-     * animated, we let the animation engine handle this. Otherwise, we
-     * redraw.
+     * This is called when a display variable is changed.If the script is
+     * animated, we let the animation engine handle this. Otherwise, we redraw.
+     *
+     * @param restart True if the animation should be restarted when a display
+     * variable changes.
      */
-    public void updateForDisplayVariable()
+    public void updateForDisplayVariable(boolean restart)
     {
         if (isAnimated) {
-            animationEngine.updateForDisplayVariable();
+            animationEngine.updateForDisplayVariable(restart);
         }
         else {
             hCodeEngine.execute();
@@ -235,33 +226,32 @@ public class DiagramEngine
 //        }
 //    }
 
-    private String valueToString(Object value)
-    {
-        if (value instanceof Character character) {
-            return quoteForCsv(character.toString());
-        }
-        else if (value instanceof Double double1) {
-            return double1.toString();
-        }
-        else if (value instanceof String string) {
-            return(quoteForCsv(string));
-        }
-        else if (value instanceof Integer integer1) {
-            return integer1.toString();
-        }
-        else {
-            return "";
-        }
-    }
-
-    private String quoteForCsv(String str)
-    {
-        if (str.matches(".*[,\r\n\"].*")) {
-            str = str.replaceAll("\"", "\"\"");
-            str = "\"" + str + "\"";
-        }
-        return str;
-    }
-
+//    private String valueToString(Object value)
+//    {
+//        if (value instanceof Character character) {
+//            return quoteForCsv(character.toString());
+//        }
+//        else if (value instanceof Double double1) {
+//            return double1.toString();
+//        }
+//        else if (value instanceof String string) {
+//            return(quoteForCsv(string));
+//        }
+//        else if (value instanceof Integer integer1) {
+//            return integer1.toString();
+//        }
+//        else {
+//            return "";
+//        }
+//    }
+//
+//    private String quoteForCsv(String str)
+//    {
+//        if (str.matches(".*[,\r\n\"].*")) {
+//            str = str.replaceAll("\"", "\"\"");
+//            str = "\"" + str + "\"";
+//        }
+//        return str;
+//    }
 
 }
