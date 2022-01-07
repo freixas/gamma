@@ -23,6 +23,7 @@ import gamma.math.Util;
 import gamma.value.AnimationVariable;
 import gamma.value.DisplayVariable;
 import gamma.value.DynamicVariable;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
 import javafx.animation.AnimationTimer;
@@ -418,16 +419,11 @@ public class AnimationEngine
         dynamicSymbolTable = hCodeEngine.getDynamicSymbolTable();
         symbolNames = dynamicSymbolTable.getSymbolNames();
 
-        // Start by adding display variables, if we have any
+        // If we have dynamic variables, we need add the controls to the main window
 
+        dynamicSymbolTable = hCodeEngine.getDynamicSymbolTable();
         if (hasDisplayVariables) {
-            Iterator<String> iter = symbolNames.iterator();
-            while (iter.hasNext()) {
-                DynamicVariable dynamicVariable = dynamicSymbolTable.getDynamicVariable(iter.next());
-                if (dynamicVariable instanceof DisplayVariable var) {
-                    window.addDisplayControl(var);
-                }
-            }
+            dynamicSymbolTable.addDisplayControls(window);
         }
 
         // Handle the animation statement and animation variables
@@ -461,6 +457,64 @@ public class AnimationEngine
         absFrame = 1;
 
         timer = new DiagramAnimationTimer(this, speed, 1);
+        timer.start();
+
+        setState(State.RUNNING);
+    }
+
+    public void restart()
+    {
+        // Remove all animation variables from the dynamic symbol table
+
+        Iterator<String> iter = symbolNames.iterator();
+        ArrayList<String> names = new ArrayList<>();
+
+        while (iter.hasNext()) {
+            String name = iter.next();
+            DynamicVariable dynamicVariable = dynamicSymbolTable.getDynamicVariable(name);
+            if (dynamicVariable instanceof AnimationVariable) {
+                names.add(name);
+            }
+        }
+
+        for (int i = 0; i < names.size(); i++) {
+            dynamicSymbolTable.remove(names.get(i));
+        }
+
+        // Execute the hcode once to add in any new/changes animation variables
+
+        hCodeEngine.execute();
+
+        // Handle the animation statement and animation variables
+
+        AnimationStruct animationStruct =
+            (AnimationStruct)hCodeEngine.getLCodeEngine().getAnimationCommand().getCmdStruct();
+
+        boolean isLoop = animationStruct.control.equals("loop");
+        int reps = animationStruct.reps;
+        speed = animationStruct.speed;
+
+        // We calculate the maximum number of frames in a loop by checking the
+        // limits of all the animation variables. If an animation variable doesn"t
+        // have a limit, we still impose one
+
+        framesPerLoop = getMaxFrames(hCodeEngine);
+
+        // If we cycle, we repeat the loop backwards, but without the first
+        // and last frames
+
+        framesPerRep = (isLoop ? framesPerLoop : framesPerLoop * 2 - 2);
+
+        // This is the 0-based absolute frame number of the largest possible
+        // absolute frame
+
+        absMaxFrame = (reps * framesPerRep) - 1;
+
+        // This is a 0-based absolute frame number. We've already drawn the
+        // first frame, so we start with 1, the second frame
+
+        absFrame = 1;
+
         timer.start();
 
         setState(State.RUNNING);
@@ -569,6 +623,10 @@ public class AnimationEngine
         stop();
         removeListeners();
 
+        // Disable the button area
+
+        animationControls.setDisable(true);
+
         if (hCodeEngine != null) {
             hCodeEngine.close();
         }
@@ -579,10 +637,20 @@ public class AnimationEngine
      * is running, we don't need to do anything--the next frame will get the
      * latest display variable value. If the animation is not running, we
      * need to redisplay the current frame.
+     * <p>
+     * If a restart is requested, we need to stop any running animation and
+     * restart the animation from the beginning (recalculating frames, etc.).
+     *
+     * @param restart True if the animation should be restarted when a display
+     * variable changes.
      */
-    public void updateForDisplayVariable()
+    public void updateForDisplayVariable(boolean restart)
     {
-        if (state != State.RUNNING) {
+        if (restart) {
+            stop();
+            restart();
+        }
+        else if (state != State.RUNNING) {
             hCodeEngine.execute();
         }
     }
