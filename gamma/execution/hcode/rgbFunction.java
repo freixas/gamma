@@ -39,17 +39,22 @@ public class rgbFunction extends ArgInfoFunction
 
     @Override
     @SuppressWarnings("null")
-    public Object execute(HCodeEngine engine, List<Object> code)
+    public Object execute(HCodeEngine engine, List<Object> data)
     {
-        if (code.size() < 3 || code.size() > 4) {
+        if (data.get(0) == null) throw new ExecutionException("The red value is null");
+        if (data.get(1) == null) throw new ExecutionException("The green value is null");
+        if (data.get(2) == null) throw new ExecutionException("The blue value is null");
+
+        if (data.size() < 3 || data.size() > 4) {
             throw new ExecutionException("rgb() function requires 3 or four parameters");
         }
-        double red =   (Double)code.get(0);
-        double green = (Double)code.get(1);
-        double blue =  (Double)code.get(2);
+        double red =   (Double)data.get(0);
+        double green = (Double)data.get(1);
+        double blue =  (Double)data.get(2);
         double alpha = 255.0;
-        if (code.size() > 3) {
-            alpha = (Double)code.get(3);
+        if (data.size() > 3) {
+            if (data.get(3) == null) throw new ExecutionException("The alpha value is null");
+            alpha = (Double)data.get(3);
         }
 
         return Color.toColorDouble(red, green, blue, alpha);
