@@ -50,6 +50,7 @@ public class LineInfoHCode extends ArgInfoHCode
 
         engine.setFile(file);
         engine.setLineNumber(lineNumber);
+//        System.err.println("Debug: Line number " + lineNumber);
     }
 
     @Override
