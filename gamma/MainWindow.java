@@ -39,7 +39,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
@@ -66,7 +65,7 @@ public final class MainWindow extends Stage
 
     private boolean hasDisplayControls;
 
-    private HBox diagramContainer;
+    private VBox top;
     private SplitPane controlsSplitter;
     private VBox diagramParent;
     private ScrollPane scrollPane;
@@ -79,7 +78,12 @@ public final class MainWindow extends Stage
     private Canvas canvas;
 
     private PrintDialog printDialog = null;
-    private final TextArea printDialogTextArea = null;
+
+    // **********************************************************************
+    // *
+    // * Constructor
+    // *
+    // **********************************************************************
 
     /**
      * Create a main window.
@@ -107,7 +111,9 @@ public final class MainWindow extends Stage
         controller.setMainWindow(this);
         setScene(new Scene(root));
 
-        hasDisplayControls = false;
+        // The FXML file has display controls by default
+
+        hasDisplayControls = true;
 
         // Handle tasks that can only be performed on instantiated window.
 
@@ -122,6 +128,35 @@ public final class MainWindow extends Stage
         });
 
         show();
+    }
+
+    // **********************************************************************
+    // *
+    // * Getters / Settings
+    // *
+    // **********************************************************************
+
+    /**
+     * Get the ID assigned to this window.
+     *
+     * The ID is assigned by the application and is an arbitrary integer used to
+     * quickly identify a specific window.
+     *
+     * @return The window ID.
+     */
+    public int getID()
+    {
+        return ID;
+    }
+
+    /**
+     * Get the file associated with this main window. The file can be null.
+     *
+     * @return the file associated with this main window.
+     */
+    public File getFile()
+    {
+        return file;
     }
 
     /**
@@ -160,55 +195,76 @@ public final class MainWindow extends Stage
             watcher = new FileWatcher(file, this);
             watcherThread = new Thread(watcher);
             watcherThread.start();
+            if (diagramEngine != null) {
+                diagramEngine.close();
+                diagramEngine = null;
+            }
         }
     }
 
     /**
-     * Get the file associated with this main window. The file can be null.
+     * Get the current DiagramEngine associated with this window, if any.
      *
-     * @return the file associated with this main window.
+     * @return The current diagram engine, or null if none.
      */
-    public File getFile()
+    public DiagramEngine getDiagramEngine()
     {
-        return file;
+        return diagramEngine;
     }
 
-    @Override
-    public void close()
+    /**
+     * Associate a DiagramEngine with this window. If a prior association
+     * exists, close it down.
+     *
+     * @param diagramEngine The diagram engine to set.
+     */
+    public void setDiagramEngine(DiagramEngine diagramEngine)
     {
-        if (watcherThread != null) {
-            watcher.stopThread();
-            watcher = null;
-            watcherThread = null;
+        if (this.diagramEngine != null) this.diagramEngine.close();
+        this.diagramEngine = diagramEngine;
+
+        // Clean up any display variables we may have added
+
+        displayControlArea.getChildren().clear();
+
+        // Disable display controls by default
+
+        enableDisplayControls(false);
+    }
+
+    /**
+     * Return the canvas. The canvas is the area in which diagrams are drawn.
+     *
+     * @return The canvas
+     */
+    public Canvas getCanvas()
+    {
+        return canvas;
+    }
+
+    /**
+     * Get the directory to use for File/New, File/Open, and File/Save.
+     *
+     * If this window is not associated with any file, get the default script
+     * location from the Application. If the window is associated with a file,
+     * then use that file's parent directory.
+     *
+     * @return The directory to use for File/New, File/Open, and File/Save.
+     */
+    public File getFileDirectory()
+    {
+        if (file == null) {
+            return Gamma.getDefaultDirectory();
         }
-        file = null;
+        return file.getParentFile();
 
-        if (diagramEngine != null) diagramEngine.close();
-        super.close();
     }
 
-    /**
-     * Set the enable/disable state of the File/Close menu.
-     *
-     * @param enable If true, enable the File/Close menu; otherwise, disable it.
-     */
-    public void setCloseState(boolean enable)
-    {
-        fileMenuClose.setDisable(!enable);
-    }
-
-    /**
-     * Get the ID assigned to this window.
-     *
-     * The ID is assigned by the application and is an arbitrary integer used to
-     * quickly identify a specific window.
-     *
-     * @return The window ID.
-     */
-    public int getID()
-    {
-        return ID;
-    }
+    // **********************************************************************
+    // *
+    // * GUI Management
+    // *
+    // **********************************************************************
 
     /**
      * Set up access to various user interface elements, particularly menu
@@ -241,7 +297,7 @@ public final class MainWindow extends Stage
                                 fileMenuPrint = menuItem;
                             case "fileMenuClose" ->
                                 fileMenuClose = menuItem;
-                             default -> {
+                            default -> {
                             }
                         }
                     }
@@ -249,154 +305,79 @@ public final class MainWindow extends Stage
             }
         }
 
-        diagramContainer = (HBox)getScene().lookup("#diagramContainer");
+        // The top of the window tree
+
+        top = (VBox)getScene().lookup("#top");
+
+        // We start with a SplitPane that can contain the diagram area and the
+        // display controls. We don't need it unless some display controls
+        // are added
+
         controlsSplitter = (SplitPane)getScene().lookup("#controlsSplitter");
+
+        // We use a parent for our drawing area (a Canvas) because Canvas
+        // doesn't resize. The parent will resize according to its parent
+        // containers rules and we can use it to resize the canvas (when we
+        // don't have a fixed diagram size).
 
         diagramParent = (VBox)getScene().lookup("#diagramParent");
         canvas = (Canvas)getScene().lookup("#diagramArea");
 
+        // The scroll pane provides scrolling support for all the display
+        // controls and appears in the right side pane in the SplitPane
+
         scrollPane = (ScrollPane)getScene().lookup("#scrollPane");
-        scrollPane.managedProperty().bind(scrollPane.visibleProperty());
-        scrollPane.setVisible(false);
+//        scrollPane.managedProperty().bind(scrollPane.visibleProperty());
+//        scrollPane.setVisible(false);
+
+        // The display control area holds all the display controls
+
         displayControlArea = (VBox)getScene().lookup("#displayControlArea");
+
+        // If we don't do this, we can't capture keyboard events in the Canvas
 
         canvas.setFocusTraversable(true);
 
         // We start out with no display controls, so we need to remove the split
         // pane from the diagram container and reparent the diagram area
 
-        controlsSplitter.getItems().remove(diagramParent);
-        diagramContainer.getChildren().remove(controlsSplitter);
-        diagramContainer.getChildren().add(diagramParent);
-        HBox.setHgrow(diagramParent, Priority.ALWAYS);
+        enableDisplayControls(false);
     }
 
     /**
-     * Get the directory to use for File/New, File/Open, and File/Save.
+     * Set up the GUI for plain windows or windows with display controls.
      *
-     * If this window is not associated with any file, get the default script
-     * location from the Application. If the window is associated with a file,
-     * then use that file's parent directory.
-     *
-     * @return The directory to use for File/New, File/Open, and File/Save.
+     * @param enable True if this window will have display controls.
      */
-    public File getFileDirectory()
+    private void enableDisplayControls(boolean enable)
     {
-        if (file == null) {
-            return Gamma.getDefaultDirectory();
+        if (enable && !hasDisplayControls) {
+            top.getChildren().add(1, controlsSplitter);
+            controlsSplitter.getItems().addAll(diagramParent, scrollPane);
+            controlsSplitter.setDividerPositions(.9, .1);
+            VBox.setVgrow(diagramParent, Priority.ALWAYS);
+            hasDisplayControls = true;
         }
-        return file.getParentFile();
 
-    }
-
-    /**
-     * Get the current DiagramEngine, if any.
-     *
-     * @return The current diagram engine, or null if none.
-     */
-    public DiagramEngine getDiagramEngine()
-    {
-        return diagramEngine;
-    }
-
-     /**
-     * Set the current DiagramEngine. If a prior engine exists, close it
-     * down.
-     *
-     * @param diagramEngine The diagram engine to set.
-     */
-    public void setDiagramEngine(DiagramEngine diagramEngine)
-    {
-        if (this.diagramEngine != null) this.diagramEngine.close();
-        this.diagramEngine = diagramEngine;
-
-        // Clean up any display variables we may have added
-
-        scrollPane.setVisible(false);
-        displayControlArea.getChildren().clear();
-
-        // Remove the split pane
-
-        if (hasDisplayControls) {
-            controlsSplitter.getItems().remove(diagramParent);
-            diagramContainer.getChildren().remove(controlsSplitter);
-            diagramContainer.getChildren().add(diagramParent);
-            HBox.setHgrow(diagramParent, Priority.ALWAYS);
+        if (!enable && hasDisplayControls) {
+            controlsSplitter.getItems().clear();
+            top.getChildren().remove(controlsSplitter);
+            top.getChildren().add(1, diagramParent);
+            VBox.setVgrow(diagramParent, Priority.ALWAYS);
             hasDisplayControls = false;
         }
     }
 
-   /**
-     * Return the canvas.
-     *
-     * @return The canvas
-     */
-    public Canvas getCanvas()
-    {
-        return canvas;
-    }
-
     /**
-     * Show an Alert with a text area for the body.
+     * Add display controls to this window.
      *
-     * @param type The type of Alert.
-     * @param title The Alert's title.
-     * @param header The Alert's header text.
-     * @param content The text to place in the text area
-     * @param block If true, block until the user dismisses the dialog
+     * @param var The display variable to use to create the display control
+     * component.
      */
-    public void showTextAreaAlert(Alert.AlertType type, String title,
-                                  String header, String content, boolean block)
-    {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-
-        TextArea area = new TextArea(content);
-        area.setWrapText(true);
-        area.setEditable(false);
-
-        alert.getDialogPane().setContent(area);
-        alert.getDialogPane().setHeaderText(header);
-        alert.setResizable(true);
-
-        if (block) {
-            alert.showAndWait();
-        }
-        else {
-            alert.show();
-        }
-    }
-
-    /**
-     * Add text to the HCode's print dialog.
-     *
-     * @param str The text to add. A newline is added to the string.
-     */
-    public void print(String str)
-    {
-        if (printDialog == null) printDialog = new PrintDialog(this);
-        printDialog.appendText(str + "\n");
-        printDialog.show();
-    }
-
-    public void clearPrintDialog()
-    {
-        if (printDialog != null) printDialog.clear();
-    }
-
     public void addDisplayControl(DisplayVariable var) {
-        scrollPane.setVisible(true);
-
-        if (!hasDisplayControls) {
-            diagramContainer.getChildren().remove(diagramParent);
-            diagramContainer.getChildren().add(controlsSplitter);
-            controlsSplitter.getItems().add(0, diagramParent);
-            controlsSplitter.setDividerPositions(1.0, 0.0);
-            hasDisplayControls = true;
-        }
+        enableDisplayControls(true);
 
         if (var instanceof RangeVariable range) {
-            RangeVariable temp = range;
             Label label = new Label(range.getLabel());
             label.setPadding(new Insets(10.0));
             displayControlArea.getChildren().add(label);
@@ -449,6 +430,93 @@ public final class MainWindow extends Stage
         separator.setPrefWidth(200);
         displayControlArea.getChildren().add(separator);
     }
+
+    /**
+     * Show an Alert with a text area for the body.
+     *
+     * @param type The type of Alert.
+     * @param title The Alert's title.
+     * @param header The Alert's header text.
+     * @param content The text to place in the text area
+     * @param block If true, block until the user dismisses the dialog
+     */
+    public void showTextAreaAlert(Alert.AlertType type, String title,
+                                  String header, String content, boolean block)
+    {
+        Alert alert = new Alert(type);
+        alert.setTitle(title);
+
+        TextArea area = new TextArea(content);
+        area.setWrapText(true);
+        area.setEditable(false);
+
+        alert.getDialogPane().setContent(area);
+        alert.getDialogPane().setHeaderText(header);
+        alert.setResizable(true);
+
+        if (block) {
+            alert.showAndWait();
+        }
+        else {
+            alert.show();
+        }
+    }
+
+    /**
+     * Add text to the HCode's print dialog.
+     *
+     * @param str The text to add. A newline is added to the string.
+     */
+    public void print(String str)
+    {
+        if (printDialog == null) printDialog = new PrintDialog(this);
+        printDialog.appendText(str + "\n");
+        printDialog.show();
+    }
+
+    public void clearPrintDialog()
+    {
+        if (printDialog != null) printDialog.clear();
+    }
+
+    // **********************************************************************
+    // *
+    // * Manage the window
+    // *
+    // **********************************************************************
+
+    /**
+     * Set the enable/disable state of the File/Close menu.
+     *
+     * @param enable If true, enable the File/Close menu; otherwise, disable it.
+     */
+    public void setCloseState(boolean enable)
+    {
+        fileMenuClose.setDisable(!enable);
+    }
+
+    /**
+     * Close this window and delete it.
+     */
+    @Override
+    public void close()
+    {
+        if (watcherThread != null) {
+            watcher.stopThread();
+            watcher = null;
+            watcherThread = null;
+        }
+        file = null;
+
+        if (diagramEngine != null) diagramEngine.close();
+        super.close();
+    }
+
+    // **********************************************************************
+    // *
+    // * Standard methods: toString, clone hashCode, equals
+    // *
+    // **********************************************************************
 
     @Override
     public int hashCode()
