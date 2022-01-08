@@ -43,7 +43,10 @@ public class gammaFunction extends ArgInfoFunction
     public Object execute(HCodeEngine engine, List<Object> code)
     {
         Object arg1 = code.get(0);
-        if (arg1 instanceof Double dbl) {
+        if (arg1 == null) {
+            throw new ExecutionException("The gamma() function's value is null");
+        }
+        else if (arg1 instanceof Double dbl) {
             return Relativity.gamma(dbl);
         }
         else if (arg1 instanceof Observer observer) {
