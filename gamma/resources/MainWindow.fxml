@@ -51,9 +51,9 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox id="top" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" stylesheets="@MainWindow.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gamma.MainWindowController">
+<VBox id="top" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" stylesheets="@MainWindow.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gamma.MainWindowController">
    <children>
-    <MenuBar id="menuBar" fx:id="menuBar" minHeight="-Infinity" minWidth="-Infinity" style="-fx-view-order: 0;" VBox.vgrow="NEVER">
+    <MenuBar id="menuBar" fx:id="menuBar" minHeight="-Infinity" style="-fx-view-order: 0;" VBox.vgrow="NEVER">
       <menus>
         <Menu fx:id="fileMenu" text="_File">
           <items>
@@ -96,28 +96,24 @@
         </Menu>
       </menus>
     </MenuBar>
-      <HBox id="diagramContainer" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS">
-         <children>
-            <SplitPane id="controlsSplitter" dividerPositions="0.7610759493670887" HBox.hgrow="ALWAYS">
-               <items>
-                  <VBox id="diagramParent" alignment="CENTER" style="-fx-view-order: 100;">
+      <SplitPane id="controlsSplitter" dividerPositions="0.7610759493670887" VBox.vgrow="ALWAYS">
+         <items>
+            <VBox id="diagramParent" alignment="CENTER" minHeight="1.0" minWidth="1.0" style="-fx-view-order: 100;">
+               <children>
+                  <Canvas id="diagramArea" focusTraversable="true" height="480.0" style="-fx-view-order: 200;" width="640.0" VBox.vgrow="NEVER" />
+               </children>
+            </VBox>
+            <ScrollPane id="scrollPane" fitToWidth="true" hbarPolicy="NEVER" minWidth="200.0" prefWidth="200.0" SplitPane.resizableWithParent="false">
+              <content>
+                <AnchorPane>
                      <children>
-                        <Canvas id="diagramArea" focusTraversable="true" height="480.0" style="-fx-view-order: 200;" width="640.0" />
+                        <VBox id="displayControlArea" alignment="CENTER_LEFT" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                      </children>
-                  </VBox>
-                  <ScrollPane id="scrollPane" fitToWidth="true" hbarPolicy="NEVER" minWidth="200.0" prefWidth="200.0" visible="false" SplitPane.resizableWithParent="false">
-                    <content>
-                      <AnchorPane>
-                           <children>
-                              <VBox id="displayControlArea" alignment="CENTER_LEFT" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                           </children>
-                        </AnchorPane>
-                    </content>
-                  </ScrollPane>
-               </items>
-            </SplitPane>
-         </children>
-      </HBox>
+                  </AnchorPane>
+              </content>
+            </ScrollPane>
+         </items>
+      </SplitPane>
       <Separator minHeight="-Infinity" minWidth="-Infinity" style="-fx-view-order: 0;" VBox.vgrow="NEVER" />
       <HBox id="statusBar" minHeight="-Infinity" minWidth="-Infinity" style="-fx-view-order: 0; -fx-opacity: 1;" VBox.vgrow="NEVER">
          <opaqueInsets>
