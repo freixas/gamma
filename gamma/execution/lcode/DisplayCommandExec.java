@@ -18,13 +18,12 @@ package gamma.execution.lcode;
 
 import gamma.ProgrammingException;
 import gamma.drawing.Context;
-import gamma.math.Util;
-import gamma.value.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
 
@@ -34,6 +33,9 @@ import javafx.scene.transform.NonInvertibleTransformException;
  */
 public class DisplayCommandExec extends CommandExec
 {
+    private boolean resize;
+    private double fixedWidth;
+    private double fixedHeight;
 
     @Override
     public void execute(Context context, Struct cmdStruct, StyleStruct styles)
@@ -44,57 +46,72 @@ public class DisplayCommandExec extends CommandExec
         // The canvas is only resized if the width and height remain
         // undefined in the structure
 
-        double width = ((DisplayStruct)cmdStruct).width;
-        double height = ((DisplayStruct)cmdStruct).height;
+        double width;
+        double height;
+        try {
+            // When we resize, we want to keep the coordinate at the center
+            // of the canvas unchanged (NOTE: I am assuming that a resize
+            // leaves the upper left corner's coordinate unchanged
 
-        if (width == Struct.INT_NOT_SET && height == Struct.INT_NOT_SET) {
+            // Let's get the coordinate at the center
 
-            try {
-                // When we resize, we want to keep the coordinate at the center
-                // of the canvas unchanged (NOTE: I am assuming that a resize
-                // leaves the upper left corner's coordinate unchanged
+            width = canvas.getWidth();
+            height = canvas.getHeight();
+            double centerX = width / 2.0;
+            double centerT = height / 2.0;
 
-                // Let's get the coordinate at the center
+            Point2D originalCenter = gc.getTransform().inverseTransform(centerX, centerT);
 
-                width = canvas.getWidth();
-                height = canvas.getHeight();
-                double centerX = width / 2.0;
-                double centerT = height / 2.0;
+            // Now resize
 
-                Point2D originalCenter = gc.getTransform().inverseTransform(centerX, centerT);
-
-                // Now resize
-
-                double parentWidth = ((Region)canvas.getParent()).getWidth();
-                double parentHeight = ((Region)canvas.getParent()).getHeight();
-
-                // If we only listen to window resizes, the following statements
-                // should not cause any recursion
-
-                canvas.setWidth(parentWidth);
-                canvas.setHeight(parentHeight);
-
-                // Get the new center
-
-                centerX = parentWidth / 2.0;
-                centerT = parentHeight / 2.0;
-
-                Point2D newCenter = gc.getTransform().inverseTransform(centerX, centerT);
-
-                // Determine the difference and use it to restore the original
-                // coordinate to the center
-
-                gc.translate(
-                    newCenter.getX()- originalCenter.getX(),
-                    newCenter.getY()- originalCenter.getY());
-
-                context.invScale = context.getCurrentInvScale();
-                context.bounds = context.getCurrentCanvasBounds();
-
+            if (resize) {
+                width = ((Region)canvas.getParent()).getWidth();
+                height = ((Region)canvas.getParent()).getHeight();
             }
-            catch (NonInvertibleTransformException e)
-            {
-                throw new ProgrammingException("DisplayCommandExec.execute()", e);
+            else {
+                width = fixedWidth;
+                height = fixedHeight;
+            }
+            canvas.setWidth(width);
+            canvas.setHeight(height);
+
+            // Get the new center
+
+            centerX = width / 2.0;
+            centerT = height / 2.0;
+
+            Point2D newCenter = gc.getTransform().inverseTransform(centerX, centerT);
+
+            // Determine the difference and use it to restore the original
+            // coordinate to the center
+
+            gc.translate(
+                newCenter.getX()- originalCenter.getX(),
+                newCenter.getY()- originalCenter.getY());
+
+            context.invScale = context.getCurrentInvScale();
+            context.bounds = context.getCurrentCanvasBounds();
+
+        }
+        catch (NonInvertibleTransformException e)
+        {
+            throw new ProgrammingException("DisplayCommandExec.execute()", e);
+        }
+
+        if (!resize) {
+            Region parent = ((Region)canvas.getParent());
+            Rectangle clip = (Rectangle)parent.getClip();
+            if (clip != null) {
+                clip.setWidth(parent.getWidth());
+                clip.setHeight(parent.getHeight());
+                parent.setClip(clip);
+            }
+
+            clip = (Rectangle)canvas.getClip();
+            if (clip != null) {
+                clip.setWidth(canvas.getWidth());
+                clip.setHeight(canvas.getHeight());
+                canvas.setClip(clip);
             }
         }
 
@@ -113,25 +130,24 @@ public class DisplayCommandExec extends CommandExec
     public void initializeCanvas(Context context, DisplayStruct struct, StyleStruct styles)
     {
         Canvas canvas = context.canvas;
-        GraphicsContext gc = canvas.getGraphicsContext2D();
 
         // *** CANVAS SIZE SETUP ***
 
-        // We need to make sure we fontSize the window properly.
+        // We need to make sure we size the window properly.
         // We will either find both width and height omitted or only one.
-        // If they are both omitted, we will fontSize the drawing area to match
+        // If they are both omitted, we will size the drawing area to match
         // the parent; if only one or the other is omitted, we set it to
-        // the parent's fontSize.
+        // the parent's size.
 
         double width = struct.width;
         double height = struct.height;
-        boolean resize = false;
+        resize = false;
 
         Region parent = ((Region)canvas.getParent());
         double parentWidth = parent.getWidth();
         double parentHeight = parent.getHeight();
 
-        // Neither width or height specified: set the canvas fontSize equal to
+        // Neither width or height specified: set the canvas size equal to
         // its parent's width and height
 
         if (width == Struct.INT_NOT_SET && height == Struct.INT_NOT_SET) {
@@ -141,12 +157,11 @@ public class DisplayCommandExec extends CommandExec
         }
 
         // Only the height was specified: leave the height alone, and set the
-        // canvas width equal to the parent's width. Then modify the
-        // display structure so that the width is fixed from now on
+        // canvas width equal to the parent's width
 
         else if (width == Struct.INT_NOT_SET) {
-            width = parentWidth;
-            struct.width = Util.toInt(width);
+            fixedWidth = width = parentWidth;
+            fixedHeight = height;
         }
 
         // Only the width was specified: leave the width alone, and set the
@@ -154,8 +169,15 @@ public class DisplayCommandExec extends CommandExec
         // display structure so that the heihgt is fixed from now on
 
         else if (height == Struct.INT_NOT_SET) {
-            height = parentHeight;
-            struct.height = Util.toInt(height);
+            fixedWidth = width;
+            fixedHeight = height = parentHeight;
+        }
+
+        // Both specified
+
+        else {
+            fixedWidth = width;
+            fixedHeight = height;
         }
 
         // We now know the width and height we want for the canvas, so set it.
@@ -165,19 +187,30 @@ public class DisplayCommandExec extends CommandExec
 
         if (width != canvas.getWidth()) {
             canvas.setWidth(width);
-            parent.setMinWidth(width);
         }
         if (height != canvas.getHeight()) {
             canvas.setHeight(height);
-            parent.setMinHeight(height);
         }
 
-        // If we are going to be resizing, make sure the parent's
-        // minimum fontSize is flexible
+        // We are not going to resize the canvas. This means that the canvas
+        // might exceed its parent's size or it might not fill the parent.
+        // Add a clip to the parent so that we don't draw outside its bounds.
+        // Add a clip to the canvas so that we don't draw outside its bounds.
 
-        if (resize) {
-            parent.setMinWidth(1D);
-            parent.setMinHeight(1D);
+        if (!resize) {
+            Rectangle clip = new Rectangle();
+            clip.setWidth(parent.getWidth());
+            clip.setHeight(parent.getHeight());
+            parent.setClip(clip);
+
+            clip = new Rectangle();
+            clip.setWidth(fixedWidth);
+            clip.setHeight(fixedHeight);
+            canvas.setClip(clip);
+        }
+        else {
+            parent.setClip(null);
+            canvas.setClip(null);
         }
 
         // *** COORDINATE SYSTEM SETUP ***
@@ -185,6 +218,7 @@ public class DisplayCommandExec extends CommandExec
         setInitialZoomPan(context, struct);
 
     }
+
     /**
      * Set the zoom/pan to the initial values specified by the user.
      * This occurs when the lcodes are first run or whenever the user
@@ -233,16 +267,11 @@ public class DisplayCommandExec extends CommandExec
         context.bounds = context.getCurrentCanvasBounds();
     }
 
-//    static Color[] colors = { Color.ALICEBLUE, Color.ANTIQUEWHITE, Color.AQUA, Color.AZURE,
-//        Color.BEIGE, Color.BISQUE, Color.BLANCHEDALMOND, Color.BLUE };
-//    static int colorIndex = 0;
-
     private final static Affine identifyTransform = new Affine();
 
     private void clearDisplay(Context context, Color color)
     {
         GraphicsContext gc = context.gc;
-        Canvas canvas = context.canvas;
 
         // Currently, there is a bug where, with certain scales and translations,
         // the bounds in world units don't match the bounds in screen
