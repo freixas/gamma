@@ -48,6 +48,10 @@ public class intersectFunction extends ArgInfoFunction
         Object arg1 = code.get(0);
         Object arg2 = code.get(1);
 
+        if (arg1 == null || arg2 == null) {
+            throw new ExecutionException("Can't calculate an intersection for a null value");
+        }
+
         Coordinate result;
 
         // Both are lines
@@ -77,9 +81,6 @@ public class intersectFunction extends ArgInfoFunction
             result = observer.intersect((Line)arg2);
         }
 
-        if (result == null) {
-            throw new ExecutionException("intersect() function: No intersection found");
-        }
         return result;
 
     }
