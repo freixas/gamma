@@ -57,8 +57,6 @@ public abstract class Executor
      * @param engine The HCode engine.
      * @param func A LambdaFunction class typically created using a lamdba
      * expression.
-     * @param execute True if this function should be executed. If false, the
-     * stack state is maintained, but the function is not executed.
      */
     public void execute(ExecutorContext context, HCodeEngine engine, LambdaFunction func)
     {
@@ -141,16 +139,16 @@ public abstract class Executor
     {
         Object result = null;
         try {
-            // result = ((FunctionalOneArg<Double, Double>)func).execute(engine, (Double)args[1]);
             result = method.invoke(func, args);
         }
-        catch (IllegalArgumentException | ClassCastException e) {
+        catch (IllegalArgumentException e) {
             throw new ExecutionException("Invalid Argument", e);
         }
         catch (InvocationTargetException e) {
             Throwable ex = e.getCause();
             if (ex instanceof ExecutionException executionException) throw executionException;
             if (ex instanceof ProgrammingException programmingException) throw programmingException;
+            if (ex instanceof ClassCastException) throw new ExecutionException("Invalid argument type");
             throw new GammaRuntimeException(ex);
         }
         catch (SecurityException | IllegalAccessException e) {
