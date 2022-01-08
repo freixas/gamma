@@ -16,7 +16,9 @@
  */
 package gamma.math;
 
+import gamma.execution.ExecutionException;
 import gamma.value.Coordinate;
+import java.util.Objects;
 
 /**
  *
@@ -184,6 +186,62 @@ public final class Util
     {
         double sign = Math.signum(d);
         return sign == 0 ? 1 : sign;
+    }
+
+    static public boolean fuzzyZero(Double d)
+    {
+        if (d == null) {
+            throw new ExecutionException("Can't compare a null value to 0");
+        }
+        return fuzzyZero((double)d);
+    }
+
+    static public boolean fuzzyEQ(Object d1, Object d2)
+    {
+        if (d1 instanceof Double && d2 instanceof Double) {
+            return fuzzyEQ((double)d1, (double)d2);
+        }
+        return Objects.equals(d1, d2);
+    }
+
+    static public boolean fuzzyNE(Object d1, Object d2)
+    {
+        if (d1 instanceof Double && d2 instanceof Double) {
+            return fuzzyNE((double)d1, (double)d2);
+        }
+        return !Objects.equals(d1, d2);
+    }
+
+    static public boolean fuzzyLT(Double d1, Double d2)
+    {
+        if (d1 == null || d2 == null) {
+            throw new ExecutionException("Can't compare null values");
+        }
+        return fuzzyLT((double)d1, (double)d2);
+    }
+
+    static public boolean fuzzyLE(Double d1, Double d2)
+    {
+        if (d1 == null || d2 == null) {
+            throw new ExecutionException("Can't compare null values");
+        }
+        return fuzzyLE((double)d1, (double)d2);
+    }
+
+    static public boolean fuzzyGT(Double d1, Double d2)
+    {
+        if (d1 == null || d2 == null) {
+            throw new ExecutionException("Can't compare null values");
+        }
+        return fuzzyGT((double)d1, (double)d2);
+    }
+
+    static public boolean fuzzyGE(Double d1, Double d2)
+    {
+        if (d1 == null || d2 == null) {
+            throw new ExecutionException("Can't compare null values");
+        }
+        return fuzzyGE((double)d1, (double)d2);
     }
 
     static public boolean fuzzyZero(double d)
