@@ -46,6 +46,10 @@ public class AnimAssignHCode extends ArgInfoHCode
     @Override
     public void execute(HCodeEngine engine, List<Object> data)
     {
+        if (data.get(1) == null) throw new ExecutionException("The initial value is null");
+        if (data.get(2) == null) throw new ExecutionException("The final value is null");
+        if (data.get(3) == null) throw new ExecutionException("The step size is null");
+
         Address address =     (Address)data.get(0);
         double initialValue = (Double) data.get(1);
         double finalValue =   (Double) data.get(2);
