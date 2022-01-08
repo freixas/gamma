@@ -55,7 +55,12 @@ public abstract class HCode extends ExecutorContext
 
     // PRINT
     static final FunctionalOneArgNoRet<Object> print = (engine, obj) -> {
-        engine.print(engine.toDisplayableString(obj));
+        if (obj == null) {
+            engine.print("null");
+        }
+        else {
+            engine.print(engine.toDisplayableString(obj));
+        }
     };
     //SET_STYLE
     static final FunctionalOneArgNoRet<PropertyList> setStyle = (engine, properties) -> {
@@ -93,6 +98,7 @@ public abstract class HCode extends ExecutorContext
     };
     // FETCH_PROP
     static final FunctionalTwoArg<ObjectContainer, String, Object> fetchProp = (engine, container, propName) -> {
+        if (container == null) throw new ExecutionException("can't dereference a null value");
         if (!container.hasProperty(propName)) throw new ExecutionException("'" + propName + " is not a valid property");
         return container.getProperty(propName);
     };
@@ -100,8 +106,9 @@ public abstract class HCode extends ExecutorContext
     static final FunctionalOneArg<String, SymbolTableAddress> fetchAddress = (engine, symbol) -> new SymbolTableAddress(engine.getSymbolTable(), symbol);
     // FETCH_PROP_ADDRESS
     static final FunctionalTwoArg<Address, String, ObjectPropertyAddress> fetchPropAddress = (engine, address, propName) -> {
-        if (!address.exists()) throw new ExecutionException("Invalid address");
+        if (!address.exists()) throw new ProgrammingException("FETCH_PROP_ADDRESS: Invalid address");
         Object value = address.getValue();
+        if (value == null) throw new ExecutionException("can't dereference a null value");
 
         // Make sure the value has the given property
 
@@ -117,18 +124,18 @@ public abstract class HCode extends ExecutorContext
     // ****************************************
 
     // NOT
-    static final FunctionalOneArg<Double, Double> not = (engine, arg1) -> Util.fuzzyZero(arg1) ? 1.0 : 0.0;
+    static final FunctionalOneArg<Double, Double> not = (engine, arg1) -> (arg1 != null && Util.fuzzyZero(arg1)) ? 1.0 : 0.0;
     // TO_BOOLEAN
-    static final FunctionalOneArg<Double, Double> toBoolean = (engine, arg1) -> Util.fuzzyZero(arg1) ? 0.0 : 1.0;
+    static final FunctionalOneArg<Double, Double> toBoolean = (engine, arg1) -> (arg1 == null || Util.fuzzyZero(arg1)) ? 0.0 : 1.0;
     // OR
     static final FunctionalTwoArg<Double, Double, Double> or = (engine, arg1, arg2) -> !Util.fuzzyZero(arg1) || !Util.fuzzyZero(arg2) ? 1.0 : 0.0;
     //AND
     static final FunctionalTwoArg<Double, Double, Double> and = (engine, arg1, arg2) -> !Util.fuzzyZero(arg1) && !Util.fuzzyZero(arg2) ? 1.0 : 0.0;
 
     // EQ
-    static final FunctionalTwoArg<Double, Double, Double> eq = (engine, arg1, arg2) -> Util.fuzzyEQ(arg1, arg2) ? 1.0 : 0.0;
+    static final FunctionalTwoArg<Object, Object, Double> eq = (engine, arg1, arg2) -> Util.fuzzyEQ(arg1, arg2) ? 1.0 : 0.0;
     // NE
-    static final FunctionalTwoArg<Double, Double, Double> ne = (engine, arg1, arg2) -> Util.fuzzyNE(arg1, arg2) ? 1.0 : 0.0;
+    static final FunctionalTwoArg<Object, Object, Double> ne = (engine, arg1, arg2) -> Util.fuzzyNE(arg1, arg2) ? 1.0 : 0.0;
     // LT
     static final FunctionalTwoArg<Double, Double, Double> lt = (engine, arg1, arg2) -> Util.fuzzyLT(arg1, arg2) ? 1.0 : 0.0;
     // GT
@@ -139,32 +146,71 @@ public abstract class HCode extends ExecutorContext
     static final FunctionalTwoArg<Double, Double, Double> ge = (engine, arg1, arg2) -> Util.fuzzyGE(arg1, arg2) ? 1.0 : 0.0;
 
     // UNARY_MINUS
-    static final FunctionalOneArg<Double, Double> unaryMinus = (engine, arg1) -> -arg1;
+    static final FunctionalOneArg<Double, Double> unaryMinus = (engine, arg1) -> {
+        if (arg1 == null) {
+            throw new ExecutionException("Can't negate a null value");
+        }
+        return -arg1;
+    };
      // UNARY_PLUS
-    static final FunctionalOneArg<Double, Double> unaryPlus = (engine, arg1) -> +arg1;
+    static final FunctionalOneArg<Double, Double> unaryPlus = (engine, arg1) -> {
+        if (arg1 == null) {
+            throw new ExecutionException("Can't operate on a null value");
+        }
+        return +arg1;
+    };
     // SUB
-    static final FunctionalTwoArg<Double, Double, Double> sub = (engine, arg1, arg2) -> arg1 - arg2;
+    static final FunctionalTwoArg<Double, Double, Double> sub = (engine, arg1, arg2) -> {
+        if (arg1 == null) {
+            throw new ExecutionException("Can't use math on a null value");
+        }
+        return arg1 - arg2;
+    };
     // MULT
-    static final FunctionalTwoArg<Double, Double, Double> mult = (engine, arg1, arg2) -> arg1 * arg2;
+    static final FunctionalTwoArg<Double, Double, Double> mult = (engine, arg1, arg2) -> {
+        if (arg1 == null) {
+            throw new ExecutionException("Can't use math on a null value");
+        }
+        return arg1 * arg2;
+    };
     // DIV
-    static final FunctionalTwoArg<Double, Double, Double> div = (engine, arg1, arg2) -> arg1 / arg2;
+    static final FunctionalTwoArg<Double, Double, Double> div = (engine, arg1, arg2) -> {
+        if (arg1 == null) {
+            throw new ExecutionException("Can't use math on a null value");
+        }
+        return arg1 / arg2;
+    };
     // REMAINDER
-    static final FunctionalTwoArg<Double, Double, Double> remainder = (engine, arg1, arg2) -> arg1 % arg2;
+    static final FunctionalTwoArg<Double, Double, Double> remainder = (engine, arg1, arg2) -> {
+        if (arg1 == null) {
+            throw new ExecutionException("Can't use math on a null value");
+        }
+        return arg1 % arg2;
+    };
     // EXP
-    static final FunctionalTwoArg<Double, Double, Double> exp = (engine, arg1, arg2) -> Math.pow(arg1, arg2);
+    static final FunctionalTwoArg<Double, Double, Double> exp = (engine, arg1, arg2) -> {
+        if (arg1 == null) {
+            throw new ExecutionException("Can't use math on a null value");
+        }
+        return Math.pow(arg1, arg2);
+    };
     // LORENTZ
     static final FunctionalTwoArg<Coordinate, Object, Coordinate> lorentz = (engine, coord, obj) -> {
+        if (coord == null) throw new ExecutionException("The coordinate can't be null");
+        if (obj == null) throw new ExecutionException("The frame is null");
         @SuppressWarnings("LocalVariableHidesMemberVariable")
         Frame frame = Frame.promote(obj);
-        if (obj == null) throw new ExecutionException("The '>' operator expects a frame or an observer");
+        if (frame == null) throw new ExecutionException("The '>' operator expects a frame or an observer");
 
         return frame.toFrame(coord);
     };
     // INV_LORENTZ
     static final FunctionalTwoArg<Coordinate, Object, Coordinate> invLorentz = (engine, coord, obj) -> {
+        if (coord == null) throw new ExecutionException("The coordinate can't be null");
+        if (obj == null) throw new ExecutionException("The frame is null");
         @SuppressWarnings("LocalVariableHidesMemberVariable")
         Frame frame = Frame.promote(obj);
-        if (obj == null) throw new ExecutionException("The '>' operator expects a frame or an observer");
+        if (frame == null) throw new ExecutionException("The '<-' operator expects a frame or an observer");
         return frame.toRest(coord);
     };
 
@@ -176,11 +222,14 @@ public abstract class HCode extends ExecutorContext
     static final FunctionalThreeArg<Coordinate, Double, Double, WInitializer> wInitializer = (engine, coord, tau, d) -> new WInitializer(coord, tau, d);
     // W_SEGMENT
     static final FunctionalFourArg<Double, Double, WorldlineSegment.LimitType, Double, WSegment> wSegment = (engine, v, a, limitType, delta) -> {
+        if (v == null) throw new ExecutionException("The velocity is null");
         if (v <= -1.0 || v >= 1.0) throw new ExecutionException("The velocity must be within -1 and +1.");
 
          // Convert user acceleration (in g's) to the correct value ((ly/y^2) * user units)
 
-        a =     a * 1.032295276 * engine.getSetStatement().getUnits();
+        if (a == null) throw new ExecutionException("The acceleration is null");
+        a =  a * 1.032295276 * engine.getSetStatement().getUnits();
+        if (delta == null) throw new ExecutionException("The limit's value is null");
         if (limitType == WorldlineSegment.LimitType.V && (delta <= -1.0 || delta >= 1.0)) {
             throw new ExecutionException("The velocity must be within -1 and +1.");
         }
@@ -194,7 +243,7 @@ public abstract class HCode extends ExecutorContext
         PropertyList properties = new PropertyList();
         for (int i = 0; i < numOfProperties; i++) {
             if (!(data[i] instanceof PropertyElement)) {
-                throw new ProgrammingException("Trying to create a PropertyList from elements that are not PropertyElements");
+                throw new ExecutionException("One of the elements in the list of properties is not a property");
             }
             PropertyElement element = (PropertyElement)data[i];
             properties.add(element);
@@ -208,11 +257,15 @@ public abstract class HCode extends ExecutorContext
 
     // FRAME
     static final FunctionalTwoArg<Coordinate, Double, Frame> frame = (engine, origin, v) -> {
+        if (origin == null) throw new ExecutionException("The origin is null");
+        if (v == null) throw new ExecutionException("The velocity is null");
         if (v <= -1.0 || v >= 1.0) throw new ExecutionException("The velocity must be within -1 and +1.");
         return new Frame(origin, v);
     };
     // OBSERVER_FRAME
     static final FunctionalThreeArg<Observer, Frame.AtType, Double, Frame> observerFrame = (engine, observer, atType, atValue) -> {
+        if (observer == null) throw new ExecutionException("The observer is null");
+        if (atValue == null) throw new ExecutionException("The 'at' value is null");
         if (atType == Frame.AtType.V && (atValue <= -1.0 || atValue >= 1.0)) {
             throw new ExecutionException("The velocity must be within -1 and +1.");
         }
@@ -221,20 +274,30 @@ public abstract class HCode extends ExecutorContext
     };
     // AXIS_LINE
     static final FunctionalThreeArg<Line.AxisType, Object, Double, Line> axisLine = (engine, type, obj, offset) -> {
+        if (obj == null) throw new ExecutionException("The frame is null");
         @SuppressWarnings("LocalVariableHidesMemberVariable")
         Frame frame = Frame.promote(obj);
-        if (obj == null) throw new ExecutionException("The line object expects a frame or an observer");
+        if (frame == null) throw new ExecutionException("The line object expects a frame or an observer");
         return new ConcreteLine(type, frame, offset);
     };
     // ANGLE_LINE
-    static final FunctionalTwoArg<Double, Coordinate, Line> angleLine = (engine, angle, coord) -> new ConcreteLine(angle, coord);
+    static final FunctionalTwoArg<Double, Coordinate, Line> angleLine = (engine, angle, coord) -> {
+        if (angle == null) throw new ExecutionException("The angle is null");
+        if (coord == null) throw new ExecutionException("The coordinate is null");
+        return new ConcreteLine(angle, coord);
+    };
     // ENDPOINT_LINE
-    static final FunctionalTwoArg<Coordinate, Coordinate, Line> endpointLine = (engine, coord1, coord2) -> new ConcreteLine(coord1, coord2);
+    static final FunctionalTwoArg<Coordinate, Coordinate, Line> endpointLine = (engine, coord1, coord2) -> {
+        if (coord1 == null) throw new ExecutionException("The first coordinate is null");
+        if (coord2 == null) throw new ExecutionException("The second coordinate is null");
+        return new ConcreteLine(coord1, coord2);
+    };
     // PATH
     static final VariableArg<Path> path = (engine, data) -> {
         int numOfCoordinates = data.length;
         ArrayList<Coordinate> coords = new ArrayList<>();
         for (int i = 0; i < numOfCoordinates; i++) {
+            if (data[i] == null) throw new ExecutionException("Coordinate '" + (i + 1) +"' is null");
             if (!(data[i] instanceof Coordinate)) {
                 throw new ProgrammingException("Trying to create a Path from elements that are not all Coordinates");
             }
@@ -243,9 +306,17 @@ public abstract class HCode extends ExecutorContext
         return new Path(coords);
     };
     // BOUNDS
-    static final FunctionalTwoArg<Coordinate, Coordinate, Bounds> bounds = (engine, min, max) -> new Bounds(min, max);
+    static final FunctionalTwoArg<Coordinate, Coordinate, Bounds> bounds = (engine, min, max) -> {
+        if (min == null) throw new ExecutionException("The minimum coordinate is null");
+        if (max == null) throw new ExecutionException("The maximum coordinate is null");
+        return new Bounds(min, max);
+    };
     // INTERVAL
-    static final FunctionalThreeArg<Interval.Type, Double, Double, Interval> interval = (engine, type, min, max) -> new Interval(type, min, max);
+    static final FunctionalThreeArg<Interval.Type, Double, Double, Interval> interval = (engine, type, min, max) -> {
+        if (min == null) throw new ExecutionException("The minimum value is null");
+        if (max == null) throw new ExecutionException("The maximum value is null");
+        return new Interval(type, min, max);
+    };
     // STYLE
     static final FunctionalOneArg<PropertyList, Style> style = (engine, properties) -> {
         @SuppressWarnings("LocalVariableHidesMemberVariable")
@@ -254,7 +325,11 @@ public abstract class HCode extends ExecutorContext
         return style;
     };
     // COORDINATE
-    static final FunctionalTwoArg<Double, Double, Coordinate> coordinate = (engine, x, t) -> new Coordinate(x, t);
+    static final FunctionalTwoArg<Double, Double, Coordinate> coordinate = (engine, x, t) -> {
+        if (x == null) throw new ExecutionException("The x coordinate is null");
+        if (t == null) throw new ExecutionException("The t coordinate is null");
+        return new Coordinate(x, t);
+    };
 
     // ****************************************
     // * COMMANDS
