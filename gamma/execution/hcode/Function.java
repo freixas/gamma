@@ -60,73 +60,91 @@ public abstract class Function extends ExecutorContext
 
     // DTOT
     static final FunctionalTwoArg<Double, Observer, Double> dToT = (engine, dbl, observer) -> {
-        try { return observer.dToT(dbl); } catch (Exception ex) { throw new ExecutionException("Error in function dToT()", ex);  }
+        double result = observer.dToT(dbl);
+        return Double.isNaN(result) ? null : result;
     };
     // DTOTAU
     static final FunctionalTwoArg<Double, Observer, Double> dToTau = (engine, dbl, observer) -> {
-        try { return observer.dToTau(dbl); } catch (Exception ex) { throw new ExecutionException("Error in function dToTau()", ex); }
+        double result = observer.dToTau(dbl);
+        return Double.isNaN(result) ? null : result;
     };
     // DTOV
     static final FunctionalTwoArg<Double, Observer, Double> dToV = (engine, dbl, observer) -> {
-        try { return observer.dToV(dbl); } catch (Exception ex) { throw new ExecutionException("Error in function dToV()", ex); }
+        double result = observer.dToV(dbl);
+        return Double.isNaN(result) ? null : result;
     };
     // DTOX
     static final FunctionalTwoArg<Double, Observer, Double> dToX = (engine, dbl, observer) -> {
-        try { return observer.dToX(dbl); } catch (Exception ex) { throw new ExecutionException("Error in function dToX()", ex); }
+        double result = observer.dToX(dbl);
+        return Double.isNaN(result) ? null : result;
     };
     // TTOD
     static final FunctionalTwoArg<Double, Observer, Double> tToD = (engine, dbl, observer) -> {
-        try { return observer.tToD(dbl); } catch (Exception ex) { throw new ExecutionException("Error in function tToD()", ex); }
+        double result = observer.tToD(dbl);
+        return Double.isNaN(result) ? null : result;
     };
     // TOTTAU
     static final FunctionalTwoArg<Double, Observer, Double> tToTau = (engine, dbl, observer) -> {
-        try { return observer.tToTau(dbl); } catch (Exception ex) { throw new ExecutionException("Error in function tToTau()", ex); }
+        double result = observer.tToTau(dbl);
+        return Double.isNaN(result) ? null : result;
     };
     // TTOV
     static final FunctionalTwoArg<Double, Observer, Double> tToV = (engine, dbl, observer) -> {
-        try { return observer.tToV(dbl); } catch (Exception ex) { throw new ExecutionException("Error in function tToV()", ex); }
+        double result = observer.tToV(dbl);
+        return Double.isNaN(result) ? null : result;
     };
     // TOTX
     static final FunctionalTwoArg<Double, Observer, Double> tToX = (engine, dbl, observer) -> {
-        try { return observer.tToX(dbl); } catch (Exception ex) { throw new ExecutionException("Error in function tToX()", ex); }
+        double result = observer.tToX(dbl);
+        return Double.isNaN(result) ? null : result;
     };
     // TAUTOD
     static final FunctionalTwoArg<Double, Observer, Double> tauToD = (engine, dbl, observer) -> {
-        try { return observer.tauToD(dbl); } catch (Exception ex) { throw new ExecutionException("Error in function tauToD()", ex); }
+        double result = observer.tauToD(dbl);
+        return Double.isNaN(result) ? null : result;
     };
     // TAUTOT
     static final FunctionalTwoArg<Double, Observer, Double> tauToT = (engine, dbl, observer) -> {
-        try { return observer.tauToT(dbl); } catch (Exception ex) { throw new ExecutionException("Error in function tauToT()", ex); }
+        double result = observer.tauToT(dbl);
+        return Double.isNaN(result) ? null : result;
     };
     // TAUTOV
     static final FunctionalTwoArg<Double, Observer, Double> tauToV = (engine, dbl, observer) -> {
-        try { return observer.tauToV(dbl); } catch (Exception ex) { throw new ExecutionException("Error in function tauToV()", ex); }
+        double result = observer.tauToV(dbl);
+        return Double.isNaN(result) ? null : result;
     };
     // TAUTOX
     static final FunctionalTwoArg<Double, Observer, Double> tauToX = (engine, dbl, observer) -> {
-        try { return observer.tauToX(dbl); } catch (Exception ex) { throw new ExecutionException("Error in function tauToX()", ex); }
+        double result = observer.tauToX(dbl);
+        return Double.isNaN(result) ? null : result;
     };
     // VTOD
     static final FunctionalTwoArg<Double, Observer, Double> vToD = (engine, dbl, observer) -> {
-        try { return observer.vToD(dbl); } catch (Exception ex) { throw new ExecutionException("Error in function vToD()", ex); }
+        double result = observer.vToD(dbl);
+        return Double.isNaN(result) ? null : result;
     };
     // VTOT
     static final FunctionalTwoArg<Double, Observer, Double> vToT = (engine, dbl, observer) -> {
-        try { return observer.vToT(dbl); } catch (Exception ex) { throw new ExecutionException("Error in function vToT()", ex); }
+        double result = observer.vToT(dbl);
+        return Double.isNaN(result) ? null : result;
     };
     // VTOTAU
     static final FunctionalTwoArg<Double, Observer, Double> vToTau = (engine, dbl, observer) -> {
-        try { return observer.vToTau(dbl); } catch (Exception ex) { throw new ExecutionException("Error in function vToTau()", ex); }
+        double result = observer.vToTau(dbl);
+        return Double.isNaN(result) ? null : result;
     };
     // VTOX
     static final FunctionalTwoArg<Double, Observer, Double> vToX = (engine, dbl, observer) -> {
-        try { return observer.vToX(dbl); } catch (Exception ex) { throw new ExecutionException("Error in function vToX()", ex); }
+        double result = observer.vToX(dbl);
+        return Double.isNaN(result) ? null : result;
     };
 
     // SET_BOUNDS
     static final FunctionalTwoArg<Line, Bounds, BoundedLine> setBounds = (engine, line, bounds) -> new BoundedLine(line, bounds);
     // CLEAR_BOUNDS
     static final FunctionalOneArg<Line, Line> clearBounds = (engine, line) -> {
+        if (line == null) throw new ExecutionException("ckearBounds() has a null line");
+
         if (line instanceof ConcreteLine concreteLine) {
             return concreteLine;
         }
@@ -139,6 +157,8 @@ public abstract class Function extends ExecutorContext
     static final FunctionalTwoArg<Observer, Interval, IntervalObserver> setInterval = (engine, observer, interval) -> new IntervalObserver(observer, interval);
     // CLEAR_INTERVAL
     static final FunctionalOneArg<Observer, Observer> clearInterval = (engine, observer) -> {
+        if (observer == null) throw new ExecutionException("ckearInterval() has a null observer");
+
         if (observer instanceof ConcreteObserver concreteObserver) {
             return concreteObserver;
         }
@@ -150,6 +170,9 @@ public abstract class Function extends ExecutorContext
 
     // TO_STRING
     static final FunctionalTwoArg<Double, Double, String> toString = (engine, arg1, arg2) -> {
+        if (arg1 == null) throw new ExecutionException("toString() has a null value");
+        if (arg2 == null) throw new ExecutionException("toString() has a null precision");
+
         int digits = Util.toInt(arg2);
         if (digits < 0) {
             throw new ExecutionException("Invalid number of digits in float to string conversion");
@@ -158,59 +181,131 @@ public abstract class Function extends ExecutorContext
     };
 
     // ABS
-    static final FunctionalOneArg<Double, Double> abs = (engine, arg1) -> Math.abs(arg1);
+    static final FunctionalOneArg<Double, Double> abs = (engine, arg1) -> {
+	if (arg1 == null) throw new ExecutionException("abs() function's value is null");
+	return Math.abs(arg1);
+    };
     // ACOS
-    static final FunctionalOneArg<Double, Double> acos = (engine, arg1) -> Math.toDegrees(Math.acos(arg1));
+    static final FunctionalOneArg<Double, Double> acos = (engine, arg1) -> {
+	if (arg1 == null) throw new ExecutionException("acos() function's value is null");
+	return Math.toDegrees(Math.acos(arg1));
+    };
     // ACOSH
-    static final FunctionalOneArg<Double, Double> acosh = (engine, arg1) -> Util.acosh(arg1);
+    static final FunctionalOneArg<Double, Double> acosh = (engine, arg1) -> {
+	if (arg1 == null) throw new ExecutionException("acosh() function's value is null");
+	return Util.acosh(arg1);
+    };
     // ASIN
-    static final FunctionalOneArg<Double, Double> asin = (engine, arg1) -> Math.toDegrees(Math.asin(arg1));
+    static final FunctionalOneArg<Double, Double> asin = (engine, arg1) -> {
+	if (arg1 == null) throw new ExecutionException("asin() function's value is null");
+	return Math.toDegrees(Math.asin(arg1));
+    };
     // ASINH
-    static final FunctionalOneArg<Double, Double> asinh = (engine, arg1) -> Util.asinh(arg1);
+    static final FunctionalOneArg<Double, Double> asinh = (engine, arg1) -> {
+	if (arg1 == null) throw new ExecutionException("asinh() function's value is null");
+	return Util.asinh(arg1);
+    };
     // ATAN
-    static final FunctionalOneArg<Double, Double> atan = (engine, arg1) -> Math.toDegrees(Math.atan(arg1));
+    static final FunctionalOneArg<Double, Double> atan = (engine, arg1) -> {
+	if (arg1 == null) throw new ExecutionException("atan() function's value is null");
+	return Math.toDegrees(Math.atan(arg1));
+    };
     // ATAN2
-    static final FunctionalTwoArg<Double, Double, Double> atan2 = (engine, arg1, arg2) -> Math.toDegrees(Math.atan2(arg1, arg2));
+    static final FunctionalTwoArg<Double, Double, Double> atan2 = (engine, arg1, arg2) -> {
+	if (arg1 == null) throw new ExecutionException("atan2() function's value is null");
+	return Math.toDegrees(Math.atan2(arg1, arg2));
+    };
     // ATANH
-    static final FunctionalOneArg<Double, Double> atanh = (engine, arg1) -> Util.atanh(arg1);
+    static final FunctionalOneArg<Double, Double> atanh = (engine, arg1) -> {
+	if (arg1 == null) throw new ExecutionException("atanh() function's value is null");
+	return Util.atanh(arg1);
+    };
     // CEIL
-    static final FunctionalOneArg<Double, Double> ceil = (engine, arg1) -> Math.ceil(arg1);
+    static final FunctionalOneArg<Double, Double> ceil = (engine, arg1) -> {
+	if (arg1 == null) throw new ExecutionException("ceil() function's value is null");
+	return Math.ceil(arg1);
+    };
     // COS
-    static final FunctionalOneArg<Double, Double> cos = (engine, arg1) -> Math.cos(Math.toRadians(arg1));
+    static final FunctionalOneArg<Double, Double> cos = (engine, arg1) -> {
+	if (arg1 == null) throw new ExecutionException("cos() function's value is null");
+	return Math.cos(Math.toRadians(arg1));
+    };
     // COSH
-    static final FunctionalOneArg<Double, Double> cosh = (engine, arg1) -> Math.cosh(arg1);
+    static final FunctionalOneArg<Double, Double> cosh = (engine, arg1) -> {
+	if (arg1 == null) throw new ExecutionException("cosh() function's value is null");
+	return Math.cosh(arg1);
+    };
     // E
     static final FunctionalNoArg<Double> e = (engine) -> Math.E;
     // EXP
-    static final FunctionalOneArg<Double, Double> exp = (engine, arg1) -> Math.exp(arg1);
+    static final FunctionalOneArg<Double, Double> exp = (engine, arg1) -> {
+	if (arg1 == null) throw new ExecutionException("exp() function's value is null");
+	return Math.exp(arg1);
+    };
     // FLOOR
-    static final FunctionalOneArg<Double, Double> floor = (engine, arg1) -> Math.floor(arg1);
+    static final FunctionalOneArg<Double, Double> floor = (engine, arg1) -> {
+	if (arg1 == null) throw new ExecutionException("floor() function's value is null");
+	return Math.floor(arg1);
+    };
     // LOG
-    static final FunctionalOneArg<Double, Double> log = (engine, arg1) -> Math.log(arg1);
+    static final FunctionalOneArg<Double, Double> log = (engine, arg1) -> {
+	if (arg1 == null) throw new ExecutionException("log() function's value is null");
+	return Math.log(arg1);
+    };
     // LOG10
-    static final FunctionalOneArg<Double, Double> log10 = (engine, arg1) -> Math.log10(arg1);
+    static final FunctionalOneArg<Double, Double> log10 = (engine, arg1) -> {
+	if (arg1 == null) throw new ExecutionException("log10() function's value is null");
+	return Math.log10(arg1);
+    };
     // MAX
-    static final FunctionalTwoArg<Double, Double, Double> max = (engine, arg1, arg2) -> Math.max(arg1, arg2);
+    static final FunctionalTwoArg<Double, Double, Double> max = (engine, arg1, arg2) -> {
+	if (arg1 == null) throw new ExecutionException("max() function's value is null");
+	return Math.max(arg1, arg2);
+    };
     // MIN
-    static final FunctionalTwoArg<Double, Double, Double> min = (engine, arg1, arg2) -> Math.min(arg1, arg2);
+    static final FunctionalTwoArg<Double, Double, Double> min = (engine, arg1, arg2) -> {
+	if (arg1 == null) throw new ExecutionException("min() function's value is null");
+	return Math.min(arg1, arg2);
+    };
     // PI
     static final FunctionalNoArg<Double> pi = (engine) -> Math.PI;
     // RANDOM
     static final FunctionalNoArg<Double> random = (engine) -> Math.random();
     // ROUND
-    static final FunctionalOneArg<Double, Double> round = (engine, arg1) -> (double)Math.round(arg1);
+    static final FunctionalOneArg<Double, Double> round = (engine, arg1) -> {
+	if (arg1 == null) throw new ExecutionException("round() function's value is null");
+	return (double)Math.round(arg1);
+    };
     // SIGN
-    static final FunctionalOneArg<Double, Double> sign = (engine, arg1) -> Util.sign(arg1);
+    static final FunctionalOneArg<Double, Double> sign = (engine, arg1) -> {
+	if (arg1 == null) throw new ExecutionException("sign() function's value is null");
+	return Util.sign(arg1);
+    };
     // SIN
-    static final FunctionalOneArg<Double, Double> sin = (engine, arg1) -> Math.sin(Math.toRadians(arg1));
+    static final FunctionalOneArg<Double, Double> sin = (engine, arg1) -> {
+	if (arg1 == null) throw new ExecutionException("sin() function's value is null");
+	return Math.sin(Math.toRadians(arg1));
+    };
     // SINH
-    static final FunctionalOneArg<Double, Double> sinh = (engine, arg1) -> Math.sinh(arg1);
+    static final FunctionalOneArg<Double, Double> sinh = (engine, arg1) -> {
+	if (arg1 == null) throw new ExecutionException("sinh() function's value is null");
+	return Math.sinh(arg1);
+    };
     // SQRT
-    static final FunctionalOneArg<Double, Double> sqrt = (engine, arg1) -> Math.sqrt(arg1);
+    static final FunctionalOneArg<Double, Double> sqrt = (engine, arg1) -> {
+	if (arg1 == null) throw new ExecutionException("sqrt() function's value is null");
+	return Math.sqrt(arg1);
+    };
     // TAN
-    static final FunctionalOneArg<Double, Double> tan = (engine, arg1) -> Math.tan(Math.toRadians(arg1));
+    static final FunctionalOneArg<Double, Double> tan = (engine, arg1) -> {
+	if (arg1 == null) throw new ExecutionException("tan() function's value is null");
+	return Math.tan(Math.toRadians(arg1));
+    };
     // TANH
-    static final FunctionalOneArg<Double, Double> tanh = (engine, arg1) -> Math.tanh(arg1);
+    static final FunctionalOneArg<Double, Double> tanh = (engine, arg1) -> {
+	if (arg1 == null) throw new ExecutionException("tanh() function's value is null");
+	return Math.tanh(arg1);
+    };
 
     // Map generic functions to their matching lambda
 
