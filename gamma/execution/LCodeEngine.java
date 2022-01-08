@@ -44,7 +44,7 @@ import javafx.scene.transform.NonInvertibleTransformException;
  */
 public class LCodeEngine
 {
-    static private final double MIN_ZOOM_SCALE =      0.000001;
+    static private final double MIN_ZOOM_SCALE = 0.000001;
     static private final double MAX_ZOOM_SCALE = 100.0;
 
     private final ArrayList<Command> commands;
@@ -541,19 +541,12 @@ public class LCodeEngine
         canvasParent.widthProperty().removeListener(widthListener);
         canvasParent.widthProperty().removeListener(heightListener);
         canvas.removeEventHandler(MouseEvent.MOUSE_MOVED, mouseMovedEventHandler);
-        // canvas.setOnMouseMoved(null);
         canvas.removeEventHandler(MouseEvent.MOUSE_ENTERED, mouseEnteredEventHandler);
-        // canvas.setOnMouseEnetered(null);
         canvas.removeEventHandler(MouseEvent.MOUSE_EXITED, mouseExitedEventHandler);
-        // canvas.setOnMouseExited(null);
         canvas.removeEventHandler(MouseEvent.MOUSE_PRESSED, mousePressedEventHandler);
-        // canvas.setOnMousePressed(null);
         canvas.removeEventHandler(MouseEvent.MOUSE_DRAGGED, mouseDraggedEventHandler);
-        // canvas.setOnMouseDragged(null);
         canvas.removeEventHandler(ScrollEvent.ANY, scrollEventHandler);
-        // canvas.setOnScroll(null);
         canvas.removeEventHandler(KeyEvent.KEY_PRESSED, keyPressedEventHandler);
-        // canvas.setOnKeyPressed(null);
     }
 
 }
