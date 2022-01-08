@@ -11,7 +11,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have received first copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package gamma.parser;
@@ -59,7 +59,7 @@ public class Parser
             this.isBinary = isBinary;
             this.precedence = precedence;
 
-            // Store each operator in a table so that we can re-use the
+            // Store each operator in first table so that we can re-use the
             // instances
 
             if (isBinary) {
@@ -143,6 +143,18 @@ public class Parser
 
     }
 
+    class Pair<A, B>
+    {
+        public final A first;
+        public final B second;
+
+        Pair (A first, B second)
+        {
+            this.first = first;
+            this.second = second;
+        }
+    }
+
     private final File file;
     private final String script;
     private ArrayList<Token<?>> tokens;
@@ -153,6 +165,7 @@ public class Parser
     private boolean displayVariableIsPresent;
 
     private int labelId;
+    private LinkedList<Pair<Label, Label>> loopLabels;
 
     private SetStatement setStatement;
 
@@ -268,6 +281,8 @@ public class Parser
         animationVariableIsPresent = false;
         displayVariableIsPresent = false;
 
+        loopLabels = new LinkedList<>();
+
         setStatement = new SetStatement();
 
         labelId = 0;
@@ -277,7 +292,7 @@ public class Parser
 
         // tokenPtr points to the current token.
         // When we start, it points one before the start of the token list.
-        // The current token is a dummy token.
+        // The current token is first dummy token.
         // Peek is the token after the current one.
         // It starts out as the first item on the token list.
         // The token list always has at least one item. The last token is
@@ -311,7 +326,7 @@ public class Parser
 
         while (!isEOF() && !(isDelimiter() && getChar() == '}')) {
 
-            // A statement block can be a statement block within braces
+            // A statement block can be first statement block within braces
 
             if (isDelimiter() && getChar() == '{') {
                 nextToken();
@@ -322,7 +337,7 @@ public class Parser
                 nextToken();
             }
 
-            // Or a statement
+            // Or first statement
 
             else {
                 codes.addAll(parseStatement());
@@ -336,15 +351,47 @@ public class Parser
     {
         LinkedList<Object> codes = new LinkedList<>();
 
+        // A statement that starts with first name
+
         if (isName()) {
             codes.add(new LineInfoHCode(curToken.getFile(), curToken.getLineNumber()));
-            switch (getString()) {
-                case "if" -> codes.addAll(parseIfStatement());
-                case "while" -> codes.addAll(parseWhileStatement());
-                case "for" -> codes.addAll(parseForStatement());
-                default -> codes.addAll(parseSemiStatement());
+
+            // Look far ahead to see if we might have first plain assigment statement
+
+            int curState = tokenPtr;
+            boolean isLeftVariable;
+            try {
+                codes.addAll(parseLeftVariable());
+                isLeftVariable = isDelimiter() && getChar() == '=';
+            }
+            catch (ParseException e) {
+                isLeftVariable = false;
+            }
+
+            // If we have a left variable, we have a plain assignment
+            // statement
+
+            if (isLeftVariable) {
+                codes.addAll(parseSemicolonStatement(true));
+            }
+
+            // Otherwise, we have something else
+
+            else {
+                codes.clear();
+                setCurrentTokenTo(curState);
+
+                switch (getString()) {
+                    case "if" -> codes.addAll(parseIfStatement());
+                    case "while" -> codes.addAll(parseWhileStatement());
+                    case "for" -> codes.addAll(parseForStatement());
+                    default -> codes.addAll(parseSemicolonStatement(false));
+                }
             }
         }
+
+        // A statement that is first block
+
         else if (isDelimiter() && getChar() == '{') {
             nextToken();
             codes.addAll(parseStatementBlock());
@@ -353,6 +400,15 @@ public class Parser
             }
             nextToken();
         }
+
+        // Empty statement
+
+        else if (isDelimiter() && getChar() == ';') {
+            nextToken();
+        }
+
+        // Neither: error
+
         else {
             throwParseException("Expected the start of a statement");
         }
@@ -360,11 +416,11 @@ public class Parser
         return codes;
     }
 
-    private LinkedList<Object> parseSemiStatement() throws ParseException
+    private LinkedList<Object> parseSemicolonStatement(boolean leftVariableDetected) throws ParseException
     {
         LinkedList<Object> codes = new LinkedList<>();
 
-        codes.addAll(parseSimpleStatement());
+        codes.addAll(parseSimpleStatement(leftVariableDetected));
 
         if (!isDelimiter() || getChar() != ';') {
             throwParseException("Expected a ';'");
@@ -374,22 +430,389 @@ public class Parser
         return codes;
     }
 
-    private LinkedList<Object> parseSimpleStatement() throws ParseException
+    private LinkedList<Object> parseSimpleStatement(boolean leftVariableDetected) throws ParseException
     {
         LinkedList<Object> codes = new LinkedList<>();
 
-        if (isName()) {
+        // If a left variable was detected, we have a normal assignment statement
+
+        if (leftVariableDetected) {
+            codes.addAll(parseAssignmentStatement());
+        }
+
+        else if (isName()) {
             switch (getString()) {
                 case "include" -> parseIncludeStatement();
                 case "stylesheet" -> parseStylesheetStatement();
                 case "set" -> parseSetStatement();
                 case "print" -> codes.addAll(parsePrintStatement());
-                case "let" -> codes.addAll(parseAssignmentStatement());
+                case "animate" -> codes.addAll(parseAnimationAssignmentStatement());
+                case "range" -> codes.addAll(parseRangeAssignmentStatement());
+                case "toggle" -> codes.addAll(parseToggleAssignmentStatement());
+                case "choice" -> codes.addAll(parseChoiceAssignmentStatement());
+                case "break" -> codes.addAll(parseBreakStatement());
+                case "continue" -> codes.addAll(parseContinueStatement());
                 case "style" -> codes.addAll(parseStyleStatement());
-                case "if" -> codes.addAll(parseIfStatement());
                 default -> codes.addAll(parseCommandStatement());
             }
         }
+
+        return codes;
+    }
+
+    private LinkedList<Object> parseIfStatement() throws ParseException
+    {
+        LinkedList<Object> codes = new LinkedList<>();
+
+        // We start knowing only that the current token points to "if"
+
+        nextToken();
+        if (!isDelimiter() || getChar() != '(') {
+            throwParseException("Expected '('");
+        }
+
+        // Add the conditional expression
+
+        nextToken();
+        codes.addAll(parseExpr());
+
+        if (!isDelimiter() || getChar() != ')') {
+            throwParseException("Expected ')'");
+        }
+
+        nextToken();
+        LinkedList<Object> ifCodes = parseStatement();
+        LinkedList<Object> elseCodes = new LinkedList<>();
+
+
+        if (isName() && getString().equals("else")) {
+            nextToken();
+            elseCodes = parseStatement();
+        }
+
+        Label labelDone = new Label(labelId++);
+        Label labelElse = labelDone;
+        if (elseCodes.size() > 0) labelElse = new Label(labelId++);
+
+        // Add the test for the conditional expression. If false, this
+        // jumps to the else clause (if any) or to the next statement. If
+        // true, it falls through to the if clause
+
+        codes.add(new JumpIfFalseHCode(labelElse.getId()));
+
+        // Add the if true clause
+
+        codes.addAll(ifCodes);
+
+        // If we have an else clause, we need to let the if clause jump to
+        // the next statement. Then we add the label that marks the start of
+        // the else clause and add the else clause code
+
+        if (elseCodes.size() > 0) {
+            codes.add(new JumpHCode(labelDone.getId()));
+            codes.add(labelElse);
+            codes.addAll(elseCodes);
+        }
+
+        // Finally we label the end of the entire if statement
+
+        codes.add(labelDone);
+
+        return codes;
+    }
+
+    private LinkedList<Object> parseWhileStatement() throws ParseException
+    {
+        LinkedList<Object> codes = new LinkedList<>();
+
+        Label labelStart = new Label(labelId++);
+        Label labelDone = new Label(labelId++);
+
+        loopLabels.push(new Pair<>(labelStart, labelDone));
+
+        // We start knowing only that the current token points to "while"
+
+        nextToken();
+        if (!isDelimiter() || getChar() != '(') {
+            throwParseException("Expected '('");
+        }
+
+        // Add the conditional expression
+
+        nextToken();
+        codes.add(labelStart);
+        codes.addAll(parseExpr());
+
+        if (!isDelimiter() || getChar() != ')') {
+            throwParseException("Expected ')'");
+        }
+
+        nextToken();
+
+        codes.add(new JumpIfFalseHCode(labelDone.getId()));
+
+        codes.addAll(parseStatement());
+        codes.add(new JumpHCode(labelStart.getId()));
+        codes.add(labelDone);
+
+        loopLabels.pop();
+
+        return codes;
+    }
+
+    private LinkedList<Object> parseForStatement() throws ParseException
+    {
+        LinkedList<Object> codes = new LinkedList<>();
+
+        Label labelStart = new Label(labelId++);
+        Label labelContinue = new Label(labelId++);
+        Label labelDone = new Label(labelId++);
+
+        loopLabels.push(new Pair<>(labelContinue, labelDone));
+
+        // We start knowing only that the current token points to "for"
+
+        nextToken();
+
+        // Variable to loop over
+
+        if (!isName()) {
+            throwParseException("Expected a variable");
+        }
+        String loopVariable = curToken.getString();
+        nextToken();
+
+        // Initial value
+
+        if (!isDelimiter() || getChar() != '=') {
+            throwParseException("Expected '='");
+        }
+        nextToken();
+        LinkedList<Object> initialValue = parseExpr();
+
+        // Final value
+
+        if (!isName() || !getString().equals("to")) {
+            throwParseException("Expected 'to'");
+        }
+        nextToken();
+        LinkedList<Object> finalValue = parseExpr();
+
+        // Step value
+
+        if (!isName() || !getString().equals("step")) {
+            throwParseException("Expected 'step'");
+        }
+        nextToken();
+        LinkedList<Object> stepValue = parseExpr();
+
+        // Code to loop over
+
+        LinkedList<Object> forLoop = parseStatement();
+
+        // Initialize the loop variable
+
+        codes.add(loopVariable);
+        codes.add(new GenericHCode(HCode.Type.FETCH_ADDRESS));
+        codes.addAll(initialValue);
+        codes.add(new AssignHCode());
+
+        // Calculate and save the final and stepConstant values
+
+        String finalVariable = loopVariable + "$$final";
+        String stepVariable = loopVariable + "$$step";
+
+        boolean finalIsConstant = (finalValue.size() == 1) && (finalValue.get(0) instanceof Double);
+        Double finalConstant = 1.0;
+        if (finalIsConstant) {
+            finalConstant = (Double)finalValue.get(0);
+        }
+        else {
+            codes.add(finalVariable);
+            codes.add(new GenericHCode(HCode.Type.FETCH_ADDRESS));
+            codes.addAll(finalValue);
+            codes.add(new AssignHCode());
+        }
+
+        boolean stepIsConstant = (stepValue.size() == 1) && (stepValue.get(0) instanceof Double);
+        Double stepConstant = 1.0;
+        if (stepIsConstant) {
+            stepConstant = (Double)stepValue.get(0);
+        }
+        else {
+            codes.add(stepVariable);
+            codes.add(new GenericHCode(HCode.Type.FETCH_ADDRESS));
+            codes.addAll(stepValue);
+            codes.add(new AssignHCode());
+        }
+
+        // Test: if (loopVariable$$step == 0) exit
+
+        if (!(stepIsConstant && (double)stepValue.get(0) == 0.0)) {
+
+            // Alternative code when the stepConstant value is not a constant
+
+            if (!stepIsConstant) {
+                codes.add(stepVariable);
+                codes.add(new GenericHCode(HCode.Type.FETCH));
+                codes.add(0.0);
+                codes.add(new GenericHCode(HCode.Type.EQ));
+                codes.add(new JumpIfTrueHCode(labelDone.getId()));
+            }
+
+            codes.add(labelStart);
+
+            // Test: if (loopVariable$$step > 0 && loopVariable > loopVariable$$final) ||
+            //          (loopVariable$$step < 0 && loopVariable < loopVariable$$final)) exit
+
+            // If the step value is a constant, we only need to do one comparison
+
+            if (stepIsConstant) {
+                if (stepConstant > 0) {
+                    codes.add(loopVariable);
+                    codes.add(new GenericHCode(HCode.Type.FETCH));
+
+                    if (finalIsConstant) {
+                        codes.add(finalConstant);
+                    }
+                    else {
+                        codes.add(finalVariable);
+                        codes.add(new GenericHCode(HCode.Type.FETCH));
+                    }
+                    codes.add(new GenericHCode(HCode.Type.LE));
+                    codes.add(new JumpIfFalseHCode(labelDone.getId()));
+                }
+                else if (stepConstant < 0) {
+                    codes.add(loopVariable);
+                    codes.add(new GenericHCode(HCode.Type.FETCH));
+
+                    if (finalIsConstant) {
+                        codes.add(finalConstant);
+                    }
+                    else {
+                        codes.add(finalVariable);
+                        codes.add(new GenericHCode(HCode.Type.FETCH));
+                    }
+                    codes.add(new GenericHCode(HCode.Type.GE));
+                    codes.add(new JumpIfFalseHCode(labelDone.getId()));
+                }
+            }
+            else {
+                Label label1 = new Label(labelId++);
+                Label label2 = new Label(labelId++);
+                Label label3 = new Label(labelId++);
+
+                codes.add(stepVariable);
+                codes.add(new GenericHCode(HCode.Type.FETCH));
+                codes.add(0.0);
+                codes.add(new GenericHCode(HCode.Type.GT));
+                codes.add(new JumpAndHCode(label1.getId()));
+
+                codes.add(loopVariable);
+                codes.add(new GenericHCode(HCode.Type.FETCH));
+
+                if (finalIsConstant) {
+                    codes.add(finalConstant);
+                }
+                else {
+                    codes.add(finalVariable);
+                    codes.add(new GenericHCode(HCode.Type.FETCH));
+                }
+                codes.add(new GenericHCode(HCode.Type.LE));
+                codes.add(new GenericHCode(HCode.Type.AND));
+                codes.add(label1);
+                codes.add(new JumpOrHCode(label2.getId()));
+
+                codes.add(stepVariable);
+                codes.add(new GenericHCode(HCode.Type.FETCH));
+                codes.add(0.0);
+                codes.add(new GenericHCode(HCode.Type.LT));
+                codes.add(new JumpAndHCode(label3.getId()));
+
+                codes.add(loopVariable);
+                codes.add(new GenericHCode(HCode.Type.FETCH));
+
+                if (finalIsConstant) {
+                    codes.add(finalConstant);
+                }
+                else {
+                    codes.add(finalVariable);
+                    codes.add(new GenericHCode(HCode.Type.FETCH));
+                }
+                codes.add(new GenericHCode(HCode.Type.GE));
+                codes.add(new GenericHCode(HCode.Type.AND));
+                codes.add(label3);
+                codes.add(new GenericHCode(HCode.Type.OR));
+                codes.add(label2);
+                codes.add(new JumpIfFalseHCode(labelDone.getId()));
+            }
+
+            // Execute the body
+
+            codes.addAll(forLoop);
+
+            // Increment: loopVariable = loopVariable + loopVariable$$step
+
+            codes.add(labelContinue);
+
+            codes.add(loopVariable);
+            codes.add(new GenericHCode(HCode.Type.FETCH_ADDRESS));
+            codes.add(loopVariable);
+            codes.add(new GenericHCode(HCode.Type.FETCH));
+            if (stepIsConstant) {
+                codes.add(stepConstant);
+            }
+            else {
+                codes.add(stepVariable);
+                codes.add(new GenericHCode(HCode.Type.FETCH));
+            }
+            codes.add(new AddHCode());
+            codes.add(new AssignHCode());
+
+            // Jump back to the start of the loop
+
+            codes.add(new JumpHCode(labelStart.getId()));
+
+            // Label for exit
+
+            codes.add(labelDone);
+        }
+
+        loopLabels.pop();
+
+        return codes;
+    }
+
+    private LinkedList<Object> parseBreakStatement() throws ParseException
+    {
+        LinkedList<Object> codes = new LinkedList<>();
+
+         // We start knowing that the current token is "break"
+
+        nextToken();
+        if (loopLabels.size() < 1) {
+            throwParseException("The break statement is not inside a loop");
+        }
+        Pair<Label, Label> pair = loopLabels.get(0);
+
+        codes.add(new JumpHCode(pair.second.getId()));
+
+        return codes;
+    }
+
+    private LinkedList<Object> parseContinueStatement() throws ParseException
+    {
+        LinkedList<Object> codes = new LinkedList<>();
+
+         // We start knowing that the current token is "break"
+
+        nextToken();
+        if (loopLabels.size() < 1) {
+            throwParseException("The continue statement is not inside a loop");
+        }
+        Pair<Label, Label> pair = loopLabels.get(0);
+
+        codes.add(new JumpHCode(pair.first.getId()));
 
         return codes;
     }
@@ -400,14 +823,14 @@ public class Parser
 
         nextToken();
 
-        // The next token has to be a string. We don't have the ability to
+        // The next token has to be first string. We don't have the ability to
         // process expressions in the parser
 
         if (!isString()) {
             throwParseException("Missing include file name");
         }
 
-        // If the next token isn't a ';', return an empty codes list
+        // If the next token isn't first ';', return an empty codes list
 
         if (!peek.isDelimiter() || peek.getChar() != ';') {
             nextToken();
@@ -477,10 +900,13 @@ public class Parser
         double displayPrecision = SetStatement.DEFAULT_DISPLAY_PRECISION;
         double printPrecision = SetStatement.DEFAULT_PRINT_PRECISION;
 
-        OUTER:
         while (true) {
-            if (!isName()) break;
+            if (!isName()) {
+                throwParseException("Expected 'units', 'displayPrecision', or 'printPrecision'");
+            }
+
             // Look for units
+
             switch (getString()) {
                 case "units" -> {
                     if (foundUnits) {
@@ -516,9 +942,14 @@ public class Parser
                     foundPrintPrecision = true;
                 }
                 default -> {
-                    break OUTER;
+                    throwParseException("Expected 'units', 'displayPrecision', or 'printPrecision'");
                 }
             }
+
+            // We need to find first comma before looking for other settings
+
+            if (!isDelimiter() || getChar() != ',') break;
+            nextToken();
         }
 
         if (foundUnits) setStatement.setUnits(units);
@@ -534,7 +965,7 @@ public class Parser
 
         nextToken();
 
-        // If the new token is ';', print a blank line
+        // If the new token is ';', print first blank line
 
         if (isDelimiter()&& getChar() == ';') {
             codes.add("");
@@ -552,10 +983,23 @@ public class Parser
     private LinkedList<Object> parseAssignmentStatement() throws ParseException
     {
         LinkedList<Object> codes = new LinkedList<>();
-        Token<?> toToken = null;
-        Token<?> stepToken = null;
 
-        // We start knowing that the current token is "let"
+        // We start knowing that the current token is '=' and that we've already
+        // processed the left variable
+
+        nextToken();
+        codes.addAll(parseExpr());
+        codes.add(new AssignHCode());
+
+        return codes;
+    }
+
+    private LinkedList<Object> parseAnimationAssignmentStatement() throws ParseException
+    {
+        LinkedList<Object> codes = new LinkedList<>();
+        Token<?> toToken = null;
+
+        // We start knowing that the current token is "animate"
 
         nextToken();
         codes.addAll(parseLeftVariable());
@@ -567,8 +1011,6 @@ public class Parser
         nextToken();
         codes.addAll(parseExpr());
 
-        // Look for an animation variable
-
         if (isName() && (getString().equals("to") || getString().equals("step"))) {
             if (getString().equals("to")) {
                 toToken = curToken;
@@ -576,7 +1018,7 @@ public class Parser
                 codes.addAll(parseExpr());
             }
 
-            // "to" is optional; "step" is required
+            // "to" is optional; "stepConstant" is required
 
             if (isName() && getString().equals("step")) {
 
@@ -586,72 +1028,168 @@ public class Parser
                     codes.add(Double.NaN);
                 }
 
-                stepToken = curToken;
                 nextToken();
                 codes.addAll(parseExpr());
             }
             else {
-                throwParseException("Missing 'step' in animation assignment");
+                throwParseException("Expected 'step'");
             }
 
             animationVariableIsPresent = true;
             codes.add(new AnimAssignHCode());
         }
 
-        // Look for a display variable
-
-        else if (isName() && getString().equals("display")) {
-            nextToken();
-
-            // Look for range display variable
-
-            if (isName() && getString().equals("from")) {
-                nextToken();
-                codes.addAll(parseExpr());
-                if (isName() && getString().equals("to")) {
-                    nextToken();
-                    codes.addAll(parseExpr());
-                }
-                else {
-                    throwParseException("Expected 'to' in display variable assignment");
-                }
-
-                if (isName() && getString().equals("label")) {
-                    nextToken();
-                    codes.addAll(parseExpr());
-                }
-                else {
-                    throwParseException("Expected 'label' in display variable assignment");
-                }
-                displayVariableIsPresent = true;
-                codes.add(new RangeDisplayAssignHCode());
-            }
-
-            // Look for boolean display variable
-
-            else if (isName() && getString().equals("boolean")) {
-                nextToken();
-                if (isName() && getString().equals("label")) {
-                    nextToken();
-                    codes.addAll(parseExpr());
-                }
-                else {
-                    throwParseException("Expected 'label' in display variable assignment");
-                }
-                displayVariableIsPresent = true;
-                codes.add(new BooleanDisplayAssignHCode());
-            }
-
-            else {
-                throwParseException("Expected 'from' or 'boolean' in display variable assignment");
-            }
-        }
-
-        // We have a normal assignment
-
         else {
-            codes.add(new AssignHCode());
+            throwParseException("Expected 'to' or 'step'");
         }
+
+        return codes;
+    }
+
+    private LinkedList<Object> parseRangeAssignmentStatement() throws ParseException
+    {
+        LinkedList<Object> codes = new LinkedList<>();
+
+        // We start knowing that the current token is "range"
+
+        nextToken();
+        codes.addAll(parseLeftVariable());
+
+        if (!isDelimiter() || getChar() != '=') {
+            throwParseException("Expected '='");
+        }
+
+        nextToken();
+        codes.addAll(parseExpr());
+
+        if (isName() && getString().equals("from")) {
+            nextToken();
+            codes.addAll(parseExpr());
+        }
+        else {
+            throwParseException("Expected 'from'");
+        }
+
+        if (isName() && getString().equals("to")) {
+            nextToken();
+            codes.addAll(parseExpr());
+        }
+        else {
+            throwParseException("Expected 'to'");
+        }
+
+        if (isName() && getString().equals("label")) {
+            nextToken();
+            codes.addAll(parseExpr());
+        }
+        else {
+            throwParseException("Expected 'label'");
+        }
+
+        displayVariableIsPresent = true;
+        codes.add(new RangeAssignHCode());
+
+        return codes;
+    }
+
+    private LinkedList<Object> parseToggleAssignmentStatement() throws ParseException
+    {
+        LinkedList<Object> codes = new LinkedList<>();
+
+        // We start knowing that the current token is "toggle"
+
+        nextToken();
+        codes.addAll(parseLeftVariable());
+
+        if (!isDelimiter() || getChar() != '=') {
+            throwParseException("Expected '='");
+        }
+
+        nextToken();
+        codes.addAll(parseExpr());
+
+        if (isName() && getString().equals("label")) {
+            nextToken();
+            codes.addAll(parseExpr());
+        }
+        else {
+            throwParseException("Expected 'label'");
+        }
+
+        if (isName() && getString().equals("restart")) {
+            codes.add(1.0);
+            nextToken();
+        }
+        else {
+            codes.add(0.0);
+        }
+
+        displayVariableIsPresent = true;
+        codes.add(new ToggleAssignHCode());
+
+        return codes;
+    }
+
+    private LinkedList<Object> parseChoiceAssignmentStatement() throws ParseException
+    {
+        LinkedList<Object> codes = new LinkedList<>();
+
+        // We start knowing that the current token is "choice"
+
+        nextToken();
+        codes.addAll(parseLeftVariable());
+
+        if (!isDelimiter() || getChar() != '=') {
+            throwParseException("Expected '='");
+        }
+
+        nextToken();
+        codes.addAll(parseExpr());
+
+        if (isName() && getString().equals("choices")) {
+            nextToken();
+        }
+        else {
+            throwParseException("Expected 'choices'");
+        }
+
+        int numChoices = 1;
+        LinkedList<Object> choicesCodes = new LinkedList<>();
+        choicesCodes.addAll(parseExpr());
+
+        while (isDelimiter() && getChar() == ',') {
+            nextToken();
+            choicesCodes.addAll(parseExpr());
+            numChoices++;
+        }
+
+        if (isName() && getString().equals("label")) {
+            nextToken();
+            codes.addAll(parseExpr());
+        }
+        else {
+            throwParseException("Expected 'label'");
+        }
+
+        if (isName() && getString().equals("restart")) {
+            codes.add(1.0);
+            nextToken();
+        }
+        else {
+            codes.add(0.0);
+        }
+
+        // Add the choices last
+
+        codes.addAll(choicesCodes);
+
+        // Add the total count of arguments: left variable, initial choice,
+        // all choices, and label
+
+        codes.add(numChoices + 4);
+
+        displayVariableIsPresent = true;
+        codes.add(new ChoiceAssignHCode());
 
         return codes;
     }
@@ -667,7 +1205,7 @@ public class Parser
             codes.add(new PropertyList());
         }
 
-        codes.addAll(parsePropertyList());
+        codes.addAll(parsePropertyList(0));
         codes.add(new GenericHCode(HCode.Type.SET_STYLE));
 
         return codes;
@@ -677,7 +1215,7 @@ public class Parser
     {
         LinkedList<Object> codes = new LinkedList<>();
 
-        // We start knowing that the current token is a name
+        // We start knowing that the current token is first name
 
         String name = getString();
         if (!name.equals("display") &&
@@ -693,23 +1231,91 @@ public class Parser
             !name.equals("label")) {
             throwParseException("Unknown command name '" + name + "'");
         }
-        Token<?> nameToken = curToken;
 
         if (name.equals("animation")) this.animationStatementIsPresent = true;
 
         nextToken();
 
-        // The property list could be empty
+        // Some properties require an expression, some allow an expression, and
+        // some have neither requirement
 
-        if (isDelimiter() && getChar() == ';') {
-            codes.add(new PropertyList());
-        }
-        else {
-            codes.addAll(parsePropertyList());
+        int propertyCount = 0;
+        switch (name) {
+            case "frame" -> {
+                if (!peekForProperty()) {
+                    codes.addAll(parseDefaultCommandProperty("frame"));
+                    propertyCount = 1;
+                }
+            }
+            case "axes" -> {
+                if (!peekForProperty()) {
+                    codes.addAll(parseDefaultCommandProperty("frame"));
+                    propertyCount = 1;
+                }
+            }
+            case "grid" -> {
+                if (!peekForProperty()) {
+                    codes.addAll(parseDefaultCommandProperty("frame"));
+                    propertyCount = 1;
+                }
+            }
+            case "event" -> {
+                codes.addAll(parseDefaultCommandProperty("location"));
+                propertyCount = 1;
+            }
+            case "line" -> {
+                codes.addAll(parseDefaultCommandProperty("line"));
+                propertyCount = 1;
+            }
+            case "worldline" -> {
+                codes.addAll(parseDefaultCommandProperty("observer"));
+                propertyCount = 1;
+            }
+            case "path" -> {
+                codes.addAll(parseDefaultCommandProperty("path"));
+                propertyCount = 1;
+            }
+            case "label" -> {
+                codes.addAll(parseDefaultCommandProperty("location"));
+                propertyCount = 1;
+            }
+
         }
 
-        codes.add(nameToken.getValue());
+        // Parse the property list
+
+        codes.addAll(parsePropertyList(propertyCount));
+
+        codes.add(name);
         codes.add(new GenericHCode(HCode.Type.COMMAND));
+
+        return codes;
+    }
+
+    /**
+     * Check to see if the current token starts a property. This means that the
+     * token is a name and is followed by a ':'. We also allow a ';', meaning
+     * that the property list is empty,
+     *
+     * @return True if the next element is a property.
+     */
+    private boolean peekForProperty()
+    {
+        return
+            (isDelimiter() && getChar() == ';') ||
+            (isName() && peek.isDelimiter() && peek.getChar() == ':');
+    }
+
+    private LinkedList<Object> parseDefaultCommandProperty(String propName) throws ParseException
+    {
+        LinkedList<Object> codes = new LinkedList<>();
+
+        codes.add(propName);
+        codes.addAll(parseExpr());
+        codes.add(new GenericHCode(HCode.Type.PROPERTY));
+        if (isDelimiter() && getChar() == ',') {
+            nextToken();
+        }
 
         return codes;
     }
@@ -720,7 +1326,7 @@ public class Parser
         boolean topNameSeen = false;
 
         while (true) {
-            // We start knowing that we expect a left side variable at the
+            // We start knowing that we expect first left side variable at the
             // current token
 
             if (!isName()) {
@@ -748,7 +1354,7 @@ public class Parser
 
             else {
                 nextToken();    // Cur token is now '.'
-                nextToken();    // Cur token should now be a name
+                nextToken();    // Cur token should now be first name
             }
         }
     }
@@ -757,13 +1363,13 @@ public class Parser
     {
         LinkedList<Object> codes = new LinkedList<>();
 
-        // We start knowing that we found a name where we need a variable
+        // We start knowing that we found first name where we need first variable
 
         // Grab the variable name
 
         String variable = curToken.getString();
 
-        // If it's followed immediately by a '[', it's an array variable
+        // If it's followed immediately by first '[', it's an array variable
 
         if (peek.isDelimiter() && peek.getChar() == '[') {
 
@@ -776,13 +1382,13 @@ public class Parser
 
              LinkedList<Object> index = parseExpr();
 
-             // We need to end with a ']'
+             // We need to end with first ']'
 
              if (!isDelimiter() || getChar() != ']') {
                  throwParseException("Expected a ']'");
              }
 
-             // Add the index and then the name. We will create a new name
+             // Add the index and then the name. We will create first new name
              // from these
 
              codes.addAll(index);
@@ -790,7 +1396,7 @@ public class Parser
              codes.add(new GenericHCode(HCode.Type.DYNAMIC_NAME));
          }
 
-        // Otherwise, we have a regular non-array variable
+        // Otherwise, we have first regular non-array variable
 
          else {
              codes.add(variable);
@@ -869,7 +1475,7 @@ public class Parser
         LinkedList<Object> codes = new LinkedList<>();
 
         // We start knowing that the current token points
-        // to the start of a potential worldline initializer
+        // to the start of first potential worldline initializer
 
         boolean originSeen = false;
         boolean distanceSeen = false;
@@ -902,7 +1508,7 @@ public class Parser
             }
         }
 
-        // We create a worldline initializer regardless of whether we find
+        // We create first worldline initializer regardless of whether we find
         // anything by defaulting all missing elements
 
         if (originSeen) {
@@ -936,7 +1542,7 @@ public class Parser
         LinkedList<Object> codes = new LinkedList<>();
 
         // We start knowing that the current token points
-        // to the start of a possibly empty list of worldline segment
+        // to the start of first possibly empty list of worldline segment
 
         int count = 0;
         if (isName() && (getString().equals("velocity") || getString().equals("acceleration"))) {
@@ -958,7 +1564,7 @@ public class Parser
         LinkedList<Object> codes = new LinkedList<>();
 
         // We start knowing that the current token points
-        // to the start of a worldline segment
+        // to the start of first worldline segment
 
         // Velocity and acceleration are both optional, but velocity precedes
         // acceleration and one or both must be provided.
@@ -990,9 +1596,9 @@ public class Parser
 
         // The segment limit is optional
 
-        if (isName() && (getString().equals("t") || getString().equals("tau") || getString().equals("distance"))) {
+        if (isName()) {
             switch (getString()) {
-                case "t" -> {
+                case "time" -> {
                     codes.add(WorldlineSegment.LimitType.T);
                     nextToken();
                     codes.addAll(parseExpr());
@@ -1012,7 +1618,10 @@ public class Parser
                     nextToken();
                     codes.addAll(parseExpr());
                 }
-                default -> throwParseException("Programming error");
+                default -> {
+                    codes.add(WorldlineSegment.LimitType.NONE);
+                    codes.add(Double.NaN);
+                }
             }
         }
         else {
@@ -1066,7 +1675,7 @@ public class Parser
                 }
             }
 
-            // If no "at" clause, use a default
+            // If no "at" clause, use first default
 
             else {
                 codes.add(Frame.AtType.TAU);
@@ -1289,22 +1898,22 @@ public class Parser
 
         if (isName()) {
             switch (getString()) {
-                case "t" -> {
+                case "time" -> {
                     codes.add(Interval.Type.T);
                 }
                 case "tau" -> {
                     codes.add(Interval.Type.TAU);
                 }
-                case "d" -> {
+                case "distance" -> {
                     codes.add(Interval.Type.D);
                 }
                 default -> {
-                    throwParseException("Expected 't', 'tau' or 'd'");
+                    throwParseException("Expected 'time', 'tau' or 'distance'");
                 }
             }
         }
         else {
-            throwParseException("Expected 't', 'tau' or 'd'");
+            throwParseException("Expected 'time', 'tau' or 'distance'");
         }
 
         nextToken();
@@ -1330,21 +1939,21 @@ public class Parser
         // to "style"
 
         nextToken();
-        codes.addAll(parsePropertyList());
+        codes.addAll(parsePropertyList(0));
 
         codes.add(new GenericHCode(HCode.Type.STYLE));
 
         return codes;
     }
 
-    private LinkedList<Object> parsePropertyList() throws ParseException
+    private LinkedList<Object> parsePropertyList(int extraProperties) throws ParseException
     {
         LinkedList<Object> codes = new LinkedList<>();
 
         // We start knowing that the current token points
         // to the start of the property list
         //
-        // The property list can be empty. Otherwise, it can start with a
+        // The property list can be empty. Otherwise, it can start with the first
         // property element or an expression.
 
         boolean isPropElem = isName() && peek.isDelimiter() && peek.getChar() == ':';
@@ -1353,7 +1962,7 @@ public class Parser
 
             // Empty property list
 
-            codes.add(0);
+            codes.add(extraProperties);
             codes.add(new GenericHCode(HCode.Type.PROPERTY_LIST));
             return codes;
         }
@@ -1364,7 +1973,7 @@ public class Parser
             isPropElem = isName() && peek.isDelimiter() && peek.getChar() == ':';
             if (isPropElem) {
 
-                // We have a property name
+                // We have first property name
 
                 codes.add(curToken.getValue());
 
@@ -1381,251 +1990,15 @@ public class Parser
 
             count++;
 
-            // If we don't find a comma, we're done
+            // If we don't find first comma, we're done
 
             if (!isDelimiter() || getChar() != ',') break;
 
             nextToken();
         }
 
-        codes.add(count);
+        codes.add(count + extraProperties);
         codes.add(new GenericHCode(HCode.Type.PROPERTY_LIST));
-
-        return codes;
-    }
-
-    private LinkedList<Object> parseIfStatement() throws ParseException
-    {
-        LinkedList<Object> codes = new LinkedList<>();
-
-        // We start knowing only that the current token points to "if"
-
-        nextToken();
-        if (!isDelimiter() || getChar() != '(') {
-            throwParseException("Expected '('");
-        }
-
-        // Add the conditional expression
-
-        nextToken();
-        codes.addAll(parseExpr());
-
-        if (!isDelimiter() || getChar() != ')') {
-            throwParseException("Expected ')'");
-        }
-
-        nextToken();
-        LinkedList<Object> ifCodes = parseStatement();
-        LinkedList<Object> elseCodes = new LinkedList<>();
-
-
-        if (isName() && getString().equals("else")) {
-            nextToken();
-            elseCodes = parseStatement();
-        }
-
-        Label labelDone = new Label(labelId++);
-        Label labelElse = labelDone;
-        if (elseCodes.size() > 0) labelElse = new Label(labelId++);
-
-        // Add the test for the conditional expression. If false, this
-        // jumps to the else clause (if any) or to the next statement. If
-        // true, it falls through to the if clause
-
-        codes.add(new JumpIfFalseHCode(labelElse.getId()));
-
-        // Add the if true clause
-
-        codes.addAll(ifCodes);
-
-        // If we have an else clause, we need to let the if clause jump to
-        // the next statement. Then we add the label that marks the start of
-        // the else clause and add the else clause code
-
-        if (elseCodes.size() > 0) {
-            codes.add(new JumpHCode(labelDone.getId()));
-            codes.add(labelElse);
-            codes.addAll(elseCodes);
-        }
-
-        // Finally we label the end of the entire if statement
-
-        codes.add(labelDone);
-
-        return codes;
-    }
-
-    private LinkedList<Object> parseWhileStatement() throws ParseException
-    {
-        LinkedList<Object> codes = new LinkedList<>();
-
-        Label labelStart = new Label(labelId++);
-        Label labelDone = new Label(labelId++);
-
-        // We start knowing only that the current token points to "while"
-
-        nextToken();
-        if (!isDelimiter() || getChar() != '(') {
-            throwParseException("Expected '('");
-        }
-
-        // Add the conditional expression
-
-        nextToken();
-        codes.add(labelStart);
-        codes.addAll(parseExpr());
-
-        if (!isDelimiter() || getChar() != ')') {
-            throwParseException("Expected ')'");
-        }
-
-        nextToken();
-
-        codes.add(new JumpIfFalseHCode(labelDone.getId()));
-
-        codes.addAll(parseStatement());
-        codes.add(new JumpHCode(labelStart.getId()));
-        codes.add(labelDone);
-
-        return codes;
-    }
-
-    private LinkedList<Object> parseForStatement() throws ParseException
-    {
-        LinkedList<Object> codes = new LinkedList<>();
-
-        Label labelStart = new Label(labelId++);
-        Label labelDone = new Label(labelId++);
-
-        // We start knowing only that the current token points to "for"
-
-        nextToken();
-
-        // Variable to loop over
-
-        if (!isName()) {
-            throwParseException("Expected a variable");
-        }
-        String loopVariable = curToken.getString();
-        nextToken();
-
-        // Initial value
-
-        if (!isName() || !getString().equals("from")) {
-            throwParseException("Expected 'from'");
-        }
-        nextToken();
-        LinkedList<Object> initialValue = parseExpr();
-
-        // Final value
-
-        if (!isName() || !getString().equals("to")) {
-            throwParseException("Expected 'to'");
-        }
-        nextToken();
-        LinkedList<Object> finalValue = parseExpr();
-
-        // Step value
-
-        if (!isName() || !getString().equals("step")) {
-            throwParseException("Expected 'step'");
-        }
-        nextToken();
-        LinkedList<Object> stepValue = parseExpr();
-
-        // Code to loop over
-
-        LinkedList<Object> forLoop = parseStatement();
-
-        // Initialize the loop variable
-
-        codes.add(loopVariable);
-        codes.add(new GenericHCode(HCode.Type.FETCH_ADDRESS));
-        codes.addAll(initialValue);
-        codes.add(new AssignHCode());
-
-        // Calculate and save the final and step values
-
-        String finalVariable = loopVariable + "$$final";
-        codes.add(finalVariable);
-        codes.add(new GenericHCode(HCode.Type.FETCH_ADDRESS));
-        codes.addAll(finalValue);
-        codes.add(new AssignHCode());
-
-        String stepVariable = loopVariable + "$$step";
-        codes.add(stepVariable);
-        codes.add(new GenericHCode(HCode.Type.FETCH_ADDRESS));
-        codes.addAll(stepValue);
-        codes.add(new AssignHCode());
-
-        codes.add(labelStart);
-
-        // Test: if (loopVariable$$step == 0) exit
-
-        codes.add(stepVariable);
-        codes.add(new GenericHCode(HCode.Type.FETCH));
-        codes.add(0.0);
-        codes.add(new GenericHCode(HCode.Type.EQ));
-        codes.add(new JumpIfTrueHCode(labelDone.getId()));
-
-        // Test: if (loopVariable$$step > 0 && loopVariable >= loopVariable$$final) ||
-        //          (loopVariable$$step < 0 && loopVariable <= loopVariable$$final)) exit
-
-        Label label1 = new Label(labelId++);
-        Label label2 = new Label(labelId++);
-        Label label3 = new Label(labelId++);
-
-        codes.add(stepVariable);
-        codes.add(new GenericHCode(HCode.Type.FETCH));
-        codes.add(0.0);
-        codes.add(new GenericHCode(HCode.Type.GT));
-        codes.add(new JumpAndHCode(label1.getId()));
-        codes.add(loopVariable);
-        codes.add(new GenericHCode(HCode.Type.FETCH));
-        codes.add(finalVariable);
-        codes.add(new GenericHCode(HCode.Type.FETCH));
-        codes.add(new GenericHCode(HCode.Type.LE));
-        codes.add(new GenericHCode(HCode.Type.AND));
-        codes.add(label1);
-        codes.add(new JumpOrHCode(label2.getId()));
-        codes.add(stepVariable);
-        codes.add(new GenericHCode(HCode.Type.FETCH));
-        codes.add(0.0);
-        codes.add(new GenericHCode(HCode.Type.LT));
-        codes.add(new JumpAndHCode(label3.getId()));
-        codes.add(loopVariable);
-        codes.add(new GenericHCode(HCode.Type.FETCH));
-        codes.add(finalVariable);
-        codes.add(new GenericHCode(HCode.Type.FETCH));
-        codes.add(new GenericHCode(HCode.Type.GE));
-        codes.add(new GenericHCode(HCode.Type.AND));
-        codes.add(label3);
-        codes.add(new GenericHCode(HCode.Type.OR));
-        codes.add(label2);
-        codes.add(new JumpIfFalseHCode(labelDone.getId()));
-
-        // Execute the body
-
-        codes.addAll(forLoop);
-
-        // Increment: loopVariable = loopVariable + loopVariable$$step
-
-        codes.add(loopVariable);
-        codes.add(new GenericHCode(HCode.Type.FETCH_ADDRESS));
-        codes.add(loopVariable);
-        codes.add(new GenericHCode(HCode.Type.FETCH));
-        codes.add(stepVariable);
-        codes.add(new GenericHCode(HCode.Type.FETCH));
-        codes.add(new AddHCode());
-        codes.add(new AssignHCode());
-
-        // Jump back to the start of the loop
-
-        codes.add(new JumpHCode(labelStart.getId()));
-
-        // Label for exit
-
-        codes.add(labelDone);
 
         return codes;
     }
@@ -1650,14 +2023,14 @@ public class Parser
 
         while (true) {
 
-            // If we find a function name, push it on the operator stack.
-            // Function names are always followed by a '('.
+            // If we find first function name, push it on the operator stack.
+            // Function names are always followed by first '('.
 
             if (isName() && peek.isDelimiter() && peek.getChar() == '(') {
                 ops.push(new OpToken<>(curToken, Op.find("FUNC", true)));
             }
 
-            // If we have a variable, push it on the codes stack
+            // If we have first variable, push it on the codes stack
 
             else if (isName()) {
                 codes.addAll(parseVariable());
@@ -1666,7 +2039,7 @@ public class Parser
                 }
             }
 
-            // If we have a number, push it on the codes stack
+            // If we have first number, push it on the codes stack
 
             else if (isNumber()) {
                 codes.add(curToken.getValue());
@@ -1682,8 +2055,8 @@ public class Parser
                 codes.addAll(parseObject());
             }
 
-            // If we have a  comma, pop operators from the op stack to
-            // the codes stack until we reach a "("
+            // If we have first  comma, pop operators from the op stack to
+            // the codes stack until we reach first "("
 
             else if (isDelimiter() && getChar() == ',') {
                 if (level < 0) throw new ProgrammingException("Parser.parseExp(): Comma without preceding '('");
@@ -1711,11 +2084,11 @@ public class Parser
                 argCount.set(level, argCount.get(level) + 1);
             }
 
-            // If we have a "(", push it on the operator stack
+            // If we have first "(", push it on the operator stack
 
             else if (isDelimiter() && getChar() == '(') {
                 ops.push(new OpToken<>(curToken, Op.find("(", true)));
-                level++;                    // Begin a new parenthesis level
+                level++;                    // Begin first new parenthesis level
 
                 // Record the number of arguments seen so far (0)
 
@@ -1727,20 +2100,20 @@ public class Parser
                 }
             }
 
-            // We have a ")"
+            // We have first ")"
 
             else if (isDelimiter() && getChar() == ')') {
                 if (level < 0) throwParseException("Unmatched ')'");
 
                 // Bump the argument count by 1 unless the last token
-                // was a '('
+                // was first '('
 
                 if (lastToken != null && (!lastToken.isDelimiter() || lastToken.getChar() != '(')) {
                     argCount.set(level, argCount.get(level) + 1);
                 }
 
                 // Pop operators from the op stack to the codes stack until we
-                // reach a "(". Then pop the "(" and discard it.
+                // reach first "(". Then pop the "(" and discard it.
 
                 while (!ops.isEmpty()) {
                     OpToken<?> topToken = ops.pop();
@@ -1754,7 +2127,7 @@ public class Parser
                     }
                 }
 
-                // If the operator at the top is now a function, pop it and push
+                // If the operator at the top is now first function, pop it and push
                 // the function name on the codes stack, along with the total of
                 // all the arguments plus the function name
 
@@ -1779,7 +2152,7 @@ public class Parser
                    throwParseException("Invalid commas inside parentheses");
                 }
 
-                // Finished a level of parantheses
+                // Finished first level of parantheses
 
                 level--;
             }
@@ -1790,7 +2163,7 @@ public class Parser
 
                 // Special case unary +/-
                 // Unary if at start of expression OR
-                // following a comma OR
+                // following first comma OR
                 // following '(' OR
                 // following any other operator
 
@@ -1848,15 +2221,15 @@ public class Parser
             // Since we are not using recursive descent to parse expressions,
             // we need to know when we're done with an expression
             //
-            // An expression begins with a number, a string, a name, an open
+            // An expression begins with first number, first string, first name, an open
             // paren ("(") or an open bracket ("["). Let's call these things
-            // "items". It can also begin with a unary operator.
+            // "items". It can also begin with first unary operator.
             //
-            // When we finish parsing a name, we can follow it with an open paren.
+            // When we finish parsing first name, we can follow it with an open paren.
             // When we finish parsing ANY item, we can follow it with an operator.
             // When we finish parsing an operator, we MUST follow it with an operator
             // or an item.
-            // For our purposes, a parenthetical expression only counts when the
+            // For our purposes, first parenthetical expression only counts when the
             // parenthesis level is 0.
             //
             // We are not done if we can follow the current item with something
@@ -1928,9 +2301,9 @@ public class Parser
      */
     private boolean isExprStart()
     {
-        // An expression begins with a number, a string, a name, an open
+        // An expression begins with first number, first string, first name, an open
         // paren ("(") or an open bracket ("["). Let's call these things
-        // "items". It can also begin with a unary operator.
+        // "items". It can also begin with first unary operator.
 
         return isNumber() ||
                isString() ||
@@ -1998,7 +2371,7 @@ public class Parser
         curToken = tokens.get(tokenPtr);
 
         // If the current token is now EOF, the peek token should also be EOF.
-        // If the current token is not EOF, the next token is a valid one,
+        // If the current token is not EOF, the next token is first valid one,
         // so grab it (it might be EOF).
 
         peek = curToken;
@@ -2007,7 +2380,7 @@ public class Parser
 
     private void returnToken()
     {
-        // When we return a token, we want to set the tokens to what they
+        // When we return first token, we want to set the tokens to what they
         // were before the last nextToken() call.
         // The current token become the peek token.
 

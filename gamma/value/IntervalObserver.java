@@ -48,9 +48,8 @@ public class IntervalObserver extends Observer
 
     public IntervalObserver(Observer observer, Interval interval)
     {
-        if (observer == null) {
-            throw new ProgrammingException("BoundedLine: Trying to attach an interval to a null observer");
-        }
+        if (observer == null) throw new ExecutionException("setInterval() has a null observer");
+        if (interval == null) throw new ExecutionException("setInterval() has a null interval");
 
         if (observer instanceof IntervalObserver intervalObserver) {
             this.observer = intervalObserver.observer;
@@ -210,7 +209,6 @@ public class IntervalObserver extends Observer
      *
      * @param v The velocity.
      * @return The position in the rest frame or NaN.
-     * @throws ExecutionException When there are no matching x's.
      */
     @Override
     public double vToX(double v)
@@ -230,7 +228,7 @@ public class IntervalObserver extends Observer
                 if (!Double.isNaN(x)) return x;
             }
         }
-        throw new ExecutionException("vToX(): No matching x for velocity.");
+        return Double.NaN;
     }
 
     /**
@@ -239,7 +237,6 @@ public class IntervalObserver extends Observer
      *
      * @param v The velocity.
      * @return The distance in the rest frame or NaN.
-     * @throws ExecutionException When there are no matching d's.
      */
     @Override
     public double vToD(double v)
@@ -259,7 +256,7 @@ public class IntervalObserver extends Observer
                 if (!Double.isNaN(d)) return d;
             }
         }
-        throw new ExecutionException("vToD(): No matching distance for velocity.");
+        return Double.NaN;
     }
 
     /**
@@ -268,7 +265,6 @@ public class IntervalObserver extends Observer
      *
      * @param v The velocity.
      * @return The time in the rest frame or NaN.
-     * @throws ExecutionException When there are no matching t's.
      */
     @Override
     public double vToT(double v)
@@ -293,7 +289,7 @@ public class IntervalObserver extends Observer
                 if (!Double.isNaN(t)) return t;
             }
         }
-        throw new ExecutionException("vToT(): No matching time for velocity.");
+        return Double.NaN;
     }
 
     /**
@@ -302,7 +298,6 @@ public class IntervalObserver extends Observer
      *
      * @param v The velocity.
      * @return The time in the accelerated frame or NaN.
-     * @throws ExecutionException When there are no matching tau's.
      */
     @Override
     public double vToTau(double v)
@@ -328,7 +323,7 @@ public class IntervalObserver extends Observer
             }
 
         }
-        throw new ExecutionException("vToTau(): No matching tau for velocity.");
+        return Double.NaN;
     }
 
     // **********************************************************
@@ -342,7 +337,6 @@ public class IntervalObserver extends Observer
      *
      * @param d The distance in the rest frame.
      * @return The velocity.
-     * @throws ExecutionException When there are no matching v's.
      */
     @Override
     public double dToV(double d)
@@ -361,7 +355,7 @@ public class IntervalObserver extends Observer
                 if (!Double.isNaN(d)) return v;
             }
         }
-        throw new ExecutionException("dToV(): No matching velocity for d.");
+        return Double.NaN;
     }
 
     /**
@@ -369,7 +363,6 @@ public class IntervalObserver extends Observer
      *
      * @param d The distance in the rest frame
      * @return The position in the rest frame.
-     * @throws ExecutionException When there are no matching x's.
      */
     @Override
     public double dToX(double d)
@@ -387,15 +380,14 @@ public class IntervalObserver extends Observer
                 if (!Double.isNaN(x)) return x;
             }
         }
-        throw new ExecutionException("dToX(): No matching x coordinate for d.");
-   }
+        return Double.NaN;
+    }
 
     /**
      * Given d, return t.
      *
      * @param d The distance in the rest frame
      * @return The time in the rest frame.
-     * @throws ExecutionException When there are no or infinite matching t's.
      */
     @Override
     public double dToT(double d)
@@ -418,7 +410,7 @@ public class IntervalObserver extends Observer
                 if (!Double.isNaN(t)) return t;
             }
         }
-        throw new ExecutionException("dToT(): No or infinite matching times for d.");
+        return Double.NaN;
     }
 
     /**
@@ -426,7 +418,6 @@ public class IntervalObserver extends Observer
      *
      * @param d The distance in the rest frame
      * @return The time in the accelerated frame.
-     * @throws ExecutionException When there are no or infinite matching taus.
      */
     @Override
     public double dToTau(double d)
@@ -449,7 +440,7 @@ public class IntervalObserver extends Observer
                 if (!Double.isNaN(tau)) return tau;
             }
         }
-        throw new ExecutionException("dToTau(): No or infinite matching taus for d.");
+        return Double.NaN;
     }
 
     // **********************************************************
@@ -477,7 +468,7 @@ public class IntervalObserver extends Observer
                 if (!Double.isNaN(v)) return v;
             }
         }
-        throw new ProgrammingException("tToV(): No matching velocity for t.");
+        return Double.NaN;
      }
 
     /**
@@ -499,7 +490,7 @@ public class IntervalObserver extends Observer
                 if (!Double.isNaN(x)) return x;
             }
         }
-        throw new ProgrammingException("tToX(): No matching x coordiante for t.");
+        return Double.NaN;
     }
 
     /**
@@ -522,7 +513,7 @@ public class IntervalObserver extends Observer
                 if (!Double.isNaN(d)) return d;
             }
         }
-        throw new ProgrammingException("tToD(): No matching distance for t.");
+        return Double.NaN;
     }
 
     /**
@@ -544,7 +535,7 @@ public class IntervalObserver extends Observer
                 if (!Double.isNaN(tau)) return tau;
             }
         }
-       throw new ProgrammingException("tToTau(): No matching tau for t.");
+        return Double.NaN;
     }
 
     // **********************************************************
@@ -572,7 +563,7 @@ public class IntervalObserver extends Observer
                 if (!Double.isNaN(v)) return v;
             }
         }
-        throw new ProgrammingException("tauToV(): No matching velocity for tau.");
+        return Double.NaN;
     }
 
     /**
@@ -594,7 +585,7 @@ public class IntervalObserver extends Observer
                 if (!Double.isNaN(x)) return x;
             }
         }
-        throw new ProgrammingException("tauToX(): No matching x coordinate for tau.");
+        return Double.NaN;
     }
 
     /**
@@ -618,7 +609,7 @@ public class IntervalObserver extends Observer
                 if (!Double.isNaN(d)) return d;
             }
         }
-         throw new ProgrammingException("tauToD(): No matching distance for tau.");
+        return Double.NaN;
     }
 
     /**
@@ -640,7 +631,7 @@ public class IntervalObserver extends Observer
                 if (!Double.isNaN(t)) return t;
             }
         }
-        throw new ProgrammingException("tauToT(): No matching time for tau.");
+        return Double.NaN;
     }
 
     // **********************************************************
@@ -750,7 +741,7 @@ public class IntervalObserver extends Observer
         // We don't need to check the X coordinate. If the T coordinate is in
         // the interval, the X coordinate will be as well
 
-        return Util.fuzzyGE(min.t, c.t) && Util.fuzzyLE(max.t, c.t);
+        return Util.fuzzyLE(min.t, c.t) && Util.fuzzyGE(max.t, c.t);
     }
 
     // **********************************************************************

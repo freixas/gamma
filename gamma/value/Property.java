@@ -16,6 +16,7 @@
  */
 package gamma.value;
 
+import gamma.execution.ExecutionException;
 import gamma.execution.lcode.StyleStruct;
 
 /**
@@ -30,6 +31,7 @@ public class Property implements PropertyElement, ExecutionImmutable
     public Property(String name, Object value)
     {
         this.name = name;
+        if (value == null) throw new ExecutionException("The property's value is null");
         this.value = value;
     }
 

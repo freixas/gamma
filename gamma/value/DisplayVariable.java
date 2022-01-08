@@ -29,6 +29,8 @@ abstract public class DisplayVariable extends DynamicVariable
         RANGE, BOOLEAN
     }
 
+    private int displayOrder = -1;
+
     /**
      * Get the type of this display variable.
      *
@@ -49,5 +51,27 @@ abstract public class DisplayVariable extends DynamicVariable
      * @return The display variable's label.
      */
     abstract public String getLabel();
+
+    /**
+     * Get the order in which this display variable should be displayed,
+     * starting with 0 for the first variable to display.
+     *
+     * @return The display order.
+     */
+     public int getDisplayOrder()
+     {
+         return displayOrder;
+     }
+
+    /**
+     * Set the order in which this display variable should be displayed,
+     * starting with 0 for the first variable to display.
+     *
+     * @param displayOrder The display order.
+     */
+    public void setDisplayOrder(int displayOrder)
+    {
+        this.displayOrder = displayOrder;
+    }
 
 }

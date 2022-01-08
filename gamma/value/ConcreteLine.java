@@ -17,6 +17,7 @@
 package gamma.value;
 
 import gamma.ProgrammingException;
+import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
 import gamma.math.Relativity;
 import gamma.math.Util;
@@ -407,7 +408,10 @@ public class ConcreteLine extends Line
     @Override
     public ConcreteLine relativeTo(Frame prime)
     {
-        return new ConcreteLine(Relativity.toPrimeAngle(angle, prime.getV()), prime.toFrame(coord));
+        return
+            new ConcreteLine(
+                new ConcreteLine(Relativity.toPrimeAngle(angle, prime.getV()), prime.toFrame(coord)),
+                isInfiniteMinus, isInfinitePlus);
     }
 
     // **********************************************************************

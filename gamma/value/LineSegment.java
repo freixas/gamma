@@ -61,13 +61,12 @@ public class LineSegment extends CurveSegment implements ExecutionImmutable
         }
     }
 
-    /**
-     * Create a new version of this line segment that is relative to the
-     * given frame rather than relative to the rest frame.
-     *
-     * @param prime The frame to be relative to.
-     * @return The new line segment.
-     */
+    // **********************************************************************
+    // *
+    // * Drawing frame support
+    // *
+    // **********************************************************************
+
     public LineSegment relativeTo(Frame prime)
     {
         Coordinate p1 = prime.toFrame(point1);

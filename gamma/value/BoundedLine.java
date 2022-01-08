@@ -17,6 +17,7 @@
 package gamma.value;
 
 import gamma.ProgrammingException;
+import gamma.execution.ExecutionException;
 import gamma.execution.HCodeEngine;
 
 /**
@@ -54,9 +55,8 @@ public class BoundedLine extends Line
      */
     public BoundedLine(Line line, Bounds bounds)
     {
-        if (line == null) {
-            throw new ProgrammingException("BoundedLine: Trying to attach a bounding box to a null line");
-        }
+        if (line == null) throw new ExecutionException("setBounds() has a null line");
+        if (bounds == null) throw new ExecutionException("setBounds() has a null bounding box");
 
         if (line instanceof BoundedLine boundedLine) {
             this.line = boundedLine.line;
@@ -113,6 +113,26 @@ public class BoundedLine extends Line
             other.bounds.min.subtract(offset),
             other.bounds.max.subtract(offset));
         segment = this.line.infiniteIntersect(this.originalBounds);
+        if (segment != null) {
+            this.bounds = segment.getBounds();
+        }
+        else {
+            this.bounds = null;
+        }
+    }
+
+    /**
+     * This is a special constructor used by the relativeTo() method.
+     *
+     * @param line The line to attach to.
+     * @param bounds The bounding box to attach.
+     * @param segment The bounded segment.
+     */
+    private BoundedLine(ConcreteLine line, Bounds bounds, CurveSegment segment)
+    {
+        this.line = line;
+        this.originalBounds = new Bounds(bounds);
+        this.segment = segment;
         if (segment != null) {
             this.bounds = segment.getBounds();
         }
@@ -229,11 +249,40 @@ public class BoundedLine extends Line
     // *
     // **********************************************************************
 
-     @Override
+    @Override
     public BoundedLine relativeTo(Frame prime)
     {
-        //return new BoundedLine(line.relativeTo(prime));
-        return null;
+        // Convert the original line to the new frame, although I don't think
+        // it gets used (the relativeTo() call is just before the execution of
+        // the l-code, while the original line might only be used in the h-code
+
+        ConcreteLine newLine = line.relativeTo(prime);
+
+        CurveSegment newSegment;
+
+        if (segment == null) {
+            newSegment = null;
+        }
+
+        // If the CurveSegment is a ConcreteLine, we need to make it
+        // relative to the drawing frame
+
+        else if (segment instanceof ConcreteLine concreteLine) {
+            newSegment = concreteLine.relativeTo(prime);
+        }
+
+        // If the CurveSegment is a LineSegment, make it relative to the
+        // drawing frame
+
+        else if (segment instanceof LineSegment boundedSegment) {
+            newSegment = boundedSegment.relativeTo(prime);
+        }
+
+        else {
+            throw new ProgrammingException("BoundedLine.relativeTo(): Unexpected CurveSegment type");
+        }
+
+        return new BoundedLine(newLine, originalBounds, newSegment);
     }
 
     // **********************************************************************

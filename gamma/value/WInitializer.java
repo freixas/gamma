@@ -16,6 +16,7 @@
  */
 package gamma.value;
 
+import gamma.execution.ExecutionException;
 import gamma.math.Relativity;
 
 /**
@@ -30,8 +31,27 @@ public class WInitializer implements ExecutionImmutable
     private final double tau;
     private final double d;
 
+    public WInitializer(Coordinate origin, Double tau, Double d)
+    {
+        if (origin == null) {
+            throw new ExecutionException("The worldline's origin is null");
+        }
+        if (tau == null) {
+            throw new ExecutionException("The worldline's initial tau is null");
+        }
+        if (d == null) {
+            throw new ExecutionException("The worldline's initial distance is null");
+        }
+        this.origin = origin;
+        this.tau = tau;
+        this.d = d;
+    }
+    
     public WInitializer(Coordinate origin, double tau, double d)
     {
+        if (origin == null) {
+            throw new ExecutionException("The worldline's origin is null");
+        }
         this.origin = origin;
         this.tau = tau;
         this.d = d;

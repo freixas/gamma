@@ -226,7 +226,6 @@ public class ConcreteObserver extends Observer
      *
      * @param v The velocity.
      * @return The position in the rest frame or NaN.
-     * @throws ExecutionException When there are no matching x's.
      */
     @Override
     public double vToX(double v)
@@ -236,7 +235,7 @@ public class ConcreteObserver extends Observer
             double x = iter.next().vToX(v);
             if (!Double.isNaN(x)) return x;
         }
-        throw new ExecutionException("vToX(): No matching x for velocity.");
+        return Double.NaN;
     }
 
     /**
@@ -245,7 +244,6 @@ public class ConcreteObserver extends Observer
      *
      * @param v The velocity.
      * @return The distance in the rest frame or NaN.
-     * @throws ExecutionException When there are no matching d's.
      */
     @Override
     public double vToD(double v)
@@ -255,7 +253,7 @@ public class ConcreteObserver extends Observer
             double d = iter.next().vToD(v);
             if (!Double.isNaN(d)) return d;
         }
-        throw new ExecutionException("vToD(): No matching distance for velocity.");
+        return Double.NaN;
     }
 
     /**
@@ -264,7 +262,6 @@ public class ConcreteObserver extends Observer
      *
      * @param v The velocity.
      * @return The time in the rest frame or NaN.
-     * @throws ExecutionException When there are no matching t's.
      */
     @Override
     public double vToT(double v)
@@ -274,7 +271,7 @@ public class ConcreteObserver extends Observer
             double t = iter.next().vToT(v);
             if (!Double.isNaN(t)) return t;
         }
-        throw new ExecutionException("vToT(): No matching time for velocity.");
+        return Double.NaN;
     }
 
     /**
@@ -283,7 +280,6 @@ public class ConcreteObserver extends Observer
      *
      * @param v The velocity.
      * @return The time in the accelerated frame or NaN.
-     * @throws ExecutionException When there are no matching tau's.
      */
     @Override
     public double vToTau(double v)
@@ -293,7 +289,7 @@ public class ConcreteObserver extends Observer
             double tau = iter.next().vToTau(v);
             if (!Double.isNaN(tau)) return tau;
         }
-        throw new ExecutionException("vToTau(): No matching tau for velocity.");
+        return Double.NaN;
     }
 
     // **********************************************************
@@ -306,8 +302,7 @@ public class ConcreteObserver extends Observer
      * Given d, return v.
      *
      * @param d The distance in the rest frame.
-     * @return The velocity.
-     * @throws ExecutionException When there are no matching v's.
+     * @return The velocity or NaN.
      */
     @Override
     public double dToV(double d)
@@ -317,15 +312,14 @@ public class ConcreteObserver extends Observer
             double v = iter.next().dToV(d);
             if (!Double.isNaN(v)) return v;
         }
-        throw new ExecutionException("dToV(): No matching velocity for d.");
+        return Double.NaN;
     }
 
     /**
      * Given d, return x.
      *
      * @param d The distance in the rest frame
-     * @return The position in the rest frame.
-     * @throws ExecutionException When there are no matching x's.
+     * @return The position in the rest frame or NaN.
      */
     @Override
     public double dToX(double d)
@@ -335,15 +329,14 @@ public class ConcreteObserver extends Observer
             double x = iter.next().dToX(d);
             if (!Double.isNaN(x)) return x;
         }
-        throw new ExecutionException("dToX(): No matching x coordinate for d.");
+        return Double.NaN;
    }
 
     /**
      * Given d, return t.
      *
      * @param d The distance in the rest frame
-     * @return The time in the rest frame.
-     * @throws ExecutionException When there are no or infinite matching t's.
+     * @return The time in the rest frame or NaN.
      */
     @Override
     public double dToT(double d)
@@ -353,15 +346,14 @@ public class ConcreteObserver extends Observer
             double t = iter.next().dToT(d);
             if (!Double.isNaN(t)) return t;
         }
-        throw new ExecutionException("dToT(): No or infinite matching times for d.");
+        return Double.NaN;
     }
 
     /**
      * Given d, return tau.
      *
      * @param d The distance in the rest frame
-     * @return The time in the accelerated frame.
-     * @throws ExecutionException When there are no or infinite matching taus.
+     * @return The time in the accelerated frame or NaN.
      */
     @Override
     public double dToTau(double d)
@@ -371,7 +363,7 @@ public class ConcreteObserver extends Observer
             double tau = iter.next().dToTau(d);
             if (!Double.isNaN(tau)) return tau;
         }
-        throw new ExecutionException("dToTau(): No or infinite matching taus for d.");
+        return Double.NaN;
     }
 
     // **********************************************************
@@ -394,7 +386,7 @@ public class ConcreteObserver extends Observer
             double v = iter.next().tToV(t);
             if (!Double.isNaN(v)) return v;
         }
-        throw new ProgrammingException("tToV(): No matching velocity for t.");
+        return Double.NaN;
      }
 
     /**
@@ -411,7 +403,7 @@ public class ConcreteObserver extends Observer
             double x = iter.next().tToX(t);
             if (!Double.isNaN(x)) return x;
         }
-        throw new ProgrammingException("tToX(): No matching x coordinate for t.");
+        return Double.NaN;
     }
 
     /**
@@ -428,7 +420,7 @@ public class ConcreteObserver extends Observer
             double d = iter.next().tToD(t);
             if (!Double.isNaN(d)) return d;
         }
-        throw new ProgrammingException("tToD(): No matching distance for t.");
+        return Double.NaN;
     }
 
     /**
@@ -445,7 +437,7 @@ public class ConcreteObserver extends Observer
             double tau = iter.next().tToTau(t);
             if (!Double.isNaN(tau)) return tau;
         }
-        throw new ProgrammingException("tToTau(): No matching tau for t.");
+        return Double.NaN;
     }
 
     // **********************************************************
@@ -468,7 +460,7 @@ public class ConcreteObserver extends Observer
             double v = iter.next().tauToV(tau);
             if (!Double.isNaN(v)) return v;
         }
-        throw new ProgrammingException("tauToV(): No matching velocity for tau.");
+        return Double.NaN;
     }
 
     /**
@@ -485,7 +477,7 @@ public class ConcreteObserver extends Observer
             double x = iter.next().tauToX(tau);
             if (!Double.isNaN(x)) return x;
         }
-        throw new ProgrammingException("tauToX(): No matching x coordinate for tau.");
+        return Double.NaN;
     }
 
     /**
@@ -504,7 +496,7 @@ public class ConcreteObserver extends Observer
             double d = iter.next().tauToD(tau);
             if (!Double.isNaN(d)) return d;
         }
-        throw new ProgrammingException("tauToD(): No matching distance for tau.");
+        return Double.NaN;
     }
 
     /**
@@ -521,7 +513,7 @@ public class ConcreteObserver extends Observer
             double t = iter.next().tauToT(tau);
             if (!Double.isNaN(t)) return t;
         }
-        throw new ProgrammingException("tauToT(): No matching time for tau.");
+        return Double.NaN;
     }
 
     // **********************************************************

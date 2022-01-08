@@ -30,4 +30,5 @@ public abstract class CurveSegment implements ExecutionImmutable
      * @return The bounds of this curve.
      */
     public abstract Bounds getBounds();
+
 }
