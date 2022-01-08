@@ -43,6 +43,9 @@ public class toXAngleFunction extends ArgInfoFunction
     public Object execute(HCodeEngine engine, List<Object> code)
     {
         Object arg1 = code.get(0);
+
+        if (arg1 == null) throw new ExecutionException("The toXAngle() function's value is null ");
+
         if (arg1 instanceof Double dbl) {
             return Relativity.vToXAngle(dbl);
         }
