@@ -49,6 +49,10 @@ public class AddHCode extends ArgInfoHCode
         Object arg2 = data.get(1);
         data.clear();
 
+        if (arg1 == null || arg2 == null) {
+            throw new ExecutionException("Can't use math on a null value");
+        }
+
         boolean isDouble1 = arg1 instanceof Double;
         boolean isDouble2 = arg2 instanceof Double;
         boolean isString1 = arg1 instanceof String;
