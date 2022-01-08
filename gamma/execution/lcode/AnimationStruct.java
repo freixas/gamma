@@ -17,7 +17,6 @@
 package gamma.execution.lcode;
 
 import gamma.execution.ExecutionException;
-import gamma.execution.HCodeEngine;
 import gamma.value.Frame;
 
 /**
