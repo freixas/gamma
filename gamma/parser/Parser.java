@@ -2015,6 +2015,8 @@ public class Parser
         ArrayList<Integer> argCount = new ArrayList<>();
         Token<?> lastToken = null;
 
+        Token<?> expressionStartToken = curToken;
+
         // Let's check that this is the start of an expression
 
         if (!isExprStart()) {
@@ -2272,8 +2274,12 @@ public class Parser
             // If we're not done, but we've reached the end of the input, we have
             // an error
 
-            if (notDone && isEOF()) {
-                throwParseException("Premature end of file while processing an expression");
+            if (notDone && isEOF()) { // line " + lineNumber + " character " + charNumber
+                throwParseException(
+                    "Premature end of file while processing an expression starting with '" +
+                    expressionStartToken.getValue() +
+                    "' at line " + expressionStartToken.getLineNumber() +
+                    " character " + expressionStartToken.getCharNumber());
             }
 
             if (!notDone) {
