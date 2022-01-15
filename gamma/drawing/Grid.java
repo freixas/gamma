@@ -16,14 +16,16 @@
  */
 package gamma.drawing;
 
+import gamma.css.value.StyleProperties;
 import gamma.execution.lcode.GridStruct;
-import gamma.execution.lcode.StyleStruct;
+import gamma.css.value.StyleStruct;
 import gamma.math.Relativity;
 import gamma.math.Util;
 import gamma.value.Bounds;
 import gamma.value.Coordinate;
 import gamma.value.Frame;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 
 /**
  *
@@ -78,12 +80,17 @@ public class Grid
 
         double spacing = Math.pow(10, Math.ceil(Math.log10(minTransformedSpacing)));
 
-        double worldDivThickness = context.invScale * styles.divThickness;
-        double worldMajorDivThickness = context.invScale * styles.majorDivThickness;
-
         // Set up the gc
 
-        Line.setupLineGc(context, styles);
+        Color color = styles.xDivColor;
+        double lineThickness = styles.xDivLineThickness;
+        StyleProperties.LineStyle lineStyle = styles.xDivLineStyle;
+
+        Color majorColor = styles.xMajorDivColor;
+        double majorLineThickness = styles.xMajorDivLineThickness;
+        StyleProperties.LineStyle majorLineStyle = styles.xMajorDivLineStyle;
+
+        Line.setupLineGc(context, color, lineThickness, lineStyle);
 
         // Draw the X lines
 
@@ -98,12 +105,10 @@ public class Grid
                 Coordinate c2 = frame.toRest(x, transformedBounds.max.t);
 
                 if (iX % 10 == 0) {
-                    gc.setStroke(styles.javaFXMajorDivColor);
-                    gc.setLineWidth(worldMajorDivThickness);
+                    Line.setupLineGc(context, majorColor, majorLineThickness, majorLineStyle);
                     gc.strokeLine(c1.x, c1.t, c2.x, c2.t);
-                    gc.setStroke(styles.javaFXDivColor);
-                    gc.setLineWidth(worldDivThickness);
-                }
+                    Line.setupLineGc(context, color, lineThickness, lineStyle);
+               }
                 else {
                     gc.strokeLine(c1.x, c1.t, c2.x, c2.t);
                 }
@@ -111,6 +116,17 @@ public class Grid
         }
 
         // Draw the T lines
+
+        color = styles.tDivColor;
+        lineThickness = styles.tDivLineThickness;
+        lineStyle = styles.tDivLineStyle;
+
+        majorColor = styles.tMajorDivColor;
+        majorLineThickness = styles.tMajorDivLineThickness;
+        majorLineStyle = styles.tMajorDivLineStyle;
+
+
+        Line.setupLineGc(context, color, lineThickness, lineStyle);
 
         double startT = transformedBounds.min.t - (transformedBounds.min.t % spacing);
         lineNumber = Util.toInt(startT / spacing);
@@ -123,11 +139,9 @@ public class Grid
                 Coordinate c2 = frame.toRest(transformedBounds.max.x, t);
 
                 if (iT % 10 == 0) {
-                    gc.setStroke(styles.javaFXMajorDivColor);
-                    gc.setLineWidth(worldMajorDivThickness);
+                    Line.setupLineGc(context, majorColor, majorLineThickness, majorLineStyle);
                     gc.strokeLine(c1.x, c1.t, c2.x, c2.t);
-                    gc.setStroke(styles.javaFXDivColor);
-                    gc.setLineWidth(worldDivThickness);
+                    Line.setupLineGc(context, color, lineThickness, lineStyle);
                 }
                 else {
                     gc.strokeLine(c1.x, c1.t, c2.x, c2.t);

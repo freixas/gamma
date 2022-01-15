@@ -16,8 +16,9 @@
  */
 package gamma.drawing;
 
+import gamma.css.value.StyleProperties;
 import gamma.execution.lcode.PathStruct;
-import gamma.execution.lcode.StyleStruct;
+import gamma.css.value.StyleStruct;
 import gamma.math.Util;
 import gamma.value.Coordinate;
 import javafx.scene.canvas.GraphicsContext;
@@ -66,16 +67,16 @@ public class Path
 
        // Add arrow heads
 
-       if (struct.stroke && !struct.closed && !styles.arrow.equals("none")) {
+       if (struct.stroke && !struct.closed && styles.arrow != StyleProperties.Arrow.END) {
            int size = path.size();
            if (size > 1) {
-               if (styles.arrow.equals("end") || styles.arrow.equals("both")) {
+               if (styles.arrow == StyleProperties.Arrow.END || styles.arrow == StyleProperties.Arrow.BOTH) {
                    Coordinate start = path.get(size - 2);
                    Coordinate end = path.get(size - 1);
                    double angle = Util.getAngle(start, end);
                    Arrow.draw(context, end, angle, styles);
                }
-               if (styles.arrow.equals("start") || styles.arrow.equals("both")) {
+               if (styles.arrow == StyleProperties.Arrow.START || styles.arrow == StyleProperties.Arrow.BOTH) {
                    Coordinate start = path.get(1);
                    Coordinate end = path.get(0);
                    double angle = Util.getAngle(start, end);
@@ -99,7 +100,7 @@ public class Path
         GraphicsContext gc = context.gc;
 
         gc.setFillRule(FillRule.EVEN_ODD);
-        gc.setFill(styles.javaFXBackgroundColor);
+        gc.setFill(styles.backgroundColor);
     }
 
 }

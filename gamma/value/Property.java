@@ -17,7 +17,6 @@
 package gamma.value;
 
 import gamma.execution.ExecutionException;
-import gamma.execution.lcode.StyleStruct;
 
 /**
  *
@@ -43,11 +42,6 @@ public class Property implements PropertyElement, ExecutionImmutable
     public Object getValue()
     {
         return value;
-    }
-
-    public boolean isStyleProperty()
-    {
-        return StyleStruct.isStyleProperty(this);
     }
 
 }

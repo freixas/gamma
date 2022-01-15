@@ -18,6 +18,7 @@ package gamma;
 
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -99,7 +100,7 @@ public class MainWindowController implements Initializable
         File selectedFile;
         while ((selectedFile = fileChooser.showSaveDialog(mainWindow)) != null) {
             if (selectedFile.createNewFile()) {
-                mainWindow.setFile(selectedFile);
+                mainWindow.setFile(selectedFile, null);
                 return;
             }
             new Alert(Alert.AlertType.ERROR, "Use File/Open to open an existing script.").showAndWait();
@@ -116,12 +117,9 @@ public class MainWindowController implements Initializable
                 new ExtensionFilter("All Files", "*.*"));
         fileChooser.setInitialDirectory(mainWindow.getFileDirectory());
 
-        // NOTE: Need to check that the selected file is not already open -
-        // not that it would hurt anything
-
         File selectedFile = fileChooser.showOpenDialog(mainWindow);
         if (selectedFile != null) {
-                mainWindow.setFile(selectedFile);
+                mainWindow.setFile(selectedFile, null);
         }
     }
 

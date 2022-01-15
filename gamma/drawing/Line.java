@@ -16,13 +16,15 @@
  */
 package gamma.drawing;
 
+import gamma.css.value.StyleProperties;
 import gamma.execution.lcode.LineStruct;
-import gamma.execution.lcode.StyleStruct;
+import gamma.css.value.StyleStruct;
 import gamma.value.BoundedLine;
 import gamma.value.ConcreteLine;
 import gamma.value.CurveSegment;
 import gamma.value.LineSegment;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.StrokeLineCap;
 
 /**
@@ -41,12 +43,12 @@ public class Line
      */
     public static void draw(Context context, LineStruct struct, StyleStruct styles)
     {
-        String arrowStyle = styles.arrow;
+        StyleProperties.Arrow arrowStyle = styles.arrow;
 
         // Normal lines are infinite and have no arrowheads
 
         if (struct.line instanceof ConcreteLine) {
-            styles.arrow = "none";
+            styles.arrow = StyleProperties.Arrow.NONE;
         }
 
         // Bounded lines are allowed arrows on any finite end
@@ -86,27 +88,27 @@ public class Line
         }
 
         // Restore the original arrow style
-        
+
         styles.arrow = arrowStyle;
     }
 
     private static void suppressStartArrow(StyleStruct styles)
     {
-        if (styles.arrow.equals("start")) {
-            styles.arrow = "none";
+        if (styles.arrow == StyleProperties.Arrow.START) {
+            styles.arrow = StyleProperties.Arrow.NONE;
         }
-        else if (styles.arrow.equals("both")) {
-            styles.arrow = "end";
+        else if (styles.arrow == StyleProperties.Arrow.BOTH) {
+            styles.arrow = StyleProperties.Arrow.END;
         }
     }
 
     private static void suppressEndArrow(StyleStruct styles)
     {
-        if (styles.arrow.equals("end")) {
-            styles.arrow = "none";
+        if (styles.arrow == StyleProperties.Arrow.END) {
+            styles.arrow = StyleProperties.Arrow.NONE;
         }
-        else if (styles.arrow.equals("both")) {
-            styles.arrow = "start";
+        else if (styles.arrow == StyleProperties.Arrow.BOTH) {
+            styles.arrow = StyleProperties.Arrow.START;
         }
     }
 
@@ -154,9 +156,9 @@ public class Line
 
         // Draw the arrowheads
 
-        boolean bothArrows = styles.arrow.equals("both");
-        boolean startArrow = styles.arrow.equals("start") || bothArrows;
-        boolean endArrow = styles.arrow.equals("end") || bothArrows;
+        boolean bothArrows = styles.arrow == StyleProperties.Arrow.BOTH;
+        boolean startArrow = styles.arrow == StyleProperties.Arrow.START|| bothArrows;
+        boolean endArrow = styles.arrow == StyleProperties.Arrow.END || bothArrows;
 
         double angle = 0.0;
         if (startArrow || endArrow) {
@@ -186,7 +188,7 @@ public class Line
 
         // Set the line color
 
-        gc.setStroke(styles.javaFXColor);
+        gc.setStroke(styles.color);
 
         // *** NOTE: For now, we'll assume the stroke style is CENTER
         // Set the line thickness
@@ -196,14 +198,50 @@ public class Line
 
         // Set the line style
 
-        if (styles.lineStyle.equals("dashed")) {
+        if (styles.lineStyle == StyleProperties.LineStyle.DASHED) {
             double dashLength = 5.0 * scale;
             gc.setLineDashes(dashLength, dashLength);
         }
-        else if (styles.lineStyle.equals("dotted")) {
+        else if (styles.lineStyle == StyleProperties.LineStyle.DASHED) {
             gc.setLineCap(StrokeLineCap.ROUND);
             gc.setLineDashes(worldLineThickness / 10.0, worldLineThickness * 2);
         }
     }
 
+    /**
+     * Set up the graphics context for drawing a line.We only set up the things
+     * that can be handled by the graphics context: color, line thickness, and
+     * line style.
+     *
+     * @param context The context.
+     * @param color The line color.
+     * @param lineThickness The line thickness.
+     * @param lineStyle The line style.
+     */
+    static public void setupLineGc(Context context, Color color, double lineThickness, StyleProperties.LineStyle lineStyle)
+    {
+        GraphicsContext gc = context.gc;
+        double scale = context.invScale;
+
+        // Set the line color
+
+        gc.setStroke(color);
+
+        // *** NOTE: For now, we'll assume the stroke style is CENTER
+        // Set the line thickness
+
+        double worldLineThickness = lineThickness * scale;
+        gc.setLineWidth(worldLineThickness);
+
+        // Set the line style
+
+        if (lineStyle == StyleProperties.LineStyle.DASHED) {
+            double dashLength = 5.0 * scale;
+            gc.setLineDashes(dashLength, dashLength);
+        }
+        else if (lineStyle == StyleProperties.LineStyle.DASHED) {
+            gc.setLineCap(StrokeLineCap.ROUND);
+            gc.setLineDashes(worldLineThickness / 10.0, worldLineThickness * 2);
+        }
+    }
 }

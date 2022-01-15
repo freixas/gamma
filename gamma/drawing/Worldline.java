@@ -16,7 +16,8 @@
  */
 package gamma.drawing;
 
-import gamma.execution.lcode.StyleStruct;
+import gamma.css.value.StyleProperties;
+import gamma.css.value.StyleStruct;
 import gamma.execution.lcode.WorldlineStruct;
 import gamma.math.Relativity;
 import gamma.math.Util;
@@ -46,8 +47,8 @@ public class Worldline
         // Save the current graphics context
 
         gc.save();
-        String savedArrow = styles.arrow;
-        styles.arrow = "none";
+        StyleProperties.Arrow savedArrow = styles.arrow;
+        styles.arrow = StyleProperties.Arrow.NONE;
 
         // Set up the gc for line drawing
 
@@ -151,14 +152,14 @@ public class Worldline
                 // Add the arrows
 
                 styles.arrow = savedArrow;
-                if (!styles.arrow.equals("none")) {
+                if (styles.arrow != StyleProperties.Arrow.NONE) {
                     double[] angles = getAngles(min, max);
-                    if (styles.arrow.equals("start") || styles.arrow.equals("both")) {
+                    if (styles.arrow == StyleProperties.Arrow.START || styles.arrow == StyleProperties.Arrow.BOTH) {
                         if (context.bounds.inside(min.x, min.t)) {
                             Arrow.draw(context, new Coordinate(min.x, min.t), angles[0], styles);
                         }
                     }
-                    if (styles.arrow.equals("end") || styles.arrow.equals("both")) {
+                    if (styles.arrow == StyleProperties.Arrow.END || styles.arrow == StyleProperties.Arrow.BOTH) {
                         if (context.bounds.inside(max.x, max.t)) {
                             Arrow.draw(context, new Coordinate(max.x, max.t), angles[1], styles);
                         }
@@ -173,26 +174,6 @@ public class Worldline
         styles.arrow = savedArrow;
         gc.restore();
     }
-
-//    private static void suppressStartArrow(StyleStruct styles)
-//    {
-//        if (styles.arrow.equals("start")) {
-//            styles.arrow = "none";
-//        }
-//        else if (styles.arrow.equals("both")) {
-//            styles.arrow = "end";
-//        }
-//    }
-//
-//    private static void suppressEndArrow(StyleStruct styles)
-//    {
-//        if (styles.arrow.equals("end")) {
-//            styles.arrow = "none";
-//        }
-//        else if (styles.arrow.equals("both")) {
-//            styles.arrow = "start";
-//        }
-//    }
 
     private static double[] getAngles(WorldlineEndpoint min, WorldlineEndpoint max)
     {

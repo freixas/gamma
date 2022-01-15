@@ -17,6 +17,7 @@
 package gamma.execution.lcode;
 
 import gamma.ProgrammingException;
+import gamma.css.value.StyleStruct;
 import gamma.drawing.Context;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
@@ -117,7 +118,7 @@ public class DisplayCommandExec extends CommandExec
 
         // Clear the display area
 
-        clearDisplay(context, styles.javaFXBackgroundColor);
+        clearDisplay(context, styles.backgroundColor);
     }
 
     /**

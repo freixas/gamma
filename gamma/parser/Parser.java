@@ -11,18 +11,19 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received first copy of the GNU General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package gamma.parser;
 
 import gamma.ProgrammingException;
+import gamma.css.parser.CSSParser;
+import gamma.css.value.Stylesheet;
 import gamma.execution.hcode.*;
 import gamma.value.Coordinate;
 import gamma.value.Frame;
 import gamma.value.Interval;
 import gamma.value.Line;
-import gamma.value.PropertyList;
 import gamma.value.WorldlineSegment;
 import java.io.File;
 import java.io.IOException;
@@ -31,6 +32,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Stack;
+import javafx.util.Pair;
 
 /**
  *
@@ -59,7 +61,7 @@ public class Parser
             this.isBinary = isBinary;
             this.precedence = precedence;
 
-            // Store each operator in first table so that we can re-use the
+            // Store each operator in a table so that we can re-use the
             // instances
 
             if (isBinary) {
@@ -143,22 +145,12 @@ public class Parser
 
     }
 
-    class Pair<A, B>
-    {
-        public final A first;
-        public final B second;
-
-        Pair (A first, B second)
-        {
-            this.first = first;
-            this.second = second;
-        }
-    }
-
     private final File file;
     private final String script;
     private ArrayList<Token<?>> tokens;
     private LinkedList<Object> hCodes;
+    private Stylesheet stylesheet;
+    private ArrayList<File> dependentFiles;
 
     private boolean animationStatementIsPresent;
     private boolean animationVariableIsPresent;
@@ -270,6 +262,21 @@ public class Parser
         return setStatement;
     }
 
+    public Stylesheet getStylesheet()
+    {
+        return stylesheet;
+    }
+
+    public File getFile()
+    {
+        return file;
+    }
+
+    public ArrayList<File> getDependentFiles()
+    {
+        return dependentFiles;
+    }
+
     /**
      * Parse the script
      * @return
@@ -280,6 +287,8 @@ public class Parser
         animationStatementIsPresent = false;
         animationVariableIsPresent = false;
         displayVariableIsPresent = false;
+        stylesheet = new Stylesheet();
+        this.dependentFiles = new ArrayList<>();
 
         loopLabels = new LinkedList<>();
 
@@ -292,9 +301,9 @@ public class Parser
 
         // tokenPtr points to the current token.
         // When we start, it points one before the start of the token list.
-        // The current token is first dummy token.
+        // The current token is a dummy token.
         // Peek is the token after the current one.
-        // It starts out as the first item on the token list.
+        // It starts out as the a item on the token list.
         // The token list always has at least one item. The last token is
         // always the EOF token.
 
@@ -326,7 +335,7 @@ public class Parser
 
         while (!isEOF() && !(isDelimiter() && getChar() == '}')) {
 
-            // A statement block can be first statement block within braces
+            // A statement block can be a statement block within braces
 
             if (isDelimiter() && getChar() == '{') {
                 nextToken();
@@ -337,7 +346,7 @@ public class Parser
                 nextToken();
             }
 
-            // Or first statement
+            // Or a statement
 
             else {
                 codes.addAll(parseStatement());
@@ -351,17 +360,18 @@ public class Parser
     {
         LinkedList<Object> codes = new LinkedList<>();
 
-        // A statement that starts with first name
+        // A statement that starts with a name
 
         if (isName()) {
             codes.add(new LineInfoHCode(curToken.getFile(), curToken.getLineNumber()));
 
-            // Look far ahead to see if we might have first plain assigment statement
+            // Look far ahead to see if we might have a plain assigment statement
 
             int curState = tokenPtr;
             boolean isLeftVariable;
+            LinkedList<Object> leftVariableCodes = new LinkedList<>();
             try {
-                codes.addAll(parseLeftVariable());
+                leftVariableCodes.addAll(parseLeftVariable());
                 isLeftVariable = isDelimiter() && getChar() == '=';
             }
             catch (ParseException e) {
@@ -372,13 +382,13 @@ public class Parser
             // statement
 
             if (isLeftVariable) {
+                codes.addAll(leftVariableCodes);
                 codes.addAll(parseSemicolonStatement(true));
             }
 
             // Otherwise, we have something else
 
             else {
-                codes.clear();
                 setCurrentTokenTo(curState);
 
                 switch (getString()) {
@@ -390,7 +400,7 @@ public class Parser
             }
         }
 
-        // A statement that is first block
+        // A statement that is a block
 
         else if (isDelimiter() && getChar() == '{') {
             nextToken();
@@ -452,7 +462,6 @@ public class Parser
                 case "choice" -> codes.addAll(parseChoiceAssignmentStatement());
                 case "break" -> codes.addAll(parseBreakStatement());
                 case "continue" -> codes.addAll(parseContinueStatement());
-                case "style" -> codes.addAll(parseStyleStatement());
                 default -> codes.addAll(parseCommandStatement());
             }
         }
@@ -795,7 +804,7 @@ public class Parser
         }
         Pair<Label, Label> pair = loopLabels.get(0);
 
-        codes.add(new JumpHCode(pair.second.getId()));
+        codes.add(new JumpHCode(pair.getValue().getId()));
 
         return codes;
     }
@@ -812,7 +821,7 @@ public class Parser
         }
         Pair<Label, Label> pair = loopLabels.get(0);
 
-        codes.add(new JumpHCode(pair.first.getId()));
+        codes.add(new JumpHCode(pair.getKey().getId()));
 
         return codes;
     }
@@ -823,14 +832,14 @@ public class Parser
 
         nextToken();
 
-        // The next token has to be first string. We don't have the ability to
+        // The next token has to be a string. We don't have the ability to
         // process expressions in the parser
 
         if (!isString()) {
             throwParseException("Missing include file name");
         }
 
-        // If the next token isn't first ';', return an empty codes list
+        // If the next token isn't a ';', return an empty codes list
 
         if (!peek.isDelimiter() || peek.getChar() != ';') {
             nextToken();
@@ -843,13 +852,14 @@ public class Parser
             if (!includeFile.isAbsolute()) {
                 includeFile = new File(file.getParent(), name);
             }
-            if (!file.exists()) {
+            if (!includeFile.exists()) {
                 throwParseException("File '" + includeFile.toString() +"' does not exist.");
             }
-            if (file.isDirectory()) {
+            if (includeFile.isDirectory()) {
                 throwParseException("File '" + includeFile.toString() +"' is a directory.");
             }
             String includeScript = Files.readString(includeFile.toPath());
+            dependentFiles.add(includeFile);
             Tokenizer tokenizer = new Tokenizer(includeFile, includeScript);
             ArrayList<Token<?>> includeTokens = tokenizer.tokenize();
 
@@ -882,6 +892,55 @@ public class Parser
         // We start knowing that the current token is "stylesheet"
 
         nextToken();
+
+        // The next token might be external
+
+        boolean isExternal = false;
+        if (isName() && getString().equals("external")) {
+            isExternal = true;
+            nextToken();
+        }
+
+        //The next token must be a string
+
+        String css = null;
+        if (isString()) {
+            css = getString();
+            nextToken();
+        }
+        else {
+            throwParseException("Expected a string literal");
+        }
+
+        try {
+            File stylesheetFile = null;
+
+            // If the stylesheet is external, read it
+
+            if (isExternal) {
+                stylesheetFile = new File(css);
+                if (!stylesheetFile.isAbsolute()) {
+                    stylesheetFile = new File(file.getParent(), css);
+                }
+                if (!stylesheetFile.exists()) {
+                    throwParseException("File '" + stylesheetFile.toString() + "' does not exist.");
+                }
+                if (stylesheetFile.isDirectory()) {
+                    throwParseException("File '" + stylesheetFile.toString() + "' is a directory.");
+                }
+                css = Files.readString(stylesheetFile.toPath());
+            }
+
+            // Either way, the css is now in the includeScrp
+
+            CSSParser cssParser = new CSSParser(isExternal ? stylesheetFile : file, css);
+            dependentFiles.add(stylesheetFile);
+            Stylesheet sheet = cssParser.parse();
+            stylesheet.addStylesheet(sheet);
+        }
+        catch (IOException e) {
+            throwParseException("IO Error - " + e.getMessage());
+        }
 
         return null;
     }
@@ -946,7 +1005,7 @@ public class Parser
                 }
             }
 
-            // We need to find first comma before looking for other settings
+            // We need to find a comma before looking for other settings
 
             if (!isDelimiter() || getChar() != ',') break;
             nextToken();
@@ -965,7 +1024,7 @@ public class Parser
 
         nextToken();
 
-        // If the new token is ';', print first blank line
+        // If the new token is ';', print a blank line
 
         if (isDelimiter()&& getChar() == ';') {
             codes.add("");
@@ -1194,28 +1253,11 @@ public class Parser
         return codes;
     }
 
-    private LinkedList<Object> parseStyleStatement() throws ParseException
-    {
-        LinkedList<Object> codes = new LinkedList<>();
-
-        // We start knowing that the current token is "style"
-
-        nextToken();
-        if (isDelimiter() && getChar() == ';') {
-            codes.add(new PropertyList());
-        }
-
-        codes.addAll(parsePropertyList(0));
-        codes.add(new GenericHCode(HCode.Type.SET_STYLE));
-
-        return codes;
-    }
-
     private LinkedList<Object> parseCommandStatement() throws ParseException
     {
         LinkedList<Object> codes = new LinkedList<>();
 
-        // We start knowing that the current token is first name
+        // We start knowing that the current token is a name
 
         String name = getString();
         if (!name.equals("display") &&
@@ -1326,7 +1368,7 @@ public class Parser
         boolean topNameSeen = false;
 
         while (true) {
-            // We start knowing that we expect first left side variable at the
+            // We start knowing that we expect a left side variable at the
             // current token
 
             if (!isName()) {
@@ -1354,7 +1396,7 @@ public class Parser
 
             else {
                 nextToken();    // Cur token is now '.'
-                nextToken();    // Cur token should now be first name
+                nextToken();    // Cur token should now be a name
             }
         }
     }
@@ -1363,13 +1405,13 @@ public class Parser
     {
         LinkedList<Object> codes = new LinkedList<>();
 
-        // We start knowing that we found first name where we need first variable
+        // We start knowing that we found a name where we need a variable
 
         // Grab the variable name
 
         String variable = curToken.getString();
 
-        // If it's followed immediately by first '[', it's an array variable
+        // If it's followed immediately by a '[', it's an array variable
 
         if (peek.isDelimiter() && peek.getChar() == '[') {
 
@@ -1382,13 +1424,13 @@ public class Parser
 
              LinkedList<Object> index = parseExpr();
 
-             // We need to end with first ']'
+             // We need to end with a ']'
 
              if (!isDelimiter() || getChar() != ']') {
                  throwParseException("Expected a ']'");
              }
 
-             // Add the index and then the name. We will create first new name
+             // Add the index and then the name. We will create a new name
              // from these
 
              codes.addAll(index);
@@ -1396,7 +1438,7 @@ public class Parser
              codes.add(new GenericHCode(HCode.Type.DYNAMIC_NAME));
          }
 
-        // Otherwise, we have first regular non-array variable
+        // Otherwise, we have a regular non-array variable
 
          else {
              codes.add(variable);
@@ -1432,9 +1474,6 @@ public class Parser
                 }
                 case "interval" -> {
                     return parseIntervalObj();
-                }
-                case "style" -> {
-                    return parseStyleObj();
                 }
                 default -> throwParseException("Invalid object type '" + getString() + "'");
             }
@@ -1475,7 +1514,7 @@ public class Parser
         LinkedList<Object> codes = new LinkedList<>();
 
         // We start knowing that the current token points
-        // to the start of first potential worldline initializer
+        // to the start of a potential worldline initializer
 
         boolean originSeen = false;
         boolean distanceSeen = false;
@@ -1508,7 +1547,7 @@ public class Parser
             }
         }
 
-        // We create first worldline initializer regardless of whether we find
+        // We create a worldline initializer regardless of whether we find
         // anything by defaulting all missing elements
 
         if (originSeen) {
@@ -1542,7 +1581,7 @@ public class Parser
         LinkedList<Object> codes = new LinkedList<>();
 
         // We start knowing that the current token points
-        // to the start of first possibly empty list of worldline segment
+        // to the start of a possibly empty list of worldline segment
 
         int count = 0;
         if (isName() && (getString().equals("velocity") || getString().equals("acceleration"))) {
@@ -1564,7 +1603,7 @@ public class Parser
         LinkedList<Object> codes = new LinkedList<>();
 
         // We start knowing that the current token points
-        // to the start of first worldline segment
+        // to the start of a worldline segment
 
         // Velocity and acceleration are both optional, but velocity precedes
         // acceleration and one or both must be provided.
@@ -1675,7 +1714,7 @@ public class Parser
                 }
             }
 
-            // If no "at" clause, use first default
+            // If no "at" clause, use a default
 
             else {
                 codes.add(Frame.AtType.TAU);
@@ -1931,21 +1970,6 @@ public class Parser
         return codes;
     }
 
-    private LinkedList<Object> parseStyleObj() throws ParseException
-    {
-        LinkedList<Object> codes = new LinkedList<>();
-
-        // We start knowing that the current token points
-        // to "style"
-
-        nextToken();
-        codes.addAll(parsePropertyList(0));
-
-        codes.add(new GenericHCode(HCode.Type.STYLE));
-
-        return codes;
-    }
-
     private LinkedList<Object> parsePropertyList(int extraProperties) throws ParseException
     {
         LinkedList<Object> codes = new LinkedList<>();
@@ -1953,7 +1977,7 @@ public class Parser
         // We start knowing that the current token points
         // to the start of the property list
         //
-        // The property list can be empty. Otherwise, it can start with the first
+        // The property list can be empty. Otherwise, it can start with the a
         // property element or an expression.
 
         boolean isPropElem = isName() && peek.isDelimiter() && peek.getChar() == ':';
@@ -1973,7 +1997,7 @@ public class Parser
             isPropElem = isName() && peek.isDelimiter() && peek.getChar() == ':';
             if (isPropElem) {
 
-                // We have first property name
+                // We have a property name
 
                 codes.add(curToken.getValue());
 
@@ -1990,7 +2014,7 @@ public class Parser
 
             count++;
 
-            // If we don't find first comma, we're done
+            // If we don't find a comma, we're done
 
             if (!isDelimiter() || getChar() != ',') break;
 
@@ -2025,14 +2049,14 @@ public class Parser
 
         while (true) {
 
-            // If we find first function name, push it on the operator stack.
-            // Function names are always followed by first '('.
+            // If we find a function name, push it on the operator stack.
+            // Function names are always followed by a '('.
 
             if (isName() && peek.isDelimiter() && peek.getChar() == '(') {
                 ops.push(new OpToken<>(curToken, Op.find("FUNC", true)));
             }
 
-            // If we have first variable, push it on the codes stack
+            // If we have a variable, push it on the codes stack
 
             else if (isName()) {
                 codes.addAll(parseVariable());
@@ -2041,7 +2065,7 @@ public class Parser
                 }
             }
 
-            // If we have first number, push it on the codes stack
+            // If we have a number, push it on the codes stack
 
             else if (isNumber()) {
                 codes.add(curToken.getValue());
@@ -2057,8 +2081,8 @@ public class Parser
                 codes.addAll(parseObject());
             }
 
-            // If we have first  comma, pop operators from the op stack to
-            // the codes stack until we reach first "("
+            // If we have a  comma, pop operators from the op stack to
+            // the codes stack until we reach a "("
 
             else if (isDelimiter() && getChar() == ',') {
                 if (level < 0) throw new ProgrammingException("Parser.parseExp(): Comma without preceding '('");
@@ -2086,11 +2110,11 @@ public class Parser
                 argCount.set(level, argCount.get(level) + 1);
             }
 
-            // If we have first "(", push it on the operator stack
+            // If we have a "(", push it on the operator stack
 
             else if (isDelimiter() && getChar() == '(') {
                 ops.push(new OpToken<>(curToken, Op.find("(", true)));
-                level++;                    // Begin first new parenthesis level
+                level++;                    // Begin a new parenthesis level
 
                 // Record the number of arguments seen so far (0)
 
@@ -2102,20 +2126,20 @@ public class Parser
                 }
             }
 
-            // We have first ")"
+            // We have a ")"
 
             else if (isDelimiter() && getChar() == ')') {
                 if (level < 0) throwParseException("Unmatched ')'");
 
                 // Bump the argument count by 1 unless the last token
-                // was first '('
+                // was a '('
 
                 if (lastToken != null && (!lastToken.isDelimiter() || lastToken.getChar() != '(')) {
                     argCount.set(level, argCount.get(level) + 1);
                 }
 
                 // Pop operators from the op stack to the codes stack until we
-                // reach first "(". Then pop the "(" and discard it.
+                // reach a "(". Then pop the "(" and discard it.
 
                 while (!ops.isEmpty()) {
                     OpToken<?> topToken = ops.pop();
@@ -2129,7 +2153,7 @@ public class Parser
                     }
                 }
 
-                // If the operator at the top is now first function, pop it and push
+                // If the operator at the top is now a function, pop it and push
                 // the function name on the codes stack, along with the total of
                 // all the arguments plus the function name
 
@@ -2154,7 +2178,7 @@ public class Parser
                    throwParseException("Invalid commas inside parentheses");
                 }
 
-                // Finished first level of parantheses
+                // Finished a level of parantheses
 
                 level--;
             }
@@ -2165,7 +2189,7 @@ public class Parser
 
                 // Special case unary +/-
                 // Unary if at start of expression OR
-                // following first comma OR
+                // following a comma OR
                 // following '(' OR
                 // following any other operator
 
@@ -2176,7 +2200,7 @@ public class Parser
 
                 Op op = Op.find(getString(), !isUnary);
 
-                // Depending on precedence, we may first transfer some operators to
+                // Depending on precedence, we may a transfer some operators to
                 // the codes stack
 
                 while (ops.size() > 0) {
@@ -2223,15 +2247,15 @@ public class Parser
             // Since we are not using recursive descent to parse expressions,
             // we need to know when we're done with an expression
             //
-            // An expression begins with first number, first string, first name, an open
+            // An expression begins with a number, a string, a name, an open
             // paren ("(") or an open bracket ("["). Let's call these things
-            // "items". It can also begin with first unary operator.
+            // "items". It can also begin with a unary operator.
             //
-            // When we finish parsing first name, we can follow it with an open paren.
+            // When we finish parsing a name, we can follow it with an open paren.
             // When we finish parsing ANY item, we can follow it with an operator.
             // When we finish parsing an operator, we MUST follow it with an operator
             // or an item.
-            // For our purposes, first parenthetical expression only counts when the
+            // For our purposes, a parenthetical expression only counts when the
             // parenthesis level is 0.
             //
             // We are not done if we can follow the current item with something
@@ -2307,9 +2331,9 @@ public class Parser
      */
     private boolean isExprStart()
     {
-        // An expression begins with first number, first string, first name, an open
+        // An expression begins with a number, a string, a name, an open
         // paren ("(") or an open bracket ("["). Let's call these things
-        // "items". It can also begin with first unary operator.
+        // "items". It can also begin with a unary operator.
 
         return isNumber() ||
                isString() ||
@@ -2377,7 +2401,7 @@ public class Parser
         curToken = tokens.get(tokenPtr);
 
         // If the current token is now EOF, the peek token should also be EOF.
-        // If the current token is not EOF, the next token is first valid one,
+        // If the current token is not EOF, the next token is a valid one,
         // so grab it (it might be EOF).
 
         peek = curToken;
@@ -2386,7 +2410,7 @@ public class Parser
 
     private void returnToken()
     {
-        // When we return first token, we want to set the tokens to what they
+        // When we return a token, we want to set the tokens to what they
         // were before the last nextToken() call.
         // The current token become the peek token.
 

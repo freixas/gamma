@@ -57,7 +57,7 @@ public class ScriptParseErrorHandler implements Runnable
             ListIterator<Exception> iter = list.listIterator();
             while (iter.hasNext()) {
                 Exception e = iter.next();
-                str.append(e.getMessage());
+                str.append(e.getLocalizedMessage());
                 str.append("\n");
             }
             list.clear();

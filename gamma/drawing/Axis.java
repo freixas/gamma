@@ -16,15 +16,17 @@
  */
 package gamma.drawing;
 
+import gamma.css.value.StyleProperties;
 import gamma.execution.lcode.AxesStruct;
 import gamma.execution.lcode.LabelStruct;
-import gamma.execution.lcode.StyleStruct;
+import gamma.css.value.StyleStruct;
 import gamma.math.Util;
 import gamma.value.Bounds;
 import gamma.value.ConcreteLine;
 import gamma.value.Coordinate;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.transform.Affine;
 
@@ -43,6 +45,7 @@ public class Axis
                             StyleStruct styles)
     {
         GraphicsContext gc = context.gc;
+        boolean isXAxis = axisStruct.axisType == gamma.value.Line.AxisType.X;
 
         // Save the current graphics context
 
@@ -50,7 +53,21 @@ public class Axis
 
         // Set up the gc for line drawing
 
-        Line.setupLineGc(context, styles);
+        Color color;
+        double lineThickness;
+        StyleProperties.LineStyle lineStyle;
+
+        if (isXAxis) {
+            color = styles.xColor;
+            lineThickness = styles.xLineThickness;
+            lineStyle = styles.xLineStyle;
+        }
+        else {
+            color = styles.tColor;
+            lineThickness = styles.tLineThickness;
+            lineStyle = styles.tLineStyle;
+        }
+        Line.setupLineGc(context, color, lineThickness, lineStyle);
 
         // Get the values we need
 
@@ -94,7 +111,7 @@ public class Axis
 
         // If we have tick marks, the height increases
 
-        if (styles.ticks) {
+        if ((isXAxis && styles.xTicks) || (!isXAxis && styles.tTicks)) {
             height += MIN_MAJOR_TICK_MARK_LENGTH;
         }
 
@@ -142,10 +159,40 @@ public class Axis
 
         // Check for tick marks
 
-        if (!styles.ticks) {
+        if ((isXAxis && !styles.xTicks) || (!isXAxis && !styles.tTicks)) {
             gc.restore();
             return;
         }
+
+        Color divColor ;
+        Color majorDivColor;
+        double divLineThickness;
+        double majorDivLineThickness;
+        StyleProperties.LineStyle divLineStyle;
+        StyleProperties.LineStyle majorDivLineStyle;
+
+        if (isXAxis) {
+            divColor = styles.xDivColor;
+            majorDivColor = styles.xMajorDivColor;
+            divLineThickness = styles.xDivLineThickness;
+            majorDivLineThickness = styles.xMajorDivLineThickness;
+            divLineStyle = styles.xDivLineStyle;
+            majorDivLineStyle = styles.xMajorDivLineStyle;
+        }
+        else {
+            divColor = styles.tDivColor;
+            majorDivColor = styles.tMajorDivColor;
+            divLineThickness = styles.tDivLineThickness;
+            majorDivLineThickness = styles.tMajorDivLineThickness;
+            divLineStyle = styles.tDivLineStyle;
+            majorDivLineStyle = styles.tMajorDivLineStyle;
+        }
+
+        Line.setupLineGc(context, divColor, divLineThickness, divLineStyle);
+
+        boolean majorIsDifferent =
+            !divColor.equals(majorDivColor) || divLineThickness != majorDivLineThickness ||
+            divLineStyle != majorDivLineStyle;
 
         // Get the world space units per ideal tick spacing in pixels
 
@@ -167,8 +214,8 @@ public class Axis
         // width of the the tick marks. Note that the width is in pixel
         // space but the intersection is in world space
 
-        double worldTickThickness = viewportScale * styles.divThickness;
-        double worldMajorTickThickness = viewportScale * styles.majorDivThickness;
+        double worldTickThickness = viewportScale * divLineThickness;
+        double worldMajorTickThickness = viewportScale * majorDivLineThickness;
 
         double padding = Math.max(worldTickThickness, worldMajorTickThickness) / 2.0;
         padding *= viewportScale;
@@ -191,7 +238,7 @@ public class Axis
         int tickNumber = Util.toInt(firstTick / tickSpacing);
         firstTick += origin.x;
 
-        gc.setStroke(styles.javaFXDivColor);
+        gc.setStroke(divColor);
         gc.setLineWidth(worldTickThickness);
 
         // If we only print out one of the axes, don't skip labeling 0
@@ -206,11 +253,14 @@ public class Axis
                 // Major tick
 
                 if (tickCount % 10 == 0) {
-                    gc.setStroke(styles.javaFXMajorDivColor);
-                    gc.setLineWidth(worldMajorTickThickness);
-                    gc.strokeLine(x, origin.t - halfHeightMajor, x, origin.t + halfHeightMajor);
-                    gc.setStroke(styles.javaFXMajorDivColor);
-                    gc.setLineWidth(worldMajorTickThickness);
+                    if (majorIsDifferent) {
+                        Line.setupLineGc(context, majorDivColor, majorDivLineThickness, majorDivLineStyle);
+                        gc.strokeLine(x, origin.t - halfHeightMajor, x, origin.t + halfHeightMajor);
+                        Line.setupLineGc(context, divColor, divLineThickness, divLineStyle);
+                    }
+                    else {
+                        gc.strokeLine(x, origin.t - halfHeightMajor, x, origin.t + halfHeightMajor);
+                    }
                 }
 
                 // Minor tick
@@ -225,15 +275,30 @@ public class Axis
         // *** Draw the tick labels.                 ***
         // *********************************************
 
-        if (!styles.tickLabels) {
+        if ((isXAxis && !styles.xTickLabels) || (!isXAxis && !styles.tTickLabels)) {
             gc.restore();
             return;
         }
 
+        Color textColor;
+        Font font;
+        if (isXAxis) {
+            textColor = styles.xTextColor;
+            font = styles.xTickFont;
+        }
+        else {
+            textColor = styles.tTextColor;
+            font = styles.tTickFont;
+        }
+
         LabelStruct labelStruct = new LabelStruct();
+
         double savedTextRotation = styles.textRotation;
-        double savedTextPadding = styles.textPadding;
-        String savedTextAnchor = styles.textAnchor;
+        double savedTextPaddingTop = styles.textPaddingTop;
+        double savedTextPaddingBottom = styles.textPaddingBottom;
+        double savedTextPaddingLeft = styles.textPaddingLeft;
+        double savedTextPaddingRight = styles.textPaddingRight;
+        StyleProperties.TextAnchor savedTextAnchor = styles.textAnchor;
 
         // The text system has problems with rotations in the graphics
         // context combined with scaling the Y axis by -1. So if we have tick
@@ -251,8 +316,8 @@ public class Axis
         // Set up the tick labels
 
         String format;
-        String anchorPlus;
-        String anchorMinus;
+        StyleProperties.TextAnchor anchorPlus;
+        StyleProperties.TextAnchor anchorMinus;
         int printEvery;
 
         // Half height is half the height of a major tickmark in screen
@@ -265,44 +330,44 @@ public class Axis
         if (v >= 0.0) {
             if (axisStruct.axisType == gamma.value.Line.AxisType.X) {
                 if (angle <= 22.5) {
-                    anchorPlus = "TC";      // Horz to slightly up CCW
-                    anchorMinus = "TC";
+                    anchorPlus = StyleProperties.TextAnchor.TC;      // Horz to slightly up CCW
+                    anchorMinus = StyleProperties.TextAnchor.TC;
                 }
                 else {
-                    anchorPlus = "TL";      // Closer to +45
-                     anchorMinus = "BR";
+                    anchorPlus = StyleProperties.TextAnchor.TL;      // Closer to +45
+                    anchorMinus = StyleProperties.TextAnchor.BR;
                }
             }
             else /* T axis */ {
                 if (angle <= 67.5)  {
-                    anchorPlus = "BR";      // Closer to +45
-                    anchorMinus = "TL";
+                    anchorPlus = StyleProperties.TextAnchor.BR;      // Closer to +45
+                    anchorMinus = StyleProperties.TextAnchor.TL;
                 }
                 else {
-                    anchorPlus = "MR";      // Vert to slighty down CW
-                    anchorMinus = "MR";
+                    anchorPlus = StyleProperties.TextAnchor.MR;      // Vert to slighty down CW
+                    anchorMinus = StyleProperties.TextAnchor.MR;
                 }
             }
         }
         else /* v < 0 */ {
             if (axisStruct.axisType == gamma.value.Line.AxisType.X) {
                 if (angle >= -22.5) {
-                    anchorPlus = "TC";      // Horz to slightly down CW
-                    anchorMinus = "TC";
+                    anchorPlus = StyleProperties.TextAnchor.TC;      // Horz to slightly down CW
+                    anchorMinus = StyleProperties.TextAnchor.TC;
                 }
                 else {
-                    anchorPlus = "BL";      // Closer to -45
-                    anchorMinus = "TR";
+                    anchorPlus = StyleProperties.TextAnchor.BL;      // Closer to -45
+                    anchorMinus = StyleProperties.TextAnchor.TR;
                 }
             }
             else /* T axis */ {
                 if (angle >= -67.5)  {
-                    anchorPlus = "BL";      // Closer to -45
-                    anchorMinus = "TR";
+                    anchorPlus = StyleProperties.TextAnchor.BL;      // Closer to -45
+                    anchorMinus = StyleProperties.TextAnchor.TR;
                 }
                 else {
-                    anchorPlus = "MR";      // Vert to slightly down CCW
-                    anchorMinus = "MR";
+                    anchorPlus = StyleProperties.TextAnchor.MR;      // Vert to slightly down CCW
+                    anchorMinus = StyleProperties.TextAnchor.MR;
                 }
             }
         }
@@ -310,9 +375,12 @@ public class Axis
         // Figure out how many labels we should skip depending on label size
         // and tickSpacing
 
-        printEvery = getLabelSkip(firstTick, maxDistance, tickSpacing * tickScale, format, styles.font, viewportScale);
+        printEvery = getLabelSkip(firstTick, maxDistance, tickSpacing * tickScale, format, font, viewportScale);
         styles.textRotation = 0.0;
-        styles.textPadding = pad;
+        styles.textPaddingTop = pad;
+        styles.textPaddingBottom = pad;
+        styles.textPaddingLeft = pad;
+        styles.textPaddingRight = pad;
 
         for (x = firstTick, tickCount = tickNumber; x <= maxDistance; x += tickSpacing, tickCount++) {
             if (tickCount != 0 || !skipZero) {
@@ -325,7 +393,7 @@ public class Axis
                     labelStruct.text = String.format(format, tickValue);
 
                     styles.textAnchor = tickValue >= 0 ? anchorPlus : anchorMinus;
-                    Label.draw(context, labelStruct, styles);
+                    Label.draw(context, labelStruct, textColor, font, styles);
                 }
             }
         }
@@ -333,7 +401,10 @@ public class Axis
         // Restore the original graphics context
 
         styles.textRotation = savedTextRotation;
-        styles.textPadding = savedTextPadding;
+        styles.textPaddingTop = savedTextPaddingTop;
+        styles.textPaddingBottom = savedTextPaddingBottom;
+        styles.textPaddingLeft = savedTextPaddingLeft;
+        styles.textPaddingRight = savedTextPaddingRight;
         styles.textAnchor = savedTextAnchor;
         gc.restore();
     }

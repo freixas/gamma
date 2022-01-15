@@ -19,6 +19,7 @@ package gamma.execution;
 import gamma.GammaRuntimeException;
 import gamma.MainWindow;
 import gamma.ProgrammingException;
+import gamma.css.value.Stylesheet;
 import gamma.execution.hcode.FunctionExecutor;
 import gamma.execution.hcode.HCodeExecutor;
 import gamma.execution.hcode.HCode;
@@ -26,16 +27,12 @@ import gamma.execution.hcode.ArgInfoHCode;
 import gamma.execution.hcode.GenericHCode;
 import gamma.execution.hcode.Label;
 import gamma.execution.hcode.SetStatement;
-import gamma.value.Color;
 import gamma.execution.lcode.Command;
-import gamma.execution.lcode.Struct;
-import gamma.execution.lcode.StyleStruct;
 import gamma.math.Util;
 import gamma.value.ConcreteObserver;
 import gamma.value.Coordinate;
 import gamma.value.Displayable;
 import gamma.value.Frame;
-import gamma.value.Style;
 import gamma.value.WInitializer;
 import java.io.File;
 import java.util.ArrayList;
@@ -55,6 +52,7 @@ public class HCodeEngine
 
     private final MainWindow window;
     private final SetStatement setStatement;
+    private final Stylesheet stylesheet;
     private final HCodeProgram program;
     private int programCounter;
 
@@ -66,15 +64,16 @@ public class HCodeEngine
     private LCodeEngine lCodeEngine;
     private final HCodeExecutor hCodeExecutor;
     private final FunctionExecutor functionExecutor;
-    private StyleStruct styleDefaults;
 
     private File file;
     private int lineNumber;
 
-    public HCodeEngine(MainWindow window, SetStatement setStatement, HCodeProgram program)
+    public HCodeEngine(MainWindow window, SetStatement setStatement, Stylesheet stylesheet, HCodeProgram program)
     {
         this.window = window;
         this.setStatement = setStatement;
+        this.stylesheet = stylesheet;
+        stylesheet.setCacheEnabled(true);
         this.program = program;
         this.dynamicTable = new DynamicSymbolTable(this);
         this.lCodeEngine = null;
@@ -98,20 +97,6 @@ public class HCodeEngine
 
         table.put("null", null);
         table.protect("null");
-
-        // Add colors
-
-        table.put("red",   Color.red);
-        table.put("green", Color.green);
-        table.put("blue",  Color.blue);
-
-        table.put("yellow",  Color.yellow);
-        table.put("magenta", Color.magenta);
-        table.put("cyan",    Color.cyan);
-
-        table.put("black", Color.black);
-        table.put("gray",  Color.gray);
-        table.put("white", Color.white);
 
         // Add booleans
 
@@ -147,20 +132,9 @@ public class HCodeEngine
         }
     }
 
-    public String toDisplayableString(Object obj)
+    public Stylesheet getStylesheet()
     {
-        if (obj instanceof String str) {
-            return str;
-        }
-        else if (obj instanceof Double dbl) {
-            return Util.toString(dbl, precision);
-        }
-        else if (obj instanceof Displayable displayable) {
-            return displayable.toDisplayableString(this);
-        }
-        else {
-            throw new ProgrammingException("HCodeEngine.toDisplayableString(): Couldn't convert object to string");
-        }
+        return stylesheet;
     }
 
     public HCodeProgram getProgram()
@@ -208,17 +182,6 @@ public class HCodeEngine
         this.lineNumber = lineNumber;
     }
 
-    public void setStyleDefaults(Style style)
-    {
-        styleDefaults = new StyleStruct();
-        Struct.initializeStruct(this, styleDefaults, "style", style);
-    }
-
-    public StyleStruct getStyleDefaults()
-    {
-        return styleDefaults;
-    }
-
     public static Frame getDefFrame()
     {
         return new Frame(defFrame);
@@ -236,8 +199,8 @@ public class HCodeEngine
 
     public void execute()
     {
+        // System.err.println("\n\n*******************\nNew execution\n*******************\n");
         lineNumber = 0;
-        styleDefaults = new StyleStruct();
 
         // Create an LCodeEngine only the first time
 
@@ -308,6 +271,13 @@ public class HCodeEngine
             throwGammaException(e);
         }
 
+        // We only enable stylesheet caching on the first execution. If the user
+        // writes an aninmated script where the style property changes
+        // with each execution, we might put a lot of stuff into the cache that
+        // will never be used
+
+        stylesheet.setCacheEnabled(false);
+
         // Execute the lCodes
 
         // Set up the lcode engine for this set of lcodes.
@@ -339,6 +309,22 @@ public class HCodeEngine
     public void addCommand(Command command)
     {
         lCodeEngine.addCommand(command);
+    }
+
+    public String toDisplayableString(Object obj)
+    {
+        if (obj instanceof String str) {
+            return str;
+        }
+        else if (obj instanceof Double dbl) {
+            return Util.toString(dbl, precision);
+        }
+        else if (obj instanceof Displayable displayable) {
+            return displayable.toDisplayableString(this);
+        }
+        else {
+            throw new ProgrammingException("HCodeEngine.toDisplayableString(): Couldn't convert object to string");
+        }
     }
 
     public void throwGammaException(Throwable e)

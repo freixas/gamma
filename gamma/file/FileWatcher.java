@@ -31,6 +31,9 @@ import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -43,15 +46,33 @@ import javafx.application.Platform;
 public class FileWatcher extends Thread
 {
     private final File file;
+    private final ArrayList<File> dependentFiles;
     private final MainWindow window;
     private final List<Exception> list;
     private final AtomicBoolean stop = new AtomicBoolean(false);
 
-    public FileWatcher(File file, MainWindow window)
+    public FileWatcher(File file, ArrayList<File> dependentFiles, MainWindow window)
     {
         this.file = file;
+        this.dependentFiles = dependentFiles;
         this.window = window;
         this.list = Collections.synchronizedList(new ArrayList<>());
+    }
+
+    /**
+     * Determine if the give file list is the same as the existing file
+     * list.
+     *
+     * @param file The main script file.
+     * @param dependentFiles A list of dependent files.
+     *
+     * @return True if the files are the same.
+     */
+    public boolean hasSameFiles(File file, ArrayList<File> dependentFiles)
+    {
+        if (this.dependentFiles == null && dependentFiles != null) return false;
+        if (this.dependentFiles != null && dependentFiles == null) return false;
+        return this.file.equals(file) && this.dependentFiles.equals(dependentFiles);
     }
 
     /**
@@ -111,9 +132,51 @@ public class FileWatcher extends Thread
 
         try {
             WatchService watchService = FileSystems.getDefault().newWatchService();
+            HashMap<Path, WatchKey> parentMap = new HashMap<>();
+            HashMap<WatchKey, ArrayList<String>> watchKeyMap = new HashMap<>();
 
-            Path path = file.toPath().getParent();
-            path.register(watchService, ENTRY_CREATE, ENTRY_MODIFY, ENTRY_DELETE);
+            // Create a watch key for the main script's parent
+
+            Path path = file.toPath();
+            Path parent = path.getParent();
+            WatchKey key = parent.register(watchService, ENTRY_CREATE, ENTRY_MODIFY, ENTRY_DELETE);
+
+            // Save the parent folder and the key -> filename link
+            // When we get an event, we only get a relative path. We can convert
+            // this to a filename to compare against what we are looking for
+
+            parentMap.put(parent, key);
+            ArrayList<String> filenames = new ArrayList<>();
+            filenames.add(path.getFileName().toString());
+            watchKeyMap.put(key, filenames);
+
+            // Create a watch key for each unique parent of each dependent file
+
+            if (dependentFiles != null) {
+                Iterator<File> iter = dependentFiles.iterator();
+                while (iter.hasNext()) {
+                    Path dependentPath = iter.next().toPath();
+                    Path dependentParent = dependentPath.getParent();
+
+                    // If a watch key exists for the parent directory, just add
+                    // the new file to list of files associated with the key
+
+                    if ((key = parentMap.get(dependentParent)) != null) {
+                        filenames = watchKeyMap.get(key);
+                        filenames.add(dependentPath.getFileName().toString());
+                    }
+
+                    // Otherwise, we need a new watch key
+
+                    else {
+                        key = dependentParent.register(watchService, ENTRY_CREATE, ENTRY_MODIFY, ENTRY_DELETE);
+                        parentMap.put(dependentParent, key);
+                        filenames = new ArrayList<>();
+                        filenames.add(dependentPath.getFileName().toString());
+                        watchKeyMap.put(key, filenames);
+                    }
+                }
+            }
 
             boolean poll = true;
             long lastModTime = 0L;
@@ -123,7 +186,7 @@ public class FileWatcher extends Thread
                 // Wait up to 5 seconds. This means that it can take up to
                 // 5 seconds to kill the thread
 
-                WatchKey key = watchService.poll(5, TimeUnit.SECONDS);
+                key = watchService.poll(5, TimeUnit.SECONDS);
 
                 // Check to see if we should terminate
 
@@ -136,18 +199,38 @@ public class FileWatcher extends Thread
 
                 if (key != null) {
                     for (WatchEvent<?> event : key.pollEvents()) {
+
                         WatchEvent.Kind<?> kind = event.kind();
                         System.err.println("Event kind : " + kind + " - File : " + event.context());
 
                         if (kind == StandardWatchEventKinds.ENTRY_CREATE ||
                             kind == StandardWatchEventKinds.ENTRY_MODIFY) {
 
-                            @SuppressWarnings("unchecked")
-                            Path filename = ((WatchEvent<Path>)event).context();
-                            System.err.print("Filename is " + filename + "\n");
+                            // Get the list of filenames were are monitored related
+                            // to this key
 
-                            if (filename.toString().equals(file.getName())) {
-                                Long modTime = file.lastModified();
+                            filenames = watchKeyMap.get(key);
+                            if (filenames == null) continue;
+
+                            // Get the path to the file associated with the
+                            // event
+
+                            @SuppressWarnings("unchecked")
+                            Path detectedPath = ((WatchEvent<Path>)event).context();
+                            System.err.print("File " + detectedPath + "\n");
+
+                            // See if the file detected is on our list
+
+                            if (filenames.contains(detectedPath.getFileName().toString())) {
+
+                                // Conver the relative path we received to an
+                                // absolute one
+
+                                Path parentDirectory = (Path)key.watchable();
+                                Path fullDetectedPath = parentDirectory.resolve(detectedPath);
+
+                                File detectedFile = fullDetectedPath.toFile();
+                                Long modTime = detectedFile.lastModified();
                                 if (modTime > lastModTime + 1000) {
                                     System.err.println("doOnChange()\n");
                                     doOnChange();

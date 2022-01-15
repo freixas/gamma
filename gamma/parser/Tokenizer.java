@@ -17,7 +17,13 @@
 package gamma.parser;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.ListIterator;
 
 /**
  *
@@ -83,6 +89,15 @@ public class Tokenizer
                 charNumber = cPtr - lineNumberStart + 1;
             }
 
+            if (c == '/' && cNext == '*') {
+                cPtr += 2;
+                stripComment();
+                if (c == EOF) break;
+                c = script.charAt(cPtr);
+                cNext = script.charAt(cPtr + 1);
+                charNumber = cPtr - lineNumberStart + 1;
+            }
+
             // Count newlines and discard them as whitespace
 
             if (c == '\n') {
@@ -123,8 +138,7 @@ public class Tokenizer
 
             // Handle numbers
 
-            else if ((c == '#' && isHexDigit(cNext)) ||
-                     (c == '.' && Character.isDigit(cNext))  ||
+            else if ((c == '.' && Character.isDigit(cNext))  ||
                      Character.isDigit(c)) {
                 list.add(new Token<>(Token.Type.NUMBER, getNumber(), file, lineNumber, charNumber));
             }
@@ -156,11 +170,24 @@ public class Tokenizer
     private void stripComment()
     {
         while ((c = script.charAt(cPtr)) != EOF) {
-            c = script.charAt(cPtr);
             if (c == '\n') return;
             cPtr++;
         }
 
+    }
+
+    /**
+     * Strip an alternate comment.
+     * <p>
+     * When called, cPtr should point to the first character after a "/*". On
+     * return, cPtr points to the first character just past the comment.
+     */
+    private void stripAlternateComment()
+    {
+        while (((c = script.charAt(cPtr)) != '*' || (cNext = script.charAt(cPtr + 1)) != '/') && c != EOF) {
+            cPtr++;
+        }
+        if (c != EOF) cPtr += 2;
     }
 
     /**
@@ -255,64 +282,19 @@ public class Tokenizer
     /**
      * Get a number token.
      * <p>
-     * When called, cPtr should point to the first character of the number. A
-     * hex color is considered a number, so the first character might be "#". On
-     * return, cPtr points to the first non-hex digit.
+     * When called, cPtr should point to the first character of the number. On
+     * return, cPtr points to the first non-digit.
      *
      * @return A number.
      * @throws ParseException When the color number is improperly formed.
      */
-    private double getNumber()
-            throws ParseException
+    private double getNumber() throws ParseException
     {
         // Check for color numbers
 
         StringBuilder number = new StringBuilder();
 
         try {
-            if (c == '#') {
-                cPtr++;
-                while (isHexDigit(c = script.charAt(cPtr))) {
-                    number.append(c);
-                    cPtr++;
-                }
-
-                // cPtr should now be pointing to the first non-hex digit.
-                // If we have three digits, convert to 6 by doubling each digit
-
-                if (number.length() == 3) {
-                    for (int i = 0; i < 3; i++) {
-                        number.insert(i * 2, number.charAt(i * 2));
-                    }
-                }
-
-                // If we have four digits, convert to 8 by doubling each digit
-
-                if (number.length() == 4) {
-                    for (int i = 0; i < 4; i++) {
-                        number.insert(i * 2, number.charAt(i * 2));
-                    }
-                }
-
-                // If we have six digits, add "FF"
-
-                if (number.length() == 6) {
-                    number.append("FF");
-                }
-
-                // If we have eight digits, convert to a double
-
-                if (number.length() == 8) {
-                    number.insert(0, "0x");
-                    return Long.decode(number.toString());
-                }
-
-                throw new ParseException(
-                    file, lineNumber, charNumber, "Invalid color value: '#'" + number.toString() + "'");
-            }
-
-            // Check for double
-
             while (Character.isDigit(c = script.charAt(cPtr)) || c == '.') {
                 number.append(c);
                 cPtr++;
@@ -325,7 +307,7 @@ public class Tokenizer
             int p2 = number.lastIndexOf(".");
             if (p1 != p2) {
                 throw new ParseException(
-                    file, lineNumber, charNumber, "Invalid float value: '" + number.toString() + "'");
+                    file, lineNumber, charNumber, "Invalid number: '" + number.toString() + "'");
             }
             return Double.valueOf(number.toString());
         }
@@ -365,6 +347,66 @@ public class Tokenizer
     private boolean isHexDigit(char c)
     {
         return hexDigits.indexOf(c) != -1;
+    }
+
+    private void debugTokens(ArrayList<Token<?>> tokens)
+    {
+        try {
+            File logDir  = new File("D:/users/tony/Documents/Gamma/Logs");
+            logDir.mkdirs();
+
+            String timestamp = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss").format(new Date());
+            File log = new File(logDir, timestamp +" Log.csv");
+            log.createNewFile();
+            FileOutputStream out = new FileOutputStream(log);
+            try (PrintWriter writer = new PrintWriter(out)) {
+                ListIterator<Token<?>> iter = tokens.listIterator();
+                writer.write("Line Number,Char Number,Type,Value\n");
+
+                while (iter.hasNext()) {
+                    Token<?> token = iter.next();
+
+                    String value = valueToString(token.getValue());
+
+                    writer.write(
+                            token.getLineNumber() + "," +
+                        token.getCharNumber() + "," +
+                        token.getType() + "," +
+                        value + "\n");
+                }
+            }
+        }
+        catch (IOException e) {
+
+        }
+    }
+
+    private String valueToString(Object value)
+    {
+        if (value instanceof Character character) {
+            return quoteForCsv(character.toString());
+        }
+        else if (value instanceof Double double1) {
+            return double1.toString();
+        }
+        else if (value instanceof String string) {
+            return(quoteForCsv(string));
+        }
+        else if (value instanceof Integer integer1) {
+            return integer1.toString();
+        }
+        else {
+            return "";
+        }
+    }
+
+    private String quoteForCsv(String str)
+    {
+        if (str.matches(".*[,\r\n\"].*")) {
+            str = str.replaceAll("\"", "\"\"");
+            str = "\"" + str + "\"";
+        }
+        return str;
     }
 
 }

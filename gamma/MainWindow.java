@@ -34,6 +34,7 @@ import gamma.value.ChoiceVariable;
 import gamma.value.ToggleVariable;
 import gamma.value.DisplayVariable;
 import gamma.value.RangeVariable;
+import java.util.ArrayList;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -120,7 +121,7 @@ public final class MainWindow extends Stage
         setOnShown((WindowEvent t) -> {
             locateUIElements();
             setCloseState(Gamma.getWindowCount() > 1);
-            setFile(file);
+            setFile(file, new ArrayList<File>());
         });
 
         this.setOnCloseRequest((WindowEvent t) -> {
@@ -169,7 +170,7 @@ public final class MainWindow extends Stage
      *
      * @param file The script file associated with this window.
      */
-    public void setFile(File file)
+    public void setFile(File file, ArrayList<File> dependentFiles)
     {
         this.file = file;
         boolean disable = file == null;
@@ -186,18 +187,23 @@ public final class MainWindow extends Stage
 
             setTitle("Gamma - " + file.getName());
 
-            // Stop any existing watcher
+            // Determine if we must create a new watcher
 
-            if (watcherThread != null) {
-                watcher.stopThread();
-            }
+            if (watcherThread == null || !watcher.hasSameFiles(file, dependentFiles)) {
 
-            watcher = new FileWatcher(file, this);
-            watcherThread = new Thread(watcher);
-            watcherThread.start();
-            if (diagramEngine != null) {
-                diagramEngine.close();
-                diagramEngine = null;
+                // Stop any existing watcher
+
+                if (watcherThread != null) {
+                    watcher.stopThread();
+                }
+
+                watcher = new FileWatcher(file, dependentFiles, this);
+                watcherThread = new Thread(watcher);
+                watcherThread.start();
+                if (diagramEngine != null) {
+                    diagramEngine.close();
+                    diagramEngine = null;
+                }
             }
         }
     }

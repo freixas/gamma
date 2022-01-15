@@ -18,6 +18,7 @@ package gamma.execution;
 
 import gamma.MainWindow;
 import gamma.ProgrammingException;
+import gamma.css.value.Stylesheet;
 import gamma.execution.hcode.SetStatement;
 import java.util.LinkedList;
 import java.util.Set;
@@ -40,6 +41,7 @@ public class DiagramEngine
     private final boolean isAnimated;
     private final boolean hasDisplayVariables;
     private final SetStatement setStatement;
+    private final Stylesheet stylesheet;
 
     private DynamicSymbolTable dynamicSymbolTable;
     private Set<String> symbolNames;
@@ -48,13 +50,14 @@ public class DiagramEngine
     private HCodeEngine hCodeEngine;
 
     @SuppressWarnings("LeakingThisInConstructor")
-    public DiagramEngine(MainWindow window, LinkedList<Object> hCodes, boolean isAnimated, boolean hasDisplayVariables, SetStatement setStatement)
+    public DiagramEngine(MainWindow window, LinkedList<Object> hCodes, boolean isAnimated, boolean hasDisplayVariables, SetStatement setStatement, Stylesheet stylesheet)
     {
         this.window = window;
         this.program = new HCodeProgram(hCodes);
         this.isAnimated = isAnimated;
-        this.setStatement = setStatement;
         this.hasDisplayVariables = hasDisplayVariables;
+        this.setStatement = setStatement;
+        this.stylesheet = stylesheet;
 
         this.animationEngine = null;
         this.hCodeEngine = null;
@@ -73,14 +76,14 @@ public class DiagramEngine
            // Execute animated scripts
 
             if (isAnimated) {
-                animationEngine = new AnimationEngine(window, setStatement, program, hasDisplayVariables);
+                animationEngine = new AnimationEngine(window, setStatement, stylesheet, program, hasDisplayVariables);
                 animationEngine.execute();
             }
 
             // Execute non-animated scripts
 
             else {
-                hCodeEngine = new HCodeEngine(window, setStatement, program);
+                hCodeEngine = new HCodeEngine(window, setStatement, stylesheet, program);
                 hCodeEngine.execute();
 
                 // If we have dynamic variables, we need add the controls to the main window

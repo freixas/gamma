@@ -16,6 +16,7 @@
  */
 package gamma.execution.lcode;
 
+import gamma.css.value.StyleStruct;
 import gamma.drawing.Context;
 
 /**
@@ -33,7 +34,6 @@ public class Command
         this.cmdStruct = cmdStruct;
         this.cmdStruct.finalizeValues();
         this.styles = styles;
-        this.styles.finalizeValues();
         this.cmdExec = cmdExec;
     }
 

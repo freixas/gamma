@@ -18,6 +18,7 @@ package gamma.execution;
 
 import gamma.MainWindow;
 import gamma.ProgrammingException;
+import gamma.css.value.StyleStruct;
 import gamma.drawing.Context;
 import gamma.execution.lcode.*;
 import gamma.value.Frame;

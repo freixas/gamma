@@ -16,7 +16,7 @@
  */
 package gamma.drawing;
 
-import gamma.execution.lcode.StyleStruct;
+import gamma.css.value.StyleStruct;
 import gamma.math.OffsetAcceleration;
 import gamma.value.HyperbolicSegment;
 import javafx.scene.canvas.GraphicsContext;

@@ -16,9 +16,9 @@
  */
 package gamma.execution.lcode;
 
+import gamma.css.value.StyleStruct;
 import gamma.drawing.Context;
 import gamma.drawing.Grid;
-import gamma.value.Line;
 
 /**
  *

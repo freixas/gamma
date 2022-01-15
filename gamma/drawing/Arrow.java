@@ -16,7 +16,7 @@
  */
 package gamma.drawing;
 
-import gamma.execution.lcode.StyleStruct;
+import gamma.css.value.StyleStruct;
 import gamma.value.Bounds;
 import gamma.value.Coordinate;
 import javafx.scene.canvas.GraphicsContext;

@@ -18,12 +18,12 @@ package gamma.drawing;
 
 import gamma.ProgrammingException;
 import gamma.execution.lcode.LabelStruct;
-import gamma.execution.lcode.StyleStruct;
+import gamma.css.value.StyleStruct;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.geometry.VPos;
-import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 import javafx.scene.text.TextBoundsType;
@@ -40,51 +40,55 @@ public class Label
 
     public static void draw(Context context, LabelStruct struct, StyleStruct styles)
     {
+        draw(context, struct, styles.textColor, styles.font, styles);
+    }
+
+    public static void draw(Context context, LabelStruct struct, Color color, Font font, StyleStruct styles)
+    {
         // NOTE: + angle is counterclockwise. - angle is clockwise
 
         try {
-            Canvas canvas = context.canvas;
             GraphicsContext gc = context.gc;
 
             // Save the current graphics context
 
             gc.save();
 
-            gc.setFont(styles.font);
+            gc.setFont(font);
 
             // Set the drawing position
             // These need to be inverted from their logical settings
 
-            char vAlign = styles.textAnchor.charAt(0);
-            char hAlign = styles.textAnchor.charAt(1);
+            char vAlign = styles.textAnchor.toString().charAt(0);
+            char hAlign = styles.textAnchor.toString().charAt(1);
             double offsetX = 0;
             double offsetT = 0;
 
             switch (vAlign) {
                 case 'T' -> {
                     gc.setTextBaseline(VPos.TOP);
-                    offsetT = styles.textPadding;
+                    offsetT = styles.textPaddingTop;
                 }
                 case 'M' -> gc.setTextBaseline(VPos.CENTER);
                 case 'B' -> {
                     gc.setTextBaseline(VPos.BASELINE);
-                    offsetT = -styles.textPadding;
+                    offsetT = -styles.textPaddingBottom;
                 }
             }
 
             switch (hAlign) {
                 case 'R' -> {
                     gc.setTextAlign(TextAlignment.RIGHT);
-                    offsetX = -styles.textPadding;
+                    offsetX = -styles.textPaddingRight;
                 }
                 case 'C' -> gc.setTextAlign(TextAlignment.CENTER);
                 case 'L' -> {
                     gc.setTextAlign(TextAlignment.LEFT);
-                    offsetX = styles.textPadding;
+                    offsetX = styles.textPaddingLeft;
                 }
             }
 
-            gc.setFill(styles.javaFXColor);
+            gc.setFill(color);
 
             Affine transform = gc.getTransform();
 

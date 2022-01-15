@@ -24,7 +24,7 @@ import javafx.beans.property.Property;
 /**
  * The ArgInfo class is used to provide information about the arguments of
  * an HCode or Function and to type-check those arguments.
- * 
+ *
  * @author Antonio Freixas
  */
 public class ArgInfo
@@ -32,7 +32,7 @@ public class ArgInfo
     public enum Type
     {
         INTEGER, DOUBLE, STRING, DOUBLE_OR_STRING, W_INITIALIZER, W_SEGMENT, LIMIT_TYPE,
-        OBSERVER, OBSERVER_OR_FRAME, AT_TYPE, LINE, AXIS_TYPE, PATH, PROPERTY, PROPERTY_LIST, STYLE,
+        OBSERVER, OBSERVER_OR_FRAME, AT_TYPE, LINE, AXIS_TYPE, PATH, PROPERTY, PROPERTY_LIST,
         PROPERTY_ELEMENT, COORDINATE, ADDRESS, OBJECT_CONTAINER, LINE_OR_OBSERVER, ANY
     }
 
@@ -127,7 +127,6 @@ public class ArgInfo
                 case PATH ->                { if (!(obj instanceof Path))                                   throwTypeError("a path"); }
                 case PROPERTY ->            { if (!(obj instanceof Property))                               throwTypeError("a property"); }
                 case PROPERTY_LIST ->       { if (!(obj instanceof PropertyList))                           throwTypeError("a property list"); }
-                case STYLE ->               { if (!(obj instanceof Style))                                  throwTypeError("a style"); }
                 case PROPERTY_ELEMENT ->    { if (!(obj instanceof PropertyElement))                        throwTypeError("a property element"); }
                 case COORDINATE ->          { if (!(obj instanceof Coordinate))                             throwTypeError("a coordinate"); }
                 case ADDRESS ->             { if (!(obj instanceof Address))                                throwTypeError("an address"); }

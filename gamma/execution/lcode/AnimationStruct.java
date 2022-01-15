@@ -25,10 +25,9 @@ import gamma.value.Frame;
  */
 public class AnimationStruct extends Struct
 {
-    public String control = "loop";
+    public boolean cycle = false;
     public int reps = 500;
     public double speed = 1.0;
-
 
     public AnimationStruct()
     {

@@ -145,22 +145,6 @@ public class Context
 
             Affine inverse = gc.getTransform().createInverse();
             Bounds worldBounds = screenBounds.transform(inverse);
-
-//            Point2D p1 = gc.getTransform().transform(worldBounds.min.x, worldBounds.min.t);
-//            Point2D p2 = gc.getTransform().transform(worldBounds.max.x, worldBounds.max.t);
-//
-//            double error1 = p1.getX();
-//            double error2 = p1.getY() - canvas.getHeight();
-//            double error3 = p2.getX() - canvas.getWidth();
-//            double error4 = p2.getY();
-//
-//            System.err.println(
-//                "Debug: canvas bounds " +
-//                error1 + ", " +
-//                error2 + ", " +
-//                error3 + ", " +
-//                error4);
-
             return worldBounds;
         }
         catch (NonInvertibleTransformException e) {

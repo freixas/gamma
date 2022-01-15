@@ -17,6 +17,7 @@
 package gamma.execution.lcode;
 
 import gamma.ProgrammingException;
+import gamma.css.value.StyleStruct;
 import gamma.execution.HCodeEngine;
 import gamma.value.PropertyList;
 import java.util.HashMap;
@@ -48,9 +49,10 @@ public class CommandFactory
         CommandExec exec = commandMap.get(name);
         if (exec == null) throw new ProgrammingException("Unexpected command name '" + name + ";");
 
+        // Place the properties into a structure
+
         Struct cmdStruct = Struct.createNewStruct(engine, name, properties);
-        StyleStruct styleStruct = new StyleStruct(engine.getStyleDefaults());
-        Struct.initializeStruct(engine, styleStruct, "style", properties);
+        StyleStruct styleStruct = engine.getStylesheet().createStyleStruct(engine.getFile(), name, cmdStruct.id, cmdStruct.cls, cmdStruct.style);
 
         return new Command(cmdStruct, styleStruct, exec);
     }

@@ -373,7 +373,6 @@ public abstract class Function extends ExecutorContext
     static final HashMap<String, Function> functions = new HashMap<>();
 
     static {
-        functions.put("rgb",        new rgbFunction());
         functions.put("gamma",      new gammaFunction());
 
         functions.put("toXAngle",   new toXAngleFunction());

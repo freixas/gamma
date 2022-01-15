@@ -17,6 +17,7 @@
 package gamma.parser;
 
 import java.io.File;
+import javafx.scene.paint.Color;
 
 /**
  * When a script is parsed, it is first tokenized.
@@ -28,7 +29,7 @@ import java.io.File;
 public class Token<T>
 {
     public enum Type {
-        NUMBER, STRING, OPERATOR, NAME, DELIMITER, EOF
+        NUMBER, COLOR, STRING, OPERATOR, SELECTOR, NAME, DELIMITER, EOF
     }
 
     private final Type type;
@@ -112,14 +113,17 @@ public class Token<T>
     }
 
     public boolean isNumber() { return type == Token.Type.NUMBER; }
+    public boolean isColor() { return type == Token.Type.COLOR; }
     public boolean isString() { return type == Token.Type.STRING; }
     public boolean isOperator() { return type == Token.Type.OPERATOR; }
+    public boolean isSelector() { return type == Token.Type.SELECTOR; }
     public boolean isName() { return type == Token.Type.NAME; }
     public boolean isDelimiter() { return type == Token.Type.DELIMITER; }
     public boolean isEOF() { return type == Token.Type.EOF; }
 
     public char getChar() { return (Character)getValue(); }
     public double getNumber() { return (Double)getValue(); }
+    public Color getColor() { return (Color)getValue(); }
     public String getString() { return (String)getValue(); }
 
     @Override

@@ -17,7 +17,7 @@
 package gamma.drawing;
 
 import gamma.execution.lcode.HypergridStruct;
-import gamma.execution.lcode.StyleStruct;
+import gamma.css.value.StyleStruct;
 import gamma.math.OffsetAcceleration;
 import gamma.math.Util;
 import gamma.value.Bounds;

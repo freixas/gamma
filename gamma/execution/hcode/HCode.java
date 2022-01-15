@@ -25,7 +25,7 @@ import gamma.math.Util;
 import gamma.value.*;
 import java.util.ArrayList;
 import java.util.HashMap;
-import jdk.jshell.spi.ExecutionControl;
+import javax.swing.text.Style;
 
 /**
  * An HCode is a high-level instruction for an imaginary machine which we
@@ -37,13 +37,13 @@ public abstract class HCode extends ExecutorContext
 {
     public enum Type
     {
-        PRINT, SET_STYLE,
+        PRINT,
         DYNAMIC_NAME, FETCH, FETCH_PROP, FETCH_ADDRESS, FETCH_PROP_ADDRESS,
         NOT, TO_BOOLEAN, OR, AND,
         EQ, NE, LT, GT, LE, GE,
         UNARY_MINUS, UNARY_PLUS, SUB, MULT, DIV, REMAINDER, EXP, LORENTZ, INV_LORENTZ,
         W_INITIALIZER, W_SEGMENT, PROPERTY, PROPERTY_LIST,
-        FRAME, OBSERVER_FRAME, AXIS_LINE, ANGLE_LINE, ENDPOINT_LINE, PATH, BOUNDS, INTERVAL, STYLE, COORDINATE,
+        FRAME, OBSERVER_FRAME, AXIS_LINE, ANGLE_LINE, ENDPOINT_LINE, PATH, BOUNDS, INTERVAL, COORDINATE,
         COMMAND
     }
 
@@ -61,16 +61,6 @@ public abstract class HCode extends ExecutorContext
         else {
             engine.print(engine.toDisplayableString(obj));
         }
-    };
-    //SET_STYLE
-    static final FunctionalOneArgNoRet<PropertyList> setStyle = (engine, properties) -> {
-        @SuppressWarnings("LocalVariableHidesMemberVariable")
-        Style style = new Style();
-        style.add(properties);
-
-        // Use these properties as the defaults further on
-
-        engine.setStyleDefaults(style);
     };
 
     // ****************************************
@@ -317,13 +307,6 @@ public abstract class HCode extends ExecutorContext
         if (max == null) throw new ExecutionException("The maximum value is null");
         return new Interval(type, min, max);
     };
-    // STYLE
-    static final FunctionalOneArg<PropertyList, Style> style = (engine, properties) -> {
-        @SuppressWarnings("LocalVariableHidesMemberVariable")
-        Style style = new Style();
-        style.add(properties);
-        return style;
-    };
     // COORDINATE
     static final FunctionalTwoArg<Double, Double, Coordinate> coordinate = (engine, x, t) -> {
         if (x == null) throw new ExecutionException("The x coordinate is null");
@@ -342,7 +325,6 @@ public abstract class HCode extends ExecutorContext
     };
     static {
         map.put(Type.PRINT, print);
-        map.put(Type.SET_STYLE, setStyle);
 
         map.put(Type.DYNAMIC_NAME, dynamicName);
         map.put(Type.FETCH, fetch);
@@ -386,7 +368,6 @@ public abstract class HCode extends ExecutorContext
         map.put(Type.PATH, path);
         map.put(Type.BOUNDS, bounds);
         map.put(Type.INTERVAL, interval);
-        map.put(Type.STYLE, style);
         map.put(Type.COORDINATE, coordinate);
 
         map.put(Type.COMMAND, command);

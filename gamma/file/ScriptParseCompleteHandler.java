@@ -19,6 +19,8 @@ package gamma.file;
 import gamma.MainWindow;
 import gamma.execution.*;
 import gamma.parser.Parser;
+import java.io.File;
+import java.util.ArrayList;
 
 /**
  * This handler is run when a script is parsed successfully.
@@ -39,10 +41,21 @@ public class ScriptParseCompleteHandler implements Runnable
     @Override
     public void run()
     {
+        // The parser may detect some dependent files, such as stylesheets or
+        // include files. Any changes to those should  also cause the script to
+        // reload, so we need to tell the main window about the changes
+
+        File file = parser.getFile();
+        ArrayList<File> dependentFiles = parser.getDependentFiles();
+        window.setFile(file, dependentFiles);
+
         // The parser has finished. Start up the diagrame engine.
 
         DiagramEngine dEngine =
-            new DiagramEngine(window, parser.getHCodes(), parser.isAnimated(), parser.hasDisplayVariables(), parser.getSetStatement());
+            new DiagramEngine(
+                window, parser.getHCodes(),
+                parser.isAnimated(), parser.hasDisplayVariables(),
+                parser.getSetStatement(), parser.getStylesheet());
         dEngine.execute();
     }
 

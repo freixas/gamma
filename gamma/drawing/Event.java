@@ -16,17 +16,15 @@
  */
 package gamma.drawing;
 
+import gamma.css.value.StyleProperties;
 import gamma.execution.lcode.EventStruct;
 import gamma.execution.lcode.LabelStruct;
-import gamma.execution.lcode.StyleStruct;
+import gamma.css.value.StyleStruct;
 import gamma.math.Util;
 import gamma.value.Coordinate;
 import gamma.value.HyperbolicSegment;
-import static java.awt.SystemColor.text;
 import javafx.scene.canvas.GraphicsContext;
-import static javafx.scene.paint.Color.color;
 import javafx.scene.shape.FillRule;
-import static javafx.scene.text.Font.font;
 
 /**
  *
@@ -73,19 +71,19 @@ public class Event
         diameter *= context.invScale;
         double halfDiameter = diameter / 2.0;
 
-        gc.setStroke(styles.javaFXColor);
-        gc.setFill(styles.javaFXColor);
+        gc.setStroke(styles.color);
+        gc.setFill(styles.color);
 
         Coordinate location = struct.location;
 
         switch(styles.eventShape) {
-            case "circle" -> {
+            case CIRCLE -> {
                 gc.fillOval(location.x - halfDiameter, location.t - halfDiameter, diameter, diameter);
             }
-            case "square" -> {
+            case SQUARE -> {
                 gc.fillRect(location.x - halfDiameter, location.t - halfDiameter, diameter, diameter);
             }
-            case "diamond" -> {
+            case DIAMOND -> {
                 double halfHeightDiameter = halfDiameter * DIAMOND_DIAMETER_SCALE;
                 gc.beginPath();
                 gc.moveTo(location.x, location.t + halfHeightDiameter);
@@ -96,7 +94,7 @@ public class Event
                 gc.closePath();
                 gc.fill();
             }
-            case "star" -> {
+            case STAR -> {
                 gc.beginPath();
                 for (int i = 0; i < pathX.length; i++) {
                     if (i == 0) {
@@ -137,10 +135,10 @@ public class Event
                 HyperbolicSegment segment = struct.segment.intersect(context.bounds);
                 if (segment != null) {
                     Hyperbola.drawRaw(context, segment);
-                    if (styles.arrow.equals("start") || styles.arrow.equals("both")) {
+                    if (styles.arrow == StyleProperties.Arrow.START || styles.arrow == StyleProperties.Arrow.BOTH) {
                         Arrow.draw(context, location, struct.angleAtStart, styles);
                     }
-                    if (styles.arrow.equals("end") || styles.arrow.equals("both")) {
+                    if (styles.arrow == StyleProperties.Arrow.END || styles.arrow == StyleProperties.Arrow.BOTH) {
                         Arrow.draw(context, struct.endPoint, struct.angleAtEnd, styles);
                     }
                 }
@@ -152,10 +150,10 @@ public class Event
                 if (segment != null) {
                     Hyperbola.drawRaw(context, segment);
                 }
-                if (styles.arrow.equals("start") || styles.arrow.equals("both")) {
+                if (styles.arrow == StyleProperties.Arrow.START || styles.arrow == StyleProperties.Arrow.BOTH) {
                     Arrow.draw(context, location, struct.angleAtStart, styles);
                 }
-                if (styles.arrow.equals("end") || styles.arrow.equals("both")) {
+                if (styles.arrow == StyleProperties.Arrow.END || styles.arrow == StyleProperties.Arrow.BOTH) {
                     Arrow.draw(context, struct.endPoint, struct.angleAtEnd, styles);
                 }
             }

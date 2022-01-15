@@ -17,7 +17,6 @@
 package gamma.execution.lcode;
 
 import gamma.GammaRuntimeException;
-import gamma.value.Color;
 import gamma.ProgrammingException;
 import gamma.math.Util;
 import gamma.value.Frame;
@@ -81,10 +80,11 @@ public abstract class Struct
 
         allFields.put("LabelStruct", getFields(LabelStruct.class));
         allMethods.put("LabelStruct", getMethods(LabelStruct.class));
-
-        allFields.put("StyleStruct", getFields(StyleStruct.class));
-        allMethods.put("StyleStruct", getMethods(StyleStruct.class));
     }
+
+    public String id = null;
+    public String cls = null;
+    public String style = null;
 
     /**
      * Finalize any settings. Some values have defaults that depend on other
@@ -112,7 +112,7 @@ public abstract class Struct
      * @param cls The class of the Struct subclass.
      * @return The fields in a HashMap.
      */
-    private static HashMap<String, Field> getFields(Class cls)
+    private static HashMap<String, Field> getFields(Class<?> cls)
     {
         Field[] fields = cls.getFields();
         HashMap<String, Field> fieldMap = new HashMap<>();
@@ -129,7 +129,7 @@ public abstract class Struct
      * @param cls The class of the Struct subclass.
      * @return The methods in a HashMap.
      */
-    private static HashMap<String, Method> getMethods(Class cls)
+    private static HashMap<String, Method> getMethods(Class<?> cls)
     {
         Method[] methods = cls.getMethods();
         HashMap<String, Method> methodMap = new HashMap<>();
@@ -185,6 +185,7 @@ public abstract class Struct
      * structure, which is held by the hcode engine and then initialized from
      * the property list using initializeStruct. *
      *
+     * @param engine The hcode engine.
      * @param cmdName The name of the command.
      * @param list The property list used to initialize the structure.
      *
@@ -218,6 +219,7 @@ public abstract class Struct
      * Initialize a structure, one that is a subclass of Struct, using values in
      * the property list.
      *
+     * @param engine The hcode engine.
      * @param cmdStruct The structure to initialize.
      * @param cmdName The name of the command.
      * @param list The property list used to initialize the structure.
@@ -242,6 +244,7 @@ public abstract class Struct
             for (int i = 0; i < list.size(); i++) {
                 Property property = list.getProperty(i);
                 String propertyName = property.getName();
+                if (propertyName.equals("class")) propertyName = "cls";
 
                 // This is a command property, set it
 
@@ -250,15 +253,9 @@ public abstract class Struct
                     setValue(engine, cmdStruct, fieldMap, field, property, methodMap);
                 }
 
-                // This is not a command property or a style property
-                // If the command is "style", ignore checks as we will have properties for
-                // the command being passed in.
-                //
-                // The only way to avoid this would be to remove cmd properties
-                // before working on the style. Then if any properties were left,
-                // we would know there were some inappropriate properties given
+                // This is not a command property
 
-                else if (!cmdName.equals("style") && !styleFieldMap.containsKey(propertyName)) {
+                else {
                     throw new ExecutionException("Invalid property '" + propertyName + "' for command '" + cmdName + "'");
                 }
             }
@@ -344,9 +341,6 @@ public abstract class Struct
             }
             else if (field.getType() == int.class) {
                 field.setInt(instance, Util.toInt(dbl));
-            }
-            else if (field.getType() == Color.class) {
-                field.set(instance, new Color(dbl));
             }
             else if (field.getType() == boolean.class) {
                 field.setBoolean(instance, dbl != 0);
