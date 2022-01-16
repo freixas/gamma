@@ -17,7 +17,7 @@
 package gamma.parser;
 
 import gamma.ProgrammingException;
-import gamma.css.parser.CSSParser;
+import gamma.css.value.StyleException;
 import gamma.css.value.Stylesheet;
 import gamma.execution.hcode.*;
 import gamma.value.Coordinate;
@@ -913,7 +913,8 @@ public class Parser
         }
 
         try {
-            File stylesheetFile = null;
+            File stylesheetFile;
+            Stylesheet sheet;
 
             // If the stylesheet is external, read it
 
@@ -922,24 +923,20 @@ public class Parser
                 if (!stylesheetFile.isAbsolute()) {
                     stylesheetFile = new File(file.getParent(), css);
                 }
-                if (!stylesheetFile.exists()) {
-                    throwParseException("File '" + stylesheetFile.toString() + "' does not exist.");
-                }
-                if (stylesheetFile.isDirectory()) {
-                    throwParseException("File '" + stylesheetFile.toString() + "' is a directory.");
-                }
-                css = Files.readString(stylesheetFile.toPath());
+                dependentFiles.add(stylesheetFile);
+                sheet = Stylesheet.createStylesheet(stylesheetFile);
+            }
+            else {
+                sheet = Stylesheet.createStylesheet(file, css);
             }
 
-            // Either way, the css is now in the includeScrp
-
-            CSSParser cssParser = new CSSParser(isExternal ? stylesheetFile : file, css);
-            dependentFiles.add(stylesheetFile);
-            Stylesheet sheet = cssParser.parse();
             stylesheet.addStylesheet(sheet);
         }
         catch (IOException e) {
             throwParseException("IO Error - " + e.getMessage());
+        }
+        catch (StyleException e) {
+            throwParseException(e.getLocalizedMessage());
         }
 
         return null;
