@@ -73,6 +73,7 @@ public class HCodeEngine
         this.window = window;
         this.setStatement = setStatement;
         this.stylesheet = stylesheet;
+        this.stylesheet.prefixStylesheet(Stylesheet.DEFAULT_STYLESHEET);
         stylesheet.setCacheEnabled(true);
         this.program = program;
         this.dynamicTable = new DynamicSymbolTable(this);
