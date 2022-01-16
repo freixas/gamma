@@ -47,7 +47,7 @@ public class ScriptParseCompleteHandler implements Runnable
 
         File file = parser.getFile();
         ArrayList<File> dependentFiles = parser.getDependentFiles();
-        window.setFile(file, dependentFiles);
+        window.setScript(file, dependentFiles);
 
         // The parser has finished. Start up the diagrame engine.
 
