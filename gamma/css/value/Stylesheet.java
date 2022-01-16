@@ -19,7 +19,10 @@ package gamma.css.value;
 
 import gamma.css.parser.CSSParser;
 import gamma.execution.ExecutionException;
+import gamma.parser.ParseException;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -37,6 +40,16 @@ import javafx.util.Pair;
  */
 public class Stylesheet
 {
+    static final String DEFAULT_STYLESHEET_STRING =
+        "grid { color: #CCC; } hypergrid { color: #3D3; } worldline { color: #00F; }";
+    static public Stylesheet DEFAULT_STYLESHEET;
+    static {
+        try {
+            DEFAULT_STYLESHEET = Stylesheet.createStylesheet(null, DEFAULT_STYLESHEET_STRING);
+        }
+        catch (ParseException e) { }
+    }
+
     private static final Comparator<Pair<Integer, Rule>> scoreComparator = (a, b) -> {
         return a.getKey() - b.getKey();
     };
@@ -47,7 +60,13 @@ public class Stylesheet
     private final ArrayList<Rule> rules;
     private boolean cacheEnabled;
     private HashMap<String, StyleStruct>styleStructCache;
-    private HashMap<String, Stylesheet>stylesheetCache;
+    private final HashMap<String, Stylesheet>stylesheetCache;
+
+    // **********************************************************************
+    // *
+    // * Constructors
+    // *
+    // **********************************************************************
 
     public Stylesheet()
     {
@@ -62,10 +81,62 @@ public class Stylesheet
         stylesheetCache = new HashMap<>();
     }
 
-    public void addRule(Rule rule)
+    // **********************************************************************
+    // *
+    // * Factory methods
+    // *
+    // **********************************************************************
+
+    /**
+     * Create a stylesheet from a file presumably containing valid styles.
+     *
+     * @param cssFile If null, this is equivalent to new Stylesheet(). Otherwise,
+     * it is a file containing a styles.
+     *
+     * @return The created stylesheet.
+     *
+     * @throws StyleException If the styles have a syntax error.
+     * @throws IOException If there is a problem reading the file.
+     */
+    static public Stylesheet createStylesheet(File cssFile) throws IOException, ParseException, StyleException
     {
-        rules.add(rule);
+        if (cssFile == null) return new Stylesheet();
+
+        if (!cssFile.exists()) {
+            throw new StyleException("File '" + cssFile.toString() + "' does not exist.");
+        }
+        if (cssFile.isDirectory()) {
+            throw new StyleException("File '" + cssFile.toString() + "' is a directory.");
+        }
+        String css = Files.readString(cssFile.toPath());
+
+        return createStylesheet(cssFile, css);
     }
+
+    /**
+     * Create a stylesheet from a string presumably containing valid styles.
+     *
+     * @param cssFile The parent file from which the styles were read, if any.
+     * It may be null if the styles originated in a string.
+     * @param css The string containing the styles.
+     *
+     * @return The created stylesheet.
+     *
+     * @throws StyleException If the styles have a syntax error.
+     */
+    static public Stylesheet createStylesheet(File cssFile, String css) throws ParseException
+    {
+        if (css == null || css.length() == 0) return new Stylesheet();
+
+        CSSParser cssParser = new CSSParser(cssFile, css);
+        return cssParser.parse();
+    }
+
+    // **********************************************************************
+    // *
+    // * Getters / Setters
+    // *
+    // **********************************************************************
 
     public boolean isCacheEnabled()
     {
@@ -80,6 +151,29 @@ public class Stylesheet
         }
     }
 
+    // **********************************************************************
+    // *
+    // * Add to the stylesheet
+    // *
+    // **********************************************************************
+
+    public void addRule(Rule rule)
+    {
+        rules.add(rule);
+    }
+
+    /**
+     * Merge two stylesheets. The other stylesheet's rules are always added before
+     * all the rules in this stylesheet.
+     *
+     * @param other The other stylesheet.
+     */
+    public void prefixStylesheet(Stylesheet other)
+    {
+        if (other == null) return;
+        rules.addAll(0, other.rules);
+    }
+
     /**
      * Merge two stylesheets. The other stylesheet's rules are always added after
      * all the rules in this stylesheet.
@@ -91,6 +185,12 @@ public class Stylesheet
         if (other == null) return;
         rules.addAll(other.rules);
     }
+
+    // **********************************************************************
+    // *
+    // * StyleStruct creation
+    // *
+    // **********************************************************************
 
     /**
      * Give the command name, and the id, class, and style properties, create
