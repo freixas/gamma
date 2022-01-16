@@ -22,11 +22,12 @@ import java.io.File;
  *
  * @author Antonio Freixas
  */
+@SuppressWarnings("serial")
 public class ParseException extends Exception
 {
     public ParseException(File file, int lineNumber, int charNumber, String message)
     {
-        super(file.getName() + ", line " + lineNumber + " character " + charNumber + ": " + message);
+        super((file != null? file.getName() + ", " : "") + "line " + lineNumber + " character " + charNumber + ": " + message);
     }
-    
+
 }
