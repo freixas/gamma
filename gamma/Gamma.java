@@ -18,27 +18,54 @@ package gamma;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.ListIterator;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
+import gamma.cli.CommandLine;
+import gamma.cli.CommandLineParser;
+import gamma.cli.DefaultParser;
+import gamma.cli.HelpFormatter;
+import gamma.cli.Options;
+import gamma.cli.ParseException;
+import gamma.css.value.StyleException;
+import gamma.css.value.Stylesheet;
+import gamma.preferences.PreferenceManager;
+import java.io.IOException;
+import javax.swing.JFileChooser;
 
 /**
  * The main application class.
- * 
+ *
  * Anything functionality that is associated with the application and not
- * associated with just one window is included here. This includes the 
+ * associated with just one window is included here. This includes the
  * functionality for creating a new main window.
  *
  * @author Antonio Freixas
  */
 public class Gamma extends Application
 {
+    public enum FileType  {
+        SCRIPT(0), IMAGE(1), VIDEO(2);
+
+        private final int value;
+        FileType(int value) { this.value = value; }
+        public int getValue() { return value; }
+    }
+
+    static public final File USER_DATA_HOME = new JFileChooser().getFileSystemView().getDefaultDirectory();
 
     private static int windowID = 1;
-    private static final ArrayList<MainWindow> windowList = new ArrayList<MainWindow>();
-    private static File defaultDirectory = null;
+    private static final ArrayList<MainWindow> windowList = new ArrayList<>();
+    private static Stylesheet systemStylesheet = null;
+
+    // **********************************************************************
+    // *
+    // * Main
+    // *
+    // **********************************************************************
 
     /**
      * Launch the application.
@@ -50,36 +77,128 @@ public class Gamma extends Application
         launch(args);
     }
 
+    // **********************************************************************
+    // *
+    // * JavaFX Start
+    // *
+    // **********************************************************************
+
     @Override
     public void start(Stage primaryStage)
             throws Exception
     {
-        newMainWindow(null);
+        List<String> list = getParameters().getRaw();
+        String[] args = new String[list.size()];
+        for (int i = 0; i < list.size(); i++) {
+            args[i] = list.get(i);
+        }
+
+        CommandLineParser parser = new DefaultParser();
+
+        // create the Options
+
+        Options options = new Options();
+        options.addOption("h", "help", false, "displays this help message");
+        options.addOption("v", "version", false, "displays the version number");
+        options.addOption("s", "stylesheet", true, "path to default stylesheet");
+
+        try {
+            CommandLine line = parser.parse(options, args);
+
+            if (line.hasOption("help")) {
+                HelpFormatter formatter = new HelpFormatter();
+                formatter.printHelp("Gamma [options] [script-files ...]\n", options);
+                System.exit(0);
+            }
+
+            else if (line.hasOption("version")) {
+                String version = this.getClass().getPackage().getImplementationVersion();
+                if (version == null) {
+                    System.out.println("Development version");
+                }
+                else {
+                    System.out.println("Version " + this.getClass().getPackage().getImplementationVersion());
+                }
+                System.exit(0);
+            }
+
+            File cssFile;
+            if (line.hasOption("stylesheet")) {
+                cssFile = new File(line.getOptionValue("stylesheet"));
+            }
+            else {
+                cssFile = PreferenceManager.getDefaultStylesheet();
+            }
+
+            if (cssFile != null) {
+                try {
+                    systemStylesheet = Stylesheet.createStylesheet(cssFile);
+                }
+                catch (IOException | gamma.parser.ParseException | StyleException e)
+                {
+                    System.err.println(e.getLocalizedMessage());
+                }
+            }
+
+            File[] defaultDirectories = { null, null, null };
+
+            String[] filenames = line.getArgs();
+            if (filenames.length > 0) {
+                for (String filename : filenames) {
+                    File file = new File(filename);
+                    if (!file.exists()) {
+                        System.err.println("File '" + filename + "' does not exist.");
+                    }
+                    else if (!file.isFile()) {
+                        System.err.println("'" + filename + "' is not a file.");
+                    }
+                    else {
+                        newMainWindow(file, defaultDirectories);
+                    }
+                }
+            }
+            else {
+                newMainWindow(null, defaultDirectories);
+            }
+        }
+        catch (ParseException exp) {
+            System.err.println("Command line error:" + exp.getMessage());
+        }
+
         primaryStage.close();
     }
+
+    // **********************************************************************
+    // *
+    // * Window Management
+    // *
+    // **********************************************************************
 
     /**
      * Create a new main window.
      *
      * @param file The script file associated with the window (can be null).
+     * @param defaultDirectories The default directories to use for file dialogs
+     * in the the new window, one for each type of file (SCRIPT, IMAGE, and
+     * VIDEO).
+     *
      * @throws java.lang.Exception
      */
-    public static void newMainWindow(File file)
+    public static void newMainWindow(File file, File[] defaultDirectories)
             throws Exception
     {
         // Go through all the existing windows and set the Close button's state
         // appropriately
-        
+
         ListIterator<MainWindow> iter = windowList.listIterator();
         while (iter.hasNext()) {
             MainWindow w = iter.next();
             w.setCloseState(windowList.size() + 1 > 1);
         }
 
-        MainWindow window = new MainWindow(windowID, file);
+        MainWindow window = new MainWindow(windowID, file, defaultDirectories);
         windowList.add(window);
         windowID++;
-
     }
 
     /**
@@ -93,7 +212,7 @@ public class Gamma extends Application
         if (!Platform.isFxApplicationThread()) Gamma.quickAlert("Not FX Thread");
         return windowList.size();
     }
-    
+
     /**
      * Exit the application by closing all windows (letting the windows
      * release any resources) and then exiting the GUI.
@@ -103,17 +222,17 @@ public class Gamma extends Application
         while (windowList.size() > 1) {
             closeWindow(windowList.get(0));
         }
-        
+
         Platform.exit();
-        
+
         // Unfortunately, some threads are blocked and will not know to stop,
         // so we have to resort to this to exit everything
-        
+
         System.exit(0);
     }
-    
+
     /**
-     * Close a main window. 
+     * Close a main window.
      * <p>
      * When a main window has verified that it is able to close, it should
      * call this method. This removes any references to the window instance
@@ -128,66 +247,108 @@ public class Gamma extends Application
     {
         // If we have just one window (which we are about to close), go through
         // exit() instead
-        
+
         if (windowList.size() == 1) exit();
-        
+
         // Otherwise close the window
-        
+
         windowList.remove(window);
         window.close();
 
         // If we now have just one window left, disable its close button
         // It can still be closed through the window manager
-        
+
         if (windowList.size() == 1) {
             MainWindow finalWindow = windowList.get(0);
             finalWindow.setCloseState(windowList.size() > 1);
         }
     }
 
+    // **********************************************************************
+    // *
+    // * Global Options
+    // *
+    // **********************************************************************
+
     /**
-     * Get the default directory to use for file dialogs when we don't have any
-     * script file chosen.
+     * Get the default directory to use for file dialogs for various types
+     * of files. This method is only called by MainWindows that don't have a
+     * default of their own. MainWindow defaults will always be directories that
+     * have been accessed during the lifetime of this program. The directories
+     * that this method returns may never have been accessed and will be created
+     * if they don't exist.
      *
-     * For Windows, the default location is %USERHOME%\Documents\Gamma and this
-     * is created if it doesn't exist. If it can't be created, it is
-     * %USERHOME%\Documents.
-     *
-     * For all other platforms, it is the user's home directory / Gamma, which
-     * is created. If it can't be created, it is the user's home directory.
-     *
-     * @return
+     * @param type The type of file.
      */
-    static File getDefaultDirectory()
+    public static File getDefaultDirectory(FileType type)
     {
-        if (defaultDirectory == null) {
-            File userHome = new File(System.getProperty("user.home"));
-            File documents = new File(userHome, "Documents");
-            if (documents.exists()) {
-                File gamma = new File(documents, "Gamma");
-                gamma.mkdir();
-                if (gamma.exists()) {
-                    defaultDirectory = gamma;
-                }
-                else {
-                    defaultDirectory = documents;
-                }
+        File defaultDirectory;
+        String defaultName;
+
+        // Get the default from the preferences system
+
+        switch (type) {
+            case SCRIPT -> {
+                defaultDirectory = PreferenceManager.getDefaultScriptDirectory();
+                defaultName = "/Scripts";
             }
-            else {
-                File gamma = new File(userHome, "Gamma");
-                gamma.mkdir();
-                if (gamma.exists()) {
-                    defaultDirectory = gamma;
-                }
-                else {
-                    defaultDirectory = userHome;
-                }
+            case IMAGE -> {
+                defaultDirectory = PreferenceManager.getDefaultImageDirectory();
+                defaultName = "/Images";
+            }
+            case VIDEO -> {
+                defaultDirectory = PreferenceManager.getDefaultVideoDirectory();
+                defaultName = "/Videos";
+
+            }
+            default -> {
+                defaultDirectory = null;
+                defaultName = "";
             }
         }
-        return defaultDirectory;
 
+        if (defaultDirectory != null) {
+
+            // isDirectory() implies that the file exists AND is a directory
+
+            if (defaultDirectory.isDirectory()) return defaultDirectory;
+
+            // Does it exist?
+
+            if (!defaultDirectory.exists()) {
+                defaultDirectory.mkdir();
+                if (defaultDirectory.exists()) return defaultDirectory;
+            }
+        }
+
+        // We reach hear only if the default directory was undefined or if it
+        // was a file or if it didn't exist and we were unable to create it.
+        // The fallback is to user USER_DATA_HOME/Gamma/(Scripts|Images|Videos)
+
+        defaultDirectory = new File(USER_DATA_HOME, "Gamma" + defaultName);
+        if (defaultDirectory.isDirectory()) return defaultDirectory;
+
+        if (!defaultDirectory.exists()) {
+            defaultDirectory.mkdir();
+            if (defaultDirectory.exists()) return defaultDirectory;
+        }
+
+        // One more try: If USER_DATA_HOME doesn't exist, try
+        // user.home/Gamma/(Scripts|Images|Videos)
+
+        defaultDirectory = new File(System.getProperty("user.home"), "Gamma" + defaultName);
+        if (defaultDirectory.isDirectory()) return defaultDirectory;
+
+        if (!defaultDirectory.exists()) {
+            defaultDirectory.mkdir();
+            if (defaultDirectory.exists()) return defaultDirectory;
+        }
+
+        // Final option: user.home
+
+        return new File(System.getProperty("user.home"));
     }
-    
+
     static private void quickAlert(String message)
     {
         Alert alert = new Alert(Alert.AlertType.ERROR);

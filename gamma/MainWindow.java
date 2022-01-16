@@ -55,7 +55,8 @@ public final class MainWindow extends Stage
 {
 
     private final int ID;
-    private File file;
+    private File script;
+    private final File[] directoryDefaults;
     private final MainWindowController controller;
 
     private MenuItem fileMenuExportDiagram;
@@ -90,18 +91,19 @@ public final class MainWindow extends Stage
      * Create a main window.
      *
      * @param ID The ID assigned to this window.
-     * @param file The associated script file (may be null).
+     * @param script The associated script file (may be null).
      * @throws Exception
      */
     @SuppressWarnings("LeakingThisInConstructor")
-    public MainWindow(int ID, File file)
+    public MainWindow(int ID, File script, File[] directoryDefaults)
             throws Exception
     {
         // We can't fully deal with the file until the main window is
         // instantiated.
 
         this.ID = ID;
-        this.file = file;
+        this.script = script;
+        this.directoryDefaults = directoryDefaults;
 
         // Load the view (FXML file) and controller. Get a reference to the controller.
 
@@ -121,7 +123,7 @@ public final class MainWindow extends Stage
         setOnShown((WindowEvent t) -> {
             locateUIElements();
             setCloseState(Gamma.getWindowCount() > 1);
-            setFile(file, new ArrayList<File>());
+            setScript(script, new ArrayList<>());
         });
 
         this.setOnCloseRequest((WindowEvent t) -> {
@@ -151,29 +153,42 @@ public final class MainWindow extends Stage
     }
 
     /**
-     * Get the file associated with this main window. The file can be null.
+     * Get the script file associated with this main window. The file can be
+     * null.
      *
-     * @return the file associated with this main window.
+     * @return the script file associated with this main window.
      */
-    public File getFile()
+    public File getScript()
     {
-        return file;
+        return script;
     }
 
     /**
-     * Set the file associated with this main window. The file can be null.
+     * Get the current default directories being used for various file dialogs.
+     *
+     * @return The current default directories being used for various file dialogs.
+     */
+
+    public File[] getDirectoryDefaults()
+    {
+        return directoryDefaults;
+    }
+
+    /**
+     * Set the script file associated with this main window. The file can be
+     * null.
      * <p>
      *
-     * Certain menu items are enabled or disabled depending on whether the file
-     * is null. The title bar is updated to display the file name. If the file
-     * is not null, the associated script file is run.
+     * Certain menu items are enabled or disabled depending on whether the script
+     * is null. The title bar is updated to display the file name. If the script
+     * is not null, the associated script is run.
      *
-     * @param file The script file associated with this window.
+     * @param script The script file associated with this window.
      */
-    public void setFile(File file, ArrayList<File> dependentFiles)
+    public void setScript(File script, ArrayList<File> dependentFiles)
     {
-        this.file = file;
-        boolean disable = file == null;
+        this.script = script;
+        boolean disable = script == null;
 
         // Enable/disable various File Menu entries
 
@@ -181,15 +196,15 @@ public final class MainWindow extends Stage
         fileMenuExportVideo.setDisable(disable);
         fileMenuPrint.setDisable(disable);
 
-        if (file != null) {
+        if (script != null) {
 
             // Update the title bar
 
-            setTitle("Gamma - " + file.getName());
+            setTitle("Gamma - " + script.getName());
 
             // Determine if we must create a new watcher
 
-            if (watcherThread == null || !watcher.hasSameFiles(file, dependentFiles)) {
+            if (watcherThread == null || !watcher.hasSameFiles(script, dependentFiles)) {
 
                 // Stop any existing watcher
 
@@ -197,7 +212,7 @@ public final class MainWindow extends Stage
                     watcher.stopThread();
                 }
 
-                watcher = new FileWatcher(file, dependentFiles, this);
+                watcher = new FileWatcher(script, dependentFiles, this);
                 watcherThread = new Thread(watcher);
                 watcherThread.start();
                 if (diagramEngine != null) {
@@ -249,21 +264,34 @@ public final class MainWindow extends Stage
     }
 
     /**
-     * Get the directory to use for File/New, File/Open, and File/Save.
+     * Get the default directory to use for various file dialogs.
      *
-     * If this window is not associated with any file, get the default script
-     * location from the Application. If the window is associated with a file,
-     * then use that file's parent directory.
+     * If we already have a default for the file type, use it. If we don't,
+     * but we have a script file and the request is for scripts, use the
+     * script's parent directory. Otherwise, use a global default.
      *
-     * @return The directory to use for File/New, File/Open, and File/Save.
+     * @param type The type of file whose default directory we want.
+     *
+     * @return The directory to use for various file dialogs.
      */
-    public File getFileDirectory()
+    public File getDefaultDirectory(Gamma.FileType type)
     {
-        if (file == null) {
-            return Gamma.getDefaultDirectory();
-        }
-        return file.getParentFile();
+        if (directoryDefaults[type.getValue()] == null) {
 
+            // If we want the default directory to use for a script and we have
+            // an associated file, use it's parent directory
+
+            if (type == Gamma.FileType.SCRIPT && script != null) {
+                directoryDefaults[type.getValue()] = script.getParentFile();
+            }
+
+            // Otherwise, ask for the global default
+
+            else {
+                directoryDefaults[type.getValue()] = Gamma.getDefaultDirectory(type);
+            }
+        }
+        return directoryDefaults[type.getValue()];
     }
 
     // **********************************************************************
@@ -512,7 +540,7 @@ public final class MainWindow extends Stage
             watcher = null;
             watcherThread = null;
         }
-        file = null;
+        script = null;
 
         if (diagramEngine != null) diagramEngine.close();
         super.close();

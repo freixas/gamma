@@ -95,12 +95,12 @@ public class MainWindowController implements Initializable
         fileChooser.setTitle("Create New Script File");
         fileChooser.getExtensionFilters().addAll(
                 new ExtensionFilter("All Files", "*.*"));
-        fileChooser.setInitialDirectory(mainWindow.getFileDirectory());
+        fileChooser.setInitialDirectory(mainWindow.getDefaultDirectory(Gamma.FileType.SCRIPT));
 
         File selectedFile;
         while ((selectedFile = fileChooser.showSaveDialog(mainWindow)) != null) {
             if (selectedFile.createNewFile()) {
-                mainWindow.setFile(selectedFile, null);
+                mainWindow.setScript(selectedFile, null);
                 return;
             }
             new Alert(Alert.AlertType.ERROR, "Use File/Open to open an existing script.").showAndWait();
@@ -115,11 +115,11 @@ public class MainWindowController implements Initializable
         fileChooser.setTitle("Open Existing Script File");
         fileChooser.getExtensionFilters().addAll(
                 new ExtensionFilter("All Files", "*.*"));
-        fileChooser.setInitialDirectory(mainWindow.getFileDirectory());
+        fileChooser.setInitialDirectory(mainWindow.getDefaultDirectory(Gamma.FileType.SCRIPT));
 
         File selectedFile = fileChooser.showOpenDialog(mainWindow);
         if (selectedFile != null) {
-                mainWindow.setFile(selectedFile, null);
+                mainWindow.setScript(selectedFile, null);
         }
     }
 
@@ -162,7 +162,7 @@ public class MainWindowController implements Initializable
     @FXML
     private void windowMenuNewWindow(ActionEvent event) throws Exception
     {
-        Gamma.newMainWindow(null);
+        Gamma.newMainWindow(null, mainWindow.getDirectoryDefaults());
     }
 
     @FXML
