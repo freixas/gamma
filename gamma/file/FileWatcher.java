@@ -50,13 +50,15 @@ public class FileWatcher extends Thread
     private final MainWindow window;
     private final List<Exception> list;
     private final AtomicBoolean stop = new AtomicBoolean(false);
+    private final boolean newFile;
 
-    public FileWatcher(File file, ArrayList<File> dependentFiles, MainWindow window)
+    public FileWatcher(File file, ArrayList<File> dependentFiles, MainWindow window, boolean newFile)
     {
         this.file = file;
         this.dependentFiles = dependentFiles;
         this.window = window;
         this.list = Collections.synchronizedList(new ArrayList<>());
+        this.newFile = newFile;
     }
 
     /**
@@ -125,10 +127,16 @@ public class FileWatcher extends Thread
     @Override
     public void run()
     {
-        // When we first execute this thread, we should treat the file as though
-        // we've just noticed that it changed
+        // We monitor several files, one of which is the main script file and the
+        // rest of which are dependent files. The dependent files may change, forcing
+        // the creation of a new file watcher. If this file watcher was created
+        // because we have a new main file, we need to parse the script immediately.
+        // If it was created only because the dependent files changed, then we
+        // want to skip the initial update
 
-        doOnChange();
+        if (newFile) {
+            doOnChange();
+        }
 
         try {
             WatchService watchService = FileSystems.getDefault().newWatchService();

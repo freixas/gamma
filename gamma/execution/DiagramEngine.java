@@ -125,6 +125,8 @@ public class DiagramEngine
      */
     public void handleExeception(Throwable e)
     {
+        close();
+        
         e.printStackTrace();
         if (e instanceof ExecutionException) {
             window.showTextAreaAlert(Alert.AlertType.ERROR, "Runtime Errors", "Runtime Errors", e.getLocalizedMessage(), true);

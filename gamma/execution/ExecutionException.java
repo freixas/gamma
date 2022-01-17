@@ -17,12 +17,14 @@
 package gamma.execution;
 
 import gamma.GammaRuntimeException;
+import gamma.parser.ParseException;
 
 /**
  *
  * @author Antonio Freixas
  */
-public class ExecutionException  extends GammaRuntimeException
+@SuppressWarnings("serial")
+public class ExecutionException extends GammaRuntimeException
 {
     public ExecutionException(String message)
     {
@@ -31,10 +33,17 @@ public class ExecutionException  extends GammaRuntimeException
 
     public ExecutionException(String message, Throwable cause)
     {
-        super("Runtime error: " +
-              message +
-              (cause != null ?
-                (cause.getLocalizedMessage() != null ? "\nCaused by " + cause.getLocalizedMessage() : "") : ""), cause);
+        super(
+            message == null && cause != null && cause instanceof ParseException ?
+                ("Stylesheet parsing error: " + cause.getLocalizedMessage()) :
+                ("Runtime error: " + message +
+                    (cause != null ?
+                    (cause.getLocalizedMessage() != null ?
+                        "\nCaused by " + cause.getLocalizedMessage() :
+                        "") :
+                    "")
+                ),
+            cause);
     }
 
 //    @Override

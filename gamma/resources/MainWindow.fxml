@@ -91,6 +91,9 @@
         <Menu fx:id="helpMenu" text="_Help">
           <items>
             <MenuItem fx:id="helpMenuContents" mnemonicParsing="false" onAction="#helpMenuContents" text="Contents" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                  <MenuItem mnemonicParsing="false" text="Open Sample Scripts..." />
+                  <SeparatorMenuItem mnemonicParsing="false" />
                   <MenuItem fx:id="helpMenuAbout" mnemonicParsing="false" onAction="#helpMenuAbout" text="About Gamma" />
           </items>
         </Menu>

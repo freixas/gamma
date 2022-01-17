@@ -52,6 +52,7 @@ public class Selector
         boolean isId = false;
         boolean isClass = false;
 
+        String originalName = name;
         name += '$';            // Add an EOF marker
 
         // The following algorithm relies on the selector name already having
@@ -74,7 +75,7 @@ public class Selector
                         commandName = str;
                     }
                     else {
-                        throw new StyleException("Stylesheet selector '" + name +  "'contains an invalid command name");
+                        throw new StyleException("Stylesheet selector '" + originalName +  "'contains an invalid command name");
                     }
                 }
 
@@ -82,13 +83,13 @@ public class Selector
 
                 else if (isId) {
                     if (str.length() < 1) {
-                        throw new StyleException("Stylesheet selector '" + name +  "'contains an invalid id name");
+                        throw new StyleException("Stylesheet selector '" + originalName +  "'contains an invalid id name");
                     }
                     if (id == null) {
                         id = str;
                     }
                     else {
-                        throw new StyleException("Stylesheet selector '" + name +  "'contains more than one id");
+                        throw new StyleException("Stylesheet selector '" + originalName +  "'contains more than one id");
                     }
                 }
 
@@ -97,7 +98,7 @@ public class Selector
 
                 else if (isClass) {
                     if(str.length() < 1) {
-                        throw new StyleException("Stylesheet selector '" + name +  "'contains an invalid class name");
+                        throw new StyleException("Stylesheet selector '" + originalName +  "'contains an invalid class name");
                     }
                     if (cls.contains(str)) continue;
                     cls.add(str);

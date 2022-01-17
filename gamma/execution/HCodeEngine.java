@@ -72,9 +72,18 @@ public class HCodeEngine
     {
         this.window = window;
         this.setStatement = setStatement;
+
+        // Get the stylesheet so that it contains
+        //
+        // - The fatory default stylesheet
+        // - The user's default stylesheet, if any
+        // - The stylesheet given
+
         this.stylesheet = stylesheet;
+        if (Stylesheet.USER_STYLESHEET != null) this.stylesheet.prefixStylesheet(Stylesheet.USER_STYLESHEET);
         this.stylesheet.prefixStylesheet(Stylesheet.DEFAULT_STYLESHEET);
         stylesheet.setCacheEnabled(true);
+
         this.program = program;
         this.dynamicTable = new DynamicSymbolTable(this);
         this.lCodeEngine = null;

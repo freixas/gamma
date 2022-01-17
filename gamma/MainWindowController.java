@@ -16,6 +16,7 @@
  */
 package gamma;
 
+import gamma.preferences.PreferencesDialog;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
@@ -148,9 +149,10 @@ public class MainWindowController implements Initializable
     }
 
     @FXML
-    private void fileMenuPreferences(ActionEvent event)
+    private void fileMenuPreferences(ActionEvent event) throws Exception
     {
-        new Alert(Alert.AlertType.INFORMATION, "Preferences called!").show();
+        PreferencesDialog preferencesDialog = new PreferencesDialog();
+        preferencesDialog.show(mainWindow);
     }
 
     @FXML

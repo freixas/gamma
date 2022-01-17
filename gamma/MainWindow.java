@@ -30,10 +30,12 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 import gamma.file.FileWatcher;
+import gamma.preferences.PreferencesManager;
 import gamma.value.ChoiceVariable;
 import gamma.value.ToggleVariable;
 import gamma.value.DisplayVariable;
 import gamma.value.RangeVariable;
+import java.io.IOException;
 import java.util.ArrayList;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
@@ -187,7 +189,6 @@ public final class MainWindow extends Stage
      */
     public void setScript(File script, ArrayList<File> dependentFiles)
     {
-        this.script = script;
         boolean disable = script == null;
 
         // Enable/disable various File Menu entries
@@ -212,7 +213,11 @@ public final class MainWindow extends Stage
                     watcher.stopThread();
                 }
 
-                watcher = new FileWatcher(script, dependentFiles, this);
+                // The final parameter tells the file watcher whether we have
+                // a new script file (requiring an immediate parse/display) or
+                // whether we are just updating the dependent files
+
+                watcher = new FileWatcher(script, dependentFiles, this, !script.equals(this.script));
                 watcherThread = new Thread(watcher);
                 watcherThread.start();
                 if (diagramEngine != null) {
@@ -221,6 +226,28 @@ public final class MainWindow extends Stage
                 }
             }
         }
+
+        // Did we change the file? If so, try to open the editor on it
+
+        if (script != null && !script.equals(this.script)) {
+            String editorCommand = PreferencesManager.getEditorCommand();
+            if (editorCommand.length() > 0) {
+                editorCommand = editorCommand.replace("$F$", script.toString());
+                try {
+                    Runtime.getRuntime().exec(editorCommand);
+                }
+                catch (IOException e) {
+                    showTextAreaAlert(
+                        Alert.AlertType.ERROR, "Editor Command Error", "Editor Command Error",
+                        "Error when trying to execute this editor command:\n\n" + editorCommand +"\n\n" +
+                        "Error is:\n\n" +
+                        e.getLocalizedMessage(),
+                        true);
+                }
+            }
+        }
+
+        this.script = script;
     }
 
     /**
@@ -288,7 +315,7 @@ public final class MainWindow extends Stage
             // Otherwise, ask for the global default
 
             else {
-                directoryDefaults[type.getValue()] = Gamma.getDefaultDirectory(type);
+                directoryDefaults[type.getValue()] = PreferencesManager.getDefaultDirectory(type);
             }
         }
         return directoryDefaults[type.getValue()];

@@ -32,7 +32,7 @@ import gamma.cli.Options;
 import gamma.cli.ParseException;
 import gamma.css.value.StyleException;
 import gamma.css.value.Stylesheet;
-import gamma.preferences.PreferenceManager;
+import gamma.preferences.PreferencesManager;
 import java.io.IOException;
 import javax.swing.JFileChooser;
 
@@ -57,9 +57,19 @@ public class Gamma extends Application
 
     static public final File USER_DATA_HOME = new JFileChooser().getFileSystemView().getDefaultDirectory();
 
+    static public final boolean IS_WINDOWS;
+    static public final boolean IS_MAC;
+    static public final boolean IS_LINUX;
+
+    static {
+        String osName = System.getProperty("os.name").toLowerCase();
+        IS_WINDOWS = osName.contains("win");
+        IS_MAC = osName.contains("mac");
+        IS_LINUX = osName.contains("nix") || osName.contains("nux") || osName.contains("aix");
+    }
+
     private static int windowID = 1;
     private static final ArrayList<MainWindow> windowList = new ArrayList<>();
-    private static Stylesheet systemStylesheet = null;
 
     // **********************************************************************
     // *
@@ -122,17 +132,18 @@ public class Gamma extends Application
                 System.exit(0);
             }
 
-            File cssFile;
+            File cssFile = null;
             if (line.hasOption("stylesheet")) {
                 cssFile = new File(line.getOptionValue("stylesheet"));
             }
             else {
-                cssFile = PreferenceManager.getDefaultStylesheet();
+                String cssFileName = PreferencesManager.getDefaultStylesheet();
+                if (cssFileName.length() > 0) cssFile = new File(cssFileName);
             }
 
             if (cssFile != null) {
                 try {
-                    systemStylesheet = Stylesheet.createStylesheet(cssFile);
+                    Stylesheet.USER_STYLESHEET = Stylesheet.createStylesheet(cssFile);
                 }
                 catch (IOException | gamma.parser.ParseException | StyleException e)
                 {
@@ -266,88 +277,9 @@ public class Gamma extends Application
 
     // **********************************************************************
     // *
-    // * Global Options
+    // * Private
     // *
     // **********************************************************************
-
-    /**
-     * Get the default directory to use for file dialogs for various types
-     * of files. This method is only called by MainWindows that don't have a
-     * default of their own. MainWindow defaults will always be directories that
-     * have been accessed during the lifetime of this program. The directories
-     * that this method returns may never have been accessed and will be created
-     * if they don't exist.
-     *
-     * @param type The type of file.
-     */
-    public static File getDefaultDirectory(FileType type)
-    {
-        File defaultDirectory;
-        String defaultName;
-
-        // Get the default from the preferences system
-
-        switch (type) {
-            case SCRIPT -> {
-                defaultDirectory = PreferenceManager.getDefaultScriptDirectory();
-                defaultName = "/Scripts";
-            }
-            case IMAGE -> {
-                defaultDirectory = PreferenceManager.getDefaultImageDirectory();
-                defaultName = "/Images";
-            }
-            case VIDEO -> {
-                defaultDirectory = PreferenceManager.getDefaultVideoDirectory();
-                defaultName = "/Videos";
-
-            }
-            default -> {
-                defaultDirectory = null;
-                defaultName = "";
-            }
-        }
-
-        if (defaultDirectory != null) {
-
-            // isDirectory() implies that the file exists AND is a directory
-
-            if (defaultDirectory.isDirectory()) return defaultDirectory;
-
-            // Does it exist?
-
-            if (!defaultDirectory.exists()) {
-                defaultDirectory.mkdir();
-                if (defaultDirectory.exists()) return defaultDirectory;
-            }
-        }
-
-        // We reach hear only if the default directory was undefined or if it
-        // was a file or if it didn't exist and we were unable to create it.
-        // The fallback is to user USER_DATA_HOME/Gamma/(Scripts|Images|Videos)
-
-        defaultDirectory = new File(USER_DATA_HOME, "Gamma" + defaultName);
-        if (defaultDirectory.isDirectory()) return defaultDirectory;
-
-        if (!defaultDirectory.exists()) {
-            defaultDirectory.mkdir();
-            if (defaultDirectory.exists()) return defaultDirectory;
-        }
-
-        // One more try: If USER_DATA_HOME doesn't exist, try
-        // user.home/Gamma/(Scripts|Images|Videos)
-
-        defaultDirectory = new File(System.getProperty("user.home"), "Gamma" + defaultName);
-        if (defaultDirectory.isDirectory()) return defaultDirectory;
-
-        if (!defaultDirectory.exists()) {
-            defaultDirectory.mkdir();
-            if (defaultDirectory.exists()) return defaultDirectory;
-        }
-
-        // Final option: user.home
-
-        return new File(System.getProperty("user.home"));
-    }
 
     static private void quickAlert(String message)
     {

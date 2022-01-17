@@ -49,6 +49,7 @@ public class Stylesheet
         }
         catch (ParseException e) { }
     }
+    static public Stylesheet USER_STYLESHEET = null;
 
     private static final Comparator<Pair<Integer, Rule>> scoreComparator = (a, b) -> {
         return a.getKey() - b.getKey();
@@ -207,7 +208,15 @@ public class Stylesheet
     @SuppressWarnings("null")
     public StyleStruct createStyleStruct(File file, String commandName, String id, String cls, String style)
     {
-        // Check the cache for a match
+        // We have two caches:
+        //
+        // The stylesheet cache looks for a amtch with the command name, id (if
+        // any), and class (if any).
+        //
+        // The StyleStruct cache looks for a match with the command name, id (if
+        // any), class (if any), and style (if any)
+        //
+        // We check the StyleStruct cache first, because it's optimal
 
         String stylesheetCacheId =
             commandName +
@@ -282,7 +291,7 @@ public class Stylesheet
             }
 
             if (style != null) {
-                CSSParser cssParser = new CSSParser(file, style);
+                CSSParser cssParser = new CSSParser(file, "{" + style + ";}");
                 Stylesheet localStylesheet = cssParser.parse();
 
                 // Add the local stylesheet at the very bottom
@@ -304,8 +313,8 @@ public class Stylesheet
             }
             return styles;
         }
-        catch (Exception e) {
-            throw new ExecutionException(e.getLocalizedMessage());
+        catch (ParseException e) {
+            throw new ExecutionException(null, e);
         }
     }
 
