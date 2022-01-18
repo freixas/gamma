@@ -18,6 +18,7 @@
 package gamma.preferences;
 
 import gamma.Gamma;
+import gamma.file.ExportImageDialog;
 import java.io.File;
 import java.util.prefs.Preferences;
 
@@ -35,6 +36,10 @@ public class PreferencesManager
     static private final String WINDOWS_DEFAULT_EDITOR_COMMAND = "notepad \"$F$\"";
     static private final String MAC_DEFAULT_EDITOR_COMMAND = "open -t \"$F$\"";
     static private final String LINUX_DEFAULT_EDITOR_COMMAND = "open \"$F$\"";
+
+    static private final int IMAGE_FORMAT = ExportImageDialog.ImageType.PNG.getValue();
+    static private final float IMAGE_COMPRESSION = (float)95.0;
+    static private final boolean IMAGE_PROGRESSIVE = false;
 
     // **********************************************************************
     // *
@@ -120,9 +125,44 @@ public class PreferencesManager
         userPreferences.put("EDITOR_COMMAND", editorCommand != null ? editorCommand : "");
     }
 
+    // EXPORT IMAGE FORMAT
+
+    static public final int getImageFormat()
+    {
+        return userPreferences.getInt("IMAGE_FORMAT", IMAGE_FORMAT);
+    }
+
+    static public final void setImageFormat(int imageFormat)
+    {
+        userPreferences.putInt("IMAGE_FORMAT", imageFormat);
+    }
+
+    // EXPORT IMAGE COMPRESSION
+
+    static public final float getImageCompression()
+    {
+        return userPreferences.getFloat("IMAGE_COMPRESSION", IMAGE_COMPRESSION);
+    }
+
+    static public final void setImageCompression(float imageCompression)
+    {
+        userPreferences.putFloat("IMAGE_COMPRESSION", imageCompression);
+    }
+
+    // EXPORT IMAGE PROGRESSIVE
+
+    static public final boolean getImageProgressive()
+    {
+        return userPreferences.getBoolean("IMAGE_PROGRESSIVE", IMAGE_PROGRESSIVE);
+    }
+
+    static public final void setImageProgressive(boolean isProgressive)
+    {
+        userPreferences.putBoolean("IMAGE_PROGRESSIVE", isProgressive);
+    }
+
     // Other preferences to be added:
     //
-    // * Export image format
     // * Export video format
     // * Settings for each image/video format
     // *

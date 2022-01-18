@@ -27,6 +27,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
+import javafx.stage.Screen;
+import javafx.stage.Stage;
 
 /**
  *
@@ -144,6 +146,11 @@ public class DisplayCommandExec extends CommandExec
         double height = struct.height;
         resize = false;
 
+        // Find out which screen we are on
+
+        Stage stage = (Stage)canvas.getScene().getWindow();
+        Screen screen = Screen.getScreensForRectangle(stage.getX(), stage.getY(), 1., 1.).get(0);
+
         Region parent = ((Region)canvas.getParent());
         double parentWidth = parent.getWidth();
         double parentHeight = parent.getHeight();
@@ -180,6 +187,9 @@ public class DisplayCommandExec extends CommandExec
             fixedWidth = width;
             fixedHeight = height;
         }
+
+        fixedWidth = fixedWidth / screen.getOutputScaleX();
+        fixedHeight = fixedHeight / screen.getOutputScaleY();
 
         // We now know the width and height we want for the canvas, so set it.
         // We should listen only for window resizes to prevent this method

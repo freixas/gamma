@@ -42,6 +42,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
@@ -104,8 +105,13 @@ public final class MainWindow extends Stage
         // instantiated.
 
         this.ID = ID;
-        this.script = script;
+        this.script = null;
         this.directoryDefaults = directoryDefaults;
+
+        // The script file must be an absolute file or else it gets messed
+        // up when it's turned into an absolute path in the FileWatcher
+
+        final File absoluteScript = script.getAbsoluteFile();
 
         // Load the view (FXML file) and controller. Get a reference to the controller.
 
@@ -125,12 +131,22 @@ public final class MainWindow extends Stage
         setOnShown((WindowEvent t) -> {
             locateUIElements();
             setCloseState(Gamma.getWindowCount() > 1);
-            setScript(script, new ArrayList<>());
+            setScript(absoluteScript, new ArrayList<>());
         });
 
         this.setOnCloseRequest((WindowEvent t) -> {
             Gamma.closeWindow((MainWindow)t.getSource());
         });
+
+        // Add icons
+
+        getIcons().addAll(
+            new Image(getClass().getResourceAsStream("/gamma/resources/gamma-icon-16x16.png")),
+            new Image(getClass().getResourceAsStream("/gamma/resources/gamma-icon-24x24.png")),
+            new Image(getClass().getResourceAsStream("/gamma/resources/gamma-icon-32x32.png")),
+            new Image(getClass().getResourceAsStream("/gamma/resources/gamma-icon-48x48.png")),
+            new Image(getClass().getResourceAsStream("/gamma/resources/gamma-icon-256x256.png"))
+        );
 
         show();
     }

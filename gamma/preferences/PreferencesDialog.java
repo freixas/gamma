@@ -40,11 +40,7 @@ public class PreferencesDialog extends Dialog<ButtonType>
     // **********************************************************************
 
     /**
-     * Create a main window.
-     *
-     * @param ID The ID assigned to this window.
-     * @param script The associated script file (may be null).
-     * @throws Exception
+     * Create a preferences dialog.
      */
     public PreferencesDialog() throws Exception
     {

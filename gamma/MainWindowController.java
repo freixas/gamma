@@ -16,10 +16,10 @@
  */
 package gamma;
 
+import gamma.file.ExportImageDialog;
 import gamma.preferences.PreferencesDialog;
 import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -125,9 +125,10 @@ public class MainWindowController implements Initializable
     }
 
     @FXML
-    private void fileMenuExportDiagram(ActionEvent event)
+    private void fileMenuExportDiagram(ActionEvent event) throws Exception
     {
-        new Alert(Alert.AlertType.INFORMATION, "File Save Diagram called!").show();
+        ExportImageDialog exportImageDialog = new ExportImageDialog();
+        exportImageDialog.show(mainWindow);
     }
 
     @FXML
