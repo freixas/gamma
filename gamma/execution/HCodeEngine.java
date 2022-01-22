@@ -204,7 +204,7 @@ public class HCodeEngine
 
     public void print(String str)
     {
-        window.print(str);
+        window.scriptPrint(str);
     }
 
     public void execute()

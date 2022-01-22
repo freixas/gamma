@@ -16,6 +16,7 @@
  */
 package gamma;
 
+import gamma.execution.ScriptPrintDialog;
 import gamma.execution.DiagramEngine;
 import java.io.File;
 import java.util.ListIterator;
@@ -45,6 +46,7 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.stage.Screen;
 
 /**
  * This class manages the view / controller / model for one main window. It
@@ -76,13 +78,16 @@ public final class MainWindow extends Stage
     private ScrollPane scrollPane;
     private VBox displayControlArea;
 
+    private Screen screen;
+
     private FileWatcher watcher = null;
     private Thread watcherThread = null;
 
     private DiagramEngine diagramEngine = null;
     private Canvas canvas;
 
-    private PrintDialog printDialog = null;
+    private static boolean displayGreetingsDialog = PreferencesManager.getDisplayGreetingMessage();
+    private ScriptPrintDialog scriptPrintDialog = null;
 
     // **********************************************************************
     // *
@@ -98,8 +103,7 @@ public final class MainWindow extends Stage
      * @throws Exception
      */
     @SuppressWarnings("LeakingThisInConstructor")
-    public MainWindow(int ID, File script, File[] directoryDefaults)
-            throws Exception
+    public MainWindow(int ID, File script, File[] directoryDefaults) throws Exception
     {
         // We can't fully deal with the file until the main window is
         // instantiated.
@@ -118,7 +122,7 @@ public final class MainWindow extends Stage
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(getClass().getResource("resources/MainWindow.fxml"));
         Parent root = loader.load();
-        controller = (MainWindowController) loader.getController();
+        controller = (MainWindowController)loader.getController();
         controller.setMainWindow(this);
         setScene(new Scene(root));
 
@@ -132,6 +136,14 @@ public final class MainWindow extends Stage
             locateUIElements();
             setCloseState(Gamma.getWindowCount() > 1);
             setScript(absoluteScript, new ArrayList<>());
+            if (displayGreetingsDialog) {
+                try {
+                    GreetingsDialog greetings = new GreetingsDialog(this);
+                    greetings.show();
+                    displayGreetingsDialog = false;
+                }
+                catch (Exception e) { }
+            }
         });
 
         this.setOnCloseRequest((WindowEvent t) -> {
@@ -190,6 +202,18 @@ public final class MainWindow extends Stage
     public File[] getDirectoryDefaults()
     {
         return directoryDefaults;
+    }
+
+    public Screen getScreen()
+    {
+        ObservableList<Screen> screens = Screen.getScreensForRectangle(getX(), getY(), 1.0, 1.0);
+        if (screens.size() < 1) {
+            if (screen != null) return screen;
+            screen = Screen.getPrimary();
+            return screen;
+        }
+        screen = screens.get(0);
+        return screen;
     }
 
     /**
@@ -544,16 +568,23 @@ public final class MainWindow extends Stage
      *
      * @param str The text to add. A newline is added to the string.
      */
-    public void print(String str)
+    public void scriptPrint(String str)
     {
-        if (printDialog == null) printDialog = new PrintDialog(this);
-        printDialog.appendText(str + "\n");
-        printDialog.show();
+        if (scriptPrintDialog == null) {
+            try {
+                scriptPrintDialog = new ScriptPrintDialog(this);
+            }
+            catch (Exception e) {
+                showTextAreaAlert(Alert.AlertType.ERROR, "Error", "Error", "Failed to open a Script Print dialog: " + e.getLocalizedMessage(), true);
+            }
+        }
+        scriptPrintDialog.appendText(str + "\n");
+        scriptPrintDialog.show();
     }
 
-    public void clearPrintDialog()
+    public void clearScriptPrintDialog()
     {
-        if (printDialog != null) printDialog.clear();
+        if (scriptPrintDialog != null) scriptPrintDialog.clear();
     }
 
     // **********************************************************************

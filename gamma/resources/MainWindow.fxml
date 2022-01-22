@@ -69,10 +69,10 @@
                   </MenuItem>
             <SeparatorMenuItem mnemonicParsing="false" />
             <MenuItem fx:id="fileMenuExportDiagram" disable="true" onAction="#fileMenuExportDiagram" text="Export _Diagram..." />
-            <MenuItem fx:id="fileMenuExportVideo" disable="true" onAction="#fileMenuExportVideo" text="Export _Video..." />
+            <MenuItem fx:id="fileMenuExportVideo" disable="true" onAction="#fileMenuExportVideo" text="Export _Video..." visible="false" />
             <SeparatorMenuItem mnemonicParsing="false" />
-                  <MenuItem fx:id="fileMenuPrint" disable="true" onAction="#fileMenuPrint" text="_Print..." />
-            <SeparatorMenuItem mnemonicParsing="false" />
+                  <MenuItem fx:id="fileMenuPrint" disable="true" onAction="#fileMenuPrint" text="_Print..." visible="false" />
+            <SeparatorMenuItem mnemonicParsing="false" visible="false" />
             <MenuItem fx:id="fileMenuClose" disable="true" onAction="#fileMenuClose" text="Close _Window">
                      <accelerator>
                         <KeyCodeCombination alt="UP" code="W" control="DOWN" meta="UP" shift="UP" shortcut="UP" />

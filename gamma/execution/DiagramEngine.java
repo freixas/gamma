@@ -70,7 +70,7 @@ public class DiagramEngine
 
     public void execute() throws ExecutionException, ProgrammingException
     {
-        window.clearPrintDialog();
+        window.clearScriptPrintDialog();
 
         try {
            // Execute animated scripts

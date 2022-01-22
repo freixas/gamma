@@ -13,9 +13,9 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-<DialogPane fx:id="dialogPane" headerText="Preferences" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="500.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gamma.preferences.PreferencesDialogController">
+<DialogPane fx:id="dialogPane" headerText="Preferences" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefWidth="500.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gamma.preferences.PreferencesDialogController">
     <header>
-      <AnchorPane maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0">
+      <AnchorPane maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="1.0" minWidth="1.0">
          <children>
             <Label maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" text="Set Preferences" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
                <font>
@@ -28,7 +28,7 @@
          </children></AnchorPane>
     </header>
     <content>
-      <AnchorPane minHeight="0.0" minWidth="0.0">
+      <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0">
          <children>
             <GridPane hgap="5.0" layoutX="10.0" layoutY="10.0" vgap="2.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                <columnConstraints>

@@ -164,7 +164,8 @@ public final class Relativity
     /**
      * Given an inertial frame F' at velocity v, calculate gamma, 1 / sqrt(1 - v<sup>2</sup>).
      *
-     * @param v Thevelocity.
+     * @param v The velocity.
+     *
      * @return Gamma.
      */
     static public double gamma(double v) {
@@ -173,6 +174,21 @@ public final class Relativity
 	    Relativity.gamma = 1 / Math.sqrt(1 - v*v);
 	}
 	return Relativity.gamma;
+    }
+
+    /**
+     * Given gamma, return the corresponding velocity. There are actually two
+     * answers, differing only in sign. The sign of the returned value will be
+     * the same as the sign of gamma.
+     *
+     * @param gamma The gamma value.
+     *
+     * @return The corresponding positive velocity.
+     */
+    static public double gammaToV(double gamma)
+    {
+        if (gamma == 0) return Double.POSITIVE_INFINITY;
+        return Math.sqrt(gamma * gamma - 1) / gamma;
     }
 
     /**

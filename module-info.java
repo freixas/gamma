@@ -24,8 +24,13 @@ module gamma
     requires javafx.controls;
     requires javafx.fxml;
     opens gamma to javafx.fxml, javafx.graphics;
+    opens gamma.execution to javafx.fxml;
+    opens gamma.file to javafx.fxml;
+    opens gamma.preferences to javafx.fxml;
+//    opens gamma.print to javafx.fxml;
     requires javafx.media;
     requires javafx.swing;
     requires javafx.web;
+    requires java.base;
 
 }

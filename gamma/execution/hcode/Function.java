@@ -17,6 +17,7 @@
 package gamma.execution.hcode;
 
 import gamma.execution.ExecutionException;
+import gamma.math.Relativity;
 import gamma.math.Util;
 import gamma.value.BoundedLine;
 import gamma.value.Bounds;
@@ -42,6 +43,7 @@ public abstract class Function extends ExecutorContext
         TTOD, TTOTAU, TTOV, TTOX,
         TAUTOD, TAUTOT, TAUTOV, TAUTOX,
         VTOD, VTOT, VTOTAU, VTOX,
+        GAMMATOV,
         SET_BOUNDS, CLEAR_BOUNDS,
         SET_INTERVAL, CLEAR_INTERVAL,
         TO_STRING,
@@ -137,6 +139,12 @@ public abstract class Function extends ExecutorContext
     static final FunctionalTwoArg<Double, Observer, Double> vToX = (engine, dbl, observer) -> {
         double result = observer.vToX(dbl);
         return Double.isNaN(result) ? null : result;
+    };
+
+    // GAMMATOV
+    static final FunctionalOneArg<Double, Double> gammaToV = (engine, gamma) -> {
+        if (gamma == null) return null;
+        return Relativity.gammaToV(gamma);
     };
 
     // SET_BOUNDS
@@ -331,6 +339,8 @@ public abstract class Function extends ExecutorContext
         map.put(Type.VTOT,          vToT);
         map.put(Type.VTOTAU,        vToTau);
         map.put(Type.VTOX,          vToX);
+
+        map.put(Type.GAMMATOV,      gammaToV);
 
         map.put(Type.SET_BOUNDS,    setBounds);
         map.put(Type.CLEAR_BOUNDS,  clearBounds);

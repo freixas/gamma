@@ -36,7 +36,7 @@ public class JumpAndHCode extends ArgInfoHCode implements Jump
 
     static {
         ArrayList<ArgInfo.Type> argTypes = new ArrayList<>();
-        argTypes.add(ArgInfo.Type.DOUBLE);
+        argTypes.add(ArgInfo.Type.ANY);
         argInfo = new ArgInfo(1, argTypes);
     }
 
@@ -70,10 +70,13 @@ public class JumpAndHCode extends ArgInfoHCode implements Jump
     @Override
     public void execute(HCodeEngine engine, List<Object> data)
     {
-        Double arg = (Double)data.get(0);
+        Object arg = data.get(0);
         data.clear();
 
-        boolean isFalse = Util.fuzzyZero(arg);
+        boolean isFalse =
+            arg == null ||
+            (arg instanceof Double && Util.fuzzyZero((Double)arg));
+
         if (isFalse) engine.goTo(jumpLocation);
         data.add(isFalse ? 0.0 : 1.0);
     }

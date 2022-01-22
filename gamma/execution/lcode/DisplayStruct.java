@@ -33,7 +33,7 @@ public class DisplayStruct extends Struct
     public int height = Struct.INT_NOT_SET;
     public Coordinate origin = originDefault;
     public double scale = 1.0;
-    public double units = 1.0;
+    public String units = "pixels";
 
     public DisplayStruct()
     {
@@ -62,8 +62,10 @@ public class DisplayStruct extends Struct
 
     public void unitsRangeCheck()
     {
-        if (units <= 0.0) {
-            throw new ExecutionException("Display units are out of range");
+        String originalUnits = units;
+        units = units.toLowerCase();
+        if (!(units.equals("pixels") || units.equals("inches") || units.equals("mm"))) {
+            throw new ExecutionException("Invalid display units '" + originalUnits + "'");
         }
     }
 

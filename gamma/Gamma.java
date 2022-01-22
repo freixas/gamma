@@ -95,7 +95,6 @@ public class Gamma extends Application
 
     @Override
     public void start(Stage primaryStage)
-            throws Exception
     {
         List<String> list = getParameters().getRaw();
         String[] args = new String[list.size()];
@@ -172,8 +171,12 @@ public class Gamma extends Application
                 newMainWindow(null, defaultDirectories);
             }
         }
-        catch (ParseException exp) {
-            System.err.println("Command line error:" + exp.getMessage());
+        catch (ParseException e) {
+            System.err.println("Command line error:" + e.getMessage());
+        }
+        catch (Exception e) {
+            System.out.println("Failed to open a window: " + e.getLocalizedMessage());
+            e.printStackTrace();
         }
 
         primaryStage.close();
@@ -195,8 +198,7 @@ public class Gamma extends Application
      *
      * @throws java.lang.Exception
      */
-    public static void newMainWindow(File file, File[] defaultDirectories)
-            throws Exception
+    public static void newMainWindow(File file, File[] defaultDirectories) throws Exception
     {
         // Go through all the existing windows and set the Close button's state
         // appropriately
@@ -208,6 +210,7 @@ public class Gamma extends Application
         }
 
         MainWindow window = new MainWindow(windowID, file, defaultDirectories);
+
         windowList.add(window);
         windowID++;
     }

@@ -25,7 +25,6 @@ import gamma.math.Util;
 import gamma.value.*;
 import java.util.ArrayList;
 import java.util.HashMap;
-import javax.swing.text.Style;
 
 /**
  * An HCode is a high-level instruction for an imaginary machine which we
@@ -114,13 +113,23 @@ public abstract class HCode extends ExecutorContext
     // ****************************************
 
     // NOT
-    static final FunctionalOneArg<Double, Double> not = (engine, arg1) -> (arg1 != null && Util.fuzzyZero(arg1)) ? 1.0 : 0.0;
+    static final FunctionalOneArg<Object, Double> not = (engine, arg1) ->
+        arg1 == null || (arg1 instanceof Double && Util.fuzzyZero((Double)arg1)) ? 1.0 : 0.0;
     // TO_BOOLEAN
-    static final FunctionalOneArg<Double, Double> toBoolean = (engine, arg1) -> (arg1 == null || Util.fuzzyZero(arg1)) ? 0.0 : 1.0;
+    static final FunctionalOneArg<Object, Double> toBoolean = (engine, arg1) ->
+        arg1 == null || (arg1 instanceof Double && Util.fuzzyZero((Double)arg1)) ? 0.0 : 1.0;
     // OR
-    static final FunctionalTwoArg<Double, Double, Double> or = (engine, arg1, arg2) -> !Util.fuzzyZero(arg1) || !Util.fuzzyZero(arg2) ? 1.0 : 0.0;
+    static final FunctionalTwoArg<Object, Object, Double> or = (engine, arg1, arg2) -> {
+        double d1 = arg1 == null || (arg1 instanceof Double && Util.fuzzyZero((Double)arg1)) ? 0.0 : 1.0;
+        double d2 = arg2 == null || (arg2 instanceof Double && Util.fuzzyZero((Double)arg2)) ? 0.0 : 1.0;
+        return !Util.fuzzyZero(d1) || !Util.fuzzyZero(d2) ? 1.0 : 0.0;
+    };
     //AND
-    static final FunctionalTwoArg<Double, Double, Double> and = (engine, arg1, arg2) -> !Util.fuzzyZero(arg1) && !Util.fuzzyZero(arg2) ? 1.0 : 0.0;
+    static final FunctionalTwoArg<Object, Object, Double> and = (engine, arg1, arg2) -> {
+        double d1 = arg1 == null || (arg1 instanceof Double && Util.fuzzyZero((Double)arg1)) ? 0.0 : 1.0;
+        double d2 = arg2 == null || (arg2 instanceof Double && Util.fuzzyZero((Double)arg2)) ? 0.0 : 1.0;
+        return !Util.fuzzyZero(d1) && !Util.fuzzyZero(d2) ? 1.0 : 0.0;
+    };
 
     // EQ
     static final FunctionalTwoArg<Object, Object, Double> eq = (engine, arg1, arg2) -> Util.fuzzyEQ(arg1, arg2) ? 1.0 : 0.0;

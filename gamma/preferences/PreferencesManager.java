@@ -18,7 +18,7 @@
 package gamma.preferences;
 
 import gamma.Gamma;
-import gamma.file.ExportImageDialog;
+import gamma.file.ExportDiagramDialog;
 import java.io.File;
 import java.util.prefs.Preferences;
 
@@ -37,9 +37,10 @@ public class PreferencesManager
     static private final String MAC_DEFAULT_EDITOR_COMMAND = "open -t \"$F$\"";
     static private final String LINUX_DEFAULT_EDITOR_COMMAND = "open \"$F$\"";
 
-    static private final int IMAGE_FORMAT = ExportImageDialog.ImageType.PNG.getValue();
+    static private final int IMAGE_FORMAT = ExportDiagramDialog.ImageType.PNG.getValue();
     static private final float IMAGE_COMPRESSION = (float)95.0;
     static private final boolean IMAGE_PROGRESSIVE = false;
+    static private final int IMAGE_PPI = 96;
 
     // **********************************************************************
     // *
@@ -159,6 +160,18 @@ public class PreferencesManager
     static public final void setImageProgressive(boolean isProgressive)
     {
         userPreferences.putBoolean("IMAGE_PROGRESSIVE", isProgressive);
+    }
+
+    // IMAGE DPI
+
+    static public final int getImagePPI()
+    {
+        return userPreferences.getInt("IMAGE_PPI", IMAGE_PPI);
+    }
+
+    static public final void setImagePPI(int dpi)
+    {
+        userPreferences.putInt("IMAGE_PPI", dpi);
     }
 
     // Other preferences to be added:

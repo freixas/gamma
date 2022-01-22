@@ -20,6 +20,7 @@ import gamma.ProgrammingException;
 import gamma.css.value.StyleStruct;
 import gamma.drawing.Context;
 import javafx.geometry.Point2D;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.Region;
@@ -148,8 +149,24 @@ public class DisplayCommandExec extends CommandExec
 
         // Find out which screen we are on
 
-        Stage stage = (Stage)canvas.getScene().getWindow();
-        Screen screen = Screen.getScreensForRectangle(stage.getX(), stage.getY(), 1., 1.).get(0);
+        Screen screen = context.engine.getWindow().getScreen();
+        Rectangle2D bounds = screen.getVisualBounds();
+
+        // Convert width and height to pixels if needed
+
+        double multiplier = 1.0;
+        switch (struct.units) {
+            case "inches" -> { multiplier = screen.getDpi() * screen.getOutputScaleX(); }
+            case "mm" -> { multiplier = screen.getDpi() * screen.getOutputScaleX() / 25.4; }
+        }
+        if (width != Struct.INT_NOT_SET) {
+            width *= multiplier;
+            width = Math.min(width, bounds.getWidth() * screen.getOutputScaleX());
+        }
+        if (height != Struct.INT_NOT_SET) {
+            height *= multiplier;
+            height = Math.min(height, bounds.getHeight() * screen.getOutputScaleY());
+        }
 
         Region parent = ((Region)canvas.getParent());
         double parentWidth = parent.getWidth();
