@@ -16,7 +16,6 @@
  */
 package gamma.execution.lcode;
 
-import gamma.execution.HCodeEngine;
 import gamma.value.Frame;
 
 /**
@@ -25,11 +24,6 @@ import gamma.value.Frame;
  */
 public class HypergridStruct extends Struct
 {
-    public boolean top = true;
-    public boolean left = true;
-    public boolean right = true;
-    public boolean bottom = true;
-
     public HypergridStruct()
     {
     }
