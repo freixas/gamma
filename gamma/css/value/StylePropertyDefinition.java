@@ -86,15 +86,15 @@ public class StylePropertyDefinition
     static final StylePropertyDefinition xLineThickness = new StylePropertyDefinition("x-line-thickness", fieldMap.get("xLineThickness"), StyleProperty.Type.FLOAT, Min.GT0);
     static final StylePropertyDefinition tLineThickness = new StylePropertyDefinition("t-line-thickness", fieldMap.get("tLineThickness"), StyleProperty.Type.FLOAT, Min.GT0);
 
-    static final StylePropertyDefinition xDivLineThickness = new StylePropertyDefinition("x-div-line-thickness", fieldMap.get("xDivLineThickness"), StyleProperty.Type.FLOAT, Min.GT0);
-    static final StylePropertyDefinition tDivLineThickness = new StylePropertyDefinition("t-div-line-thickness", fieldMap.get("tDivLineThickness"), StyleProperty.Type.FLOAT, Min.GT0);
-    static final StylePropertyDefinition[] divLineThicknessDep = { xDivLineThickness, tDivLineThickness };
-    static final StylePropertyDefinition divLineThickness = new StylePropertyDefinition("div-line-thickness", null, StyleProperty.Type.FLOAT, Min.GT0, divLineThicknessDep);
-
     static final StylePropertyDefinition xMajorDivLineThickness = new StylePropertyDefinition("x-major-div-line-thickness", fieldMap.get("xMajorDivLineThickness"), StyleProperty.Type.FLOAT, Min.GT0);
     static final StylePropertyDefinition tMajorDivLineThickness = new StylePropertyDefinition("t-major-div-line-thickness", fieldMap.get("tMajorDivLineThickness"), StyleProperty.Type.FLOAT, Min.GT0);
     static final StylePropertyDefinition[] majorDivLineThicknessDep = { xMajorDivLineThickness, tMajorDivLineThickness };
     static final StylePropertyDefinition majorDivLineThickness = new StylePropertyDefinition("major-div-line-thickness", null, StyleProperty.Type.FLOAT, Min.GT0, majorDivLineThicknessDep);
+
+    static final StylePropertyDefinition xDivLineThickness = new StylePropertyDefinition("x-div-line-thickness", fieldMap.get("xDivLineThickness"), StyleProperty.Type.FLOAT, Min.GT0);
+    static final StylePropertyDefinition tDivLineThickness = new StylePropertyDefinition("t-div-line-thickness", fieldMap.get("tDivLineThickness"), StyleProperty.Type.FLOAT, Min.GT0);
+    static final StylePropertyDefinition[] divLineThicknessDep = { xDivLineThickness, tDivLineThickness, majorDivLineThickness };
+    static final StylePropertyDefinition divLineThickness = new StylePropertyDefinition("div-line-thickness", null, StyleProperty.Type.FLOAT, Min.GT0, divLineThicknessDep);
 
     static final StylePropertyDefinition[] lineThicknessDep = { xLineThickness, tLineThickness, divLineThickness };
     static final StylePropertyDefinition lineThickness = new StylePropertyDefinition("line-thickness", fieldMap.get("lineThickness"), StyleProperty.Type.FLOAT, Min.GT0, lineThicknessDep);
@@ -178,8 +178,15 @@ public class StylePropertyDefinition
     static final StylePropertyDefinition[] tickLabelsDep = { xTickLabels, tTickLabels };
     static final StylePropertyDefinition tickLabels = new StylePropertyDefinition("tick-labels", null, StyleProperty.Type.BOOLEAN, tickLabelsDep);
 
-    static final StylePropertyDefinition tickLength = new StylePropertyDefinition("tick-length", fieldMap.get("tickLength"), StyleProperty.Type.FLOAT);
-    static final StylePropertyDefinition majorTickLength = new StylePropertyDefinition("major-tick-length", fieldMap.get("majorTickLength"), StyleProperty.Type.FLOAT);
+    static final StylePropertyDefinition tickLength = new StylePropertyDefinition("tick-length", fieldMap.get("tickLength"), StyleProperty.Type.FLOAT, Min.EQ0);
+    static final StylePropertyDefinition majorTickLength = new StylePropertyDefinition("major-tick-length", fieldMap.get("majorTickLength"), StyleProperty.Type.FLOAT, Min.EQ0);
+
+    // Hypergrid
+
+    static final StylePropertyDefinition leftQuadrant = new StylePropertyDefinition("left-quadrant", fieldMap.get("leftQuadrant"), StyleProperty.Type.BOOLEAN);
+    static final StylePropertyDefinition rightQuadrant = new StylePropertyDefinition("right-quadrant", fieldMap.get("rightQuadrant"), StyleProperty.Type.BOOLEAN);
+    static final StylePropertyDefinition topQuadrant = new StylePropertyDefinition("top-quadrant", fieldMap.get("topQuadrant"), StyleProperty.Type.BOOLEAN);
+    static final StylePropertyDefinition bottomQuadrant = new StylePropertyDefinition("bottom-quadrant", fieldMap.get("bottomQuadrant"), StyleProperty.Type.BOOLEAN);
 
     // Miscellaneous
 
@@ -276,6 +283,13 @@ public class StylePropertyDefinition
 
         defMap.put("tick-length", tickLength);
         defMap.put("major-tick-length", majorTickLength);
+
+        // Hypergrid
+
+        defMap.put("left-quadrant", leftQuadrant);
+        defMap.put("right-quadrant", rightQuadrant);
+        defMap.put("top-quadrant", topQuadrant);
+        defMap.put("bottom-quadrant", bottomQuadrant);
 
         // Miscellaneous
 

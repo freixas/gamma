@@ -102,6 +102,11 @@ public class StyleStruct
     public double tickLength = 3.0;
     public double majorTickLength = 10.0;
 
+    public boolean leftQuadrant = true;
+    public boolean rightQuadrant = true;
+    public boolean topQuadrant = true;
+    public boolean bottomQuadrant = true;
+
     public double opacity = 1.0;
     public StyleProperties.Arrow arrow = StyleProperties.Arrow.NONE;
     public double arrowWidth = 10.0;
