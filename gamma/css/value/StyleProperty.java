@@ -89,6 +89,9 @@ public class StyleProperty
                 else if (field.getType().getName().equals("double") && value.getClass() == Double.class) {
                     field.set(styles, (double)value);
                 }
+                else if (field.getType().getName().equals("boolean") && value.getClass() == Boolean.class) {
+                    field.set(styles, (boolean)value);
+                }
                 else {
                     throw new ProgrammingException("StyleProperty.setStyleStructValue: Can't assign value to field");
                 }
