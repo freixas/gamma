@@ -27,6 +27,7 @@ import gamma.value.Coordinate;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.text.Font;
 import javafx.scene.transform.Affine;
 
@@ -36,8 +37,6 @@ import javafx.scene.transform.Affine;
  */
 public class Axis
 {
-    static final double MIN_MINOR_TICK_MARK_LENGTH = 3.0;
-    static final double MIN_MAJOR_TICK_MARK_LENGTH = 10.0;
     static final double IDEAL_TICK_SPACING = 20.0;
 
     public static void draw(Context context, AxesStruct struct,
@@ -107,12 +106,12 @@ public class Axis
         // the line is being thicker, so we can apply the same algorithm
         // whether a line has tick marks or not.
 
-        double height = styles.lineThickness;
+        double height = lineThickness;
 
         // If we have tick marks, the height increases
 
         if ((isXAxis && styles.xTicks) || (!isXAxis && styles.tTicks)) {
-            height += MIN_MAJOR_TICK_MARK_LENGTH;
+            height += styles.majorTickLength;
         }
 
         // The thickness of the line is evenly distributed to either side
@@ -227,7 +226,7 @@ public class Axis
         // maximum
 
         double halfHeightMinor =
-            viewportScale * (styles.lineThickness + MIN_MINOR_TICK_MARK_LENGTH) / 2;
+            viewportScale * (lineThickness + styles.tickLength) / 2;
 
         // Determine the first tick mark and its value
 
@@ -238,8 +237,8 @@ public class Axis
         int tickNumber = Util.toInt(firstTick / tickSpacing);
         firstTick += origin.x;
 
-        gc.setStroke(divColor);
-        gc.setLineWidth(worldTickThickness);
+        gc.setLineCap(StrokeLineCap.BUTT);
+        Line.setupLineGc(context, divColor, divLineThickness, divLineStyle);
 
         // If we only print out one of the axes, don't skip labeling 0
 
@@ -254,8 +253,10 @@ public class Axis
 
                 if (tickCount % 10 == 0) {
                     if (majorIsDifferent) {
+                        gc.setLineCap(StrokeLineCap.BUTT);
                         Line.setupLineGc(context, majorDivColor, majorDivLineThickness, majorDivLineStyle);
                         gc.strokeLine(x, origin.t - halfHeightMajor, x, origin.t + halfHeightMajor);
+                        gc.setLineCap(StrokeLineCap.BUTT);
                         Line.setupLineGc(context, divColor, divLineThickness, divLineStyle);
                     }
                     else {
