@@ -64,7 +64,7 @@ public class GreetingsDialogController implements Initializable
 
             displayOption.selectedProperty().addListener(
                 (Object, oldValue, newValue) -> {
-                    PreferencesManager.setDisplayGreetingMessage(newValue);
+                    PreferencesManager.setDisplayGreetingMessage(!newValue);
                 });
 
             InputStream input = getClass().getResourceAsStream("/gamma/resources/greetings.html");
