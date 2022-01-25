@@ -167,7 +167,7 @@ public class Gamma extends Application
                     }
                 }
             }
-            else {
+            if (windowList.size() == 0) {
                 newMainWindow(null, defaultDirectories);
             }
         }
