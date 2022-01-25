@@ -115,7 +115,7 @@ public final class MainWindow extends Stage
         // The script file must be an absolute file or else it gets messed
         // up when it's turned into an absolute path in the FileWatcher
 
-        final File absoluteScript = script.getAbsoluteFile();
+        final File absoluteScript = script!= null ? script.getAbsoluteFile() : null;
 
         // Load the view (FXML file) and controller. Get a reference to the controller.
 
