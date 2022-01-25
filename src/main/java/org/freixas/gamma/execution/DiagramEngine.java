@@ -14,12 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.execution;
+package org.freixas.gamma.execution;
 
-import gamma.MainWindow;
-import gamma.ProgrammingException;
-import gamma.css.value.Stylesheet;
-import gamma.execution.hcode.SetStatement;
+import org.freixas.gamma.MainWindow;
+import org.freixas.gamma.ProgrammingException;
+import org.freixas.gamma.css.value.Stylesheet;
+import org.freixas.gamma.execution.hcode.SetStatement;
 import java.util.LinkedList;
 import java.util.Set;
 import javafx.scene.control.Alert;

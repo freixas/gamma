@@ -15,10 +15,10 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package gamma.css.value;
+package org.freixas.gamma.css.value;
 
-import gamma.math.Util;
-import gamma.parser.Token;
+import org.freixas.gamma.math.Util;
+import org.freixas.gamma.parser.Token;
 import java.util.HashMap;
 import javafx.scene.paint.Color;
 import javafx.scene.text.FontPosture;

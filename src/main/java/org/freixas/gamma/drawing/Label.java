@@ -14,11 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.drawing;
+package org.freixas.gamma.drawing;
 
-import gamma.ProgrammingException;
-import gamma.execution.lcode.LabelStruct;
-import gamma.css.value.StyleStruct;
+import org.freixas.gamma.ProgrammingException;
+import org.freixas.gamma.execution.lcode.LabelStruct;
+import org.freixas.gamma.css.value.StyleStruct;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.geometry.VPos;

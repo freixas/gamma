@@ -16,21 +16,23 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-module gamma
+module org.freixas.gamma
 {
     requires java.prefs;
 
     requires javafx.base;
     requires javafx.controls;
     requires javafx.fxml;
-    opens gamma to javafx.fxml, javafx.graphics;
-    opens gamma.execution to javafx.fxml;
-    opens gamma.file to javafx.fxml;
-    opens gamma.preferences to javafx.fxml;
-//    opens gamma.print to javafx.fxml;
+    opens org.freixas.gamma to javafx.fxml, javafx.graphics;
+    opens org.freixas.gamma.execution to javafx.fxml;
+    opens org.freixas.gamma.file to javafx.fxml;
+    opens org.freixas.gamma.preferences to javafx.fxml;
+//    opens org.freixas.gamma.print to javafx.fxml;
     requires javafx.media;
     requires javafx.swing;
     requires javafx.web;
-    requires java.base;
 
+    requires commons.cli;
+
+    requires java.base;
 }

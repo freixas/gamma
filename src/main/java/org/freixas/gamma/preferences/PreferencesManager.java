@@ -15,10 +15,10 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package gamma.preferences;
+package org.freixas.gamma.preferences;
 
-import gamma.Gamma;
-import gamma.file.ExportDiagramDialog;
+import org.freixas.gamma.Gamma;
+import org.freixas.gamma.file.ExportDiagramDialog;
 import java.io.File;
 import java.util.prefs.Preferences;
 

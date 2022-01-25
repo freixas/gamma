@@ -14,15 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.drawing;
+package org.freixas.gamma.drawing;
 
-import gamma.css.value.StyleProperties;
-import gamma.execution.lcode.LineStruct;
-import gamma.css.value.StyleStruct;
-import gamma.value.BoundedLine;
-import gamma.value.ConcreteLine;
-import gamma.value.CurveSegment;
-import gamma.value.LineSegment;
+import org.freixas.gamma.css.value.StyleProperties;
+import org.freixas.gamma.execution.lcode.LineStruct;
+import org.freixas.gamma.css.value.StyleStruct;
+import org.freixas.gamma.value.BoundedLine;
+import org.freixas.gamma.value.ConcreteLine;
+import org.freixas.gamma.value.CurveSegment;
+import org.freixas.gamma.value.LineSegment;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.StrokeLineCap;

@@ -15,9 +15,9 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package gamma;
+package org.freixas.gamma;
 
-import gamma.preferences.PreferencesManager;
+import org.freixas.gamma.preferences.PreferencesManager;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -67,7 +67,7 @@ public class GreetingsDialogController implements Initializable
                     PreferencesManager.setDisplayGreetingMessage(!newValue);
                 });
 
-            InputStream input = getClass().getResourceAsStream("/gamma/resources/greetings.html");
+            InputStream input = getClass().getResourceAsStream("/greetings.html");
             String text = new String(input.readAllBytes(), StandardCharsets.UTF_8);
             html.setHtmlText(text);
         }

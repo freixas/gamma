@@ -51,7 +51,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox id="top" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" stylesheets="@MainWindow.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gamma.MainWindowController">
+<VBox id="top" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" stylesheets="@MainWindow.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.freixas.gamma.MainWindowController">
    <children>
     <MenuBar id="menuBar" fx:id="menuBar" minHeight="-Infinity" style="-fx-view-order: 0;" VBox.vgrow="NEVER">
       <menus>

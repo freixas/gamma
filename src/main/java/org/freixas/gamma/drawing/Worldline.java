@@ -14,22 +14,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.drawing;
+package org.freixas.gamma.drawing;
 
-import gamma.css.value.StyleProperties;
-import gamma.css.value.StyleStruct;
-import gamma.execution.lcode.WorldlineStruct;
-import gamma.math.Relativity;
-import gamma.math.Util;
-import gamma.value.Bounds;
-import gamma.value.ConcreteObserver;
-import gamma.value.Coordinate;
-import gamma.value.CurveSegment;
-import gamma.value.HyperbolicSegment;
-import gamma.value.IntervalObserver;
-import gamma.value.LineSegment;
-import gamma.value.WorldlineEndpoint;
-import gamma.value.WorldlineSegment;
+import org.freixas.gamma.css.value.StyleProperties;
+import org.freixas.gamma.css.value.StyleStruct;
+import org.freixas.gamma.execution.lcode.WorldlineStruct;
+import org.freixas.gamma.math.Relativity;
+import org.freixas.gamma.math.Util;
+import org.freixas.gamma.value.Bounds;
+import org.freixas.gamma.value.ConcreteObserver;
+import org.freixas.gamma.value.Coordinate;
+import org.freixas.gamma.value.CurveSegment;
+import org.freixas.gamma.value.HyperbolicSegment;
+import org.freixas.gamma.value.IntervalObserver;
+import org.freixas.gamma.value.LineSegment;
+import org.freixas.gamma.value.WorldlineEndpoint;
+import org.freixas.gamma.value.WorldlineSegment;
 import java.util.ArrayList;
 import java.util.Iterator;
 import javafx.scene.canvas.GraphicsContext;
@@ -54,7 +54,7 @@ public class Worldline
 
         Line.setupLineGc(context, styles);
 
-        gamma.value.Observer observer = struct.observer;
+        org.freixas.gamma.value.Observer observer = struct.observer;
 
         if (observer instanceof ConcreteObserver concreteObserver) {
             ArrayList<WorldlineSegment>segments = concreteObserver.getSegments();
@@ -89,7 +89,7 @@ public class Worldline
                 // line). If so, intersect it with the viewport and draw the
                 // intersecting line segment, if any
 
-                else if (curveSegment instanceof gamma.value.Line line) {
+                else if (curveSegment instanceof org.freixas.gamma.value.Line line) {
                     LineSegment lineSegment = line.intersect(context.bounds);
                     if (lineSegment != null) {
                         Line.drawRaw(context, lineSegment, styles);
@@ -139,7 +139,7 @@ public class Worldline
                         // line). If so, intersect it with the viewport and draw the
                         // intersecting line segment, if any
 
-                        else if (curveSegment instanceof gamma.value.Line line) {
+                        else if (curveSegment instanceof org.freixas.gamma.value.Line line) {
                             LineSegment lineSegment = line.intersect(bounds);
                             if (lineSegment != null) {
                                Line.drawRaw(context, lineSegment, styles);

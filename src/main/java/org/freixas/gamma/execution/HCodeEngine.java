@@ -14,26 +14,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.execution;
+package org.freixas.gamma.execution;
 
-import gamma.GammaRuntimeException;
-import gamma.MainWindow;
-import gamma.ProgrammingException;
-import gamma.css.value.Stylesheet;
-import gamma.execution.hcode.FunctionExecutor;
-import gamma.execution.hcode.HCodeExecutor;
-import gamma.execution.hcode.HCode;
-import gamma.execution.hcode.ArgInfoHCode;
-import gamma.execution.hcode.GenericHCode;
-import gamma.execution.hcode.Label;
-import gamma.execution.hcode.SetStatement;
-import gamma.execution.lcode.Command;
-import gamma.math.Util;
-import gamma.value.ConcreteObserver;
-import gamma.value.Coordinate;
-import gamma.value.Displayable;
-import gamma.value.Frame;
-import gamma.value.WInitializer;
+import org.freixas.gamma.GammaRuntimeException;
+import org.freixas.gamma.MainWindow;
+import org.freixas.gamma.ProgrammingException;
+import org.freixas.gamma.css.value.Stylesheet;
+import org.freixas.gamma.execution.hcode.FunctionExecutor;
+import org.freixas.gamma.execution.hcode.HCodeExecutor;
+import org.freixas.gamma.execution.hcode.HCode;
+import org.freixas.gamma.execution.hcode.ArgInfoHCode;
+import org.freixas.gamma.execution.hcode.GenericHCode;
+import org.freixas.gamma.execution.hcode.Label;
+import org.freixas.gamma.execution.hcode.SetStatement;
+import org.freixas.gamma.execution.lcode.Command;
+import org.freixas.gamma.math.Util;
+import org.freixas.gamma.value.ConcreteObserver;
+import org.freixas.gamma.value.Coordinate;
+import org.freixas.gamma.value.Displayable;
+import org.freixas.gamma.value.Frame;
+import org.freixas.gamma.value.WInitializer;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;

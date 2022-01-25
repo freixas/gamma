@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.execution.hcode;
+package org.freixas.gamma.execution.hcode;
 
-import gamma.execution.ArgInfo;
-import gamma.execution.HCodeEngine;
+import org.freixas.gamma.execution.ArgInfo;
+import org.freixas.gamma.execution.HCodeEngine;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;

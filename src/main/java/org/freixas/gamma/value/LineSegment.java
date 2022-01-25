@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.value;
+package org.freixas.gamma.value;
 
-import gamma.ProgrammingException;
-import gamma.math.Util;
+import org.freixas.gamma.ProgrammingException;
+import org.freixas.gamma.math.Util;
 
 /**
  * This is a line segment between two points.

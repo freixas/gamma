@@ -14,12 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.drawing;
+package org.freixas.gamma.drawing;
 
-import gamma.ProgrammingException;
-import gamma.execution.LCodeEngine;
-import gamma.value.Bounds;
-import gamma.value.Coordinate;
+import org.freixas.gamma.ProgrammingException;
+import org.freixas.gamma.execution.LCodeEngine;
+import org.freixas.gamma.value.Bounds;
+import org.freixas.gamma.value.Coordinate;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;

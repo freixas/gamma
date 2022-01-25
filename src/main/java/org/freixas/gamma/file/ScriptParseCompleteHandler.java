@@ -14,11 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.file;
+package org.freixas.gamma.file;
 
-import gamma.MainWindow;
-import gamma.execution.*;
-import gamma.parser.Parser;
+import org.freixas.gamma.MainWindow;
+import org.freixas.gamma.execution.*;
+import org.freixas.gamma.parser.Parser;
 import java.io.File;
 import java.util.ArrayList;
 

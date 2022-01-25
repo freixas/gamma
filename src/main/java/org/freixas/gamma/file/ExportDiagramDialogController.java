@@ -15,10 +15,10 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package gamma.file;
+package org.freixas.gamma.file;
 
-import gamma.math.Util;
-import gamma.preferences.PreferencesManager;
+import org.freixas.gamma.math.Util;
+import org.freixas.gamma.preferences.PreferencesManager;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.function.UnaryOperator;

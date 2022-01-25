@@ -15,11 +15,11 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package gamma.css.value;
+package org.freixas.gamma.css.value;
 
-import gamma.css.parser.CSSParser;
-import gamma.execution.ExecutionException;
-import gamma.parser.ParseException;
+import org.freixas.gamma.css.parser.CSSParser;
+import org.freixas.gamma.execution.ExecutionException;
+import org.freixas.gamma.parser.ParseException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;

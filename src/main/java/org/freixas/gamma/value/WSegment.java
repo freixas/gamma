@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.value;
+package org.freixas.gamma.value;
 
-import gamma.math.Relativity;
+import org.freixas.gamma.math.Relativity;
 
 /**
  * This is a worldline segment definition structure. It is used to

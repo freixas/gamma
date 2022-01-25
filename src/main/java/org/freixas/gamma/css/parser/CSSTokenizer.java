@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.css.parser;
+package org.freixas.gamma.css.parser;
 
-import gamma.parser.ParseException;
-import gamma.parser.Token;
+import org.freixas.gamma.parser.ParseException;
+import org.freixas.gamma.parser.Token;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;

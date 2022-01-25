@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.execution.lcode;
+package org.freixas.gamma.execution.lcode;
 
-import gamma.css.value.StyleStruct;
-import gamma.drawing.Context;
+import org.freixas.gamma.css.value.StyleStruct;
+import org.freixas.gamma.drawing.Context;
 
 /**
  *
@@ -30,7 +30,7 @@ public class HypergridCommandExec extends CommandExec
     {
         HypergridStruct struct = (HypergridStruct)cmdStruct;
 
-        gamma.drawing.Hypergrid.draw(context, struct, styles);
+        org.freixas.gamma.drawing.Hypergrid.draw(context, struct, styles);
     }
 
 }

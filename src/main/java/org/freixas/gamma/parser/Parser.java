@@ -14,17 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.parser;
+package org.freixas.gamma.parser;
 
-import gamma.ProgrammingException;
-import gamma.css.value.StyleException;
-import gamma.css.value.Stylesheet;
-import gamma.execution.hcode.*;
-import gamma.value.Coordinate;
-import gamma.value.Frame;
-import gamma.value.Interval;
-import gamma.value.Line;
-import gamma.value.WorldlineSegment;
+import org.freixas.gamma.ProgrammingException;
+import org.freixas.gamma.css.value.StyleException;
+import org.freixas.gamma.css.value.Stylesheet;
+import org.freixas.gamma.execution.hcode.*;
+import org.freixas.gamma.value.Coordinate;
+import org.freixas.gamma.value.Frame;
+import org.freixas.gamma.value.Interval;
+import org.freixas.gamma.value.Line;
+import org.freixas.gamma.value.WorldlineSegment;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;

@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma;
+package org.freixas.gamma;
 
-import gamma.file.ExportDiagramDialog;
-import gamma.preferences.PreferencesDialog;
+import org.freixas.gamma.file.ExportDiagramDialog;
+import org.freixas.gamma.preferences.PreferencesDialog;
 import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;

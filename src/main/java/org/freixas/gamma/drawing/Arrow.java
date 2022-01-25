@@ -14,11 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.drawing;
+package org.freixas.gamma.drawing;
 
-import gamma.css.value.StyleStruct;
-import gamma.value.Bounds;
-import gamma.value.Coordinate;
+import org.freixas.gamma.css.value.StyleStruct;
+import org.freixas.gamma.value.Bounds;
+import org.freixas.gamma.value.Coordinate;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.StrokeLineJoin;
 import javafx.scene.transform.Affine;

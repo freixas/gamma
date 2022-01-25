@@ -14,14 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.execution;
+package org.freixas.gamma.execution;
 
-import gamma.MainWindow;
-import gamma.ProgrammingException;
-import gamma.css.value.StyleStruct;
-import gamma.drawing.Context;
-import gamma.execution.lcode.*;
-import gamma.value.Frame;
+import org.freixas.gamma.MainWindow;
+import org.freixas.gamma.ProgrammingException;
+import org.freixas.gamma.css.value.StyleStruct;
+import org.freixas.gamma.drawing.Context;
+import org.freixas.gamma.execution.lcode.*;
+import org.freixas.gamma.value.Frame;
 import java.util.ArrayList;
 import java.util.ListIterator;
 import javafx.beans.value.ChangeListener;

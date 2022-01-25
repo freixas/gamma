@@ -14,15 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.execution;
+package org.freixas.gamma.execution;
 
-import gamma.MainWindow;
-import gamma.css.value.Stylesheet;
-import gamma.execution.hcode.SetStatement;
-import gamma.execution.lcode.AnimationStruct;
-import gamma.math.Util;
-import gamma.value.AnimationVariable;
-import gamma.value.DynamicVariable;
+import org.freixas.gamma.MainWindow;
+import org.freixas.gamma.css.value.Stylesheet;
+import org.freixas.gamma.execution.hcode.SetStatement;
+import org.freixas.gamma.execution.lcode.AnimationStruct;
+import org.freixas.gamma.math.Util;
+import org.freixas.gamma.value.AnimationVariable;
+import org.freixas.gamma.value.DynamicVariable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
@@ -206,8 +206,8 @@ public class AnimationEngine
         buttonAnimStepForward   = (Button)window.getScene().lookup("#animStepForward");
         buttonAnimPlayPause     = (Button)window.getScene().lookup("#animPlay");
 
-        playImage = new ImageView(new Image(window.getClass().getResourceAsStream("resources/player_play.png")));
-        stopImage = new ImageView(new Image(window.getClass().getResourceAsStream("resources/player_stop.png")));
+        playImage = new ImageView(new Image(window.getClass().getResourceAsStream("/player_play.png")));
+        stopImage = new ImageView(new Image(window.getClass().getResourceAsStream("/player_stop.png")));
 
         // Enable the button area
 

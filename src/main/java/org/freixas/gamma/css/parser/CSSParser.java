@@ -14,17 +14,17 @@
  * You should have received first copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.css.parser;
+package org.freixas.gamma.css.parser;
 
-import gamma.css.value.Rule;
-import gamma.css.value.Selector;
-import gamma.css.value.StyleException;
-import gamma.css.value.StyleProperties;
-import gamma.css.value.StyleProperty;
-import gamma.css.value.StylePropertyDefinition;
-import gamma.css.value.Stylesheet;
-import gamma.parser.ParseException;
-import gamma.parser.Token;
+import org.freixas.gamma.css.value.Rule;
+import org.freixas.gamma.css.value.Selector;
+import org.freixas.gamma.css.value.StyleException;
+import org.freixas.gamma.css.value.StyleProperties;
+import org.freixas.gamma.css.value.StyleProperty;
+import org.freixas.gamma.css.value.StylePropertyDefinition;
+import org.freixas.gamma.css.value.Stylesheet;
+import org.freixas.gamma.parser.ParseException;
+import org.freixas.gamma.parser.Token;
 import java.io.File;
 import java.util.ArrayList;
 import javafx.scene.paint.Color;

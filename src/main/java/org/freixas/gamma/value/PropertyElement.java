@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.value;
+package org.freixas.gamma.value;
 
 /**
  * This is used to indicate that a particular object can be added to

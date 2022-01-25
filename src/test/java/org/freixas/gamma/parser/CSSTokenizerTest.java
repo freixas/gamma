@@ -15,9 +15,9 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package gamma.parser;
+package org.freixas.gamma.parser;
 
-import gamma.css.parser.CSSTokenizer;
+import org.freixas.gamma.css.parser.CSSTokenizer;
 import java.io.File;
 import java.util.ArrayList;
 import org.junit.After;

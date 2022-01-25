@@ -14,12 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.value;
+package org.freixas.gamma.value;
 
-import gamma.ProgrammingException;
-import gamma.execution.DiagramEngine;
-import gamma.execution.ExecutionException;
-import gamma.math.Util;
+import org.freixas.gamma.ProgrammingException;
+import org.freixas.gamma.execution.DiagramEngine;
+import org.freixas.gamma.execution.ExecutionException;
+import org.freixas.gamma.math.Util;
 
 /**
  *

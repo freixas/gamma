@@ -15,12 +15,12 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package gamma.file;
+package org.freixas.gamma.file;
 
-import gamma.Gamma;
-import gamma.MainWindow;
-import gamma.math.Util;
-import gamma.preferences.PreferencesManager;
+import org.freixas.gamma.Gamma;
+import org.freixas.gamma.MainWindow;
+import org.freixas.gamma.math.Util;
+import org.freixas.gamma.preferences.PreferencesManager;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -98,7 +98,7 @@ public class ExportDiagramDialog extends Dialog<ButtonType>
         // Load the view (FXML file) and controller. Get a reference to the controller.
 
         FXMLLoader loader = new FXMLLoader();
-        loader.setLocation(getClass().getResource("/gamma/resources/ExportDiagramDialog.fxml"));
+        loader.setLocation(getClass().getResource("/ExportDiagramDialog.fxml"));
         dialogPane = loader.load();
         controller = (ExportDiagramDialogController)loader.getController();
         setDialogPane(dialogPane);

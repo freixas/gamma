@@ -12,7 +12,7 @@
 <?import javafx.scene.web.HTMLEditor?>
 
 
-<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gamma.GreetingsDialogController">
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.freixas.gamma.GreetingsDialogController">
    <children>
       <Label maxWidth="1.7976931348623157E308" minWidth="1.0" text="Welcome!" VBox.vgrow="NEVER">
          <font>

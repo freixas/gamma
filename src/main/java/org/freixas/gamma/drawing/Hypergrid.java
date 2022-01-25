@@ -14,16 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.drawing;
+package org.freixas.gamma.drawing;
 
-import gamma.execution.lcode.HypergridStruct;
-import gamma.css.value.StyleStruct;
-import gamma.math.OffsetAcceleration;
-import gamma.math.Util;
-import gamma.value.Bounds;
-import gamma.value.ConcreteLine;
-import gamma.value.Coordinate;
-import gamma.value.HyperbolicSegment;
+import org.freixas.gamma.execution.lcode.HypergridStruct;
+import org.freixas.gamma.css.value.StyleStruct;
+import org.freixas.gamma.math.OffsetAcceleration;
+import org.freixas.gamma.math.Util;
+import org.freixas.gamma.value.Bounds;
+import org.freixas.gamma.value.ConcreteLine;
+import org.freixas.gamma.value.Coordinate;
+import org.freixas.gamma.value.HyperbolicSegment;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.transform.Affine;
 

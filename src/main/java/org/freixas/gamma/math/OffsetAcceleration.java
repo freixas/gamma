@@ -14,13 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.math;
+package org.freixas.gamma.math;
 
-import gamma.value.ConcreteLine;
-import gamma.value.Coordinate;
-import gamma.value.ExecutionImmutable;
-import gamma.value.Line;
-import gamma.value.WorldlineSegment;
+import org.freixas.gamma.value.ConcreteLine;
+import org.freixas.gamma.value.Coordinate;
+import org.freixas.gamma.value.ExecutionImmutable;
+import org.freixas.gamma.value.Line;
+import org.freixas.gamma.value.WorldlineSegment;
 
 
 /**

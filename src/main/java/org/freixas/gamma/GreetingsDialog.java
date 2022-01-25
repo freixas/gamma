@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma;
+package org.freixas.gamma;
 
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -44,7 +44,7 @@ public class GreetingsDialog extends Stage
         // Load the view (FXML file) and controller. Get a reference to the controller.
 
         FXMLLoader loader = new FXMLLoader();
-        loader.setLocation(getClass().getResource("/gamma/resources/GreetingsDialog.fxml"));
+        loader.setLocation(getClass().getResource("/GreetingsDialog.fxml"));
         root = loader.load();
         controller = (GreetingsDialogController)loader.getController();
         setScene(new Scene(root));

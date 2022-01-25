@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.math;
+package org.freixas.gamma.math;
 
 import org.junit.After;
 import org.junit.AfterClass;

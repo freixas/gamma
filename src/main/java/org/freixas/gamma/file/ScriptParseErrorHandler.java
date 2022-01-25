@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.file;
+package org.freixas.gamma.file;
 
-import gamma.MainWindow;
+import org.freixas.gamma.MainWindow;
 import java.util.List;
 import java.util.ListIterator;
 import javafx.scene.control.Alert.AlertType;

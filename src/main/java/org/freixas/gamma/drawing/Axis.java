@@ -14,16 +14,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.drawing;
+package org.freixas.gamma.drawing;
 
-import gamma.css.value.StyleProperties;
-import gamma.execution.lcode.AxesStruct;
-import gamma.execution.lcode.LabelStruct;
-import gamma.css.value.StyleStruct;
-import gamma.math.Util;
-import gamma.value.Bounds;
-import gamma.value.ConcreteLine;
-import gamma.value.Coordinate;
+import org.freixas.gamma.css.value.StyleProperties;
+import org.freixas.gamma.execution.lcode.AxesStruct;
+import org.freixas.gamma.execution.lcode.LabelStruct;
+import org.freixas.gamma.css.value.StyleStruct;
+import org.freixas.gamma.math.Util;
+import org.freixas.gamma.value.Bounds;
+import org.freixas.gamma.value.ConcreteLine;
+import org.freixas.gamma.value.Coordinate;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
@@ -44,7 +44,7 @@ public class Axis
                             StyleStruct styles)
     {
         GraphicsContext gc = context.gc;
-        boolean isXAxis = axisStruct.axisType == gamma.value.Line.AxisType.X;
+        boolean isXAxis = axisStruct.axisType == org.freixas.gamma.value.Line.AxisType.X;
 
         // Save the current graphics context
 
@@ -71,7 +71,7 @@ public class Axis
         // Get the values we need
 
         double v = struct.frame.getV();
-        gamma.value.Line line = new ConcreteLine(axisStruct.axisType, struct.frame);
+        org.freixas.gamma.value.Line line = new ConcreteLine(axisStruct.axisType, struct.frame);
 
         // *********************************************
         // *** Find out the current invScale.           ***
@@ -329,7 +329,7 @@ public class Axis
         format = getTickFormat(firstTick, maxDistance, tickSpacing);
 
         if (v >= 0.0) {
-            if (axisStruct.axisType == gamma.value.Line.AxisType.X) {
+            if (axisStruct.axisType == org.freixas.gamma.value.Line.AxisType.X) {
                 if (angle <= 22.5) {
                     anchorPlus = StyleProperties.TextAnchor.TC;      // Horz to slightly up CCW
                     anchorMinus = StyleProperties.TextAnchor.TC;
@@ -351,7 +351,7 @@ public class Axis
             }
         }
         else /* v < 0 */ {
-            if (axisStruct.axisType == gamma.value.Line.AxisType.X) {
+            if (axisStruct.axisType == org.freixas.gamma.value.Line.AxisType.X) {
                 if (angle >= -22.5) {
                     anchorPlus = StyleProperties.TextAnchor.TC;      // Horz to slightly down CW
                     anchorMinus = StyleProperties.TextAnchor.TC;
@@ -387,7 +387,7 @@ public class Axis
             if (tickCount != 0 || !skipZero) {
                 if (tickCount % printEvery == 0) {
                     double tickValue = (x - origin.x) / tickScale;
-                    if (v < 0 && axisStruct.axisType == gamma.value.Line.AxisType.T) tickValue = -tickValue;
+                    if (v < 0 && axisStruct.axisType == org.freixas.gamma.value.Line.AxisType.T) tickValue = -tickValue;
                     Point2D pos1 = revRotation.transform(x, origin.t);
 
                     labelStruct.location = new Coordinate(pos1.getX(), pos1.getY());

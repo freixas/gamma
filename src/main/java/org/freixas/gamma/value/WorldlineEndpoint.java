@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.value;
+package org.freixas.gamma.value;
 
-import gamma.math.OffsetAcceleration;
+import org.freixas.gamma.math.OffsetAcceleration;
 
 /**
  * A structure holding the x, v, t, tau, and d values for a worldline segment

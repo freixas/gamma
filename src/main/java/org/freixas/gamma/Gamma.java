@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma;
+package org.freixas.gamma;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -24,15 +24,15 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
-import gamma.cli.CommandLine;
-import gamma.cli.CommandLineParser;
-import gamma.cli.DefaultParser;
-import gamma.cli.HelpFormatter;
-import gamma.cli.Options;
-import gamma.cli.ParseException;
-import gamma.css.value.StyleException;
-import gamma.css.value.Stylesheet;
-import gamma.preferences.PreferencesManager;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.freixas.gamma.css.value.StyleException;
+import org.freixas.gamma.css.value.Stylesheet;
+import org.freixas.gamma.preferences.PreferencesManager;
 import java.io.IOException;
 import javax.swing.JFileChooser;
 
@@ -144,7 +144,7 @@ public class Gamma extends Application
                 try {
                     Stylesheet.USER_STYLESHEET = Stylesheet.createStylesheet(cssFile);
                 }
-                catch (IOException | gamma.parser.ParseException | StyleException e)
+                catch (IOException | org.freixas.gamma.parser.ParseException | StyleException e)
                 {
                     System.err.println(e.getLocalizedMessage());
                 }

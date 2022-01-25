@@ -14,12 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.value;
+package org.freixas.gamma.value;
 
-import gamma.execution.ExecutionException;
-import gamma.execution.HCodeEngine;
-import gamma.math.Relativity;
-import gamma.math.Util;
+import org.freixas.gamma.execution.ExecutionException;
+import org.freixas.gamma.execution.HCodeEngine;
+import org.freixas.gamma.math.Relativity;
+import org.freixas.gamma.math.Util;
 import javafx.geometry.Point2D;
 
 /**

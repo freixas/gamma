@@ -15,7 +15,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package gamma.css.value;
+package org.freixas.gamma.css.value;
 
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;

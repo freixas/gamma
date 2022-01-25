@@ -15,9 +15,9 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package gamma.preferences;
+package org.freixas.gamma.preferences;
 
-import gamma.MainWindow;
+import org.freixas.gamma.MainWindow;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
@@ -47,7 +47,7 @@ public class PreferencesDialog extends Dialog<ButtonType>
         // Load the view (FXML file) and controller. Get a reference to the controller.
 
         FXMLLoader loader = new FXMLLoader();
-        loader.setLocation(getClass().getResource("/gamma/resources/PreferencesDialog.fxml"));
+        loader.setLocation(getClass().getResource("/PreferencesDialog.fxml"));
         dialogPane = loader.load();
         controller = (PreferencesDialogController)loader.getController();
         setDialogPane(dialogPane);

@@ -14,7 +14,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-<DialogPane fx:id="dialogPane" headerText="exportImage" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="314.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gamma.file.ExportImageDialogController">
+<DialogPane fx:id="dialogPane" headerText="exportImage" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="314.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.freixas.gamma.file.ExportImageDialogController">
     <header>
       <AnchorPane maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0">
          <children>

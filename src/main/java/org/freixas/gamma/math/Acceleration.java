@@ -14,11 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.math;
+package org.freixas.gamma.math;
 
-import gamma.value.Coordinate;
-import gamma.value.Line;
-import gamma.value.WorldlineSegment;
+import org.freixas.gamma.value.Coordinate;
+import org.freixas.gamma.value.Line;
+import org.freixas.gamma.value.WorldlineSegment;
 
 /**
  * This is the standard acceleration class. It provides information about an

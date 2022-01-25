@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.execution.lcode;
+package org.freixas.gamma.execution.lcode;
 
-import gamma.execution.HCodeEngine;
-import gamma.value.Frame;
+import org.freixas.gamma.execution.HCodeEngine;
+import org.freixas.gamma.value.Frame;
 
 /**
  *

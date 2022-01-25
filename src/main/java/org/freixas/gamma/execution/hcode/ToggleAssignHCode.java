@@ -14,14 +14,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.execution.hcode;
+package org.freixas.gamma.execution.hcode;
 
-import gamma.execution.ArgInfo;
-import gamma.execution.ExecutionException;
-import gamma.execution.HCodeEngine;
-import gamma.value.Address;
-import gamma.value.ToggleVariable;
-import gamma.value.SymbolTableAddress;
+import org.freixas.gamma.execution.ArgInfo;
+import org.freixas.gamma.execution.ExecutionException;
+import org.freixas.gamma.execution.HCodeEngine;
+import org.freixas.gamma.value.Address;
+import org.freixas.gamma.value.ToggleVariable;
+import org.freixas.gamma.value.SymbolTableAddress;
 import java.util.ArrayList;
 import java.util.List;
 

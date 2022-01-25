@@ -14,19 +14,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.execution.hcode;
+package org.freixas.gamma.execution.hcode;
 
-import gamma.execution.ExecutionException;
-import gamma.math.Relativity;
-import gamma.math.Util;
-import gamma.value.BoundedLine;
-import gamma.value.Bounds;
-import gamma.value.ConcreteLine;
-import gamma.value.ConcreteObserver;
-import gamma.value.Interval;
-import gamma.value.IntervalObserver;
-import gamma.value.Line;
-import gamma.value.Observer;
+import org.freixas.gamma.execution.ExecutionException;
+import org.freixas.gamma.math.Relativity;
+import org.freixas.gamma.math.Util;
+import org.freixas.gamma.value.BoundedLine;
+import org.freixas.gamma.value.Bounds;
+import org.freixas.gamma.value.ConcreteLine;
+import org.freixas.gamma.value.ConcreteObserver;
+import org.freixas.gamma.value.Interval;
+import org.freixas.gamma.value.IntervalObserver;
+import org.freixas.gamma.value.Line;
+import org.freixas.gamma.value.Observer;
 import java.util.HashMap;
 
 /**

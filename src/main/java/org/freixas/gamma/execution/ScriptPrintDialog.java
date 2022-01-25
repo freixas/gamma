@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.execution;
+package org.freixas.gamma.execution;
 
-import gamma.MainWindow;
+import org.freixas.gamma.MainWindow;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.VBox;
@@ -45,7 +45,7 @@ public class ScriptPrintDialog extends Stage
         // Load the view (FXML file) and controller. Get a reference to the controller.
 
         FXMLLoader loader = new FXMLLoader();
-        loader.setLocation(getClass().getResource("/gamma/resources/ScriptPrintDialog.fxml"));
+        loader.setLocation(getClass().getResource("/ScriptPrintDialog.fxml"));
         root = loader.load();
         controller = (ScriptPrintDialogController)loader.getController();
         setScene(new Scene(root));

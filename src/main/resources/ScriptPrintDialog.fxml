@@ -11,7 +11,7 @@
 <?import javafx.scene.text.Font?>
 
 
-<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gamma.execution.ScriptPrintDialogController">
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.freixas.gamma.execution.ScriptPrintDialogController">
    <children>
       <Label maxWidth="1.7976931348623157E308" minWidth="1.0" text="Script Printing Output" VBox.vgrow="NEVER">
          <font>

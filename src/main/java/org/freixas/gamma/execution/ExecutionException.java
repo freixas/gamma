@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.execution;
+package org.freixas.gamma.execution;
 
-import gamma.GammaRuntimeException;
-import gamma.parser.ParseException;
+import org.freixas.gamma.GammaRuntimeException;
+import org.freixas.gamma.parser.ParseException;
 
 /**
  *

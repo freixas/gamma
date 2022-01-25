@@ -14,11 +14,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.execution;
+package org.freixas.gamma.execution;
 
-import gamma.MainWindow;
-import gamma.value.DisplayVariable;
-import gamma.value.DynamicVariable;
+import org.freixas.gamma.MainWindow;
+import org.freixas.gamma.value.DisplayVariable;
+import org.freixas.gamma.value.DynamicVariable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;

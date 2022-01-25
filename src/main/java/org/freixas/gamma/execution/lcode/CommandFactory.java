@@ -14,12 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.execution.lcode;
+package org.freixas.gamma.execution.lcode;
 
-import gamma.ProgrammingException;
-import gamma.css.value.StyleStruct;
-import gamma.execution.HCodeEngine;
-import gamma.value.PropertyList;
+import org.freixas.gamma.ProgrammingException;
+import org.freixas.gamma.css.value.StyleStruct;
+import org.freixas.gamma.execution.HCodeEngine;
+import org.freixas.gamma.value.PropertyList;
 import java.util.HashMap;
 
 /**

@@ -14,10 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma;
+package org.freixas.gamma;
 
-import gamma.execution.ScriptPrintDialog;
-import gamma.execution.DiagramEngine;
+import org.freixas.gamma.execution.ScriptPrintDialog;
+import org.freixas.gamma.execution.DiagramEngine;
 import java.io.File;
 import java.util.ListIterator;
 import javafx.collections.ObservableList;
@@ -30,12 +30,12 @@ import javafx.scene.control.MenuItem;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-import gamma.file.FileWatcher;
-import gamma.preferences.PreferencesManager;
-import gamma.value.ChoiceVariable;
-import gamma.value.ToggleVariable;
-import gamma.value.DisplayVariable;
-import gamma.value.RangeVariable;
+import org.freixas.gamma.file.FileWatcher;
+import org.freixas.gamma.preferences.PreferencesManager;
+import org.freixas.gamma.value.ChoiceVariable;
+import org.freixas.gamma.value.ToggleVariable;
+import org.freixas.gamma.value.DisplayVariable;
+import org.freixas.gamma.value.RangeVariable;
 import java.io.IOException;
 import java.util.ArrayList;
 import javafx.collections.FXCollections;
@@ -120,7 +120,7 @@ public final class MainWindow extends Stage
         // Load the view (FXML file) and controller. Get a reference to the controller.
 
         FXMLLoader loader = new FXMLLoader();
-        loader.setLocation(getClass().getResource("resources/MainWindow.fxml"));
+        loader.setLocation(getClass().getResource("/MainWindow.fxml"));
         Parent root = loader.load();
         controller = (MainWindowController)loader.getController();
         controller.setMainWindow(this);
@@ -153,11 +153,11 @@ public final class MainWindow extends Stage
         // Add icons
 
         getIcons().addAll(
-            new Image(getClass().getResourceAsStream("/gamma/resources/gamma-icon-16x16.png")),
-            new Image(getClass().getResourceAsStream("/gamma/resources/gamma-icon-24x24.png")),
-            new Image(getClass().getResourceAsStream("/gamma/resources/gamma-icon-32x32.png")),
-            new Image(getClass().getResourceAsStream("/gamma/resources/gamma-icon-48x48.png")),
-            new Image(getClass().getResourceAsStream("/gamma/resources/gamma-icon-256x256.png"))
+            new Image(getClass().getResourceAsStream("/gamma-icon-16x16.png")),
+            new Image(getClass().getResourceAsStream("/gamma-icon-24x24.png")),
+            new Image(getClass().getResourceAsStream("/gamma-icon-32x32.png")),
+            new Image(getClass().getResourceAsStream("/gamma-icon-48x48.png")),
+            new Image(getClass().getResourceAsStream("/gamma-icon-256x256.png"))
         );
 
         show();

@@ -14,9 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.execution;
+package org.freixas.gamma.execution;
 
-import gamma.ProgrammingException;
+import org.freixas.gamma.ProgrammingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;

@@ -14,13 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.drawing;
+package org.freixas.gamma.drawing;
 
-import gamma.css.value.StyleProperties;
-import gamma.execution.lcode.PathStruct;
-import gamma.css.value.StyleStruct;
-import gamma.math.Util;
-import gamma.value.Coordinate;
+import org.freixas.gamma.css.value.StyleProperties;
+import org.freixas.gamma.execution.lcode.PathStruct;
+import org.freixas.gamma.css.value.StyleStruct;
+import org.freixas.gamma.math.Util;
+import org.freixas.gamma.value.Coordinate;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.FillRule;
 
@@ -44,7 +44,7 @@ public class Path
 
         gc.save();
 
-        gamma.value.Path path = struct.path;
+        org.freixas.gamma.value.Path path = struct.path;
 
         gc.beginPath();
         for (int i = 0; i < path.size(); i++) {

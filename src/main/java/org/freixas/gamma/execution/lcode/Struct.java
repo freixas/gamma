@@ -14,19 +14,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.execution.lcode;
+package org.freixas.gamma.execution.lcode;
 
-import gamma.GammaRuntimeException;
-import gamma.ProgrammingException;
-import gamma.math.Util;
-import gamma.value.Frame;
-import gamma.value.Observer;
-import gamma.value.Property;
-import gamma.value.PropertyList;
-import gamma.execution.ExecutionException;
-import gamma.execution.HCodeEngine;
-import gamma.value.Displayable;
-import gamma.value.ExecutionMutable;
+import org.freixas.gamma.GammaRuntimeException;
+import org.freixas.gamma.ProgrammingException;
+import org.freixas.gamma.math.Util;
+import org.freixas.gamma.value.Frame;
+import org.freixas.gamma.value.Observer;
+import org.freixas.gamma.value.Property;
+import org.freixas.gamma.value.PropertyList;
+import org.freixas.gamma.execution.ExecutionException;
+import org.freixas.gamma.execution.HCodeEngine;
+import org.freixas.gamma.value.Displayable;
+import org.freixas.gamma.value.ExecutionMutable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -199,7 +199,7 @@ public abstract class Struct
 
             String capCmdName = cmdName.substring(0, 1).toUpperCase() + cmdName.substring(1);
             String cmdStructName = capCmdName + "Struct";
-            Class<?> cmdStructClass = Class.forName("gamma.execution.lcode." + cmdStructName);
+            Class<?> cmdStructClass = Class.forName("org.freixas.gamma.execution.lcode." + cmdStructName);
 
             // Call the constructor to create a new instance
 

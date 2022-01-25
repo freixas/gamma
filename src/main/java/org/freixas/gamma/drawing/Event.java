@@ -14,15 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package gamma.drawing;
+package org.freixas.gamma.drawing;
 
-import gamma.css.value.StyleProperties;
-import gamma.execution.lcode.EventStruct;
-import gamma.execution.lcode.LabelStruct;
-import gamma.css.value.StyleStruct;
-import gamma.math.Util;
-import gamma.value.Coordinate;
-import gamma.value.HyperbolicSegment;
+import org.freixas.gamma.css.value.StyleProperties;
+import org.freixas.gamma.execution.lcode.EventStruct;
+import org.freixas.gamma.execution.lcode.LabelStruct;
+import org.freixas.gamma.css.value.StyleStruct;
+import org.freixas.gamma.math.Util;
+import org.freixas.gamma.value.Coordinate;
+import org.freixas.gamma.value.HyperbolicSegment;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.FillRule;
 
