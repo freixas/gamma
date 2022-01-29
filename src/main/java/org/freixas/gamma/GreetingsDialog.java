@@ -27,9 +27,6 @@ import javafx.stage.Stage;
  */
 public class GreetingsDialog extends Stage
 {
-    private final MainWindow window;
-    private final VBox root;
-    private final GreetingsDialogController controller;
 
     // **********************************************************************
     // *
@@ -39,20 +36,18 @@ public class GreetingsDialog extends Stage
 
     public GreetingsDialog(MainWindow window) throws Exception
     {
-        this.window = window;
 
         // Load the view (FXML file) and controller. Get a reference to the controller.
 
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(getClass().getResource("/GreetingsDialog.fxml"));
-        root = loader.load();
-        controller = (GreetingsDialogController)loader.getController();
+        VBox root = loader.load();
         setScene(new Scene(root));
 
         initOwner(window);
 
         setResizable(true);
-        setTitle("Script Print");
+        setTitle("Welcome!");
     }
 
 }

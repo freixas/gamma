@@ -16,6 +16,7 @@
  */
 package org.freixas.gamma.css.parser;
 
+import org.freixas.gamma.parser.TokenContext;
 import org.freixas.gamma.css.value.Rule;
 import org.freixas.gamma.css.value.Selector;
 import org.freixas.gamma.css.value.StyleException;
@@ -40,7 +41,7 @@ public class CSSParser
     private final String css;
     private ArrayList<Token<?>> tokens;
 
-    private final Token<?> dummyToken = new Token<>(Token.Type.DELIMITER, '~', null, 0, 0);
+    private final Token<?> dummyToken = new Token<>(Token.Type.DELIMITER, '~', new TokenContext(null, "", 0, 0, 0, 0));
 
     private int tokenPtr;
     private Token<?> curToken;
@@ -387,11 +388,7 @@ public class CSSParser
 
     private void throwParseException(String message) throws ParseException
     {
-        throw new ParseException(
-                curToken.getFile(),
-                curToken.getLineNumber(),
-                curToken.getCharNumber(),
-                message);
+        throw new ParseException(curToken, message);
     }
 
 }

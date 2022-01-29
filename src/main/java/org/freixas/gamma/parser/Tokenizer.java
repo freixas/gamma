@@ -16,6 +16,7 @@
  */
 package org.freixas.gamma.parser;
 
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -29,26 +30,27 @@ import java.util.ListIterator;
  *
  * @author Antonio Freixas
  */
-public class Tokenizer
+abstract public class Tokenizer
 {
-    static private final char EOF = '\1';
-    private ArrayList<Token<?>> list = null;
-    private final File file;
-    private final String script;
+    static protected final char EOF = '\1';
+    protected ArrayList<Token<?>> list = null;
+    protected final File file;
+    protected final String code;
 
-    private int cPtr;
-    char c;
-    char cNext;
+    protected int cPtr;
+    protected char c;
+    protected char cNext;
 
-    private int lineNumber;
-    private int lineNumberStart;
-    private int charNumber;
+    protected int lineNumber;
+    protected int lineNumberStart;
+    protected int charNumber;
+    protected int charPos;
 
-    private final String operators = "+-*/^.<>!&|%=";
-    private final String delimiters = ";,:=[](){}";
-    private final String hexDigits = "01234567890ABCDEFabcdef";
+    protected final String operators;
+    protected final String delimiters;
+    private static final String HEX_DIGITS = "01234567890ABCDEFabcdef";
 
-    public Tokenizer(File file, String script)
+    public Tokenizer(File file, String code, String operators, String delimiters)
     {
         this.file = file;
 
@@ -56,7 +58,10 @@ public class Tokenizer
         // \R also catches Form Feed and some other odd line separators
         // Add a null to the end to make it easier to know when we're done.
 
-        this.script = script.replaceAll("\\R", "\n") + EOF;
+        this.code = code.replaceAll("\\R", "\n") + EOF;
+
+        this.operators = operators;
+        this.delimiters = delimiters;
     }
 
     /**
@@ -65,156 +70,96 @@ public class Tokenizer
      * @return A list of Tokens.
      * @throws ParseException When an invalid token is found.
      */
-    public ArrayList<Token<?>> tokenize() throws ParseException
+    abstract public ArrayList<Token<?>> tokenize() throws ParseException;
+
+    protected final void initialize()
     {
         lineNumber = 1;
         lineNumberStart = 0;
-        charNumber = 1;
+        charNumber = 0;
+        charPos = 0;
 
         cPtr = 0;
         list = new ArrayList<>();
+    }
 
-        while ((c = script.charAt(cPtr)) != EOF) {
+    protected TokenContext captureContext()
+    {
+        return new TokenContext(file, code, lineNumber, charNumber, charPos, charPos);
+    }
 
-            cNext = script.charAt(cPtr + 1);
-            charNumber = cPtr - lineNumberStart + 1;
-
-            // Strip comments
-
-            if (c == '/' && cNext == '/') {
-                cPtr += 2;
-                stripComment();
-                if (c == EOF) break;
-                cNext = script.charAt(cPtr + 1);
-                charNumber = cPtr - lineNumberStart + 1;
-            }
-
-            if (c == '/' && cNext == '*') {
-                cPtr += 2;
-                stripComment();
-                if (c == EOF) break;
-                c = script.charAt(cPtr);
-                cNext = script.charAt(cPtr + 1);
-                charNumber = cPtr - lineNumberStart + 1;
-            }
-
-            // Count newlines and discard them as whitespace
-
-            if (c == '\n') {
-                lineNumber++;
-                cPtr++;
-                lineNumberStart = cPtr;
-                continue;
-            }
-
-            // Handle operators
-
-            if (operators.indexOf(c) != -1) {
-                String operator = getOperator();
-                if (operator != null) {
-                    list.add(new Token<>(Token.Type.OPERATOR, operator, file, lineNumber, charNumber));
-                    continue;
-                }
-            }
-
-            // Handle delimiters
-
-            if (delimiters.indexOf(c) != -1) {
-                list.add(new Token<>(Token.Type.DELIMITER, c, file, lineNumber, charNumber));
-                cPtr++;
-            }
-
-            // Handle strings
-
-            else if (c == '\'' || c == '"') {
-                list.add(new Token<>(Token.Type.STRING, getString(), file, lineNumber, charNumber));
-            }
-
-            // Handle names
-
-            else if (c == '_' || Character.isLetter(c)) {
-                list.add(new Token<>(Token.Type.NAME, getName(), file, lineNumber, charNumber));
-            }
-
-            // Handle numbers
-
-            else if ((c == '.' && Character.isDigit(cNext))  ||
-                     Character.isDigit(c)) {
-                list.add(new Token<>(Token.Type.NUMBER, getNumber(), file, lineNumber, charNumber));
-            }
-
-            // Skip whitespace
-
-            else if (Character.isWhitespace(c)) {
-                cPtr++;
-            }
-
-            // Invalid character
-
-            else {
-                throw new ParseException(file, lineNumber, cPtr - lineNumberStart + 1, "Invalid character : '" + c + "'");
-            }
+    protected final void next()
+    {
+        if (cPtr > 0 && c == '\n') {
+            lineNumber++;
+            lineNumberStart = cPtr;
+            charNumber = 0;
         }
-
-        list.add(new Token<>(Token.Type.EOF, EOF, file, lineNumber, cPtr - lineNumberStart + 1));
-
-        return list;
+        c = code.charAt(cPtr);
+        charNumber++;
+        charPos = cPtr;
+        cNext = c == EOF ? EOF : code.charAt(cPtr + 1);
+        if (c != EOF) cPtr++;
     }
 
     /**
      * Strip a comment.
      * <p>
-     * When called, cPtr should point to the first character after a "//". On
-     * return, cPtr points to a newline or past the end of the script.
+     * When called, the current character should be the character after a "//". On
+     * return, the next character will be either the first character after a newline or an EOF.
      */
-    private void stripComment()
+    protected final void stripComment()
     {
-        while ((c = script.charAt(cPtr)) != EOF) {
-            if (c == '\n') return;
-            cPtr++;
+        while (c != EOF) {
+            if (c == '\n') {
+                next();
+                return;
+            }
+            next();
         }
-
     }
 
     /**
      * Strip an alternate comment.
      * <p>
-     * When called, cPtr should point to the first character after a "/*". On
-     * return, cPtr points to the first character just past the comment.
+     * When called, the current character should be the character after a "/*". On
+     * return, the next character will be the first character just past the comment.
      */
-    private void stripAlternateComment()
+    protected final void stripAlternateComment()
     {
-        while (((c = script.charAt(cPtr)) != '*' || (cNext = script.charAt(cPtr + 1)) != '/') && c != EOF) {
-            cPtr++;
+        while ((c != '*' || cNext != '/') && c != EOF) {
+            next();
         }
-        if (c != EOF) cPtr += 2;
+        if (c != EOF) {
+             next();
+             next();
+        }
     }
 
     /**
      * Get a string token.
      * <p>
-     * When called, cPtr should point to the string delimiter. On return, cPtr
-     * will point to the first character past the delimiter.
+     * When called, the current character should be the string delimiter. On return, the next character
+     * will be the first character after the delimiter.
      *
      * @return A string.
      */
-    private String getString()
+    protected final String getString()
     {
         StringBuilder name = new StringBuilder();
 
         // Determine if the delimiter is a single-quote or a double-quote
 
-        char delimiter = script.charAt(cPtr);
-        cPtr++;
+        char delimiter = c;
+        next();
 
-        while ((c = script.charAt(cPtr)) != delimiter) {
+        while (c != delimiter) {
 
             // Check for quoting
 
             switch (c) {
                 case '\\' -> {
-                    cPtr++;
-                    c = script.charAt(cPtr);
+                    next();
 
                     switch (c) {
 
@@ -228,14 +173,14 @@ public class Tokenizer
 
                         case 'n' -> {
                             name.append('\n');
-                            cPtr++;
+                            next();
                         }
 
                         // Quote everything else literally
 
                         default -> {
                             name.append(c);
-                            cPtr++;
+                            next();
                         }
                     }
                 }
@@ -250,106 +195,66 @@ public class Tokenizer
 
                 default -> {
                     name.append(c);
-                    cPtr++;
+                    next();
                 }
             }
         }
 
-        cPtr++;
+        next();
         return name.toString();
     }
 
-    /**
-     * Get a name token.
-     * <p>
-     * When called, cPtr should point to the first character of the name, which
-     * will be a letter of an underscore. On return, cPtr will point to the
-     * first character after the name.
-     *
-     * @return A string.
-     */
-    private String getName()
-    {
-        StringBuilder name = new StringBuilder();
-
-        while (Character.isLetterOrDigit(c = script.charAt(cPtr)) || c == '_') {
-            name.append(c);
-            cPtr++;
-        }
-        return name.toString();
-    }
-
-    /**
+     /**
      * Get a number token.
      * <p>
-     * When called, cPtr should point to the first character of the number. On
-     * return, cPtr points to the first non-digit.
+     * When called, the current character should be the first character of the number. On
+     * return, the current character will be the first non-digit after the number.
      *
      * @return A number.
+      *
      * @throws ParseException When the color number is improperly formed.
      */
-    private double getNumber() throws ParseException
+    protected final double getNumber() throws ParseException
     {
+        TokenContext context = captureContext();
+
         // Check for color numbers
 
         StringBuilder number = new StringBuilder();
 
         try {
-            while (Character.isDigit(c = script.charAt(cPtr)) || c == '.') {
+            while (Character.isDigit(c) || c == '.') {
                 number.append(c);
-                cPtr++;
+                next();
             }
 
-            // cPtr should now be pointing to the first non-number digit or period
+            // The current character should now be the first non-number digit or period
             // Check to make sure we don't have two periods
 
             int p1 = number.indexOf(".");
             int p2 = number.lastIndexOf(".");
             if (p1 != p2) {
+                context.setCharEnd(charPos);
                 throw new ParseException(
-                    file, lineNumber, charNumber, "Invalid number: '" + number.toString() + "'");
+                    new Token<>(Token.Type.STRING, number.toString(), context),
+                    "Invalid number: '" + number + "'");
             }
             return Double.valueOf(number.toString());
         }
         catch (NumberFormatException e) {
+            context.setCharEnd(charPos);
             throw new ParseException(
-                file, lineNumber, charNumber, "Invalid number: '" + number.toString() + "'");
+                new Token<>(Token.Type.STRING, number.toString(), context),
+                "Invalid number: '" + number + "'");
         }
     }
 
-    private String getOperator()
+    protected boolean isHexDigit(char c)
     {
-        // Check for two-character operators
-        // Boolean: &&, ||, ==, !=, <=, >=
-        // Lorentz transform: <-, ->
-
-        // We know the first character is an operator
-
-        if (c == '&' && cNext == '&') { cPtr += 2; return "&&"; }
-        if (c == '|' && cNext == '|') { cPtr += 2; return "||"; }
-        if (c == '!' && cNext == '=') { cPtr += 2; return "!="; }
-        if (c == '=' && cNext == '=') { cPtr += 2; return "=="; }
-        if (c == '<' && cNext == '=') { cPtr += 2; return "<="; }
-        if (c == '>' && cNext == '=') { cPtr += 2; return ">="; }
-        if (c == '<' && cNext == '-') { cPtr += 2; return "<-"; }
-        if (c == '-' && cNext == '>') { cPtr += 2; return "->"; }
-
-        // Some single characters aren't operators
-
-        if ( c == '&' || c == '|' || c == '=' || (c == '.' && Character.isDigit(cNext))) {
-            return null;
-        }
-
-        cPtr++;
-        return Character.toString(c);
+        return HEX_DIGITS.indexOf(c) != -1;
     }
 
-    private boolean isHexDigit(char c)
-    {
-        return hexDigits.indexOf(c) != -1;
-    }
-
-    private void debugTokens(ArrayList<Token<?>> tokens)
+    protected final void debugTokens(ArrayList<Token<?>> tokens)
     {
         try {
             File logDir  = new File("D:/users/tony/Documents/Gamma/Logs");
@@ -369,19 +274,17 @@ public class Tokenizer
                     String value = valueToString(token.getValue());
 
                     writer.write(
-                            token.getLineNumber() + "," +
-                        token.getCharNumber() + "," +
+                        token.getContext().getLineNumber() + "," +
+                        token.getContext().getCharNumber() + "," +
                         token.getType() + "," +
                         value + "\n");
                 }
             }
         }
-        catch (IOException e) {
-
-        }
+        catch (IOException ignored) {   }
     }
 
-    private String valueToString(Object value)
+    protected final String valueToString(Object value)
     {
         if (value instanceof Character character) {
             return quoteForCsv(character.toString());
@@ -400,7 +303,7 @@ public class Tokenizer
         }
     }
 
-    private String quoteForCsv(String str)
+    protected final String quoteForCsv(String str)
     {
         if (str.matches(".*[,\r\n\"].*")) {
             str = str.replaceAll("\"", "\"\"");

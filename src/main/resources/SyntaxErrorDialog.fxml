@@ -2,7 +2,6 @@
 
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -11,32 +10,31 @@
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.web.WebView?>
 
-<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.freixas.gamma.GreetingsDialogController">
+<VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.freixas.gamma.SyntaxErrorDialogController">
    <children>
-      <Label maxWidth="1.7976931348623157E308" minWidth="1.0" text="Welcome!" VBox.vgrow="NEVER">
+      <Label maxWidth="1.7976931348623157E308" minWidth="1.0" text="Syntax Error" VBox.vgrow="NEVER">
          <font>
             <Font size="18.0" />
          </font>
-         <padding>
-            <Insets left="10.0" />
-         </padding>
          <VBox.margin>
             <Insets bottom="10.0" />
          </VBox.margin>
       </Label>
-      <WebView id="html" fx:id="html" minHeight="1.0" minWidth="1.0" prefWidth="500.0" />
+      <Label text="A syntax error was detected at this location:" VBox.vgrow="NEVER">
+         <VBox.margin>
+            <Insets bottom="10.0" />
+         </VBox.margin>
+      </Label>
+      <WebView id="html" fx:id="html" minHeight="1.0" minWidth="1.0" prefHeight="200.0" prefWidth="600.0" VBox.vgrow="ALWAYS" />
       <GridPane id="buttonBar" fx:id="buttonBar" hgap="10.0" maxWidth="1.7976931348623157E308" minWidth="1.0" VBox.vgrow="NEVER">
         <columnConstraints>
-          <ColumnConstraints hgrow="NEVER" minWidth="10.0" />
-            <ColumnConstraints hgrow="NEVER" minWidth="10.0" />
             <ColumnConstraints halignment="RIGHT" hgrow="ALWAYS" minWidth="10.0" />
         </columnConstraints>
         <rowConstraints>
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <Button id="closeButton" fx:id="closeButton" layoutX="177.0" layoutY="13.0" mnemonicParsing="false" onAction="#handleClose" prefWidth="100.0" text="Close" GridPane.columnIndex="2" />
-            <CheckBox id="displayOption" fx:id="displayOption" mnemonicParsing="false" text="Don't display again" />
+            <Button id="closeButton" fx:id="closeButton" layoutX="177.0" layoutY="13.0" mnemonicParsing="false" onAction="#handleClose" prefWidth="100.0" text="Close" />
          </children>
          <VBox.margin>
             <Insets top="10.0" />

@@ -146,10 +146,8 @@ public abstract class Executor
         }
         catch (InvocationTargetException e) {
             Throwable ex = e.getCause();
-            if (ex instanceof ExecutionException executionException) throw executionException;
-            if (ex instanceof ProgrammingException programmingException) throw programmingException;
-            if (ex instanceof ClassCastException) throw new ExecutionException("Invalid argument type");
-            throw new GammaRuntimeException(ex);
+            if (ex instanceof ClassCastException) ex = new ExecutionException("Invalid argument type");
+            engine.throwGammaException(ex);
         }
         catch (SecurityException | IllegalAccessException e) {
             throw new ProgrammingException("Executor.executeImpl(): invoke() failed", e);

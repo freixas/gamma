@@ -19,6 +19,7 @@ package org.freixas.gamma.parser;
 import org.freixas.gamma.ProgrammingException;
 import org.freixas.gamma.css.value.StyleException;
 import org.freixas.gamma.css.value.Stylesheet;
+import org.freixas.gamma.execution.ExecutionException;
 import org.freixas.gamma.execution.hcode.*;
 import org.freixas.gamma.value.Coordinate;
 import org.freixas.gamma.value.Frame;
@@ -78,7 +79,9 @@ public class Parser
          * A factory method for creating operators. Given an operator string,
          * it finds and returns a matching operator.
          *
-         * @param chr
+         * @param operator The operator character string.
+         * @param isBinary True if the operator is binary, false if it's unary.
+         *
          * @return
          */
         static Op find(String operator, boolean isBinary)
@@ -91,7 +94,7 @@ public class Parser
                 result = unary.get(operator);
             }
             if (result == null) {
-                throw new RuntimeException("Op.find failed to find chr '" + operator + "' in " + (isBinary ? "binary" : "unary") + " table");
+                throw new ExecutionException("Op.find failed to find chr '" + operator + "' in " + (isBinary ? "binary" : "unary") + " table");
             }
             return result;
         }
@@ -121,7 +124,7 @@ public class Parser
 
         OpToken(Token<T> token, Op op)
         {
-            super(token.getType(), token.getValue(), token.getFile(), token.getLineNumber(), token.getCharNumber());
+            super(token.getType(), token.getValue(), token.getContext());
             this.token = token;
             this.op = op;
             this.id = -1;
@@ -161,7 +164,7 @@ public class Parser
 
     private SetStatement setStatement;
 
-    private final Token<?> dummyToken = new Token<>(Token.Type.DELIMITER, '~', null, 0, 0);
+    private final Token<?> dummyToken = new Token<>(Token.Type.DELIMITER, '~', new TokenContext(null, "", 0, 0, 0, 0));
 
     private int tokenPtr;
     private Token<?> curToken;
@@ -296,7 +299,7 @@ public class Parser
 
         labelId = 0;
 
-        Tokenizer tokenizer = new Tokenizer(file, script);
+        Tokenizer tokenizer = new ScriptTokenizer(file, script);
         tokens = tokenizer.tokenize();
 
         // tokenPtr points to the current token.
@@ -363,7 +366,7 @@ public class Parser
         // A statement that starts with a name
 
         if (isName()) {
-            codes.add(new LineInfoHCode(curToken.getFile(), curToken.getLineNumber()));
+            codes.add(new LineInfoHCode(curToken));
 
             // Look far ahead to see if we might have a plain assigment statement
 
@@ -860,7 +863,7 @@ public class Parser
             }
             String includeScript = Files.readString(includeFile.toPath());
             dependentFiles.add(includeFile);
-            Tokenizer tokenizer = new Tokenizer(includeFile, includeScript);
+            Tokenizer tokenizer = new ScriptTokenizer(includeFile, includeScript);
             ArrayList<Token<?>> includeTokens = tokenizer.tokenize();
 
             // tokenPtr points to the current token, the include file name.
@@ -2296,11 +2299,10 @@ public class Parser
             // an error
 
             if (notDone && isEOF()) { // line " + lineNumber + " character " + charNumber
-                throwParseException(
+                throw new ParseException(
+                    expressionStartToken,
                     "Premature end of file while processing an expression starting with '" +
-                    expressionStartToken.getValue() +
-                    "' at line " + expressionStartToken.getLineNumber() +
-                    " character " + expressionStartToken.getCharNumber());
+                    expressionStartToken.getValue());
             }
 
             if (!notDone) {
@@ -2460,11 +2462,7 @@ public class Parser
 
     private void throwParseException(String message) throws ParseException
     {
-        throw new ParseException(
-                curToken.getFile(),
-                curToken.getLineNumber(),
-                curToken.getCharNumber(),
-                message);
+        throw new ParseException(curToken, message);
     }
 
 }

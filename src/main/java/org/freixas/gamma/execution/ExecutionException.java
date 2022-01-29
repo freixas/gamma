@@ -16,7 +16,6 @@
  */
 package org.freixas.gamma.execution;
 
-import org.freixas.gamma.GammaRuntimeException;
 import org.freixas.gamma.parser.ParseException;
 
 /**
@@ -24,11 +23,11 @@ import org.freixas.gamma.parser.ParseException;
  * @author Antonio Freixas
  */
 @SuppressWarnings("serial")
-public class ExecutionException extends GammaRuntimeException
+public class ExecutionException extends RuntimeException
 {
     public ExecutionException(String message)
     {
-        super("Runtime error: " + message);
+        super(message);
     }
 
     public ExecutionException(String message, Throwable cause)
@@ -36,7 +35,7 @@ public class ExecutionException extends GammaRuntimeException
         super(
             message == null && cause != null && cause instanceof ParseException ?
                 ("Stylesheet parsing error: " + cause.getLocalizedMessage()) :
-                ("Runtime error: " + message +
+                (message +
                     (cause != null ?
                     (cause.getLocalizedMessage() != null ?
                         "\nCaused by " + cause.getLocalizedMessage() :
@@ -45,22 +44,5 @@ public class ExecutionException extends GammaRuntimeException
                 ),
             cause);
     }
-
-//    @Override
-//    public String toString()
-//    {
-//        String str = getLocalizedMessage() == null ? "" : getLocalizedMessage();
-//        Throwable cause = getCause();
-//        while (cause != null) {
-//            if (cause.getLocalizedMessage() != null) {
-//                str += "\nCaused by: " + cause.getLocalizedMessage();
-//            }
-//            else {
-//                str += "\nCaused by: " + cause.getClass();
-//            }
-//            cause = cause.getCause();
-//        }
-//        return str;
-//    }
 
 }

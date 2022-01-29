@@ -19,7 +19,6 @@ package org.freixas.gamma;
 import org.freixas.gamma.execution.ScriptPrintDialog;
 import org.freixas.gamma.execution.DiagramEngine;
 import java.io.File;
-import java.util.ListIterator;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -47,6 +46,7 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Screen;
+import org.freixas.gamma.parser.ParseException;
 
 /**
  * This class manages the view / controller / model for one main window. It
@@ -68,7 +68,6 @@ public final class MainWindow extends Stage
     private MenuItem fileMenuExportVideo;
     private MenuItem fileMenuPrint;
     private MenuItem fileMenuClose = null;
-    private MenuItem fileMenuPreferences;
 
     private boolean hasDisplayControls;
 
@@ -100,6 +99,9 @@ public final class MainWindow extends Stage
      *
      * @param ID The ID assigned to this window.
      * @param script The associated script file (may be null).
+     * @param directoryDefaults The default directories to use when opening or
+     * saving files.
+     *
      * @throws Exception
      */
     @SuppressWarnings("LeakingThisInConstructor")
@@ -122,7 +124,7 @@ public final class MainWindow extends Stage
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(getClass().getResource("/MainWindow.fxml"));
         Parent root = loader.load();
-        controller = (MainWindowController)loader.getController();
+        controller = loader.getController();
         controller.setMainWindow(this);
         setScene(new Scene(root));
 
@@ -142,13 +144,11 @@ public final class MainWindow extends Stage
                     greetings.show();
                     displayGreetingsDialog = false;
                 }
-                catch (Exception e) { }
+                catch (Exception e) { e.printStackTrace(); }
             }
         });
 
-        this.setOnCloseRequest((WindowEvent t) -> {
-            Gamma.closeWindow((MainWindow)t.getSource());
-        });
+        this.setOnCloseRequest((WindowEvent t) -> Gamma.closeWindow((MainWindow)t.getSource()));
 
         // Add icons
 
@@ -346,7 +346,7 @@ public final class MainWindow extends Stage
         if (directoryDefaults[type.getValue()] == null) {
 
             // If we want the default directory to use for a script and we have
-            // an associated file, use it's parent directory
+            // an associated file, use its parent directory
 
             if (type == Gamma.FileType.SCRIPT && script != null) {
                 directoryDefaults[type.getValue()] = script.getParentFile();
@@ -375,29 +375,20 @@ public final class MainWindow extends Stage
     {
         MenuBar menuBar = (MenuBar)getScene().lookup("#menuBar");
         ObservableList<Menu> menus = menuBar.getMenus();
-        ListIterator<Menu> iterMenuBar = menus.listIterator();
 
-        while (iterMenuBar.hasNext()) {
-            Menu menu = iterMenuBar.next();
-
+        for (Menu menu : menus) {
             if (menu.getId().equals("fileMenu")) {
                 ObservableList<MenuItem> menuItems = menu.getItems();
-                ListIterator<MenuItem> iterFileMenu = menuItems.listIterator();
 
-                while (iterFileMenu.hasNext()) {
-                    MenuItem menuItem = iterFileMenu.next();
+                for (MenuItem menuItem : menuItems) {
                     String menuId = menuItem.getId();
 
                     if (menuId != null) {
                         switch (menuId) {
-                            case "fileMenuExportDiagram" ->
-                                fileMenuExportDiagram = menuItem;
-                            case "fileMenuExportVideo" ->
-                                fileMenuExportVideo = menuItem;
-                            case "fileMenuPrint" ->
-                                fileMenuPrint = menuItem;
-                            case "fileMenuClose" ->
-                                fileMenuClose = menuItem;
+                            case "fileMenuExportDiagram" -> fileMenuExportDiagram = menuItem;
+                            case "fileMenuExportVideo" -> fileMenuExportVideo = menuItem;
+                            case "fileMenuPrint" -> fileMenuPrint = menuItem;
+                            case "fileMenuClose" -> fileMenuClose = menuItem;
                             default -> {
                             }
                         }
@@ -418,7 +409,7 @@ public final class MainWindow extends Stage
 
         // We use a parent for our drawing area (a Canvas) because Canvas
         // doesn't resize. The parent will resize according to its parent
-        // containers rules and we can use it to resize the canvas (when we
+        // containers rules, and we can use it to resize the canvas (when we
         // don't have a fixed diagram size).
 
         diagramParent = (VBox)getScene().lookup("#diagramParent");
@@ -484,7 +475,7 @@ public final class MainWindow extends Stage
             displayControlArea.getChildren().add(label);
 
             Slider slider = new Slider(range.getMinValue(), range.getMaxValue(), range.getInitialValue());
-            slider.setShowTickMarks​(true);
+            slider.setShowTickMarks(true);
             slider.setShowTickLabels(true);
 
             double delta = range.getMaxValue() - range.getMinValue();
@@ -530,6 +521,40 @@ public final class MainWindow extends Stage
         Separator separator = new Separator(Orientation.HORIZONTAL);
         separator.setPrefWidth(200);
         displayControlArea.getChildren().add(separator);
+    }
+
+    /**
+     * Display syntax errors.
+     *
+     * @param e A ParseException.
+     */
+    public void showParseException(ParseException e)
+    {
+        try {
+            SyntaxErrorDialog dialog = new SyntaxErrorDialog(this);
+            dialog.displayError(e);
+        }
+        catch (Exception e2) {
+            e2.printStackTrace();
+            showTextAreaAlert(Alert.AlertType.ERROR, "Syntax Error", "Syntax Error", e.getLocalizedMessage(), true);
+        }
+    }
+
+    /**
+     * Display runtime errors.
+     *
+     * @param e A ParseException.
+     */
+    public void showRuntimeException(GammaRuntimeException e)
+    {
+        try {
+            RuntimeErrorDialog dialog = new RuntimeErrorDialog(this);
+            dialog.displayError(e);
+        }
+        catch (Exception e2) {
+            e2.printStackTrace();
+            showTextAreaAlert(Alert.AlertType.ERROR, "Runtime Error", "Runtime Error", e.getLocalizedMessage(), true);
+        }
     }
 
     /**

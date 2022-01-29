@@ -17,55 +17,37 @@
  */
 package org.freixas.gamma;
 
-import org.freixas.gamma.preferences.PreferencesManager;
-import java.net.URL;
-import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
 import javafx.scene.layout.GridPane;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 
 /**
- * FXML Controller class
  *
  * @author Antonio Freixas
  */
-public class GreetingsDialogController implements Initializable
-{
+public class SyntaxErrorDialogController {
+
     @FXML
     private GridPane buttonBar;
+
     @FXML
     private Button closeButton;
-    @FXML
-    private CheckBox displayOption;
+
     @FXML
     private WebView html;
-
-    /**
-     * Initializes the controller class.
-     * @param url
-     * @param rb
-     */
-    @Override
-    public void initialize(URL url, ResourceBundle rb)
-    {
-        WebEngine engine = html.getEngine();
-        displayOption.selectedProperty().addListener(
-            (Object, oldValue, newValue) -> PreferencesManager.setDisplayGreetingMessage(!newValue));
-
-        URL greetingsURL = getClass().getResource("/greetings.html");
-        if (greetingsURL != null) {
-            engine.load(greetingsURL.toString());
-        }
-    }
 
     @FXML
     void handleClose(ActionEvent event) {
         closeButton.getScene().getWindow().hide();
+    }
+
+    public void setHTML(String htmlContent)
+    {
+        WebEngine engine = html.getEngine();
+        engine.loadContent(htmlContent);
     }
 
 }

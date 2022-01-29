@@ -34,28 +34,20 @@ public class Token<T>
 
     private final Type type;
     private final T value;
-    private final File file;
-    private final int lineNumber;
-    private final int charNumber;
+    private TokenContext context;
 
     /**
      * Create a Token.
      *
      * @param type The token type.
      * @param value The token's value.
-     * @param file The file in which the token was found.
-     * @param lineNumber The line number of the line on which the token was
-     * found. The first line is number 1.
-     * @param charNumber The character number (relative to the start of a line)
-     * of the character which begins the token. The first character is number 1.
+     * @param context The context for the token. This identifies the position of the token in the code.
      */
-    public Token(Type type, T value, File file, int lineNumber, int charNumber)
+    public Token(Type type, T value, TokenContext context)
     {
         this.type = type;
         this.value = value;
-        this.file = file;
-        this.lineNumber = lineNumber;
-        this.charNumber = charNumber;
+        this.context = context;
     }
 
     public boolean isInstruction() { return false; }
@@ -81,35 +73,12 @@ public class Token<T>
     }
 
     /**
-     * Get the file from which the script came.
+     *  Get the token context, which provides the context in which the token was located.
      *
-     * @return The file from which the script came.
+     * @return The token context.
      */
-    public File getFile()
-    {
-        return file;
-    }
-
-    /**
-     * Get the number of the line on which the token was found. The first line
-     * is number 1.
-     *
-     * @return The number of the line on which the token was found.
-     */
-    public int getLineNumber()
-    {
-        return lineNumber;
-    }
-
-    /**
-     * Get the character number (relative to the start of a line) of the
-     * character which begins the token. The first character is number 1.
-     *
-     * @return The character number of the character which begins the token
-     */
-    public int getCharNumber()
-    {
-        return charNumber;
+    public TokenContext getContext() {
+        return context;
     }
 
     public boolean isNumber() { return type == Token.Type.NUMBER; }
@@ -129,7 +98,7 @@ public class Token<T>
     @Override
     public String toString()
     {
-        return "Token{" + "type=" + type + ", value=" + value + ", file=" + file.getName() + ", lineNumber=" + lineNumber + ", charNumber=" + charNumber + '}';
+        return "Token{" + "type=" + type + ", value=" + value + ", context=" + context + '}';
     }
 
 

@@ -19,7 +19,6 @@ package org.freixas.gamma;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
@@ -193,8 +192,7 @@ public class Gamma extends Application
      *
      * @param file The script file associated with the window (can be null).
      * @param defaultDirectories The default directories to use for file dialogs
-     * in the the new window, one for each type of file (SCRIPT, IMAGE, and
-     * VIDEO).
+     * in the new window, one for each type of file (SCRIPT, IMAGE, and VIDEO).
      *
      * @throws java.lang.Exception
      */
@@ -203,9 +201,7 @@ public class Gamma extends Application
         // Go through all the existing windows and set the Close button's state
         // appropriately
 
-        ListIterator<MainWindow> iter = windowList.listIterator();
-        while (iter.hasNext()) {
-            MainWindow w = iter.next();
+        for (MainWindow w : windowList) {
             w.setCloseState(windowList.size() + 1 > 1);
         }
 
@@ -264,7 +260,7 @@ public class Gamma extends Application
 
         if (windowList.size() == 1) exit();
 
-        // Otherwise close the window
+        // Otherwise, close the window
 
         windowList.remove(window);
         window.close();
@@ -274,7 +270,7 @@ public class Gamma extends Application
 
         if (windowList.size() == 1) {
             MainWindow finalWindow = windowList.get(0);
-            finalWindow.setCloseState(windowList.size() > 1);
+            finalWindow.setCloseState(false);
         }
     }
 

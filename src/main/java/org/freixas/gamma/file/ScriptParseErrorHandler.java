@@ -20,6 +20,7 @@ import org.freixas.gamma.MainWindow;
 import java.util.List;
 import java.util.ListIterator;
 import javafx.scene.control.Alert.AlertType;
+import org.freixas.gamma.parser.ParseException;
 
 /**
  * This class handles errors that occur while reading or parsing the script
@@ -57,12 +58,16 @@ public class ScriptParseErrorHandler implements Runnable
             ListIterator<Exception> iter = list.listIterator();
             while (iter.hasNext()) {
                 Exception e = iter.next();
-                str.append(e.getLocalizedMessage());
-                str.append("\n");
+                if (e instanceof ParseException parseException) {
+                    window.showParseException(parseException);
+                }
+                else {
+                    window.showTextAreaAlert(AlertType.ERROR, "Error", "Error", e.getLocalizedMessage(), true);
+                }
             }
             list.clear();
         }
 
-        window.showTextAreaAlert(AlertType.ERROR, "Syntax Errors", "Syntax Errors", str.toString(), true);
+
     }
 }

@@ -52,7 +52,7 @@ public class CommandFactory
         // Place the properties into a structure
 
         Struct cmdStruct = Struct.createNewStruct(engine, name, properties);
-        StyleStruct styleStruct = engine.getStylesheet().createStyleStruct(engine.getFile(), name, cmdStruct.id, cmdStruct.cls, cmdStruct.style);
+        StyleStruct styleStruct = engine.getStylesheet().createStyleStruct(engine.getTokenContext().getFile(), name, cmdStruct.id, cmdStruct.cls, cmdStruct.style);
 
         return new Command(cmdStruct, styleStruct, exec);
     }

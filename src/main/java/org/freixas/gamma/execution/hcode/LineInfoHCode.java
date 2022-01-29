@@ -18,9 +18,9 @@ package org.freixas.gamma.execution.hcode;
 
 import org.freixas.gamma.execution.ArgInfo;
 import org.freixas.gamma.execution.HCodeEngine;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import org.freixas.gamma.parser.Token;
 
 /**
  *
@@ -34,13 +34,11 @@ public class LineInfoHCode extends ArgInfoHCode
         argInfo = new ArgInfo(0, argTypes, 0);
     }
 
-    private final File file;
-    private final int lineNumber;
+    private final Token<?> token;
 
-    public LineInfoHCode(File file, int lineNumber)
+    public LineInfoHCode(Token<?> token)
     {
-        this.file = file;
-        this.lineNumber = lineNumber;
+        this.token = token;
     }
 
     @Override
@@ -48,9 +46,7 @@ public class LineInfoHCode extends ArgInfoHCode
     {
         data.clear();
 
-        engine.setFile(file);
-        engine.setLineNumber(lineNumber);
-//        System.err.println("Debug: Line number " + lineNumber);
+        engine.setTokenContext(token.getContext());
     }
 
     @Override

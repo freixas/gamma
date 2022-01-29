@@ -278,9 +278,7 @@ public abstract class Struct
         }
         catch (InvocationTargetException e) {
             Throwable ex = e.getCause();
-            if (ex instanceof ExecutionException executionException) throw executionException;
-            if (ex instanceof ProgrammingException programmingException) throw programmingException;
-            throw new GammaRuntimeException(ex);
+            engine.throwGammaException(ex);
         }
         catch (IllegalAccessException | IllegalArgumentException e) {
             throw new ProgrammingException("Struct.initializeStruct()", e);

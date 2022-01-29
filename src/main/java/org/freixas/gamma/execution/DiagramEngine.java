@@ -23,6 +23,7 @@ import org.freixas.gamma.execution.hcode.SetStatement;
 import java.util.LinkedList;
 import java.util.Set;
 import javafx.scene.control.Alert;
+import org.freixas.gamma.GammaRuntimeException;
 
 /**
  * The Diagram Engine controls the overall execution of a user's program,
@@ -95,7 +96,7 @@ public class DiagramEngine
              }
         }
         catch (Throwable e) {
-            handleExeception(e);
+            handleException(e);
         }
     }
 
@@ -123,16 +124,13 @@ public class DiagramEngine
      *
      * @param e The exception.
      */
-    public void handleExeception(Throwable e)
+    public void handleException(Throwable e)
     {
         close();
-        
+
         e.printStackTrace();
-        if (e instanceof ExecutionException) {
-            window.showTextAreaAlert(Alert.AlertType.ERROR, "Runtime Errors", "Runtime Errors", e.getLocalizedMessage(), true);
-        }
-        else if (e instanceof ProgrammingException) {
-            window.showTextAreaAlert(Alert.AlertType.ERROR, "Internal Errors", "Internal Errors", e.getLocalizedMessage(), true);
+        if (e instanceof GammaRuntimeException gammaRuntimeException) {
+            window.showRuntimeException(gammaRuntimeException);
         }
         else {
             window.showTextAreaAlert(Alert.AlertType.ERROR, "Error", "Error", e.getLocalizedMessage(), true);

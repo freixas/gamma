@@ -129,7 +129,7 @@ public class AnimationEngine
                 catch (Throwable e) {
                     animationEngine.stop();
                     Platform.runLater(() -> {
-                        animationEngine.window.getDiagramEngine().handleExeception(e);
+                        animationEngine.window.getDiagramEngine().handleException(e);
                     });
                 }
             }

@@ -18,7 +18,6 @@ package org.freixas.gamma.math;
 
 import org.freixas.gamma.value.Coordinate;
 import org.freixas.gamma.value.Line;
-import org.freixas.gamma.value.WorldlineSegment;
 
 /**
  * This is the standard acceleration class. It provides information about an
@@ -170,7 +169,7 @@ import org.freixas.gamma.value.WorldlineSegment;
  * See http://web.physics.ucsb.edu/~fratus/phys103/LN/IGR.pdf<br>
  * See http://math.ucr.edu/home/baez/physics/Relativity/SR/Rocket/rocket.html
  *
- * @see gamma.math.OffsetAcceleration
+ * @see org.freixas.gamma.math.OffsetAcceleration
  * @author Antonio Freixas
  */
 public final class Acceleration
@@ -260,11 +259,11 @@ public final class Acceleration
     /**
      * Given v, return gamma.
      *
-     * @param a The acceleration.
      * @param v The velocity.
      * @return Gamma.
      */
-    public static double vToGamma(double a, double v)
+    @SuppressWarnings("unused")
+    public static double vToGamma(double v)
     {
         // The acceleration is moot. Since we have v, we can derive gamma
         // directly
@@ -291,6 +290,7 @@ public final class Acceleration
      * @throws ArithmeticException When the x coordinate doesn't cross the
      * offset acceleration curve.
      */
+    @SuppressWarnings("unused")
     public static double xToV(double a, double x)
     {
         return xToV(a, x, false);
@@ -328,6 +328,7 @@ public final class Acceleration
      * @throws ArithmeticException When the x coordinate doesn't cross the
      * offset acceleration curve.
      */
+    @SuppressWarnings("unused")
     public static double xToD(double a, double x)
     {
         return xToD(a, x, false);
@@ -373,6 +374,7 @@ public final class Acceleration
      * @throws ArithmeticException When the x coordinate doesn't cross the
      * offset acceleration curve or matches all the curve points.
      */
+    @SuppressWarnings("unused")
     public static double xToT(double a, double x)
     {
         return xToT(a, x, false);
@@ -422,6 +424,7 @@ public final class Acceleration
      * @throws ArithmeticException When the x coordinate doesn't cross the
      * offset acceleration curve or matches all the curve points.
      */
+    @SuppressWarnings("unused")
     public static double xToTau(double a, double x)
     {
         return xToTau(a, x, false);
@@ -643,7 +646,7 @@ public final class Acceleration
             return 0;
         }
 
-        // With positive acceleration, the x position will always be postive.
+        // With positive acceleration, the x position will always be positive.
         // With a negative acceleration, the x position will always be negative.
         // The formula gives the right answer in either case.
         //
@@ -750,7 +753,7 @@ public final class Acceleration
             return 0;
         }
 
-        // With positive acceleration, the x position will always be postive.
+        // With positive acceleration, the x position will always be positive.
         // With a negative acceleration, the x position will always be negative.
         // The formula gives the right answer in either case.
         //
@@ -766,7 +769,7 @@ public final class Acceleration
      * @param a The acceleration.
      * @param tau The time in the accelerated frame.
      *
-     * @return The distance in the rest frame..
+     * @return The distance in the rest frame.
      */
     public static double tauToD(double a, double tau)
     {
@@ -839,6 +842,7 @@ public final class Acceleration
      * @return The intersections. There can be zero, one, or two intersections.
      * If there are zero intersections, the returned value is null.
      */
+    @SuppressWarnings("SpellCheckingInspection")
     public static Coordinate[] intersect(double a, Line line)
     {
         // Basics:
@@ -868,8 +872,7 @@ public final class Acceleration
                 // earliest point that intersects the line
 
                 if (Util.fuzzyZero(coord.x)) {
-                    Coordinate[] result = { new Coordinate(coord.x, minT) };
-                    return result;
+                    return new Coordinate[]{ new Coordinate(coord.x, minT) };
                 }
 
                 return null;
@@ -879,8 +882,7 @@ public final class Acceleration
 
             if (Util.fuzzyZero(coord.x)) {
                 if (Util.fuzzyLE(minT, 0)) {
-                    Coordinate[] result = { new Coordinate(coord.x, 0) };
-                    return result;
+                    return new Coordinate[]{ new Coordinate(coord.x, 0) };
                 }
                 return null;
             }
@@ -904,8 +906,7 @@ public final class Acceleration
             // there is always one intersection
 
             if (zeroAcceleration) {
-                Coordinate[] result = { new Coordinate(0, coord.t) };
-                return result;
+                return new Coordinate[]{ new Coordinate(0, coord.t) };
             }
 
             // We drop through for other horizontal cases
@@ -956,11 +957,10 @@ public final class Acceleration
                     t = m * x + k;
                 }
             }
-            Coordinate[] result = { new Coordinate(x, t) };
-            return result;
+            return new Coordinate[]{ new Coordinate(x, t) };
         }
 
-        // Handle all remainining cases:
+        // Handle all remaining cases:
         //
         // * Vertical line crossing an accelerating curve at two points
         // * Horizontal line crossing an accelerating curve at one point
@@ -1022,36 +1022,21 @@ public final class Acceleration
             // Sort by time
 
             if (result1.t <= result2.t) {
-                Coordinate[] result = { result1, result2 };
-                return result;
+                return new Coordinate[]{ result1, result2 };
             }
             else {
-                Coordinate[] result = { result2, result1 };
-                return result;
+                return new Coordinate[]{ result2, result1 };
             }
         }
         else if (inside1) {
-            Coordinate[] result = { result1 };
-            return result;
+            return new Coordinate[]{ result1 };
         }
         else if (inside2) {
-            Coordinate[] result = { result2 };
-            return result;
+            return new Coordinate[]{ result2 };
         }
         else {
             return null;
         }
-    }
-
-    /**
-     * Find the intersection of a standard acceleration curve with a line.
-     *
-     * @param other The other observer.
-     * @return The intersection or null if none.
-     */
-    public static Coordinate intersect(WorldlineSegment other)
-    {
-        return null;
     }
 
 }

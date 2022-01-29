@@ -17,22 +17,17 @@
  */
 package org.freixas.gamma.css.value;
 
+import javafx.util.Pair;
 import org.freixas.gamma.css.parser.CSSParser;
 import org.freixas.gamma.execution.ExecutionException;
 import org.freixas.gamma.parser.ParseException;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javafx.util.Pair;
 
 /**
  *
@@ -47,13 +42,11 @@ public class Stylesheet
         try {
             DEFAULT_STYLESHEET = Stylesheet.createStylesheet(null, DEFAULT_STYLESHEET_STRING);
         }
-        catch (ParseException e) { }
+        catch (ParseException ignored) { }
     }
     static public Stylesheet USER_STYLESHEET = null;
 
-    private static final Comparator<Pair<Integer, Rule>> scoreComparator = (a, b) -> {
-        return a.getKey() - b.getKey();
-    };
+    private static final Comparator<Pair<Integer, Rule>> scoreComparator = Comparator.comparingInt(Pair::getKey);
 
     private static final Pattern ID_PATTERN = Pattern.compile("^[-a-zA-Z_][-a-zA-Z_0-9]*$");
     private static final Pattern CLASS_PATTERN = Pattern.compile("^([-a-zA-Z_][-a-zA-Z_0-9]*)(\\s*,\\s*[-a-zA-Z_][-a-zA-Z_0-9]*)*$");
@@ -104,10 +97,10 @@ public class Stylesheet
         if (cssFile == null) return new Stylesheet();
 
         if (!cssFile.exists()) {
-            throw new StyleException("File '" + cssFile.toString() + "' does not exist.");
+            throw new StyleException("File '" + cssFile + "' does not exist.");
         }
         if (cssFile.isDirectory()) {
-            throw new StyleException("File '" + cssFile.toString() + "' is a directory.");
+            throw new StyleException("File '" + cssFile + "' is a directory.");
         }
         String css = Files.readString(cssFile.toPath());
 
@@ -122,8 +115,6 @@ public class Stylesheet
      * @param css The string containing the styles.
      *
      * @return The created stylesheet.
-     *
-     * @throws StyleException If the styles have a syntax error.
      */
     static public Stylesheet createStylesheet(File cssFile, String css) throws ParseException
     {
@@ -139,6 +130,7 @@ public class Stylesheet
     // *
     // **********************************************************************
 
+    @SuppressWarnings("unused")
     public boolean isCacheEnabled()
     {
         return cacheEnabled;
@@ -197,7 +189,7 @@ public class Stylesheet
      * Give the command name, and the id, class, and style properties, create
      * a StyleStruct for the command.
      *
-     * @param file
+     * @param file The file used for reporting parsing errors in the style property.
      * @param commandName The name of the command.
      * @param id The id string.
      * @param cls The class string.
@@ -210,7 +202,7 @@ public class Stylesheet
     {
         // We have two caches:
         //
-        // The stylesheet cache looks for a amtch with the command name, id (if
+        // The stylesheet cache looks for a match with the command name, id (if
         // any), and class (if any).
         //
         // The StyleStruct cache looks for a match with the command name, id (if
@@ -220,13 +212,12 @@ public class Stylesheet
 
         String stylesheetCacheId =
             commandName +
-            (id != null ? id +"$" : "") +
-            (cls != null ? cls +"$" : "");
+            (id != null ? "$" + id : "") +
+            (cls != null ? "$" + cls : "");
+
+        String styleStructCacheId =  stylesheetCacheId +  (style != null ? "$" + style : "");
 
         if (styleStructCache != null) {
-            String styleStructCacheId =
-                stylesheetCacheId +
-                (style != null ? style +"$" : "");
             StyleStruct styleStruct = styleStructCache.get(styleStructCacheId);
             if (styleStruct != null) {
                 // System.err.println("Found styleStruct in cache using ID " + styleStructCacheId);
@@ -278,7 +269,7 @@ public class Stylesheet
             Stylesheet orderedStylesheet;
             Stylesheet cachedStylesheet = stylesheetCache.get(stylesheetCacheId);
 
-            if (cachedStylesheet!= null) {
+            if (cachedStylesheet != null) {
                 orderedStylesheet = new Stylesheet();
                 orderedStylesheet.addStylesheet(cachedStylesheet);
 //                System.err.println("Found stylesheet in cache using ID " + stylesheetCacheId);
@@ -294,7 +285,7 @@ public class Stylesheet
                 CSSParser cssParser = new CSSParser(file, "{" + style + ";}");
                 Stylesheet localStylesheet = cssParser.parse();
 
-                // Add the local stylesheet at the very bottom
+                // Add the local stylesheet at the very bottom (the highest priority)
 
                 orderedStylesheet.addStylesheet(localStylesheet);
             }
@@ -305,11 +296,11 @@ public class Stylesheet
             orderedStylesheet.setStyleStructValues(styles);
 
             // Save the styleStruct in the cache
-            // We're counting on StyleStructs never being permanently changed
+            // We're counting on StyleStructs never being permanently changed,
             // so we don't need to save a copy, just a reference
 
             if (cacheEnabled) {
-                styleStructCache.put(stylesheetCacheId, styles);
+                styleStructCache.put(styleStructCacheId, styles);
             }
             return styles;
         }
@@ -326,9 +317,8 @@ public class Stylesheet
      */
     public void setStyleStructValues(StyleStruct styles)
     {
-        Iterator<Rule> iter = rules.iterator();
-        while (iter.hasNext()) {
-            iter.next().setStyleStructValues(styles);
+        for (Rule rule : rules) {
+            rule.setStyleStructValues(styles);
         }
 
         // Generate the fonts, if needed, at the very end
@@ -353,9 +343,7 @@ public class Stylesheet
     {
         LinkedList<Pair<Integer, Rule>> list = new LinkedList<>();
 
-        Iterator<Rule> iter = rules.iterator();
-        while (iter.hasNext()) {
-            Rule rule = iter.next();
+        for (Rule rule : rules) {
             int score = rule.getMatchScore(commandName, id, classes);
             if (score > -1) {
                 addScoredRule(list, new Pair<>(score, rule));
@@ -363,9 +351,8 @@ public class Stylesheet
         }
 
         Stylesheet orderedSheet = new Stylesheet();
-        Iterator<Pair<Integer, Rule>> iter2 = list.iterator();
-        while (iter2.hasNext()) {
-            orderedSheet.addRule(iter2.next().getValue());
+        for (Pair<Integer, Rule> integerRulePair : list) {
+            orderedSheet.addRule(integerRulePair.getValue());
         }
 
         return orderedSheet;
@@ -387,7 +374,7 @@ public class Stylesheet
         // elements with the same score
 
         if (index > -1) {
-            while (index < list.size() && (int)list.get(index).getKey() == (int)pair.getKey()) {
+            while (index < list.size() && list.get(index).getKey() == (int)pair.getKey()) {
                 index++;
             }
             list.add(index, pair);

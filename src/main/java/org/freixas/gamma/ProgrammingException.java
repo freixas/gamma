@@ -20,17 +20,17 @@ package org.freixas.gamma;
  *
  * @author Antonio Freixas
  */
-public class ProgrammingException extends GammaRuntimeException
+@SuppressWarnings("serial")
+public class ProgrammingException extends RuntimeException
 {
     public ProgrammingException(String message)
     {
-        super("Programming Error: " + message);
+        super(message);
     }
 
     public ProgrammingException(String message, Throwable cause)
     {
-        super("Programming error: " +
-              message +
+        super(message +
               (cause != null ?
                 (cause.getLocalizedMessage() != null ? "\nCaused by " + cause.getLocalizedMessage() : "") : ""), cause);
     }
@@ -39,22 +39,4 @@ public class ProgrammingException extends GammaRuntimeException
     {
         super(cause);
     }
-
-//    @Override
-//    public String toString()
-//    {
-//        String str = getLocalizedMessage() == null ? "" : getLocalizedMessage();
-//        Throwable cause = getCause();
-//        while (cause != null) {
-//            if (cause.getLocalizedMessage() != null) {
-//                str += "\nCaused by: " + cause.getLocalizedMessage();
-//            }
-//            else {
-//                str += "\nCaused by: " + cause.getClass();
-//            }
-//            cause = cause.getCause();
-//        }
-//        return str;
-//    }
-
 }

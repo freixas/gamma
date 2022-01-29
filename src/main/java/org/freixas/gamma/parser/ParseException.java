@@ -16,8 +16,6 @@
  */
 package org.freixas.gamma.parser;
 
-import java.io.File;
-
 /**
  *
  * @author Antonio Freixas
@@ -25,9 +23,17 @@ import java.io.File;
 @SuppressWarnings("serial")
 public class ParseException extends Exception
 {
-    public ParseException(File file, int lineNumber, int charNumber, String message)
+    private final Token<?> token;
+
+    public ParseException(Token<?> token, String message)
     {
-        super((file != null? file.getName() + ", " : "") + "line " + lineNumber + " character " + charNumber + ": " + message);
+        super(message);
+        this.token = token;
+    }
+
+    public Token<?> getToken()
+    {
+        return token;
     }
 
 }

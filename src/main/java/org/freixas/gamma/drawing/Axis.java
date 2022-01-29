@@ -210,7 +210,7 @@ public class Axis
         tickSpacing *= tickScale;
 
         // We need to widen the intersection box to account for the
-        // width of the the tick marks. Note that the width is in pixel
+        // width of the tick marks. Note that the width is in pixel
         // space but the intersection is in world space
 
         double worldTickThickness = viewportScale * divLineThickness;
@@ -321,7 +321,7 @@ public class Axis
         StyleProperties.TextAnchor anchorMinus;
         int printEvery;
 
-        // Half height is half the height of a major tickmark in screen
+        // Half height is half the height of a major tick mark in screen
         // units
 
         double pad = halfHeight + 2.0;
@@ -345,7 +345,7 @@ public class Axis
                     anchorMinus = StyleProperties.TextAnchor.TL;
                 }
                 else {
-                    anchorPlus = StyleProperties.TextAnchor.MR;      // Vert to slighty down CW
+                    anchorPlus = StyleProperties.TextAnchor.MR;      // Vert to slightly down CW
                     anchorMinus = StyleProperties.TextAnchor.MR;
                 }
             }
@@ -431,10 +431,6 @@ public class Axis
         minValue = Util.fuzzyEQ(minValue, 0.0) ? 0 : Math.floor(Math.log10(minValue));
         maxValue = Util.fuzzyEQ(maxValue, 0.0) ? 0 : Math.floor(Math.log10(maxValue));
         delta =    Util.fuzzyEQ(delta, 0.0)    ? 0 : Math.floor(Math.log10(delta));
-
-//        if (minValue >= 0) minValue += 1;
-//        if (maxValue >= 0) maxValue += 1;
-//        if (delta >= 0) delta += 1;
 
         int sig1 = (int)(Math.abs(minValue - delta)) + 1;
         int sig2 = (int)(Math.abs(maxValue - delta)) + 1;

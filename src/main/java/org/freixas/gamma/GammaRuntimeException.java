@@ -16,26 +16,46 @@
  */
 package org.freixas.gamma;
 
+import org.freixas.gamma.parser.TokenContext;
+
 /**
  *
  * @author Antonio Freixas
  */
+@SuppressWarnings("serial")
 public class GammaRuntimeException extends RuntimeException
 {
-    public GammaRuntimeException(String message)
+    public enum Type { EXECUTION, PROGRAMMING, OTHER };
+
+    private final Type type;
+    TokenContext context;
+
+    public GammaRuntimeException(Type type, TokenContext context, String message)
     {
-        super(message);
+        this(type, context, message, null);
     }
 
-    public GammaRuntimeException(String message, Throwable cause)
+    public GammaRuntimeException(Type type, TokenContext context, Throwable cause)
+    {
+        this(type, context, cause != null ? cause.getLocalizedMessage() : null, cause);
+    }
+
+    public GammaRuntimeException(Type type, TokenContext context, String message, Throwable cause)
     {
         super(message, cause);
+        this.type = type;
+        this.context = context;
+
     }
 
-    public GammaRuntimeException(Throwable cause)
+    public Type getType()
     {
-        super(cause != null ? cause.getLocalizedMessage() : null, cause);
+        return type;
     }
 
+    public TokenContext getTokenContext()
+    {
+        return context;
+    }
 
 }

@@ -77,6 +77,10 @@ public class MainWindowController implements Initializable
     private Menu helpMenu;
 
     private MainWindow mainWindow;
+    @FXML
+    private MenuItem helpSampleScripts;
+    @FXML
+    private MenuItem helpQuickStart;
 
     /**
      * Initializes the controller class.
@@ -111,7 +115,6 @@ public class MainWindowController implements Initializable
 
     @FXML
     private void fileMenuOpen(ActionEvent event)
-            throws Exception
     {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Existing Script File");
@@ -170,6 +173,19 @@ public class MainWindowController implements Initializable
     private void windowMenuNewWindow(ActionEvent event) throws Exception
     {
         Gamma.newMainWindow(null, mainWindow.getDirectoryDefaults());
+    }
+
+    @FXML
+    private void helpSampleScripts(ActionEvent event)
+    {
+        new Alert(Alert.AlertType.INFORMATION, "Help Menu Sample Scripts called!").show();
+    }
+
+    @FXML
+    private void helpQuickStart(ActionEvent event)
+    {
+        new Alert(Alert.AlertType.INFORMATION, "Help Menu Quick Start called!").show();
+
     }
 
     @FXML

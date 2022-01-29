@@ -34,10 +34,10 @@ import org.freixas.gamma.value.Coordinate;
 import org.freixas.gamma.value.Displayable;
 import org.freixas.gamma.value.Frame;
 import org.freixas.gamma.value.WInitializer;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import org.freixas.gamma.parser.TokenContext;
 
 /**
  * The HCodeEngine controls the execution of a specific HCodeProgram. The
@@ -65,8 +65,7 @@ public class HCodeEngine
     private final HCodeExecutor hCodeExecutor;
     private final FunctionExecutor functionExecutor;
 
-    private File file;
-    private int lineNumber;
+    TokenContext tokenContext;
 
     public HCodeEngine(MainWindow window, SetStatement setStatement, Stylesheet stylesheet, HCodeProgram program)
     {
@@ -172,24 +171,14 @@ public class HCodeEngine
         return functionExecutor;
     }
 
-    public File getFile()
+    public TokenContext getTokenContext()
     {
-        return file;
+        return tokenContext;
     }
 
-    public void setFile(File file)
+    public void setTokenContext(TokenContext tokenContext)
     {
-        this.file = file;
-    }
-
-    public int getLineNumber()
-    {
-        return lineNumber;
-    }
-
-    public void setLineNumber(int lineNumber)
-    {
-        this.lineNumber = lineNumber;
+        this.tokenContext = tokenContext;
     }
 
     public static Frame getDefFrame()
@@ -210,7 +199,7 @@ public class HCodeEngine
     public void execute()
     {
         // System.err.println("\n\n*******************\nNew execution\n*******************\n");
-        lineNumber = 0;
+        tokenContext = new TokenContext(null, "", 0, 0, 0, 0);
 
         // Create an LCodeEngine only the first time
 
@@ -340,9 +329,24 @@ public class HCodeEngine
     public void throwGammaException(Throwable e)
         throws GammaRuntimeException
     {
+        // We might get a nest GammaRuntimeException
+        
+        if (e instanceof GammaRuntimeException gammaException) {
+            throw gammaException;
+        }
+
         String msg = e.getLocalizedMessage();
         if (msg == null) msg = e.getClass().getCanonicalName();
-            throw new GammaRuntimeException(file.getName() + ":" + lineNumber + ": " + msg, e);
+
+        GammaRuntimeException.Type type = GammaRuntimeException.Type.OTHER;
+        if (e instanceof ExecutionException) {
+            type = GammaRuntimeException.Type.EXECUTION;
+        }
+        else if (e instanceof ProgrammingException) {
+            type = GammaRuntimeException.Type.PROGRAMMING;
+        }
+
+        throw new GammaRuntimeException(type, tokenContext, msg, e);
     }
 
 }
