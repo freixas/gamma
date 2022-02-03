@@ -31,7 +31,6 @@ public class Arrow
 {
     public final static double ARROW_WIDTH = 10;
     public final static double ARROW_HEIGHT = 8;
-    public final static double HALF_ARROW_HEIGHT = ARROW_HEIGHT / 2.0;
 
     public static void draw(Context context, Coordinate location, double angle,
                             StyleStruct styles)
@@ -43,7 +42,7 @@ public class Arrow
         gc.save();
 
         // Rotate the viewport around the location so that we can draw the
-        // arrow so it points to the right (the 0 degree angle)
+        // arrow so that it points to the right (the zero-degree angle)
 
         Affine transform = gc.getTransform();
         transform.appendRotation(angle, location.x, location.t);

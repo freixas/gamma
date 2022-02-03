@@ -16,16 +16,14 @@
  */
 package org.freixas.gamma.drawing;
 
-import org.freixas.gamma.execution.lcode.HypergridStruct;
+import javafx.scene.canvas.GraphicsContext;
 import org.freixas.gamma.css.value.StyleStruct;
+import org.freixas.gamma.execution.lcode.HypergridStruct;
 import org.freixas.gamma.math.OffsetAcceleration;
 import org.freixas.gamma.math.Util;
 import org.freixas.gamma.value.Bounds;
-import org.freixas.gamma.value.ConcreteLine;
 import org.freixas.gamma.value.Coordinate;
 import org.freixas.gamma.value.HyperbolicSegment;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.transform.Affine;
 
 /**
  *
@@ -128,7 +126,7 @@ public class Hypergrid
      * @param bounds The box inside which the hyperbolas should fit.
      *
      * @return Two values or null. If two values are returned, they represent
-     * a range of points on the x axis. Any hypergrid hyperbola drawn through
+     * a range of points on the x-axis. Any hypergrid hyperbola drawn through
      * that range of points will cross the bounding box.
      */
     private static double[] calculateXRange(Bounds bounds)
@@ -137,7 +135,7 @@ public class Hypergrid
         //
         // Because the hypergrid hyperbolas are offset, the formula is actually
         // t = sqrt((x - x0)^2 + 2(x - x0) / a), where x0 is a coordinate on the
-        // x axis
+        // x-axis
         //
         // For the hypergrid hyperbolas, a = 1 / x0.
         //
@@ -187,8 +185,8 @@ public class Hypergrid
 
         // We want to find the minimum and maximum x0 values.
 
-        // If the bounds are completely above or below the x axis, we can use
-        // the mininum and maximum values for all four corners
+        // If the bounds are completely above or below the x-axis, we can use
+        // the minimum and maximum values for all four corners
 
         if (ll.t > 0 || bounds.max.t < 0) {
             double min = Double.POSITIVE_INFINITY;
@@ -212,15 +210,16 @@ public class Hypergrid
             min = Math.min(x0, min);
             max = Math.max(x0, max);
 
-            double[] minMax = { min, max };
-            return minMax;
+            return new double[]{ min, max };
         }
 
-        // If the bounds include the x axis but are to the left of the t axis,
+        // Below this point, we know that the bounds include the x-axis
+
+        // If the bounds include the x-axis but are to the left of the t axis,
         // the lower range is the minimum x. The maximum range is either the
         // top right or bottom right corner, but not more than 0
 
-        else if (bounds.max.x <= 0) {
+        else if (bounds.max.x < 0) {
             double min = ll.x;
             double max = Double.NEGATIVE_INFINITY;
 
@@ -238,15 +237,14 @@ public class Hypergrid
             x0 = Util.sign(ur.x) * Math.sqrt(ur.x * ur.x - ur.t * ur.t);
             max = Math.max(x0, max);
 
-            double[] minMax = { min, Math.min(0, max) };
-            return minMax;
+            return new double[]{ min, Math.min(0, max) };
         }
 
-        // If the bounds include the x axis but are to the right of the t axis,
+        // If the bounds include the x-axis but are to the right of the t axis,
         // the maximum range is the maximum x. The minimum range is either the
         // top left or bottom left corner, but not less than 0
 
-        else if (bounds.max.x < 0) {
+        else if (bounds.min.x > 0) {
             double min = Double.POSITIVE_INFINITY;
             double max = lr.x;
 
@@ -264,16 +262,14 @@ public class Hypergrid
             x0 = Util.sign(ur.x) * Math.sqrt(ur.x * ur.x - ur.t * ur.t);
             min = Math.min(x0, min);
 
-            double[] minMax = { Math.max(0, min), max };
-            return minMax;
+            return new double[]{ Math.max(0, min), max };
         }
 
         // If the bounds include the origin, then the range is from the minimum
         // x to the maximum x
 
         else {
-            double[] minMax = { bounds.min.x, bounds.max.x };
-            return minMax;
+            return new double[]{ bounds.min.x, bounds.max.x };
         }
     }
 

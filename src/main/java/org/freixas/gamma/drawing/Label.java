@@ -124,6 +124,17 @@ public class Label
             gc.setTransform(transform);
             gc.fillText(struct.text, xOffset, tOffset);
 
+            // Debug code - places an "X" centered exactly on the coordinate
+            // at which to draw the text
+
+            //gc.setStroke(Color.RED);
+            //gc.strokeLine(
+            //    xOffset - 5, tOffset - 5,
+            //    xOffset + 5, tOffset + 5);
+            //gc.strokeLine(
+            //    xOffset - 5, tOffset + 5,
+            //    xOffset + 5, tOffset - 5);
+
             // Restore the original graphics context
 
             gc.restore();
@@ -131,7 +142,6 @@ public class Label
         catch (NonInvertibleTransformException e) {
             throw new ProgrammingException("Text.draw()", e);
         }
-
     }
 
     public static Bounds getTextBounds(String text, Font font)

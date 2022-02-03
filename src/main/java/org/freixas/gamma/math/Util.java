@@ -282,20 +282,55 @@ public final class Util
     }
 
     /**
-     * Convert a double to an integer by rounding toward zero.
-     * @param d
-     * @return
+     * Convert a double to an integer by truncating toward zero. This truncates
+     * the number so that 1.99999 becomes 1 and -1.99999 becomes -1.
+     *
+     * @param d The value to truncate.
+     *
+     * @return The truncated value.
      */
     static public int toInt(double d)
     {
         return (int)(d >= 0 ? Math.floor(d) : Math.ceil(d));
-        // return (int) (-Math.signum(d) * Math.ceil(-Math.abs(d) - 0.5));
     }
 
+    /**
+     * Convert a double to a long by truncating toward zero. This truncates
+     * the number so that 1.99999 becomes 1 and -1.99999 becomes -1.
+     *
+     * @param d The value to truncate.
+     *
+     * @return The truncated value
+     */
     static public long toLong(double d)
     {
         return (long)(d >= 0 ? Math.floor(d) : Math.ceil(d));
-        // return (long) (-Math.signum(d) * Math.ceil(-Math.abs(d) - 0.5));
+    }
+
+    /**
+     * Round a double to an integer by rounding toward zero. 1.5 becomes 1 and
+     * -1.5 becomes -1.
+     *
+     * @param d The value to round.
+     *
+     * @return The rounded value.
+     */
+    static public int roundToInt(double d)
+    {
+        return (int)(d >= 0 ? Math.ceil(d - 0.5) : Math.floor(d + 0.5));
+    }
+
+    /**
+     * Round a double to a long by rounding toward zero. 1.5 becomes 1 and
+     * -1.5 becomes -1.
+     *
+     * @param d The value to round.
+     *
+     * @return The rounded value.
+     */
+    static public long rountToLong(double d)
+    {
+        return (int)(d >= 0 ? Math.ceil(d - 0.5) : Math.floor(d + 0.5));
     }
 
     static public boolean toBoolean(double d)

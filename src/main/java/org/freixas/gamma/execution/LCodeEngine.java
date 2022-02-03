@@ -38,6 +38,7 @@ import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Region;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
+import org.freixas.gamma.GammaRuntimeException;
 
 /**
  *
@@ -77,6 +78,8 @@ public class LCodeEngine
     private double mouseY;
     private boolean mouseInside;
 
+    private boolean isClosed;
+
     /**
      * Create the lcode engine.
      *
@@ -91,6 +94,7 @@ public class LCodeEngine
         this.frameCommand = new Command(new FrameStruct(), new StyleStruct(), new FrameCommandExec());
         this.animationCommand = new Command(new AnimationStruct(), new StyleStruct(), new AnimationCommandExec());
         this.setupComplete = false;
+        this.isClosed = false;
 
         lastWidth = -1.0;
         lastHeight = -1.0;
@@ -231,40 +235,45 @@ public class LCodeEngine
      */
     public final void setup()
     {
-        // Tell the window we are starting it. It will shut down any prior
-        // lcode engine
+        try {
+            // Tell the window we are starting it. It will shut down any prior
+            // lcode engine
 
-        // Get the drawing area
+            // Get the drawing area
 
-        canvas = window.getCanvas();
-        canvasParent = (Region)canvas.getParent();
+            canvas = window.getCanvas();
+            canvasParent = (Region)canvas.getParent();
 
-        // Set up our change listeners
+            // Set up our change listeners
 
-        addListeners();
+            addListeners();
 
-        setUpDrawingFrame();
+            setUpDrawingFrame();
 
-        setupComplete = true;
+            setupComplete = true;
 
-        // Set up the drawing transforms. The transform is set up here,
-        // but is modified whenever the zoom/pan changes or when the canvas
-        // is resized
+            // Set up the drawing transforms. The transform is set up here,
+            // but is modified whenever the zoom/pan changes or when the canvas
+            // is resized
 
-        // Create the graphics context
+            // Create the graphics context
 
-        context = new Context(this, canvas);
+            context = new Context(this, canvas);
 
-        // Run the display command
+            // Run the display command
 
-        ((DisplayCommandExec)displayCommand.getCmdExec()).initializeCanvas(
-            context,
-            (DisplayStruct)displayCommand.getCmdStruct(),
-            displayCommand.getStyles());
+            ((DisplayCommandExec)displayCommand.getCmdExec()).initializeCanvas(
+                context,
+                (DisplayStruct)displayCommand.getCmdStruct(),
+                displayCommand.getStyles());
 
-        // Draw the initial display
+            // Draw the initial display
 
-        execute();
+            execute();
+        }
+        catch (Throwable e) {
+            throwGammaException(e);
+        }
     }
 
     public void setUpDrawingFrame()
@@ -289,15 +298,23 @@ public class LCodeEngine
      */
     public void execute()
     {
-       // Execute the display command
+        if (isClosed) return;
 
-        displayCommand.execute(context);
+        try {
+            // Execute the display command
 
-        // Execute normal commands
+             displayCommand.execute(context);
 
-        ListIterator<Command> iter = commands.listIterator();
-        while (iter.hasNext()) {
-            iter.next().execute(context);
+             // Execute normal commands
+
+             ListIterator<Command> iter = commands.listIterator();
+             while (iter.hasNext()) {
+                 iter.next().execute(context);
+                 if (isClosed) return;
+             }
+        }
+        catch (Throwable e) {
+            throwGammaException(e);
         }
     }
 
@@ -311,6 +328,30 @@ public class LCodeEngine
         if (setupComplete) {
             removeListeners();
         }
+        isClosed = true;
+    }
+
+    public void throwGammaException(Throwable e) throws GammaRuntimeException
+    {
+        // We might get a nest GammaRuntimeException
+
+        if (e instanceof GammaRuntimeException gammaException) {
+            throw gammaException;
+        }
+
+        @SuppressWarnings("null")
+        String msg = e.getLocalizedMessage();
+        if (msg == null) msg = e.getClass().getCanonicalName();
+
+        GammaRuntimeException.Type type = GammaRuntimeException.Type.OTHER;
+        if (e instanceof ExecutionException) {
+            type = GammaRuntimeException.Type.EXECUTION;
+        }
+        else if (e instanceof ProgrammingException) {
+            type = GammaRuntimeException.Type.PROGRAMMING;
+        }
+
+        throw new GammaRuntimeException(type, null, msg, e);
     }
 
     /**

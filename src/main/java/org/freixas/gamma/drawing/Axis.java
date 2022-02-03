@@ -242,7 +242,7 @@ public class Axis
             maxDistance = intersection.max.x;
 
             firstTick = minDistance - (minDistance % tickSpacing);
-            tickNumber = Util.toInt(firstTick / tickSpacing);
+            tickNumber = Util.roundToInt(firstTick / tickSpacing);
             firstTick += origin.x;
 
             gc.setLineCap(StrokeLineCap.BUTT);
@@ -360,7 +360,7 @@ public class Axis
             String format;
             int printEvery;
 
-            // Half height is half the height of a largest tick mark in screen
+            // Half height is half the height of the largest tick mark in screen
             // units
 
             double pad = halfHeight + 2.0;
@@ -386,8 +386,8 @@ public class Axis
                     if (angle <= 67.5)  {
                         anchorPlus = StyleProperties.TextAnchor.BR;      // Closer to +45
                         anchorMinus = StyleProperties.TextAnchor.TL;
-                        positiveTickLabelsBelow = false;
-                        negativeTickLabelsBelow = true;
+                        positiveTickLabelsBelow = true;
+                        negativeTickLabelsBelow = false;
                     }
                     else {
                         anchorPlus =                                     // Vert to slightly down CW
@@ -416,17 +416,22 @@ public class Axis
                     if (angle >= -67.5)  {
                         anchorPlus = StyleProperties.TextAnchor.BL;      // Closer to -45
                         anchorMinus = StyleProperties.TextAnchor.TR;
-                        positiveTickLabelsBelow = true;
-                        negativeTickLabelsBelow = false;
+                        positiveTickLabelsBelow = false;
+                        negativeTickLabelsBelow = true;
                     }
                     else {
                         anchorPlus =                                     // Vert to slightly down CCW
                         anchorMinus = StyleProperties.TextAnchor.MR;
                         positiveTickLabelsBelow =
-                            negativeTickLabelsBelow = false;
+                            negativeTickLabelsBelow = true;
                     }
                 }
             }
+
+            // If we only draw one axis, the label position is the same for
+            // positive and negative ranges
+
+            if (!drawBothAxes) { negativeTickLabelsBelow = positiveTickLabelsBelow; }
 
             // Figure out how many labels we should skip depending on label size
             // and tickSpacing
@@ -458,215 +463,254 @@ public class Axis
         }
 
         // *********************************************
+        // *** Common setup.                         ***
+        // *********************************************
+
+        Bounds bounds= context.getCanvasBounds();
+        LineSegment segment = null;
+
+        if (styles.arrow != StyleProperties.Arrow.NONE || drawLabels) {
+            segment = line.intersect(bounds);
+        }
+
+        // *********************************************
+        // *** Draw arrows.                          ***
+        // *********************************************
+
+        if (styles.arrow != StyleProperties.Arrow.NONE && segment != null) {
+
+            // Arrow lines should match axis lines
+
+            Line.setupLineGc(context, color, lineThickness, lineStyle);
+
+            // We need to sort the segment so that the point with the smallest
+            // t value is first
+
+            Coordinate p1 = segment.getPoint1();
+            Coordinate p2 = segment.getPoint2();
+
+            if (Util.fuzzyGT(p1.t, p2.t) || (p1.t == p2.t && Util.fuzzyEQ(p1.x, p2.x))) {
+                double temp;
+                temp = p1.t;
+                p1.t = p2.t;
+                p2.t = temp;
+            }
+            if (styles.arrow == StyleProperties.Arrow.START ||
+                styles.arrow == StyleProperties.Arrow.BOTH) {
+                Arrow.draw(context, p1, angle < 0 ? angle : 180 + angle, styles);
+            }
+            if (styles.arrow == StyleProperties.Arrow.END ||
+                styles.arrow == StyleProperties.Arrow.BOTH) {
+                Arrow.draw(context, p2, angle < 0 ? 180 + angle : angle, styles);
+            }
+        }
+
+        // *********************************************
         // *** Draw the axis label.                  ***
         // *********************************************
 
-        if (drawLabels) {
+        if (drawLabels && segment != null) {
 
-            // The position is on the right edge of the axis line. If the axis
-            // line is off-screen, skip drawing the label
+            // We need to know if the right/top side of the axis is positive
+            // or negative. This will affect where we place the labels
 
-            Bounds bounds = context.getCanvasBounds();
-            LineSegment segment = line.intersect(bounds);
-            if (segment != null) {
+            boolean positiveEndShowing =
+                isXAxis ?
+                    Math.max(segment.getPoint1().x, segment.getPoint2().x) >= 0.0 :
+                    Math.max(segment.getPoint1().t, segment.getPoint2().t) >= 0.0;
 
-                // The line segment we just created is the exact portion of the
-                // axis line that crosses the viewport. It is angled normally.
-                // We need to take this segment of the axis and rotate it so
-                // that it's horizontal
+            // The line segment we just created is the exact portion of the
+            // axis line that crosses the viewport. It is angled normally.
+            // We need to take this segment of the axis and rotate it so
+            // that it's horizontal
 
-                Affine rotation = new Affine();
-                rotation.appendRotation(-angle, origin.x, origin.t);
+            Affine rotation = new Affine();
+            rotation.appendRotation(-angle, origin.x, origin.t);
 
-                Point2D p1 = rotation.transform(segment.getPoint1().x, segment.getPoint1().t);
-                Point2D p2 = rotation.transform(segment.getPoint2().x, segment.getPoint2().t);
+            Point2D p1 = rotation.transform(segment.getPoint1().x, segment.getPoint1().t);
+            Point2D p2 = rotation.transform(segment.getPoint2().x, segment.getPoint2().t);
 
-                // Convert these from Point2Ds to Coordinates  and sort them
-                // so that the second point has the greater X value
+            // Convert these from Point2Ds to Coordinates  and sort them
+            // so that the second point has the greater X value
 
-                Coordinate leftEndPoint;
-                Coordinate rightEndPoint;
+            Coordinate leftEndPoint;
+            Coordinate rightEndPoint;
 
-                if (p1.getX() < p2.getX()) {
-                    leftEndPoint = new Coordinate(p1);
-                    rightEndPoint = new Coordinate(p2);
-                }
-                else {
-                    leftEndPoint = new Coordinate(p2);
-                    rightEndPoint = new Coordinate(p1);
-                }
+            if (p1.getX() < p2.getX()) {
+                leftEndPoint = new Coordinate(p1);
+                rightEndPoint = new Coordinate(p2);
+            }
+            else {
+                leftEndPoint = new Coordinate(p2);
+                rightEndPoint = new Coordinate(p1);
+            }
 
-                // We need to know if the right/top side of the axis is positive
-                // or negative. This will affect where we place the labels
+            // Set up the label text
 
-                boolean positiveEndShowing;
-                if (isXAxis) {
-                    positiveEndShowing = rightEndPoint.t >= 0;
-                }
-                else {
-                    positiveEndShowing =
-                        Math.max(leftEndPoint.t, rightEndPoint.t) >= 0;
-                }
+            labelStruct.text = labelText;
 
-                // Set up the label text
+            // Set up the label color and font
 
-                labelStruct.text = labelText;
+            textColor = styles.textColor;
+            font = styles.font;
 
-                // Set up the label color and font
+           // Disable padding--we're going to precisely place the label
+            // ourselves
 
-                textColor = styles.textColor;
-                font = styles.font;
+            styles.textPaddingTop =
+                styles.textPaddingBottom =
+                styles.textPaddingLeft =
+                styles.textPaddingRight = 0;
 
-               // Disable padding--we're going to precisely place the label
-                // ourselves
+            // Get the dimensions of the text string in world units
 
-                styles.textPaddingTop =
-                    styles.textPaddingBottom =
-                    styles.textPaddingLeft =
-                    styles.textPaddingRight = 0;
+            javafx.geometry.Bounds labelBounds2D = Label.getTextBounds(labelText, font);
 
-                // Get the dimensions of the text string in world units
+            // Create a bounding box for the initial position we want for
+            // the label. This bounding box is in rotated space, where the
+            // axis is horizontal.
+            //
+            // If there are tick labels, we will place the axis labels on
+            // the opposite side
 
-                javafx.geometry.Bounds labelBounds2D = Label.getTextBounds(labelText, font);
+            Bounds labelBounds;
 
-                // Create a bounding box for the initial position we want for
-                // the label. This bounding box is in rotated space, where the
-                // axis is horizontal.
-                //
-                // If there are tick labels, we will place the axis labels on
-                // the opposite side
+            if (isXAxis) {
+                double sign =
+                    positiveEndShowing ?
+                        (positiveTickLabelsBelow ? 1 : -1) :
+                        (negativeTickLabelsBelow ? 1 : -1);
 
-                Bounds labelBounds;
+                // The label's bounding box has its right edge at the right
+                // edge of the axis
 
-                if (isXAxis) {
+                styles.textAnchor = sign > 0 ? StyleProperties.TextAnchor.BR : StyleProperties.TextAnchor.TR;
+                labelBounds = new Bounds(
+                    new Coordinate(rightEndPoint.x - (labelBounds2D.getWidth() * viewportScale), rightEndPoint.t + sign * ((5 + halfHeight + labelBounds2D.getHeight()) * viewportScale)),
+                    new Coordinate(rightEndPoint.x, rightEndPoint.t + sign * (5 + halfHeight) * viewportScale)
+                );
+            }
 
-                    // The label's bounding box has its right edge at the right
-                    // edge of the axis
+            // The t axis is more complicated. If the velocity is negative,
+            // the rotation puts the label we want on the left side, not the
+            // right
 
-                    if (posi)
+            else {
+                double sign =
+                    positiveEndShowing ?
+                        (positiveTickLabelsBelow ? -1 : 1) :
+                        (negativeTickLabelsBelow ? -1 : 1);
 
-                    styles.textAnchor = StyleProperties.TextAnchor.TR;
+                // The label's bounding box has its right edge at the right
+                // edge of the axis
+
+                if (angle >= 0.0) {
+                    styles.textAnchor = sign > 0 ? StyleProperties.TextAnchor.BR : StyleProperties.TextAnchor.TR;
                     labelBounds = new Bounds(
-                        new Coordinate(rightEndPoint.x - (labelBounds2D.getWidth() * viewportScale), rightEndPoint.t - ((5 + halfHeight + labelBounds2D.getHeight()) * viewportScale)),
-                        new Coordinate(rightEndPoint.x, rightEndPoint.t - (5 + halfHeight) * viewportScale)
+                        new Coordinate(rightEndPoint.x - (labelBounds2D.getWidth() * viewportScale), rightEndPoint.t + sign * (5 + halfHeight) * viewportScale),
+                        new Coordinate(rightEndPoint.x, rightEndPoint.t + sign * ((5 + halfHeight + labelBounds2D.getHeight()) * viewportScale))
                     );
                 }
 
-                // The t axis is more complicated. If the velocity is negative,
-                // the rotation puts the label we want on the left side, not the
-                // right
+                // The label's bounding box has its left edge at the left
+                // edge of the axis
 
                 else {
-
-                    // The label's bounding box has its right edge at the right
-                    // edge of the axis and its bottom edge above the axis
-
-                    styles.textAnchor = StyleProperties.TextAnchor.BR;
-                    if (angle >= 0.0) {
-                        labelBounds = new Bounds(
-                            new Coordinate(rightEndPoint.x - (labelBounds2D.getWidth() * viewportScale), rightEndPoint.t + (5 + halfHeight) * viewportScale),
-                            new Coordinate(rightEndPoint.x, rightEndPoint.t + ((5 + halfHeight + labelBounds2D.getHeight()) * viewportScale))
-                        );
-                    }
-                    else {
-
-                        // The label's bounding box has its left edge at the left
-                        // edge of the axis and its top edge below the axis
-
-                        styles.textAnchor = StyleProperties.TextAnchor.BL;
-                        labelBounds = new Bounds(
-                            new Coordinate(leftEndPoint.x, leftEndPoint.t - ((5 + halfHeight + labelBounds2D.getHeight()) * viewportScale)),
-                            new Coordinate(leftEndPoint.x + (labelBounds2D.getWidth() * viewportScale), leftEndPoint.t - (5 + halfHeight) * viewportScale)
-                        );
-                    }
+                    styles.textAnchor = sign > 0 ? StyleProperties.TextAnchor.BL : StyleProperties.TextAnchor.TL;
+                    labelBounds = new Bounds(
+                        new Coordinate(leftEndPoint.x, leftEndPoint.t - sign * ((5 + halfHeight + labelBounds2D.getHeight()) * viewportScale)),
+                        new Coordinate(leftEndPoint.x + (labelBounds2D.getWidth() * viewportScale), leftEndPoint.t - sign * (5 + halfHeight) * viewportScale)
+                    );
                 }
-
-                // debugDrawBounds(context, labelBounds, revRotation, Color.RED);
-
-                // We've placed the label boundary right up against the left or
-                // right side of the axis segment. That's too tight and could go
-                // off the screen once the label is rotated.
-                //
-                // We'll create bounds that are just a bit smaller than the
-                // viewport and adjust the label bounds to fit completely
-                // within. Since our label bounds are rotated, we will need
-                // to rotate the viewport bounds to match.
-                //
-                // The edges we need to compare against depend on the axis and
-                // its angle
-
-                double labelRightEdge  = bounds.max.x - 10 * viewportScale;
-                double labelTopEdge    = bounds.max.t - 10 * viewportScale;
-                double labelLeftEdge   = bounds.min.x + 10 * viewportScale;
-                double labelBottomEdge = bounds.min.t + 10 * viewportScale;
-
-                // We create special label bounds that extend a long ways in
-                // both the left and right sides. Since we will intersect the
-                // sides with the bounds, this lets us find the optimal position
-                // to place the label
-
-                Bounds extendedLabelBounds = new Bounds(-Double.MAX_VALUE, labelBounds.min.t, Double.MAX_VALUE, labelBounds.max.t);
-
-                // Positive angles only need to worry about the top and right
-                // edges (the label is always on the right or top end of the
-                // axis)
-
-                if (angle >= 0.0) {
-                    LineSegment rightEdge = rotateSegment(labelRightEdge, labelBottomEdge, labelRightEdge, labelTopEdge, rotation);
-                    LineSegment topEdge   = rotateSegment(labelLeftEdge, labelTopEdge, labelRightEdge, labelTopEdge, rotation);
-                    adjustBounds(labelBounds, extendedLabelBounds, rightEdge, true);
-                    adjustBounds(labelBounds, extendedLabelBounds, topEdge, true);
-                }
-
-                // For the X axis, negative angles only need to worry about the right
-                // and bottom edges
-
-                else if (isXAxis) {
-                    LineSegment rightEdge  = rotateSegment(labelRightEdge, labelBottomEdge, labelRightEdge, labelTopEdge, rotation);
-                    LineSegment bottomEdge = rotateSegment(labelLeftEdge, labelBottomEdge, labelRightEdge, labelBottomEdge, rotation);
-                    adjustBounds(labelBounds, extendedLabelBounds, rightEdge, true);
-                    adjustBounds(labelBounds, extendedLabelBounds, bottomEdge, true);
-                }
-
-                // For the T axis, negative angles only need to worry about the left
-                // and top edges.
-
-                else {
-                    LineSegment leftEdge = rotateSegment(labelLeftEdge, labelBottomEdge, labelLeftEdge, labelTopEdge, rotation);
-                    LineSegment topEdge  = rotateSegment(labelLeftEdge, labelTopEdge, labelRightEdge, labelTopEdge, rotation);
-                    adjustBounds(labelBounds, extendedLabelBounds, leftEdge, false);
-                    adjustBounds(labelBounds, extendedLabelBounds, topEdge, false);
-                }
-
-                // debugDrawBounds(context, labelBounds, revRotation, Color.GREEN);
-
-                // Calculate the rotation of the label
-
-                styles.textRotation = angle;
-                if (!isXAxis && angle < 0.0) styles.textRotation = angle + 180;
-
-                // Now reverse rotate the label's anchor point to its actual position
-
-                Point2D location;
-
-                if (styles.textAnchor == StyleProperties.TextAnchor.TR) {
-                    location = revRotation.transform(labelBounds.max.x, labelBounds.max.t);
-                }
-                else {
-                    if (angle >= 0.0) {
-                        location = revRotation.transform(labelBounds.max.x, labelBounds.min.t);
-                    }
-                    else {
-                        location = revRotation.transform(labelBounds.max.x, labelBounds.max.t);
-                    }
-                }
-
-                labelStruct.location = new Coordinate(location.getX(), location.getY());
-
-                // Draw the label
-
-                Label.draw(context, labelStruct, textColor, font, styles);
             }
+
+            // debugDrawBounds(context, labelBounds, revRotation, Color.RED);
+
+            // We've placed the label boundary right up against the left or
+            // right side of the axis segment. That's too tight and could go
+            // off the screen once the label is rotated.
+            //
+            // We'll create bounds that are just a bit smaller than the
+            // viewport and adjust the label bounds to fit completely
+            // within. Since our label bounds are rotated, we will need
+            // to rotate the viewport bounds to match.
+            //
+            // The edges we need to compare against depend on the axis and
+            // its angle
+
+            double labelRightEdge  = bounds.max.x - 10 * viewportScale;
+            double labelTopEdge    = bounds.max.t - 10 * viewportScale;
+            double labelLeftEdge   = bounds.min.x + 10 * viewportScale;
+            double labelBottomEdge = bounds.min.t + 10 * viewportScale;
+
+            // We create special label bounds that extend a long ways in
+            // both the left and right sides. Since we will intersect the
+            // sides with the bounds, this lets us find the optimal position
+            // to place the label
+
+            Bounds extendedLabelBounds = new Bounds(-Double.MAX_VALUE, labelBounds.min.t, Double.MAX_VALUE, labelBounds.max.t);
+
+            // Positive angles only need to worry about the top and right
+            // edges (the label is always on the right or top end of the
+            // axis)
+
+            if (angle >= 0.0) {
+                LineSegment rightEdge = rotateSegment(labelRightEdge, labelBottomEdge, labelRightEdge, labelTopEdge, rotation);
+                LineSegment topEdge   = rotateSegment(labelLeftEdge, labelTopEdge, labelRightEdge, labelTopEdge, rotation);
+                adjustBounds(labelBounds, extendedLabelBounds, rightEdge, true);
+                adjustBounds(labelBounds, extendedLabelBounds, topEdge, true);
+            }
+
+            // For the X axis, negative angles only need to worry about the right
+            // and bottom edges
+
+            else if (isXAxis) {
+                LineSegment rightEdge  = rotateSegment(labelRightEdge, labelBottomEdge, labelRightEdge, labelTopEdge, rotation);
+                LineSegment bottomEdge = rotateSegment(labelLeftEdge, labelBottomEdge, labelRightEdge, labelBottomEdge, rotation);
+                adjustBounds(labelBounds, extendedLabelBounds, rightEdge, true);
+                adjustBounds(labelBounds, extendedLabelBounds, bottomEdge, true);
+            }
+
+            // For the T axis, negative angles only need to worry about the left
+            // and top edges.
+
+            else {
+                LineSegment leftEdge = rotateSegment(labelLeftEdge, labelBottomEdge, labelLeftEdge, labelTopEdge, rotation);
+                LineSegment topEdge  = rotateSegment(labelLeftEdge, labelTopEdge, labelRightEdge, labelTopEdge, rotation);
+                adjustBounds(labelBounds, extendedLabelBounds, leftEdge, false);
+                adjustBounds(labelBounds, extendedLabelBounds, topEdge, false);
+            }
+
+            // debugDrawBounds(context, labelBounds, revRotation, Color.GREEN);
+
+            // Calculate the rotation of the label
+
+            styles.textRotation = angle;
+            if (!isXAxis && angle < 0.0) styles.textRotation = angle + 180;
+
+            // Now reverse rotate the label's anchor point to its actual position
+
+            Point2D location;
+
+            if (styles.textAnchor == StyleProperties.TextAnchor.TR) {
+                location = revRotation.transform(labelBounds.max.x, labelBounds.max.t);
+            }
+            else if (styles.textAnchor == StyleProperties.TextAnchor.BR) {
+                location = revRotation.transform(labelBounds.max.x, labelBounds.min.t);
+            }
+            else if (styles.textAnchor == StyleProperties.TextAnchor.TL) {
+                location = revRotation.transform(labelBounds.max.x, labelBounds.min.t);
+            }
+            else /* if (styles.textAnchor == StyleProperties.TextAnchor.BL) */ {
+                location = revRotation.transform(labelBounds.max.x, labelBounds.max.t);
+            }
+
+            labelStruct.location = new Coordinate(location.getX(), location.getY());
+
+            // Draw the label
+
+            Label.draw(context, labelStruct, textColor, font, styles);
+
         }
 
         // *********************************************
@@ -747,7 +791,6 @@ public class Axis
      * @param maxValue The largest value of the range.
      * @param format The format string by which to convert numbers to string.
      * @param font The font which will be used to display the tick marks.
-     * @param scale The invScale to use to convert screen units to world units.
      *
      * @return A number that can be used with the remainder operator to determine
      * whether to display or skip a particular tick mark.
@@ -797,6 +840,17 @@ public class Axis
         return printEvery;
     }
 
+    /**
+     * Rotate a line segment defined by its two endpoints.
+     *
+     * @param x1 The first x coordinate.
+     * @param t1 The first t coordinate.
+     * @param x2 The second x coordinate.
+     * @param t2 The second t coordinate.
+     * @param rotation The rotation matrix to use.
+     *
+     * @return A new, rotated line segment.
+     */
     private static LineSegment rotateSegment(double x1, double t1, double x2, double t2, Affine rotation)
     {
         Point2D p1 = rotation.transform(x1, t1);
@@ -804,6 +858,17 @@ public class Axis
         return new LineSegment(p1.getX(), p1.getY(), p2.getX(), p2.getY());
     }
 
+    /**
+     * This method helps in adjusting the position of the axis label. The extended bounds define a region in which
+     * the label can be placed. If the given line segment crosses this region, we slide the label bounds left or
+     * right until we bump into the segment.
+     *
+     * @param bounds The bounds of the label.
+     * @param extendedBounds The same bounds, but extended a long ways left and right.
+     * @param segment The line segment that we want the label next to.
+     * @param compareRightEdge If true, move the label so that its right edge touches the closest line crossing. If
+     * false, we use the left edge.
+     */
     private static void adjustBounds(Bounds bounds, Bounds extendedBounds, LineSegment segment, boolean compareRightEdge)
     {
         LineSegment newSegment = segment.intersect(extendedBounds);
@@ -823,21 +888,21 @@ public class Axis
         }
     }
 
-    private static void debugDrawBounds(Context context, Bounds bounds, Affine transform, Color color)
-    {
-        Point2D p1 = transform.transform(bounds.min.x, bounds.min.t);
-        Point2D p2 = transform.transform(bounds.min.x, bounds.max.t);
-        Point2D p3 = transform.transform(bounds.max.x, bounds.max.t);
-        Point2D p4 = transform.transform(bounds.max.x, bounds.min.t);
-
-        context.gc.setStroke(color);
-        context.gc.beginPath();
-        context.gc.moveTo(p1.getX(), p1.getY());
-        context.gc.lineTo(p2.getX(), p2.getY());
-        context.gc.lineTo(p3.getX(), p3.getY());
-        context.gc.lineTo(p4.getX(), p4.getY());
-        context.gc.lineTo(p1.getX(), p1.getY());
-        context.gc.stroke();
-    }
+//    private static void debugDrawBounds(Context context, Bounds bounds, Affine transform, Color color)
+//    {
+//        Point2D p1 = transform.transform(bounds.min.x, bounds.min.t);
+//        Point2D p2 = transform.transform(bounds.min.x, bounds.max.t);
+//        Point2D p3 = transform.transform(bounds.max.x, bounds.max.t);
+//        Point2D p4 = transform.transform(bounds.max.x, bounds.min.t);
+//
+//        context.gc.setStroke(color);
+//        context.gc.beginPath();
+//        context.gc.moveTo(p1.getX(), p1.getY());
+//        context.gc.lineTo(p2.getX(), p2.getY());
+//        context.gc.lineTo(p3.getX(), p3.getY());
+//        context.gc.lineTo(p4.getX(), p4.getY());
+//        context.gc.lineTo(p1.getX(), p1.getY());
+//        context.gc.stroke();
+//    }
 
 }

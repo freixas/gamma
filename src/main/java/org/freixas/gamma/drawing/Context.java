@@ -19,7 +19,6 @@ package org.freixas.gamma.drawing;
 import org.freixas.gamma.ProgrammingException;
 import org.freixas.gamma.execution.LCodeEngine;
 import org.freixas.gamma.value.Bounds;
-import org.freixas.gamma.value.Coordinate;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -144,8 +143,7 @@ public class Context
             // The inverse transform goes from screen units to world units
 
             Affine inverse = gc.getTransform().createInverse();
-            Bounds worldBounds = screenBounds.transform(inverse);
-            return worldBounds;
+            return screenBounds.transform(inverse);
         }
         catch (NonInvertibleTransformException e) {
             throw new ProgrammingException("Context.getCanvasBounds()", e);

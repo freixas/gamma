@@ -12,7 +12,7 @@
 
 <VBox xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.freixas.gamma.RuntimeErrorDialogController">
    <children>
-      <Label maxWidth="1.7976931348623157E308" minWidth="1.0" text="Runtime Error" VBox.vgrow="NEVER">
+      <Label fx:id="headerTitle" maxWidth="1.7976931348623157E308" minWidth="1.0" text="Runtime Error" VBox.vgrow="NEVER">
          <font>
             <Font size="18.0" />
          </font>
@@ -20,7 +20,7 @@
             <Insets bottom="10.0" />
          </VBox.margin>
       </Label>
-      <Label text="An error occurred here during execution:" VBox.vgrow="NEVER">
+      <Label fx:id="headerSubtitle" text="An error occurred here during execution:" VBox.vgrow="NEVER">
          <VBox.margin>
             <Insets bottom="10.0" />
          </VBox.margin>

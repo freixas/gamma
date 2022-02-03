@@ -99,6 +99,23 @@ public class StylePropertyDefinition
     static final StylePropertyDefinition[] lineThicknessDep = { xLineThickness, tLineThickness, divLineThickness };
     static final StylePropertyDefinition lineThickness = new StylePropertyDefinition("line-thickness", fieldMap.get("lineThickness"), StyleProperty.Type.FLOAT, Min.GT0, lineThicknessDep);
 
+
+    static final StylePropertyDefinition xLineStyle = new StylePropertyDefinition("x-line-style", fieldMap.get("xLineStyle"), StyleProperty.Type.LINE_STYLE);
+    static final StylePropertyDefinition tLineStyle = new StylePropertyDefinition("t-line-style", fieldMap.get("tLineStyle"), StyleProperty.Type.LINE_STYLE);
+
+    static final StylePropertyDefinition xMajorDivLineStyle = new StylePropertyDefinition("x-major-div-line-style", fieldMap.get("xMajorDivLineStyle"), StyleProperty.Type.LINE_STYLE);
+    static final StylePropertyDefinition tMajorDivLineStyle = new StylePropertyDefinition("t-major-div-line-style", fieldMap.get("tMajorDivLineStyle"), StyleProperty.Type.LINE_STYLE);
+    static final StylePropertyDefinition[] majorDivLineStyleDep = { xMajorDivLineStyle, tMajorDivLineStyle };
+    static final StylePropertyDefinition majorDivLineStyle = new StylePropertyDefinition("major-div-line-style", null, StyleProperty.Type.LINE_STYLE, majorDivLineStyleDep);
+
+    static final StylePropertyDefinition xDivLineStyle = new StylePropertyDefinition("x-div-line-style", fieldMap.get("xDivLineStyle"), StyleProperty.Type.LINE_STYLE);
+    static final StylePropertyDefinition tDivLineStyle = new StylePropertyDefinition("t-div-line-style", fieldMap.get("tDivLineStyle"), StyleProperty.Type.LINE_STYLE);
+    static final StylePropertyDefinition[] divLineStyleDep = { xDivLineStyle, tDivLineStyle, majorDivLineStyle };
+    static final StylePropertyDefinition divLineStyle = new StylePropertyDefinition("div-line-style", null, StyleProperty.Type.LINE_STYLE, divLineStyleDep);
+
+    static final StylePropertyDefinition[] lineStyleDep = { xLineStyle, tLineStyle, divLineStyle };
+    static final StylePropertyDefinition lineStyle = new StylePropertyDefinition("line-style", fieldMap.get("lineStyle"), StyleProperty.Type.LINE_STYLE, lineStyleDep);
+
     // Font components
 
     static final StylePropertyDefinition xTickFontFamily = new StylePropertyDefinition("x-tick-font-family", fieldMap.get("xTickFontFamily"), StyleProperty.Type.STRING);
@@ -236,6 +253,19 @@ public class StylePropertyDefinition
         defMap.put("major-div-line-thickness", majorDivLineThickness);
 
         defMap.put("line-thickness", lineThickness);
+
+        defMap.put("x-line-style", xLineStyle);
+        defMap.put("t-line-style", tLineStyle);
+
+        defMap.put("x-div-line-style", xDivLineStyle);
+        defMap.put("t-div-line-style", tDivLineStyle);
+        defMap.put("div-line-style", divLineStyle);
+
+        defMap.put("x-major-div-line-style", xMajorDivLineStyle);
+        defMap.put("t-major-div-line-style", tMajorDivLineStyle);
+        defMap.put("major-div-line-style", majorDivLineStyle);
+
+        defMap.put("line-style", lineStyle);
 
         // Fonts
 
@@ -425,6 +455,9 @@ public class StylePropertyDefinition
                 }
                 else if (field.getType().getName().equals("double") && value.getClass() == Double.class) {
                     field.set(styles, (double)value);
+                }
+                else if (field.getType().getName().equals("boolean") && value.getClass() == Boolean.class) {
+                    field.set(styles, (boolean)value);
                 }
                 else {
                     throw new ProgrammingException("StylePropertyDefinition.setStyleStructValue: Can't assign value to field");

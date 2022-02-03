@@ -16,23 +16,15 @@
  */
 package org.freixas.gamma.drawing;
 
+import javafx.scene.canvas.GraphicsContext;
 import org.freixas.gamma.css.value.StyleProperties;
 import org.freixas.gamma.css.value.StyleStruct;
 import org.freixas.gamma.execution.lcode.WorldlineStruct;
 import org.freixas.gamma.math.Relativity;
 import org.freixas.gamma.math.Util;
-import org.freixas.gamma.value.Bounds;
-import org.freixas.gamma.value.ConcreteObserver;
-import org.freixas.gamma.value.Coordinate;
-import org.freixas.gamma.value.CurveSegment;
-import org.freixas.gamma.value.HyperbolicSegment;
-import org.freixas.gamma.value.IntervalObserver;
-import org.freixas.gamma.value.LineSegment;
-import org.freixas.gamma.value.WorldlineEndpoint;
-import org.freixas.gamma.value.WorldlineSegment;
+import org.freixas.gamma.value.*;
+
 import java.util.ArrayList;
-import java.util.Iterator;
-import javafx.scene.canvas.GraphicsContext;
 
 /**
  *
@@ -59,10 +51,8 @@ public class Worldline
         if (observer instanceof ConcreteObserver concreteObserver) {
             ArrayList<WorldlineSegment>segments = concreteObserver.getSegments();
 
-            Iterator<WorldlineSegment> iter = segments.iterator();
-            while (iter.hasNext()) {
+            for (WorldlineSegment segment : segments) {
 
-                WorldlineSegment segment = iter.next();
                 CurveSegment curveSegment = segment.getCurveSegment();
 
                 // Is this a line segment? If so, intersect it with the viewport and
@@ -106,9 +96,7 @@ public class Worldline
             if (bounds != null) {
                 ArrayList<WorldlineSegment>segments = intervalObserver.getSegments();
 
-                Iterator<WorldlineSegment> iter = segments.iterator();
-                while (iter.hasNext()) {
-                    WorldlineSegment segment = iter.next();
+                for (WorldlineSegment segment : segments) {
                     int inRange = intervalObserver.inRange(segment);
                     if (inRange == 1) break;
 
@@ -121,7 +109,7 @@ public class Worldline
                         if (curveSegment instanceof LineSegment lineSegment) {
                             lineSegment = lineSegment.intersect(bounds);
                             if (lineSegment != null) {
-                                 Line.drawRaw(context, lineSegment, styles);
+                                Line.drawRaw(context, lineSegment, styles);
                             }
                         }
 
@@ -142,7 +130,7 @@ public class Worldline
                         else if (curveSegment instanceof org.freixas.gamma.value.Line line) {
                             LineSegment lineSegment = line.intersect(bounds);
                             if (lineSegment != null) {
-                               Line.drawRaw(context, lineSegment, styles);
+                                Line.drawRaw(context, lineSegment, styles);
                             }
                         }
                     }
@@ -214,8 +202,7 @@ public class Worldline
                 angleAtEnd = 90.0;
             }
         }
-        double[] angles = { angleAtStart, angleAtEnd };
-        return angles;
+        return new double[]{ angleAtStart, angleAtEnd };
     }
 
 }

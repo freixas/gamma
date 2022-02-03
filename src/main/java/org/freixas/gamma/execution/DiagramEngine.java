@@ -50,6 +50,8 @@ public class DiagramEngine
     private AnimationEngine animationEngine;
     private HCodeEngine hCodeEngine;
 
+    private boolean isClosed;
+
     @SuppressWarnings("LeakingThisInConstructor")
     public DiagramEngine(MainWindow window, LinkedList<Object> hCodes, boolean isAnimated, boolean hasDisplayVariables, SetStatement setStatement, Stylesheet stylesheet)
     {
@@ -63,6 +65,8 @@ public class DiagramEngine
         this.animationEngine = null;
         this.hCodeEngine = null;
 
+        this.isClosed = false;
+
         // This call shuts down any diagram engine currently running in this
         // window
 
@@ -71,6 +75,7 @@ public class DiagramEngine
 
     public void execute() throws ExecutionException, ProgrammingException
     {
+        if (isClosed) return;
         window.clearScriptPrintDialog();
 
         try {
@@ -109,11 +114,18 @@ public class DiagramEngine
      */
     public void updateForDisplayVariable(boolean restart)
     {
-        if (isAnimated) {
-            animationEngine.updateForDisplayVariable(restart);
+        if (isClosed) return;
+
+        try {
+            if (isAnimated) {
+                animationEngine.updateForDisplayVariable(restart);
+            }
+            else {
+                hCodeEngine.execute();
+            }
         }
-        else {
-            hCodeEngine.execute();
+        catch (Throwable e) {
+            handleException(e);
         }
     }
 
@@ -139,12 +151,16 @@ public class DiagramEngine
 
     public void close()
     {
+        isClosed = true;
         if (isAnimated) {
             if (animationEngine != null) animationEngine.close();
+            animationEngine = null;
         }
         else {
             if (hCodeEngine != null) hCodeEngine.close();
+            hCodeEngine = null;
         }
+        window.enableDisplayControls(false);
     }
 
     // **********************************************************

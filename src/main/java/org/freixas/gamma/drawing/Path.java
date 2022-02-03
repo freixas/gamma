@@ -60,10 +60,15 @@ public class Path
             gc.closePath();
         }
 
-       if (struct.stroke) {
-           Line.setupLineGc(context, styles);
-           gc.stroke();
-       }
+        if (struct.fill) {
+            setupFillGc(context, styles);
+            gc.fill();
+        }
+
+        if (struct.stroke) {
+            Line.setupLineGc(context, styles);
+            gc.stroke();
+        }
 
        // Add arrow heads
 
@@ -83,11 +88,6 @@ public class Path
                    Arrow.draw(context, end, angle, styles);
                }
            }
-       }
-
-       if (struct.fill) {
-           setupFillGc(context, styles);
-           gc.fill();
        }
 
         // Restore the original graphics context

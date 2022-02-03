@@ -36,7 +36,7 @@ import java.util.regex.Pattern;
 public class Stylesheet
 {
     static final String DEFAULT_STYLESHEET_STRING =
-        "grid { color: #CCC; } hypergrid { color: #3D3; } worldline { color: #00F; }";
+        "grid { color: #CCC; } hypergrid { color: #3D3; } worldline { color: #00F; } axes { font-size: 14; tick-font-size: 10; }";
     static public Stylesheet DEFAULT_STYLESHEET;
     static {
         try {

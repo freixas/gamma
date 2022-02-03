@@ -20,6 +20,7 @@ package org.freixas.gamma;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
@@ -40,8 +41,21 @@ public class RuntimeErrorDialogController {
     private WebView html;
 
     @FXML
+    private Label headerTitle;
+
+    @FXML
+    private Label headerSubtitle;
+
+
+    @FXML
     void handleClose(ActionEvent event) {
         closeButton.getScene().getWindow().hide();
+    }
+
+    public void setForProgrammingError()
+    {
+        headerTitle.setText("Programming Error");
+        headerSubtitle.setText("This error should not have occurred:");
     }
 
     public void setHTML(String htmlContent)

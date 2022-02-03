@@ -247,6 +247,11 @@ public class ExportDiagramDialog extends Dialog<ButtonType>
             alert.setContentText("Write failed!\n" + e.getLocalizedMessage());
             alert.showAndWait();
         }
+
+        // If we succeeded, change the default directory for images for the
+        // window parent
+
+        window.setDefaultDirectory(Gamma.FileType.IMAGE, exportFile);
     }
 
     private IIOMetadata setJPGPPI(IIOMetadata metadata, int dpi) throws IIOInvalidTreeException

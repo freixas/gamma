@@ -29,6 +29,7 @@ public class StyleProperty
     public enum Type
     {
         FLOAT, STRING, COLOR, BOOLEAN,
+        LINE_STYLE,
         FONT_WEIGHT, FONT_STYLE, TEXT_ANCHOR,
         ARROW, EVENT_SHAPE,
         FONT

@@ -177,6 +177,8 @@ public class AnimationEngine
     private int absFrame;
     private int absMaxFrame;
 
+    private boolean isClosed;
+
     public AnimationEngine(MainWindow window, SetStatement setStatement, Stylesheet stylesheet, HCodeProgram program, boolean hasDisplayVariables)
     {
         this.window = window;
@@ -189,6 +191,7 @@ public class AnimationEngine
         this.timer = null;
 
         this.state = State.NOT_SET;
+        this.isClosed = false;
 
         setup();
     }
@@ -425,6 +428,8 @@ public class AnimationEngine
      */
     public void execute(boolean firstTime)
     {
+        if (isClosed) return;
+
         if (firstTime) {
             // First execution
 
@@ -545,6 +550,8 @@ public class AnimationEngine
 
     private synchronized void executeFrame(int frame)
     {
+        if (isClosed) return;
+
         Iterator<String> iter = symbolNames.iterator();
 
         // Tell all the animation variables to update to match the current
@@ -619,6 +626,7 @@ public class AnimationEngine
     {
         stop();
         removeListeners();
+        isClosed = true;
 
         // Disable the button area
 
@@ -626,6 +634,7 @@ public class AnimationEngine
 
         if (hCodeEngine != null) {
             hCodeEngine.close();
+            hCodeEngine = null;
         }
     }
 

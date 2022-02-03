@@ -67,10 +67,13 @@ public class HCodeEngine
 
     TokenContext tokenContext;
 
+    private boolean isClosed;
+
     public HCodeEngine(MainWindow window, SetStatement setStatement, Stylesheet stylesheet, HCodeProgram program)
     {
         this.window = window;
         this.setStatement = setStatement;
+        this.isClosed = false;
 
         // Get the stylesheet so that it contains
         //
@@ -198,6 +201,8 @@ public class HCodeEngine
 
     public void execute()
     {
+        if (isClosed) return;
+
         // System.err.println("\n\n*******************\nNew execution\n*******************\n");
         tokenContext = new TokenContext(null, "", 0, 0, 0, 0);
 
@@ -220,6 +225,8 @@ public class HCodeEngine
 
         try {
             while (programCounter < code.size()) {
+                if (isClosed) return;
+                
 //                System.err.print(programCounter + ": ");
                 Object obj = code.get(programCounter);
                 if (!(obj instanceof HCode) && !(obj instanceof Label)) {
@@ -303,6 +310,7 @@ public class HCodeEngine
     public void close()
     {
         if (lCodeEngine != null) lCodeEngine.close();
+        lCodeEngine = null;
     }
 
     public void addCommand(Command command)
@@ -326,11 +334,10 @@ public class HCodeEngine
         }
     }
 
-    public void throwGammaException(Throwable e)
-        throws GammaRuntimeException
+    public void throwGammaException(Throwable e) throws GammaRuntimeException
     {
         // We might get a nest GammaRuntimeException
-        
+
         if (e instanceof GammaRuntimeException gammaException) {
             throw gammaException;
         }

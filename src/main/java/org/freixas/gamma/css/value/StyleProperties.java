@@ -157,6 +157,9 @@ public class StyleProperties
             case BOOLEAN -> {
                 return new StyleProperty(name, toBoolean(value), definition);
             }
+            case LINE_STYLE -> {
+                return new StyleProperty(name, toLineStyle(value), definition);
+            }
             case FONT_WEIGHT -> {
                 return new StyleProperty(name, toFontWeight(value), definition);
             }
@@ -184,8 +187,19 @@ public class StyleProperties
     // *
     // **********************************************************************
 
+    public static LineStyle toLineStyle(Token<?> value)
+    {
+        if (value.isName()) {
+            return StyleProperties.LineStyle.toEnum(value.getString());
+        }
+        return null;
+    }
+
     public static FontWeight toFontWeight(Token<?> value)
     {
+        if (value.isString()) {
+            return FontWeight.findByName(value.getString());
+        }
         if (value.isName()) {
             return FontWeight.findByName(value.getString());
         }
@@ -251,7 +265,10 @@ public class StyleProperties
 
     public static String toStr(Token<?> value)
     {
-        if (value.isString()) {
+        // If a string is needed and a name is given, we'll use the name as the
+        // string's value
+        
+        if (value.isString() || value.isName()) {
             return value.getString();
         }
         return null;

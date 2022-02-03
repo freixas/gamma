@@ -138,7 +138,7 @@ public class Line
     }
 
     /**
-     * Draw a line segment.Don't save, restore or setup the graphics context.
+     * Draw a line segment.Don't save, restore or set up the graphics context.
      *
      * @param context The drawing context.
      * @param segment The line segment to draw.
@@ -183,29 +183,7 @@ public class Line
      */
     static public void setupLineGc(Context context, StyleStruct styles)
     {
-        GraphicsContext gc = context.gc;
-        double scale = context.invScale;
-
-        // Set the line color
-
-        gc.setStroke(styles.color);
-
-        // *** NOTE: For now, we'll assume the stroke style is CENTER
-        // Set the line thickness
-
-        double worldLineThickness = styles.lineThickness * scale;
-        gc.setLineWidth(worldLineThickness);
-
-        // Set the line style
-
-        if (styles.lineStyle == StyleProperties.LineStyle.DASHED) {
-            double dashLength = 5.0 * scale;
-            gc.setLineDashes(dashLength, dashLength);
-        }
-        else if (styles.lineStyle == StyleProperties.LineStyle.DASHED) {
-            gc.setLineCap(StrokeLineCap.ROUND);
-            gc.setLineDashes(worldLineThickness / 10.0, worldLineThickness * 2);
-        }
+        setupLineGc(context, styles.color, styles.lineThickness, styles.lineStyle);
     }
 
     /**
@@ -239,7 +217,7 @@ public class Line
             double dashLength = 5.0 * scale;
             gc.setLineDashes(dashLength, dashLength);
         }
-        else if (lineStyle == StyleProperties.LineStyle.DASHED) {
+        else if (lineStyle == StyleProperties.LineStyle.DOTTED) {
             gc.setLineCap(StrokeLineCap.ROUND);
             gc.setLineDashes(worldLineThickness / 10.0, worldLineThickness * 2);
         }

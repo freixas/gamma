@@ -206,9 +206,19 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
                     }
                 }
                 case V -> {
-                    maxT = vToT(limitValue);
-                    if (Double.isNaN(maxT) || maxT < vPoint.t) {
-                        throw new ExecutionException("The observer segment's final velocity will never be reached.");
+                    if (zeroAcceleration) {
+                        if (Util.fuzzyEQ(min.v, limitValue)) {
+                            maxT = min.t;
+                        }
+                        else {
+                            throw new ExecutionException("The observer segment's final velocity will never be reached since the current velocity is a constant " + min.v);
+                        }
+                    }
+                    else {
+                        maxT = curve.vToT(limitValue);
+                        if (Util.fuzzyLT(maxT, min.t)) {
+                            throw new ExecutionException("The observer segment's final velocity will never be reached. The starting velocity is " + min.v);
+                        }
                     }
                 }
                 case NONE -> {

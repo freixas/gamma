@@ -288,6 +288,7 @@ public final class MainWindow extends Stage
         }
 
         this.script = script;
+        setDefaultDirectory(Gamma.FileType.SCRIPT, script);
     }
 
     /**
@@ -359,6 +360,21 @@ public final class MainWindow extends Stage
             }
         }
         return directoryDefaults[type.getValue()];
+    }
+
+    /**
+     * Set the default directory to use for the various file dialogs.
+     *
+     * @param type The type of file whose default directory we want.
+     * @param dir The default directory to use.
+     */
+    public void setDefaultDirectory(Gamma.FileType type, File dir)
+    {
+        if (dir == null) return;
+        if (!dir.exists()) return;
+        if (!dir.isDirectory()) dir = dir.getParentFile();
+
+        directoryDefaults[type.getValue()] = dir;
     }
 
     // **********************************************************************
@@ -441,7 +457,7 @@ public final class MainWindow extends Stage
      *
      * @param enable True if this window will have display controls.
      */
-    private void enableDisplayControls(boolean enable)
+    public void enableDisplayControls(boolean enable)
     {
         if (enable && !hasDisplayControls) {
             top.getChildren().add(1, controlsSplitter);

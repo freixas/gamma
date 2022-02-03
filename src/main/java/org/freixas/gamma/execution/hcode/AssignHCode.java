@@ -67,7 +67,7 @@ public class AssignHCode extends ArgInfoHCode
         else if (address.exists()) {
             String name = ((SymbolTableAddress)address).getName();
             if (engine.getDynamicSymbolTable().contains(name)) {
-                throw new ExecutionException("You cannot change the value of an animation variable");
+                throw new ExecutionException("You cannot change the value of dynamic variable '" + name + "'");
             }
         }
 
