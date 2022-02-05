@@ -172,7 +172,7 @@ public class Selector
 
         if (this.commandName != null) {
             if (this.commandName.equals(commandName)) {
-                score += 100;
+                score += 1;
             }
             else {
                 return -1;
@@ -198,7 +198,7 @@ public class Selector
                 for (String cls : this.classes) {
                     int index = Arrays.binarySearch(classes, cls);
                     if (index < 0) return -1;
-                    score += 1;
+                    score += 10;
                 }
             }
             else {

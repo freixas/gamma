@@ -117,7 +117,7 @@ public class Label
 
             // Rotate around the offset
 
-            transform.appendRotation(-styles.textRotation, struct.location.x, struct.location.t);
+            transform.appendRotation(-struct.rotation, struct.location.x, struct.location.t);
 
             // Now draw the text
 

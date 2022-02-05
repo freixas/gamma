@@ -26,21 +26,22 @@ import java.util.ListIterator;
 import java.util.Set;
 
 /**
- * Animation variables are stored in this table and in the regular Symbol
+ * Dynamic variables are stored in this table and in the regular Symbol
  * table. The are placed in the regular symbol table just to make sure they
- * aren't assigned to twice. When retrieving a symbol, if the symbol is present
- * in this table, it's value will depend on the frame number.
+ * aren't assigned to twice.
  *
  * @author Antonio Freixas
  */
 public class DynamicSymbolTable extends SymbolTable
 {
     private int lastOrderNumber;
+    private boolean hasDisplayVariables;
 
     public DynamicSymbolTable(HCodeEngine engine)
     {
         super(engine);
         lastOrderNumber = -1;
+        hasDisplayVariables = false;
     }
 
     @Override
@@ -79,6 +80,7 @@ public class DynamicSymbolTable extends SymbolTable
         if (contains(symbol)) return;
 
         if (value instanceof DisplayVariable displayVar) {
+            hasDisplayVariables = true;
             displayVar.setDisplayOrder(++lastOrderNumber);
         }
         super.put(symbol, value);
@@ -93,6 +95,7 @@ public class DynamicSymbolTable extends SymbolTable
 
     public void addDisplayControls(MainWindow window)
     {
+        if (!hasDisplayVariables) return;
         Set<String> symbolNames = getSymbolNames();
 
         // Grab all display variables and place them in a collection
@@ -107,15 +110,18 @@ public class DynamicSymbolTable extends SymbolTable
             }
         }
 
-        // Now we need to sort the list into display order
+        if (list.size() > 0) {
 
-        Collections.sort(list, (first, second) -> first.getDisplayOrder() - second.getDisplayOrder());
+            // Now we need to sort the list into display order
 
-        // Display the items
+            Collections.sort(list, (first, second) -> first.getDisplayOrder() - second.getDisplayOrder());
 
-        ListIterator<DisplayVariable> iter2 = list.listIterator();
-        while (iter2.hasNext()) {
-            window.addDisplayControl(iter2.next());
+            // Display the items
+
+            ListIterator<DisplayVariable> iter2 = list.listIterator();
+            while (iter2.hasNext()) {
+                window.addDisplayControl(iter2.next());
+            }
         }
     }
 

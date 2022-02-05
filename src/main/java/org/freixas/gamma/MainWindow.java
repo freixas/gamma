@@ -38,11 +38,15 @@ import org.freixas.gamma.value.RangeVariable;
 import java.io.IOException;
 import java.util.ArrayList;
 import javafx.collections.FXCollections;
+import javafx.event.EventHandler;
+import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
+import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Screen;
@@ -465,6 +469,7 @@ public final class MainWindow extends Stage
             controlsSplitter.setDividerPositions(.9, .1);
             VBox.setVgrow(diagramParent, Priority.ALWAYS);
             hasDisplayControls = true;
+            top.layout();
         }
 
         if (!enable && hasDisplayControls) {
@@ -473,6 +478,7 @@ public final class MainWindow extends Stage
             top.getChildren().add(1, diagramParent);
             VBox.setVgrow(diagramParent, Priority.ALWAYS);
             hasDisplayControls = false;
+            top.layout();
         }
     }
 
@@ -503,7 +509,33 @@ public final class MainWindow extends Stage
             displayControlArea.getChildren().add(slider);
 
             slider.valueProperty().addListener(
-                (value, oldValue, newValue) -> range.setCurrentValue((Double)newValue));
+                (value, oldValue, newValue) -> {
+                    Point2D p = slider.localToScene(0.0, 0.0);
+                    Tooltip tooltip = slider.getTooltip();
+                    if (tooltip == null) {
+                        tooltip = new Tooltip();
+                        slider.setTooltip(tooltip);
+                    }
+                    tooltip.setText(Double.toString((Double)newValue));
+                    Bounds bounds = slider.lookup(".thumb").getBoundsInParent();
+                    Scene scene = slider.getScene();
+                    tooltip.show(slider,
+                                 p.getX() + scene.getX() + scene.getWindow().getX() + bounds.getCenterX(),
+                                 p.getY() + scene.getY() + scene.getWindow().getY() + bounds.getHeight());
+                    range.setCurrentValue((Double)newValue);
+                });
+
+            slider.focusedProperty().addListener(
+                (value, oldValue, newValue) -> {
+                    Tooltip tooltip = slider.getTooltip();
+                    tooltip.hide();
+                });
+            slider.setOnMouseClicked((MouseEvent event) -> {
+                if (event.getClickCount() == 2) {
+                    double value = range.getInitialValue();
+                    slider.setValue(value);
+                }
+            });
 
         }
         else if (var instanceof ToggleVariable bool) {

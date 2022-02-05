@@ -226,7 +226,7 @@ public class HCodeEngine
         try {
             while (programCounter < code.size()) {
                 if (isClosed) return;
-                
+
 //                System.err.print(programCounter + ": ");
                 Object obj = code.get(programCounter);
                 if (!(obj instanceof HCode) && !(obj instanceof Label)) {
@@ -291,6 +291,7 @@ public class HCodeEngine
         // handle redraws
 
         if (firstExecution) {
+            dynamicTable.addDisplayControls(window);
             lCodeEngine.setup();
         }
         else {

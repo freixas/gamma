@@ -92,12 +92,12 @@ public class DiagramEngine
                 hCodeEngine = new HCodeEngine(window, setStatement, stylesheet, program);
                 hCodeEngine.execute();
 
-                // If we have dynamic variables, we need add the controls to the main window
-
-                dynamicSymbolTable = hCodeEngine.getDynamicSymbolTable();
-                if (hasDisplayVariables) {
-                    dynamicSymbolTable.addDisplayControls(window);
-                }
+//                // If we have dynamic variables, we need add the controls to the main window
+//
+//                dynamicSymbolTable = hCodeEngine.getDynamicSymbolTable();
+//                if (hasDisplayVariables) {
+//                    dynamicSymbolTable.addDisplayControls(window);
+//                }
              }
         }
         catch (Throwable e) {

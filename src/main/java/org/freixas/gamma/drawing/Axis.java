@@ -321,7 +321,6 @@ public class Axis
         Font font;
         LabelStruct labelStruct = new LabelStruct();
 
-        double savedTextRotation = styles.textRotation;
         double savedTextPaddingTop = styles.textPaddingTop;
         double savedTextPaddingBottom = styles.textPaddingBottom;
         double savedTextPaddingLeft = styles.textPaddingLeft;
@@ -439,7 +438,7 @@ public class Axis
             maxTickDimension = getMaxTickDimensions(firstTick, maxDistance, format, font);
             printEvery = getLabelSkip(maxTickDimension, tickSpacing * tickScale, viewportScale);
 
-            styles.textRotation = 0.0;
+            labelStruct.rotation = 0.0;
             styles.textPaddingTop = pad;
             styles.textPaddingBottom = pad;
             styles.textPaddingLeft = pad;
@@ -685,8 +684,8 @@ public class Axis
 
             // Calculate the rotation of the label
 
-            styles.textRotation = angle;
-            if (!isXAxis && angle < 0.0) styles.textRotation = angle + 180;
+            labelStruct.rotation = angle;
+            if (!isXAxis && angle < 0.0) labelStruct.rotation = angle + 180;
 
             // Now reverse rotate the label's anchor point to its actual position
 
@@ -717,8 +716,6 @@ public class Axis
         // *** Restore the original graphics context.***
         // *********************************************
 
-
-        styles.textRotation = savedTextRotation;
         styles.textPaddingTop = savedTextPaddingTop;
         styles.textPaddingBottom = savedTextPaddingBottom;
         styles.textPaddingLeft = savedTextPaddingLeft;

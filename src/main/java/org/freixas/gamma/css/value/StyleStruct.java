@@ -93,7 +93,6 @@ public class StyleStruct
     public double textPaddingLeft = 0.0;
     public double textPaddingRight = 0.0;
     public StyleProperties.TextAnchor textAnchor = StyleProperties.TextAnchor.TC;
-    public double textRotation = 0.0;
 
     public boolean xTicks = true;
     public boolean tTicks = true;

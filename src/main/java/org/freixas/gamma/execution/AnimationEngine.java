@@ -442,12 +442,12 @@ public class AnimationEngine
             dynamicSymbolTable = hCodeEngine.getDynamicSymbolTable();
             symbolNames = dynamicSymbolTable.getSymbolNames();
 
-            // If we have dynamic variables, we need add the controls to the main window
-
-            dynamicSymbolTable = hCodeEngine.getDynamicSymbolTable();
-            if (hasDisplayVariables) {
-                dynamicSymbolTable.addDisplayControls(window);
-            }
+//            // If we have dynamic variables, we need add the controls to the main window
+//
+//            dynamicSymbolTable = hCodeEngine.getDynamicSymbolTable();
+//            if (hasDisplayVariables) {
+//                dynamicSymbolTable.addDisplayControls(window);
+//            }
         }
 
         else {

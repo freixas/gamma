@@ -300,7 +300,38 @@ public final class Relativity
     }
 
     /**
-     * Convert a velocity to a t axis angle in degrees.
+     * Convert a velocity to an x axis angle in degrees. The velocity must be
+     * between -1 and 1, exclusive. The output will be between -45 and 45,
+     * exclusive.
+     *
+     * @param v The velocity as a percentage of the speed of light.
+     *
+     * @return The x axis angle in degrees.
+     */
+    public static double vToXAngle(double v)
+    {
+        return Math.toDegrees(Math.atan(v));
+    }
+
+    /**
+     * Convert an x axis angle in degrees to a velocity. The angle must be
+     * between -45 and 45, exclusive. The output will be between -1 and 1,
+     * exclusive.
+     *
+     * @param angle The x axis angle in degrees.
+     *
+     * @return The velocity.
+     */
+    public static double angleXToV(double angle)
+    {
+        return Math.tan(Math.toRadians(angle));
+    }
+
+    /**
+     * Convert a velocity to a t axis angle in degrees. The velocity must be
+     * between -1 and 1, exclusive. The output will be between -45and
+     * -90, exclusive, or between 45, exclusive,  and 90, inclusive.
+     * exclusive. A velocity of 0 returns an angle of 90, never -90.
      *
      * @param v The velocity as a percentage of the speed of light.
      *
@@ -318,7 +349,9 @@ public final class Relativity
     }
 
     /**
-     * Convert a t axis angle in degrees to a velocity.
+     * Convert a t axis angle in degrees to a velocity. The angle must be
+     * between 45, exclusive, and 90, inclusive, or between -45 and -90,
+     * exclusive. The output will be between -1 and 1, exclusive.
      *
      * @param angle The t axis angle in degrees.
      *
@@ -337,61 +370,78 @@ public final class Relativity
     }
 
     /**
-     * Convert a velocity to an x axis angle in degrees.
-     *
-     * @param v The velocity as a percentage of the speed of light.
-     *
-     * @return The x axis angle in degrees.
-     */
-    public static double vToXAngle(double v)
-    {
-        return Math.toDegrees(Math.atan(v));
-    }
-
-    /**
-     * Convert an x axis angle in degrees to a velocity.
-     *
-     * @param angle The x axis angle in degrees.
-     *
-     * @return The velocity.
-     */
-    public static double angleXToV(double angle)
-    {
-        return Math.tan(Math.toRadians(angle));
-    }
-
-    /**
      * Convert an angle (in degrees) in the rest frame to the equivalent angle
-     * in the prime frame.
+     * in the prime frame. Any angle is acceptable.
      *
      * @param angle The angle in degrees in the rest frame.
      * @param v The velocity of the prime frame.
      *
-     * @return The angle in degrees in the prime frame.
+     * @return The angle in degrees in the prime frame in the range -180,
+     * exclusive, to 180, inclusive.
      */
     public static double toPrimeAngle(double angle, double v)
     {
-        // Check whether the angle is the angle of light: +/- 45 degrees
+        double angle180 = Util.normalizeAngle180(angle);
 
-        if (angle == 45 || angle == -45) {
+        if (Math.abs(angle180) == 45 || Math.abs(angle180) == 135) {
             return angle;
         }
 
-        // X angle
+        // Tangent is a periodic function, with its main interval being from
+        // -90 to 90. If the angle. We'll normalize the angle to the range -180
+        // to 180. If the result falls outside the -90 to 90 range, we'll need
+        // to invert the final result
 
-        else if (angle > -45 && angle < 45) {
-            double v1 = angleXToV(angle);
-            double v2 = vPrime(v1, v);
-            return vToXAngle(v2);
-        }
+        boolean invert = Math.abs(angle180) > 90;
 
-        // T angle
+        double angle90 = Util.normalizeAngle90(angle);
+        double v1 = Math.abs(angle90) < 45 ? angleXToV(angle90) : angleTToV(angle90);
+        double v2 = vPrime(v1, v);
+        double vAngle = Math.abs(angle90) < 45 ? vToXAngle(v2) : vToTAngle(v2);
 
-        else {
-            double v1 = angleTToV(angle);
-            double v2 = vPrime(v1, v);
-            return vToTAngle(v2);
-        }
+        if ((v2 > 0 && vAngle > 45) || (v2 < 0 && vAngle < -45)) invert = !invert;
+
+        System.out.println("\n(angle = " + angle + " v = " + v + ") angle180 = " + angle180 + " angle90 = " + angle90 + " v1 = " + v1 + " v2 = " + v2 + " vAngle = " + vAngle);
+
+        if (invert) vAngle = Util.normalizeAngle180(vAngle + 180);
+        vAngle = Util.normalizeAngle180(vAngle);
+
+        System.out.println("Final vAngle = " + vAngle);
+
+        return vAngle;
+
+//        // The angles associated with velocity are in the range -90 to 90. The
+//        // angles we receive can be anything. Normalize the angle to be between
+//        // -180 and 180. Also normalize to be within -90 to 90.
+//
+//        angle = Util.normalizeAngle180(angle);
+//        double angle90 = Util.normalizeAngle90(angle);
+//
+//        // Check whether the angle is the angle of light: +/- 45 degrees
+//
+//        if (Math.abs(angle) == 45 || Math.abs(angle) == 135) {
+//            return angle;
+//        }
+//
+//        // X angle
+//
+//        else if (angle90 > -45 && angle90 < 45) {
+//            double v1 = angleXToV(angle90);
+//            double v2 = vPrime(v1, v);
+//            double vAngle = vToXAngle(v2);
+//            return vAngle;
+//            // return Util.normalizeAngle180(vAngle + 180);
+//        }
+//
+//        // T angle
+//
+//        else {
+//            double v1 = angleTToV(angle90);
+//            double v2 = vPrime(v1, v);
+//            double vAngle = vToTAngle(v2);
+//            if ((v1 <= 0 && v2 <= 0) || (v1 >= 0 && v2 >= 0)) return vAngle;
+//            return Util.normalizeAngle180(vAngle + 180);
+//        }
     }
 
 }

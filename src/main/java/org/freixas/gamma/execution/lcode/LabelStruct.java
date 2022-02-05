@@ -16,6 +16,8 @@
  */
 package org.freixas.gamma.execution.lcode;
 
+import org.freixas.gamma.math.Relativity;
+import org.freixas.gamma.math.Util;
 import org.freixas.gamma.value.Coordinate;
 import org.freixas.gamma.value.Frame;
 
@@ -25,8 +27,9 @@ import org.freixas.gamma.value.Frame;
  */
 public class LabelStruct extends Struct
 {
-    public String text = "";
     public Coordinate location;
+    public String text = "";
+    public double rotation = 0.0;
     public boolean locationSet = false;
 
     public LabelStruct()
@@ -34,8 +37,15 @@ public class LabelStruct extends Struct
     }
 
     @Override
+    public void finalizeValues()
+    {
+        rotation = Util.normalizeAngle180(rotation);
+    }
+
+    @Override
     public void relativeTo(Frame prime)
     {
         location = prime.toFrame(location);
+        rotation = Relativity.toPrimeAngle(rotation, prime.getV());
     }
 }

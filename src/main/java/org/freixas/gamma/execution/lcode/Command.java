@@ -16,6 +16,7 @@
  */
 package org.freixas.gamma.execution.lcode;
 
+import javafx.scene.canvas.GraphicsContext;
 import org.freixas.gamma.css.value.StyleStruct;
 import org.freixas.gamma.drawing.Context;
 
@@ -54,6 +55,17 @@ public class Command
 
     public void execute(Context context)
     {
-        cmdExec.execute(context, cmdStruct, styles);
+        // Handle the global opacity style at this level
+
+        GraphicsContext gc = context.gc;
+        gc.save();
+        gc.setGlobalAlpha(styles.opacity);
+        
+        try {
+            cmdExec.execute(context, cmdStruct, styles);
+        }
+        finally {
+            gc.restore();
+        }
     }
 }

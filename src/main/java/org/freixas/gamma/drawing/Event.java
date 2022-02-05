@@ -116,6 +116,7 @@ public class Event
             LabelStruct labelStruct = new LabelStruct();
             labelStruct.location = location;
             labelStruct.text = text;
+            labelStruct.rotation = struct.rotation;
             Label.draw(context, labelStruct, styles);
         }
 

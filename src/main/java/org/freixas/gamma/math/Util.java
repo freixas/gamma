@@ -62,7 +62,10 @@ public final class Util
      */
     static public double normalizeAngle180(double angle)
     {
-        return angle - (Math.floor(angle / 180.0) * 180.0);
+        double newAngle = angle + 180;
+        newAngle = newAngle - (Math.floor(newAngle / 360.0) * 360.0) - 180;
+        if (newAngle == -180.0 && angle >= 0) newAngle = 180;
+        return newAngle;
     }
 
     /**

@@ -181,8 +181,6 @@ public class StylePropertyDefinition
 
     static final StylePropertyDefinition textAnchor = new StylePropertyDefinition("text-anchor", fieldMap.get("textAnchor"), StyleProperty.Type.TEXT_ANCHOR);
 
-    static final StylePropertyDefinition textRotation = new StylePropertyDefinition("text-rotation", fieldMap.get("textRotation"), StyleProperty.Type.FLOAT, Min.EQ0);
-
     // Ticks
 
     static final StylePropertyDefinition xTicks = new StylePropertyDefinition("x-ticks", fieldMap.get("xTicks"), StyleProperty.Type.BOOLEAN);
@@ -298,8 +296,6 @@ public class StylePropertyDefinition
         defMap.put("text-padding", textPadding);
 
         defMap.put("text-anchor", textAnchor);
-
-        defMap.put("text-rotation", textRotation);
 
         // Ticks
 

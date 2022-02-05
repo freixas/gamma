@@ -16,7 +16,6 @@
  */
 package org.freixas.gamma.execution.lcode;
 
-import org.freixas.gamma.execution.HCodeEngine;
 import org.freixas.gamma.math.Relativity;
 import org.freixas.gamma.math.OffsetAcceleration;
 import org.freixas.gamma.math.Util;
@@ -33,8 +32,9 @@ public class EventStruct extends Struct
     static Coordinate coord = new Coordinate(0.0, 0.0);
 
     public Coordinate location = coord;
-    public Frame boostTo = null;
     public String text = "";
+    public double rotation = 0.0;
+    public Frame boostTo = null;
 
     public boolean boostX = false;
     public HyperbolicSegment segment;
@@ -51,12 +51,14 @@ public class EventStruct extends Struct
     public void finalizeValues()
     {
         preCalculateValues(null);
+        rotation = Util.normalizeAngle180(rotation);
     }
 
     @Override
     public void relativeTo(Frame prime)
     {
         location = prime.toFrame(location);
+        rotation = Relativity.toPrimeAngle(rotation, prime.getV());
         if (boostTo != null) {
             boostTo = boostTo.relativeTo(prime);
         }
