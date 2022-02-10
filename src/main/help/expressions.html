@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="styles/help.css" type="text/css" />
+        <title>Help - Expressions</title>
+    </head>
+
+    <body>
+        <div id ="header">
+            <div id="main-page"><a href="index.html">Return to Top</a></div>
+            Help - Expressions </div>
+        <div id="main">
+            <div id="nav">
+                <ol>
+                    <li><a href="#literals">Literals</a></li>
+                    <li><a href="#variables">Variables</a>
+                        <ol>
+                            <li><a href="#dynamic-variables">Dynamic Variables</a>
+                                <ol>
+                                    <li><a href="#animation-variables">Animation Variables</a></li>
+                                    <li><a href="#display-variables">Display Variables</a></li>
+                                </ol>
+                            </li>
+                            <li><a href="#arrays">Arrays</a></li>
+                            <li><a href="#predefined-variables">Predefined Variables</a></li>
+                        </ol>
+                    </li>
+                    <li><a href="#operators">Operators</a>
+                        <ol>
+                            <li><a href="#precedence">Precedence</a></li>
+                            <li><a href="#associativity">Associativity</a></li>
+                            <li><a href="#data-types">Data Types</a></li>
+                            <li><a href="#list-of-operators">List of Operators</a>      </li>
+                        </ol>
+                    </li>
+                    <li><a href="#functions">Functions</a>
+                        <ol>
+                            <li><a href="#lorentz-transformation-functions">Lorentz Transformation Functions</a></li>
+                            <li><a href="#angle-functions">Angle Functions</a></li>
+                            <li><a href="#worldline-functions">Worldline Functions</a></li>
+                            <li><a href="#bounding-box-functions">Bounding Box Functions</a></li>
+                            <li><a href="#interval-functions">Interval Functions</a></li>
+                            <li><a href="#intersection-functions">Intersection Functions</a></li>
+                            <li><a href="#math-functions">Math Functions</a></li>
+                            <li><a href="#string-functions">String Functions</a></li>
+                        </ol>
+                    </li>
+                    <li><a href="#expressions">Expressions</a></li>
+                </ol>
+            </div>
+            <div id="content">
+                <h1><a id="literals"></a>Literals</h1>
+                <p>A <span class="definition">literal</span> is a entity whose value is expressed in the characters that represent it. For example, <span class="code">24</span> is the literal representation of the value 24, <span class="code">&quot;abc&quot;</span> is the literal representation of the character string 123, and <span class="code">[observer velocity 0.5]</span> is the literal representation of an observer with a specific worldline.</p>
+                <p>Literal values are covered in the section on <a href="values.html">values</a>.</p>
+                <h1><a id="variables"></a>Variables</h1>
+                <p>Variables are named entities that can be thought of as an address to a value. A value can be stored or fetched using the variable's name. Variables receive values through <a href="statements.html#assignment-statements">assignment statements</a> and they can be used in expressions anywhere that a literal is allowed.</p>
+                <p>A variable starts with an alphabetic character. This character can be followed by any number of letters, digits, or underscores.</p>
+                <p>Variables are created when they are first assigned a value. The type of  a variable is the same as the type of the value assigned to it. This type could change in a future assignment.</p>
+                <h2><a id="dynamic-variables"></a>Dynamic Variables</h2>
+                <p>Dynamic variables are variables that are initialized when the script is first executed. If the script is re-executed because an animation is running or because an end user manipulated a control, the initialization is ignored and the value is set externally.</p>
+                <h3><a id="animation-variables"></a>Animation Variables</h3>
+                <p>Animation variables's values are controlled by the animation engine. The value is incremented or decremented based on the animation frame.</p>
+                <h3><a id="display-variables"></a>Display Variables</h3>
+                <p>Display variables's values are set by user interface controls manipulated by the end user.    </p>
+                <h2><a id="arrays"></a>Arrays</h2>
+                <p>Array variables are variables immediately followed by an expression enclosed in brackets. </p>
+                <p>If the expression evaluates to a float, it is rounded towards 0 to an integer. The integer is converted to a string, prefixed with a dollar sign, and appended to the variable's name. </p>
+                <p>If the expression evaluates to a string, the string is prefixed with a dollar sign and appended to the variable's name. </p>
+                <p> This creates a new name. Other than having the name created dynamically, the variable operates like any other variable. Note that it is impossible to create these variable names directly since the dollar sign is not valid in variable names. Note also that, following the rules above, a[1] would be the same as a[&quot;1&quot;]. <br>
+                </p>
+                <h2><a id="predefined-variables"></a>Predefined Variables</h2>
+                <p>These predefined variables have fixed values. Attempting to assign them a value generates an error.</p>
+                <ul>
+                    <li><span class="item-intro">inf:</span> infinity (for negative infinity, prefix this with a minus sign)</li>
+                    <li><span class="item-intro">true:</span> <span class="code">1.0</span></li>
+                    <li> <span class="item-intro">false:</span><span class="code"> 0.0</span></li>
+                    <li> <span class="item-intro">defFrame:</span><span class="code">[frame [observer]]</span> (i.e. the rest frame)</li>
+                    <li><span class="item-intro">null:</span> A special value that represents having no value. For example, if two lines fail to intersect, the result is the null value rather than a coordinate.</li>
+                </ul>
+                <h1><a id="operators"></a>Operators</h1>
+                <p>Operators operate on one or two values to create a new value. The types of values supported depends on the operators.</p>
+                <h2><a id="precedence"></a>Precedence</h2>
+                <p>When we have a mix of operators, as in 5 + 4 * 4, we need to know if this will be processed as (5 + 4) * 4 or 5 + (4 * 4). Each operator has a precedence value; the smaller the value, the earlier the operator is processed. In the case above, the multiplication operator (&quot;*&quot;) has a precedence  of 4, while the addition operator has a precedence of 5, so 5 + 4 * 4 becomes 5 + (4 * 4).</p>
+                <p>You can control the precedence by using parentheses, as in the example above.</p>
+                <h2><a id="associativity"></a>Associativity</h2>
+                <p>When operators have equal precedence, what order are they processed in? Does 10 / 2 / 5 become (10 / 2 ) / 5 or 10 / (2 / 5)? If the operators have left-associativity, the expression becomes (10 / 2) / 5. Only a few operators have right associativity. For example, 2^3^4 becomes 2^(3^4).</p>
+                <h2><a id="data-types"></a>Data Types</h2>
+                <p>Some operators only work on certain data types. We'll highlight a few here:</p>
+                <ul>
+                    <li>For the + operator, if both values are floats, the result is a float. If one  value is a string, the other value can be anything. The value will be converted to its string representation and concatenated on to the string. For example, (2,5) + &quot; event 1&quot; becomes  the string &quot;(2, 5) event 1&quot;.</li>
+                    <li>The &quot;&lt;-&quot; and &quot;-&gt;&quot; perform Lorentz transformations. (2, 5) &lt;- frame1 transforms the coordinate (2, 5) relatve to inertial frame &quot;frame1&quot; to the rest frame. The &quot;-&gt;&quot; goes the other way: (2, 5) -&gt; frame1 transforms rest coordinate (2, 5) to the &quot;frame1&quot; inertial frame.</li>
+                </ul>
+                <h2><a id="list-of-operators"></a>List of Operators    </h2>
+                <table id="table-9" class="operator-table">
+                    <colgroup>
+                        <col class="column1" />
+                        <col class="column2" />
+                        <col class="column3" />
+                        <col class="column4" />
+                        <col class="column5" />
+                        <col class="column6" />
+                        <col class="column7"/>
+                    </colgroup>
+                    <thead>
+                        <tr class="Row-Column-6">
+                            <td class="Header-Cell"><p class="Table-Heading">Operator</p></td>
+                            <td class="Header-Cell"><p class="Table-Heading">Type</p></td>
+                            <td class="Header-Cell"><p class="Table-Heading">Precedence</p></td>
+                            <td class="Header-Cell"><p class="Table-Heading">Left <br>
+                                        Operand</p></td>
+                            <td class="Header-Cell"><p class="Table-Heading">Right Operand</p></td>
+                            <td class="Header-Cell"><p class="Table-Heading">Associativity</p></td>
+                            <td class="Header-Cell"><p class="Table-Heading">Result</p></td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="Row-Column-21">
+                            <td class="Body-Style"><p class="Table-Contents"><span class="literal">.</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Binary</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">1</p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Object</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Name</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">Left</p></td>
+                            <td class="Description"><p class="Table-Description">The value of the named field in the object. </p></td>
+                        </tr>
+                        <tr class="Row-Column-15">
+                            <td class="Body-Style"><p class="Table-Contents"><span class="literal">!</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Unary</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">2</p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">&nbsp;</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Any</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">&nbsp;</p></td>
+                            <td class="Description"><p class="Table-Description">For floats, a non-zero value becomes 0. Zero or null becomes 1. For all other values, a non-null value becomes 0 and a null become 1.</p></td>
+                        </tr>
+                        <tr class="Row-Column-5">
+                            <td class="Body-Style"><p class="Table-Contents"><span class="literal">+</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Unary</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">2</p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">-</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Float</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">&nbsp;</p></td>
+                            <td class="Description"><p class="Table-Description">The value is unchanged.</p></td>
+                        </tr>
+                        <tr class="Row-Column-22">
+                            <td class="Body-Style"><p class="Table-Contents"><span class="literal">-</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Unary</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">2</p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">-</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Float</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">&nbsp;</p></td>
+                            <td class="Description"><p class="Table-Description">The negated value.</p></td>
+                        </tr>
+                        <tr class="Row-Column-6">
+                            <td class="Body-Style"><p class="Table-Contents"><span class="literal">^</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Binary</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">3</p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Float</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Float</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">Right</p></td>
+                            <td class="Description"><p class="Table-Description">The left operand is raised to the power of the right operand.</p></td>
+                        </tr>
+                        <tr class="Row-Column-8">
+                            <td class="Body-Style"><p class="Table-Contents"><span class="literal">*</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Binary</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">4</p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Float</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Float</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">Left</p></td>
+                            <td class="Description"><p class="Table-Description">The product of the two operands.</p></td>
+                        </tr>
+                        <tr class="Row-Column-5">
+                            <td class="Body-Style"><p class="Table-Contents"><span class="literal">/</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Binary</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">4</p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Float</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Float</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">Left</p></td>
+                            <td class="Description"><p class="Table-Description">The quotient of the two operands.</p></td>
+                        </tr>
+                        <tr class="Row-Column-8">
+                            <td class="Body-Style"><p class="Table-Contents"><span class="literal">%</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Binary</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">4</p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Float</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Float</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">Left</p></td>
+                            <td class="Description"><p class="Table-Description">The remainder of a division of the two operands.</p></td>
+                        </tr>
+                        <tr class="Row-Column-10">
+                            <td class="Body-Style"><p class="Table-Contents"><span class="literal">+</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Binary</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">5</p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Float or String</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Float or String</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">Left</p></td>
+                            <td class="Description"><p class="Table-Description">The sum of the two numbers or the concatenation of two strings. If one value is not a string and the other is a String, the value is converted to its String representation.</p></td>
+                        </tr>
+                        <tr class="Row-Column-8">
+                            <td class="Body-Style"><p class="Table-Contents"><span class="literal">-</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Binary</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">5</p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Float</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Float</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">Left</p></td>
+                            <td class="Description"><p class="Table-Description">The difference of the two operands</p></td>
+                        </tr>
+                        <tr class="Row-Column-5">
+                            <td class="Body-Style"><p class="Table-Contents"><span class="literal">&lt;</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Binary</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">6</p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Float</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Float</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">Left</p></td>
+                            <td class="Description"><p class="Table-Description">1 if the left operand is less than the right; 0 otherwise.</p></td>
+                        </tr>
+                        <tr class="Row-Column-7">
+                            <td class="Body-Style"><p class="Table-Contents"><span class="literal">&gt;</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Binary</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">6</p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Float</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Float</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">Left</p></td>
+                            <td class="Description"><p class="Table-Description">1 if the left operand is greater than the right; 0 otherwise.</p></td>
+                        </tr>
+                        <tr class="Row-Column-6">
+                            <td class="Body-Style"><p class="Table-Contents"><span class="literal">&lt;=</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Binary</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">6</p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Float</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Float</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">Left</p></td>
+                            <td class="Description"><p class="Table-Description">1 if the left operand is less than or equal to the right; 0 otherwise.</p></td>
+                        </tr>
+                        <tr class="Row-Column-7">
+                            <td class="Body-Style"><p class="Table-Contents"><span class="literal">&gt;=</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Binary</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">6</p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Float</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Float</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">Left</p></td>
+                            <td class="Description"><p class="Table-Description">1 if the left operand is greater than or equal to the right; 0 otherwise.</p></td>
+                        </tr>
+                        <tr class="Row-Column-5">
+                            <td class="Body-Style"><p class="Table-Contents"><span class="literal">==</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Binary</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">7</p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Float</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Float</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">Left</p></td>
+                            <td class="Description"><p class="Table-Description">1 if the left operand is equal to the right; 0 otherwise.</p></td>
+                        </tr>
+                        <tr class="Row-Column-7">
+                            <td class="Body-Style"><p class="Table-Contents"><span class="literal">!=</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Binary</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">7</p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Float</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Float</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">Left</p></td>
+                            <td class="Description"><p class="Table-Description">1 if the left operand is not equal to the right; 0 otherwise.</p></td>
+                        </tr>
+                        <tr class="Row-Column-10">
+                            <td class="Body-Style"><p class="Table-Contents"><span class="literal">&amp;&amp;</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Binary</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">8</p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Float</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Float</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">&nbsp;</p></td>
+                            <td class="Description"><p class="Table-Description">1 if both values are true. If the first value is fase, the result is 0 without evaluating the second value. A value is true if it is a float and non-zero and non-null or if it is anything else and not null; otherwise, it is false.</p></td>
+                        </tr>
+                        <tr class="Row-Column-23">
+                            <td class="Body-Style"><p class="Table-Contents"><span class="literal">||</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Binary</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">9</p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Float</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Float</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">&nbsp;</p></td>
+                            <td class="Description"><p class="Table-Description">1 if either value is true. If the first value is true, the result is 1 without evaluating the second value. A value is true if it is a float and non-zero and non-null or if it is anything else and not null; otherwise, it is false.</p></td>
+                        </tr>
+                        <tr class="Row-Column-6">
+                            <td class="Body-Style"><p class="Table-Contents"><span class="literal">&lt;-</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Binary</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">10</p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Coord</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Frame</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">Left</p></td>
+                            <td class="Description"><p class="Table-Description">The inverse Lorentz transformation of the coordinate to the default frame.</p></td>
+                        </tr>
+                        <tr class="Row-Column-7">
+                            <td class="Body-Style"><p class="Table-Contents"><span class="literal">-&gt;</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Binary</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">10</p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Coord</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Frame</span></p></td>
+                            <td class="Body-Style"><p class="Table-Contents">Left</p></td>
+                            <td class="Description"><p class="Table-Description">The Lorentz transformation of the coordinate to the given frame.</p></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h1><a id="functions"></a>Functions</h1>
+                <p>In Gamma, functions return single values, although that value can be a multi-valued object. The following functions are available:</p>
+                <h2><a id="lorentz-transformation-functions"></a>Lorentz Transformation Functions</h2>
+                <p>Note that the Lorentz transformation are performed using the <span class="literal">-&gt;</span> and <span class="literal">&lt;-</span> operators.</p>
+                <table class="function-table">
+                    <colgroup>
+                        <col class="column1" />
+                        <col class="column2" />
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <td>Function</td>
+                            <td>Returns</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>gamma( <span class="non-terminal">expr</span> )</td>
+                            <td>The gamma value for the given value. The value can be a float (velocity) and frame or an observer promoted to a frame (at tau = 0)..</td>
+                        </tr>
+                        <tr>
+                            <td>gammaToV( <span class="non-terminal">float</span> )</td>
+                            <td>The velocity matching the given gamma. The sign of the velocity matches the sign of the gamma value.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h2><a id="angle-functions"></a>Angle Functions    </h2>
+                <table class="function-table">
+                    <colgroup>
+                        <col class="column1" />
+                        <col class="column2" />
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <td>Function</td>
+                            <td>Returns</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>toXAngle( <span class="non-terminal">float</span> )</td>
+                            <td>The angle of the x axis of an inertial frame with the given velocity. The angle is in degrees from -45° (inclusive) to +45° (inclusive).</td>
+                        </tr>
+                        <tr>
+                            <td>toVAngle( <span class="non-terminal">float</span> )</td>
+                            <td>The angle of the x axis of an inertial frame with the given velocity. The angle is in degrees from -90° (exclusive) to -45° (exclusive) or from +45 (exclusive) to +90° (inclusive).</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h2><a id="worldline-functions"></a>Worldline Functions</h2>
+                <p>Worldline functions use a given value to identify a point along the worldline and then return  a corresponding value at that point. If no point can be identified, null is returned. If there are multiple matches, the first one is returned. To obtain a different match, apply an interval to the observer.</p>
+                <p>Identifying values are:</p>
+                <ul>
+                    <li><span class="item-intro">d:</span> A distance in rest units, measured from whatever point is set to d = 0. Points before the 0 point are negative.</li>
+                    <li><span class="item-intro">t:</span> A rest time.</li>
+                    <li><span class="item-intro">tau:</span> Observer time, measured from whatever point is set to tau = 0.</li>
+                    <li><span class="item-intro">v:</span> Velocity relative to the rest frame.</li>
+                </ul>
+                <table class="function-table">
+                    <colgroup>
+                        <col class="column1" />
+                        <col class="column2" />
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <td>Function</td>
+                            <td>Returns</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>dToT( <span class="non-terminal">float</span> , <span class="non-terminal">observer</span> )</td>
+                            <td>Convert a distance to a rest time.</td>
+                        </tr>
+                        <tr>
+                            <td>dToTau( <span class="non-terminal">float</span> , <span class="non-terminal">observer</span> )</td>
+                            <td>Convert a distance to the observer's time.</td>
+                        </tr>
+                        <tr>
+                            <td>dToV( <span class="non-terminal">float</span> , <span class="non-terminal">observer</span> )</td>
+                            <td>Convert a distance to a rest frame velocity.</td>
+                        </tr>
+                        <tr>
+                            <td>dToX( <span class="non-terminal">float</span> , <span class="non-terminal">observer</span> )</td>
+                            <td>Convert a distance to an X position.</td>
+                        </tr>
+                        <tr>
+                            <td>tToD( <span class="non-terminal">float</span> , <span class="non-terminal">observer</span> )</td>
+                            <td>Convert a time to a distance.</td>
+                        </tr>
+                        <tr>
+                            <td>tToTau( <span class="non-terminal">float</span> , <span class="non-terminal">observer</span> )</td>
+                            <td>Convert a time to the observer's time.</td>
+                        </tr>
+                        <tr>
+                            <td>tToV( <span class="non-terminal">float</span> , <span class="non-terminal">observer</span> )</td>
+                            <td>Convert a time to a rest frame velocity.</td>
+                        </tr>
+                        <tr>
+                            <td>tToX( <span class="non-terminal">float</span> , <span class="non-terminal">observer</span> )</td>
+                            <td>Convert a time to an X position.</td>
+                        </tr>
+                        <tr>
+                            <td>tauToD( <span class="non-terminal">float</span> , <span class="non-terminal">observer</span> )</td>
+                            <td>Convert tau to a distance.</td>
+                        </tr>
+                        <tr>
+                            <td>tauToT( <span class="non-terminal">float</span> , <span class="non-terminal">observer</span> ) </td>
+                            <td>Convert tau to a rest time.</td>
+                        </tr>
+                        <tr>
+                            <td>tauToV( <span class="non-terminal">float</span> , <span class="non-terminal">observer</span> )</td>
+                            <td>Convert tau to a rest frame velocity.</td>
+                        </tr>
+                        <tr>
+                            <td>tauToX( <span class="non-terminal">float</span> , <span class="non-terminal">observer</span> )</td>
+                            <td>Convert tau to an X position.</td>
+                        </tr>
+                        <tr>
+                            <td>vToD( <span class="non-terminal">float</span> , <span class="non-terminal">observer</span> )</td>
+                            <td>Convert a velocity to  a distance.</td>
+                        </tr>
+                        <tr>
+                            <td>vToT( <span class="non-terminal">float</span> , <span class="non-terminal">observer</span> )</td>
+                            <td>Convert a velocity to  a rest time.</td>
+                        </tr>
+                        <tr>
+                            <td>vToTau( <span class="non-terminal">float</span> , <span class="non-terminal">observer</span> )</td>
+                            <td>Convert a velocity to  the observer's time.</td>
+                        </tr>
+                        <tr>
+                            <td>vToX( <span class="non-terminal">float</span> , <span class="non-terminal">observer</span> )</td>
+                            <td>Convert a velocity to  an X position.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h2><a id="bounding-box-functions"></a>Bounding Box Functions</h2>
+                <p>Adding a bounding box to a line affects how a line is drawn and whether an intersection with another line or a worldline occur.</p>
+                <table class="function-table">
+                    <colgroup>
+                        <col class="column1" />
+                        <col class="column2" />
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <td>Function</td>
+                            <td>Returns</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>setBounds( <span class="non-terminal">line</span> , bounds ) </td>
+                            <td>Returns a line bounded by the bounding box. The original line is unaffected. </td>
+                        </tr>
+                        <tr>
+                            <td>clearBounds( <span class="non-terminal">line</span> )</td>
+                            <td>Returns a line with any associated bounding box removed. The original line is unaffected.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h2><a id="interval-functions"></a>Interval Functions</h2>
+                <p>Adding an interval to an observer affects how the observer's worldline is drawn, whether an intersection ith a line occurs, and whether a given value can be used to identify a point along the worldline.</p>
+                <table class="function-table">
+                    <colgroup>
+                        <col class="column1" />
+                        <col class="column2" />
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <td>Function</td>
+                            <td>Returns</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>setInterval( <span class="non-terminal">observer</span> , <span class="non-terminal">interval</span> )</td>
+                            <td>Returns an observer whose worldline lines within the interval. The original observer is unaffected. </td>
+                        </tr>
+                        <tr>
+                            <td>clearInterval( <span class="non-terminal">observer</span> )</td>
+                            <td>Returns an observer with any associated interval removed. The original observer is unaffected. </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h2><a id="intersection-functions"></a>Intersection Functions</h2>
+                <p>If no intersection occurs, null is returned.</p>
+                <table class="function-table">
+                    <colgroup>
+                        <col class="column1" />
+                        <col class="column2" />
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <td>Function</td>
+                            <td>Returns</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>intersect( <span class="non-terminal">line</span> , <span class="non-terminal">line</span> )</td>
+                            <td>Returns a coordinate indicating where the two lines intersect.</td>
+                        </tr>
+                        <tr>
+                            <td>intersect( <span class="non-terminal">line</span> , <span class="non-terminal">observer</span> )</td>
+                            <td>Returns a coordinate indicating the first point (earliest in time) where the line and observer intersect.</td>
+                        </tr>
+                        <tr>
+                            <td>intersect( <span class="non-terminal">observer</span> , <span class="non-terminal">line</span> )</td>
+                            <td>Returns a coordinate indicating the first point (earliest in time) where the line and observer intersect.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h2><a id="math-functions"></a>Math Functions</h2>
+                <p>Angles are in degrees.</p>
+                <table class="function-table">
+                    <colgroup>
+                        <col class="column1" />
+                        <col class="column2" />
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <td>Function</td>
+                            <td>Returns</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>abs( <span class="non-terminal">float</span> )</td>
+                            <td>Returns the absolute value of the float.</td>
+                        </tr>
+                        <tr>
+                            <td>acos( <span class="non-terminal">float</span> )</td>
+                            <td>Returns the arc cosine of a value; the returned angle is in the   range 0.0 through 180°.</td>
+                        </tr>
+                        <tr>
+                            <td>acosh( <span class="non-terminal">float</span> )</td>
+                            <td>Returns the inverse hyperbolic cosine of the value.</td>
+                        </tr>
+                        <tr>
+                            <td>asin( <span class="non-terminal">float</span> )</td>
+                            <td>Returns the arc sine of a value; the returned angle is in the   range -90° through +90°.</td>
+                        </tr>
+                        <tr>
+                            <td>asinh( <span class="non-terminal">float</span> )</td>
+                            <td>Returns the inverse hyperbolic sine of the value.</td>
+                        </tr>
+                        <tr>
+                            <td>atan( <span class="non-terminal">float</span> )</td>
+                            <td>Returns the arc tangent of a value; the returned angle is in the   range -90° through +90°.</td>
+                        </tr>
+                        <tr>
+                            <td>atan2( <span class="non-terminal">float</span> , <span class="non-terminal">float</span> )</td>
+                            <td>Returns the angle theta from the conversion of rectangular   coordinates (x, y) to polar   coordinates (r, theta).</td>
+                        </tr>
+                        <tr>
+                            <td>atanh( <span class="non-terminal">float</span> )</td>
+                            <td>Returns the inverse hyperbolic tangent of the value.</td>
+                        </tr>
+                        <tr>
+                            <td>ceil( <span class="non-terminal">float</span> )</td>
+                            <td>Returns the smallest (closest to negative infinity)   float that is greater than or equal to the   argument and is equal to a mathematical integer.</td>
+                        </tr>
+                        <tr>
+                            <td>cos( <span class="non-terminal">float</span> )</td>
+                            <td>Returns the trigonometric cosine of an angle.</td>
+                        </tr>
+                        <tr>
+                            <td>cosh( <span class="non-terminal">float</span> )</td>
+                            <td>Returns the hyperbolic cosine of the value.</td>
+                        </tr>
+                        <tr>
+                            <td>e(  )</td>
+                            <td>Returns Euler's number <em>e</em>.</td>
+                        </tr>
+                        <tr>
+                            <td>exp( <span class="non-terminal">float</span> )</td>
+                            <td>Returns Euler's number <em>e</em> raised to the power.</td>
+                        </tr>
+                        <tr>
+                            <td>floor( <span class="non-terminal">float</span> )</td>
+                            <td>Returns the largest (closest to positive infinity) float that is less than or equal to the   argument and is equal to a mathematical integer.</td>
+                        </tr>
+                        <tr>
+                            <td>log( <span class="non-terminal">float</span> )</td>
+                            <td>Returns the natural logarithm (base e).</td>
+                        </tr>
+                        <tr>
+                            <td>log10( <span class="non-terminal">float</span> )</td>
+                            <td>Returns the base 10 logarithm.</td>
+                        </tr>
+                        <tr>
+                            <td>max( <span class="non-terminal">float</span> , <span class="non-terminal">float</span> )</td>
+                            <td>Returns the greater of two  values.</td>
+                        </tr>
+                        <tr>
+                            <td>min( <span class="non-terminal">float</span> , <span class="non-terminal">float</span> )</td>
+                            <td>Returns the smaller of two values.</td>
+                        </tr>
+                        <tr>
+                            <td>pi(  ) </td>
+                            <td>Returns <em>pi</em>.</td>
+                        </tr>
+                        <tr>
+                            <td>random(  )</td>
+                            <td>Returns a  value with a positive sign, greater   than or equal to 0.0 and less than 1.0.</td>
+                        </tr>
+                        <tr>
+                            <td>round( <span class="non-terminal">float</span> )</td>
+                            <td>Returns the closest value to the argument that is equal to a mathematical integer, with ties   rounding toward 0.</td>
+                        </tr>
+                        <tr>
+                            <td>sign( <span class="non-terminal">float</span> )</td>
+                            <td>Returns +1 if the value &gt;= 0, -1 otherwise.</td>
+                        </tr>
+                        <tr>
+                            <td>sin( <span class="non-terminal">float</span> )</td>
+                            <td>Returns the trigonometric sine of an angle.</td>
+                        </tr>
+                        <tr>
+                            <td>sinh( <span class="non-terminal">float</span> )</td>
+                            <td>Returns the hyperbolic sine of the value.</td>
+                        </tr>
+                        <tr>
+                            <td>sqrt( <span class="non-terminal">float</span> )</td>
+                            <td>Returns the correctly rounded positive square root (the value closest to the true mathematical square root).</td>
+                        </tr>
+                        <tr>
+                            <td>tan( <span class="non-terminal">float</span> )</td>
+                            <td>Returns the trigonometric tangent of an angle.</td>
+                        </tr>
+                        <tr>
+                            <td>tanh( <span class="non-terminal">float</span> )</td>
+                            <td>Returns the  hyperbolic tangent of the value.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h2><a id="string-functions"></a>String Functions</h2>
+                <table class="function-table">
+                    <colgroup>
+                        <col class="column1" />
+                        <col class="column2" />
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <td>Function</td>
+                            <td>Returns</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>toString( <span class="non-terminal">float</span> , <span class="non-terminal">float</span> )</td>
+                            <td>Converts the first number to a string with the number of digits to the right of the decimal point being given by the second number. The function ignores the display and print precision set by the <span class="literal">set</span> statement.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h1><a id="expressions"></a>Expressions</h1>
+                <p>Expressions use operatos and grouping (parentheses) to combine literals, variables, functions so as to create new values.</p>
+                <p>&nbsp;</p>
+            </div>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="styles/help.css" type="text/css" />
+        <title>Help - Statements</title>
+    </head>
+
+    <body>
+        <div id ="header">
+            <div id="main-page"><a href="index.html">Return to Top</a></div>
+
+            Help - Statements   </div>
+        <div id="main">
+            <div id="nav">
+                <ol>
+                    <li>
+                        <a href="#overall-structure">Overall Structure</a>
+                        <ol>
+                            <li><a href="#statements">Statements</a></li>
+                            <li><a href="#blocks">Blocks</a></li>
+                        </ol>
+                    </li>
+                    <li><a href="#parsing-level-statements">Parsing-level Statements</a>
+                        <ol>
+                            <li><a href="#include">include</a></li>
+                            <li><a href="#stylesheet">stylesheet</a></li>
+                            <li><a href="#set">set</a></li>
+                        </ol>
+                    </li>
+                    <li><a href="#assignment-statements">Assignment Statements</a>
+                        <ol>
+                            <li><a href="#normal">Normal</a></li>
+                            <li><a href="#animate">animate</a></li>
+                            <li><a href="#toggle">toggle</a></li>
+                            <li><a href="#choice">choice</a></li>
+                        </ol>
+                    </li>
+                    <li><a href="#conditional-statements">Conditional Statements</a>
+                        <ol>
+                            <li><a href="#if">if</a></li>
+                        </ol>
+                    </li>
+                    <li><a href="#looping-statements">Looping Statements</a>
+                        <ol>
+                            <li><a href="#while">while</a></li>
+                            <li><a href="#for">for</a></li>
+                            <li><a href="#break">break</a></li>
+                            <li><a href="#continue">continue</a></li>
+                        </ol>
+                    </li>
+                    <li><a href="#command-statements">Command Statements</a>
+                        <ol>
+                            <li><a href="#control-commands">Control Commands</a>
+                                <ol>
+                                    <li><a href="#animate">animate</a></li>
+                                    <li><a href="#display">display</a></li>
+                                    <li><a href="#frame">frame</a></li>
+                                </ol>
+                            </li>
+                            <li><a href="#drawing-commands">Drawing Commands</a>
+                                <ol>
+                                    <li><a href="#axes">axes</a></li>
+                                    <li><a href="#event">event</a></li>
+                                    <li><a href="#grid">grid</a></li>
+                                    <li><a href="#hypergrid">hypergrid</a></li>
+                                    <li><a href="#label">label</a></li>
+                                    <li><a href="#line">line</a></li>
+                                    <li><a href="#path">path</a></li>
+                                    <li><a href="#worldline">worldline</a></li>
+                                </ol>
+                            </li>
+                        </ol>
+                    </li>
+                </ol>
+            </div>
+            <div id="content">
+                <p class="note">See <a href="syntax.html">Syntax Notation</a> for information about the syntax notation used here.</p>
+                <h1><a id="overall-structure"></a>Overall Structure </h1>
+                <p>A script is simply a sequence of <span class="definition">statements</span>. </p>
+                <h2><a id="statements"></a>Statements</h2>
+                <p>A statement is  the basic unit of a script. Statements generally end with a semicolon.</p>
+                <h2><a id="blocks"></a>Blocks</h2>
+                <p>A block is a statement that consists of a sequence of statements starting with <span class="literal">{</span> and ending with <span class="literal">}</span>. It does not end with a semicolon.</p>
+                <h1><a id="parsing-level-statements"></a>Parsing-level Statements</h1>
+                <p>Parsing-level statements are statements that are handled by the parser, the code that turns the script into an executable chunk of code. Because the parser has limited capabilities, parsing-level statements cannot have variables or expressions. </p>
+                <h2><a id="include"></a>include</h2>
+                <p><span class="literal">include</span> <span class="non-terminal">string</span></p>
+                <p>An include statement includes the text from another file into this one. The effect is as though those characters had been entered in place of the include statement.</p>
+                <p>The string is a filename. It can be a relative filename, in which case it's relative to the script file's location, or it can be an absolute filename.</p>
+                <h2><a id="stylesheet"></a>stylesheet</h2>
+                <p><span class="literal">stylesheet externa</span>l* <span class="non-terminal">string</span></p>
+                <p>The stylesheet statement adds a stylesheet to the diagram (see <a href="stylesheets.html">Stylesheets</a>). If <span class="literal">external</span> is used, the stylesheet comes from a file and the string is the file's name.  It can be a relative filename, in which case it's relative to the script file's location, or it can be an absolute filename.</p>
+                <p>If <span class="literal">external</span> is omitted, the entire stylesheet must be contained in the string. Since stylesheets can have values that are strings, you will need to be careful with how the internal strings are specified.</p>
+                <h2><a id="set"></a>set</h2>
+                <p><span class="literal">set</span> <span class="non-terminal">setting</span> ( <span class="literal">,</span> <span class="non-terminal">setting</span> )*<br />
+                    <span class="non-terminal">setting</span> → <span class="literal">units</span> <span class="non-terminal">float</span> | <span class="literal">displayPrecision</span> <span class="non-terminal">float</span> | <span class="literal">printPrecision</span> <span class="non-terminal">float</span><br />
+                </p>
+                <p>The set statement controls a few global settings:</p>
+                <ul>
+                    <li><span class="item-intro">units:</span> The meaning of one unit in the diagram. A value of 1 means that units are in light years, x, and  years, t. The choice of units affects the interpretation of acceleration values (which are in g's). If omitted, the value used is 1.</li>
+                    <li><span class="item-intro">displayPrecision:</span> The default precision for any number that is converted to a string and displayed on the diagram. The value represents the number of digits to the right of the decimal point. If omitted, the default value is 12.
+                    </li>
+                    <li><span class="item-intro">printPrecision:</span> The default precision for any number that is converted to a string and printed with the <span class="literal">print</span> statement.The value represents the number of digits to the right of the decimal point. If omitted, the default value is 12.
+                    </li>
+                </ul>
+                <p>The override the precision, use the toString() function.</p>
+                <h1><a id="assignment-statements"></a>Assignment Statements</h1>
+                <p>An assignment statement assigns a value to a variable. The value is derived from an expression. To learn about expressions and variables, see <a href="expressions.html">Expressions</a>.</p>
+                <p> An assignment statement creates a variable if it doesn't exist.</p>
+                <h2><a id="normal"></a>Normal</h2>
+                <p><span class="non-terminal">leftVariable</span> <span class="literal">=</span> <span class="non-terminal">expr</span><br />
+                    <span class="non-terminal">leftVariable</span> → <span class="non-terminal">name</span> | <span class="non-terminal">leftVariable</span> <span class="non-terminal">.</span> <span class="non-terminal">name</span></p>
+                <p>This is the normal form. The expression can evaluate to any type of value: a float, a string, or any object. The variable takes on the type of the value.</p>
+                <p>The period (&quot;.&quot;) used to dereference an object allows you to set the value of an object's field. In this case, the value must match whatever types are allowed by the object's field. For example, a frame object has two fields: v and origin. The former accepts a float while the latter accepts a coordinate.<br />
+                </p>
+                <h2><a id="animate"></a>animate</h2>
+                <p><span class="literal">animate</span> <span class="non-terminal">leftVariable</span><span class="literal"> =</span> <span class="non-terminal">float</span> ( <span class="literal">to</span> <span class="non-terminal">float</span> )? <span class="literal">step</span> <span class="non-terminal">float</span></p>
+                <p>The animate assignment creates an animation variable. When an animation runs, the script is executed once for each animation frame; the assignment, however, is ignored all but the first time. From then on, the value of the variable is controlled by the animation engine.              </p>
+                <p>The value of the  variable is incremented by its step size until its limit (the <span class="literal">to</span> value) is exceeded, if one is specified (if the step value is negative, the variable is decremented until it is less than the limit).</p>
+                <p>The first animation variable to exceed its limit ends a single repetition of an animation. If no animation variable has a limit, then the animation is theoretically infinite, although in practice there is a finite (but large) limit.</p>
+                <p>                Animations only run when the <span class="literal">animation</span> command is present and there is at least one animation variable; otherwise, they operate like any other variable.<br />
+                </p>
+                <h2><a id="range"></a>range</h2>
+                <p><span class="literal">range</span> <span class="non-terminal">leftVariable </span><span class="literal">=</span><span class="non-terminal"> float</span> <span class="literal">from</span> <span class="non-terminal">float</span><span class="literal"> to</span><span class="non-terminal"> float</span> <span class="literal">label</span> <span class="non-terminal">string</span></p>
+                <p>The range assignment adds a slider to the diagram. The diagram is created by executing the script with the variable set to its assigned value. If the end user moves the slider, the script is re-executed. The assignment is ignored and the value of the variable is set to match the slider.</p>
+                <p>The slider's range is given by the second and third values. The initial value must be within the range. </p>
+                <p>The final string is a label displayed with the slider.</p>
+                <h2><a id="toggle"></a>toggle</h2>
+                <p><span class="literal">toggle</span> <span class="non-terminal">leftVariable</span> <span class="literal">=</span><span class="non-terminal"> float</span> <span class="literal">label</span> <span class="non-terminal">string</span> <span class="literal">restart</span>? </p>
+                <p>The range assignment adds a checkbox to the diagram. The diagram is created by executing the script with the variable set to its assigned value. If the end user toggles the checkbox, the script is re-executed. The assignment is ignored and the value of the variable is set to match the slider.</p>
+                <p>The initial value can be anything. It is interpreted as a boolean. The checkbox is checked if the value is not zero, unselected if it is 0. When the end user toggles it, the variable will be either 0 or 1, depending on whether the box is unchecked or checked.</p>
+                <p>The final string is a label displayed with the toggle.</p>
+                <p><span class="literal">restart</span> causes all animation variables to be removed and the animation to restart. This allows the toggle to change the animation variables or the length of the animation.</p>
+                <h2><a id="choice"></a>choice</h2>
+                <p><span class="literal">choice</span> <span class="non-terminal">leftVariable </span><span class="literal">=</span> <span class="non-terminal">float</span> <span class="literal">choices</span> <span class="non-terminal">string</span> ( , <span class="non-terminal">string</span> )* <span class="literal">label</span> <span class="non-terminal">string</span><span class="literal"> restart</span>?</p>
+                <p>The choice assignment adds a choice button to the diagram. The diagram is created by executing the script with the variable set to its assigned value. If the end selects a different choice, the script is re-executed. The assignment is ignored and the value of the variable is set to match the choice number.</p>
+                <p>The choices are a list of strings. The first choice is number 1, the second 2, and so on. The initial value must match one of the choice numbers.              </p>
+                <p>The final string is a label displayed with the choice button.</p>
+                <p><span class="literal">restart</span> causes all animation variables to be removed and the animation to restart. This allows the end user's selection to change the animation variables or the length of the animation.</p>
+                <h1><a id="conditional-statements"></a>Conditional Statements</h1>
+                <h2><a id="if"></a>if</h2>
+                <p><span class="literal">if</span> <span class="literal">(</span> <span class="non-terminal">boolean</span> <span class="literal">)</span> <span class="non-terminal">statement</span> ( <span class="literal">else</span> <span class="non-terminal">statement</span> )?</p>
+                <p>If the value following the <span class="literal">if</span> is true (non-zero), the first statement is executed. If it is false (0), the second statement, if present, is executed.<br />
+                </p>
+                <h1><a id="looping-statements"></a>Looping Statements</h1>
+                <h2><a id="while"></a>while</h2>
+                <p><span class="literal">while</span> ( <span class="non-terminal">boolean</span> ) <span class="non-terminal">statement</span></p>
+                <p>If the value following the <span class="literal">while</span> is true (non-zero), the statement is executed. This repeats until the value is false (0).<br />
+                </p>
+                <h2><a id="for"></a>for</h2>
+                <p><span class="literal">for</span> <span class="non-terminal">variable</span> <span class="literal">=</span> <span class="non-terminal">float</span> <span class="literal">to</span> <span class="non-terminal">float</span> <span class="literal">step</span> <span class="non-terminal">float</span> <span class="non-terminal">statement</span></p>
+                <p>The variable is assigned the first value. It is then tested to see if it is greater than the second value (or less than, if the step value is negative). If the number passes the test, the statement is executed. The number is then incremented (or decremented) by the step value and the sequence repeats from the test.</p>
+                <h2><a id="break"></a>break</h2>
+                <p class="literal">break</p>
+                <p>The break statement causes an enclosing while or for loop to exit. A break statement outside of any loop generates an error.</p>
+
+                <h2><a id="continue"></a>continue</h2>
+                <p class="literal">continue</p>
+                <p>The continue statement returns an enclosing while or for statement to return to its conditional test. In the case of the for statement, the loop variable is incremented (or decremented if the step value is negative) before tesing. A continue statement outside of any loop generates an error.</p>
+                <h1><a id="command-statements"></a>Command Statements</h1>
+                <p>Command statements are things that either control how the diagram is drawn or draw something on the diagram. The have a common syntax:</p>
+                <p><span class="non-terminal">command</span> ( <span class="non-terminal">name</span> <span class="literal">:</span> <span class="non-terminal">expr</span> ( <span class="literal">,</span> <span class="non-terminal">name</span> <span class="literal">:</span> <span class="non-terminal">expr</span> )* )?</p>
+                <p>The name/expression pairs are called properties and the sequence of properties is a property list. Each command has a set of properties that control how it behaves. Almost all properties are optional and have a default value if omitted. The specific properties supported by each command are defined below.</p>
+                <p>For some commands, there is one property that is either required or very common. This property is given without the property name or colon. In the tables below, these special properties are identified by a color: a <span class="red-literal">red</span> property is required and a <span class="green-literal">green</span> property is optional.</p>
+                <p>All commands have these three common stylesheet-related properties:</p>
+                <table id="table-12" class="command-table">
+                    <colgroup>
+                        <col class="column1" />
+                        <col class="column2" />
+                        <col class="column3" />
+                        <col class="column4" />
+                        <col class="column5" />
+                        <col class="column6" />
+                    </colgroup><thead>
+                        <tr>
+                            <td>
+                                Name
+                            </td>
+                            <td>
+                                Type
+                            </td>
+                            <td>
+                                Default
+                            </td>
+                            <td>
+                                Min
+                            </td>
+                            <td>
+                                Max
+                            </td>
+                            <td>
+                                Description
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="body-style">
+                                <span class="literal">id</span>
+                            </td>
+                            <td class="body-style">
+                                <span class="non-terminal">string</span>
+                            </td>
+                            <td class="body-style">
+                                &quot;&quot;
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="description">
+                                The id for this command.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="body-style">
+                                <span class="literal">class</span>
+                            </td>
+                            <td class="body-style">
+                                <span class="non-terminal">string</span>
+                            </td>
+                            <td class="body-style">
+                                &quot;&quot;
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="description">
+                                The stylesheet classes for this command. Each class name in the string should be separated by a comma.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="body-style">
+                                <span class="literal">style</span>
+                            </td>
+                            <td class="body-style">
+                                <span class="non-terminal">string</span>
+                            </td>
+                            <td class="body-style">
+                                &quot;&quot;
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="description">
+                                A set of styles. The braces around the styles are not needed. Within the string, multiple styles should be separated by semicolons.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p>For more details on these, see <a href="stylesheets.html">Stylesheets</a>.</p>
+                <h2><a id="control-commands"></a>Control Commands</h2>
+                <p>These commands can appear anywhere in the script, but they are executed before any drawing takes places. If used, each type should only appear once. If the same control command appears twice in a script, the last one is used and all others are ignored.</p>
+                <h3><a id="animation"></a>animation</h3>
+                <p>For a diagram to be animated, the animation command must appear and there must be at least one animation variable defined.</p>
+                <table id="table-12" class="command-table">
+                    <colgroup>
+                        <col class="column1" />
+                        <col class="column2" />
+                        <col class="column3" />
+                        <col class="column4" />
+                        <col class="column5" />
+                        <col class="column6" />
+                    </colgroup><thead>
+                        <tr>
+                            <td>
+                                Name
+                            </td>
+                            <td>
+                                Type
+                            </td>
+                            <td>
+                                Default
+                            </td>
+                            <td>
+                                Min
+                            </td>
+                            <td>
+                                Max
+                            </td>
+                            <td>
+                                Description
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="body-style">
+                                <span class="literal">cycle</span>
+                            </td>
+                            <td class="body-style">
+                                <span class="non-terminal">boolean</span>
+                            </td>
+                            <td class="body-style">
+                                false
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="description">
+                                If <span class="literal">cycle</span> is false, one repetition of the animation is completed once the first animation variable with a limit exceeds its limit. If <span class="literal">cycle</span> is true,  one repetition of the animation is completed once the first animation variable with a limit exceeds its limit and the frames are executed in reverse order.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="body-style">
+                                <span class="literal">reps</span>
+                            </td>
+                            <td class="body-style">
+                                <span class="non-terminal">int</span>
+                            </td>
+                            <td class="body-style">
+                                500
+                            </td>
+                            <td class="body-style">
+                                1
+                            </td>
+                            <td class="body-style">
+                                500
+                            </td>
+                            <td class="description">
+                                The number of repetitions of the animation.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="body-style">
+                                <span class="literal">speed</span>
+                            </td>
+                            <td class="body-style">
+                                <span class="non-terminal">float</span>
+                            </td>
+                            <td class="body-style">
+                                1
+                            </td>
+                            <td class="body-style">
+                                0.1
+                            </td>
+                            <td class="body-style">
+                                10
+                            </td>
+                            <td class="description">
+                                A multiplier applied to the “normal” speed (a value of 1 is “normal” speed, a value of 2 is twice as fast, and a value of 0.5 is half as fast).
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h3><a id="display"></a>display</h3>
+                <p>The display command controls the overall appearance of the diagram. If no display command is given, a default one will be used. Since the display command's values are only used for the initial display, the values cannot be animated.</p>
+                <table id="table-10" class="command-table">
+                    <colgroup>
+                        <col class="column1" />
+                        <col class="column2" />
+                        <col class="column3" />
+                        <col class="column4" />
+                        <col class="column5" />
+                        <col class="column6" />
+                    </colgroup><thead>
+                        <tr>
+                            <td>
+                                Name
+                            </td>
+                            <td>
+                                Type
+                            </td>
+                            <td>
+                                Default
+                            </td>
+                            <td>
+                                Min
+                            </td>
+                            <td>
+                                Max
+                            </td>
+                            <td>
+                                Description
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="body-style">
+                                <span class="literal">width</span>
+                            </td>
+                            <td class="body-style">
+                                <span class="non-terminal">int</span>
+                            </td>
+                            <td class="body-style">
+                                <span class="non-terminal">int</span>
+                            </td>
+                            <td class="body-style">
+                                1
+                            </td>
+                            <td class="body-style">
+                                Maximum display width
+                            </td>
+                            <td class="description">
+                                The width of the diagram in pixels. If both <span class="literal">width</span> and <span class="literal">height</span> are omitted, the display area is always resized to the maximum space available. If only <span class="literal">width</span> is omitted, it is set to the maximum window width, but is not resized after that.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="body-style">
+                                <span class="literal">height</span>
+                            </td>
+                            <td class="body-style">
+                                <span class="non-terminal">int</span>
+                            </td>
+                            <td class="body-style">
+                                <span class="non-terminal">int</span>
+                            </td>
+                            <td class="body-style">
+                                1
+                            </td>
+                            <td class="body-style">
+                                Maximum display height
+                            </td>
+                            <td class="description">
+                                The height of the diagram in pixels.  If both <span class="literal">width</span> and <span class="literal">height</span> are omitted, the display area is always resized to the maximum space available. If only <span class="literal">height</span> is omitted, it is set to the maximum window size, but is not resized after that.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="body-style">
+                                <span class="literal">units</span>
+                            </td>
+                            <td class="body-style">
+                                <span class="non-terminal">string</span>
+                            </td>
+                            <td class="body-style">
+                                &quot;pixels&quot;
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="description">
+                                The units for width and height. Valid values are "pixels", "inches", or "mm". The size of the image on the display will be correct for the units chosen only on the monitor on which the image is created. If moved to another monitor, the operating system may choose to retain the physical size at the expense of the pixel size.
+                                When the units are in pixels, the physical size of the image will vary on different monitors; if the units are in inches or millimeters, the size should be consistent, but the number of pixels will vary.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="body-style">
+                                <span class="literal">origin</span>
+                            </td>
+                            <td class="body-style">
+                                <span class="non-terminal">coord</span>
+                            </td>
+                            <td class="body-style">
+                                (50, 50)
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="description">
+                                The location of the origin of the default observer on the diagram. The display width is divided into 100 units such that 0 represents the left side of the diagram and 100 represents the right. The display height is also divided into 100 units where 0 is the bottom and 100 is the top of the diagram. Values are not limited to being from 0 to 100, though—the origin can be off-screen.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="body-style">
+                                <span class="literal">scale</span>
+                            </td>
+                            <td class="body-style">
+                                <span class="non-terminal">float</span>
+                            </td>
+                            <td class="body-style">
+                                1
+                            </td>
+                            <td class="body-style">
+                                &gt;0
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="description">
+                                Unscaled coordinates (i.e. pixels) are scaled by this factor to produce scaled coordinates. The scale is defined by taking the lesser of the diagram width or height. A scale of 1 means that this distance is exactly 100 units, a scale of 2 would be 50 units, a scale of .5 would be 200 units and so on.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h3><a id="frame"></a>frame</h3>
+                <p>The frame command defines the inertial frame from whose perspective the diagram will be drawn. This is executed prior to each animation frame, so every animation frame can be drawn relative to a different inertial frame.</p>
+                <table id="table-11" class="command-table">
+                    <colgroup>
+                        <col class="column1" />
+                        <col class="column2" />
+                        <col class="column3" />
+                        <col class="column4" />
+                        <col class="column5" />
+                        <col class="column6" />
+                    </colgroup><thead>
+                        <tr>
+                            <td>
+                                Name
+                            </td>
+                            <td>
+                                Type
+                            </td>
+                            <td>
+                                Default
+                            </td>
+                            <td>
+                                Min
+                            </td>
+                            <td>
+                                Max
+                            </td>
+                            <td>
+                                Description
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="body-style">
+                                <span class="red-literal">frame</span>
+                            </td>
+                            <td class="body-style">
+                                <span class="non-terminal">frame</span>
+                            </td>
+                            <td class="body-style">
+                                The rest frame
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="description">
+                                The inertial frame from whose perspective the diagram will be drawn.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h2><a id="drawing-commands"></a>Drawing Commands</h2>
+                <p>The drawing commands are executed in the order in which they appear in the script. If you want one thing drawn in front of another, the thing in front should appear later in the script.</p>
+                <p>While the properties control <em>what</em> is drawn, the stylesheet and styles control <em>how</em> it is drawn. See <a href="stylesheets.html">Stylesheets</a>.</p>
+                <h3><a id="axes"></a>axes</h3>
+                <p><span class="literal">axes</span><span class="non-terminal"> frame propertyList</span></p>
+                <p>The axes command draws the axes for the given inertial frame. An observer may be substituted for a frame, in which case the observer's inertial frame at the observer's tau of 0 is used.</p>
+                <table id="table-13" class="command-table">
+                    <colgroup>
+                        <col class="column1" />
+                        <col class="column2" />
+                        <col class="column3" />
+                        <col class="column4" />
+                        <col class="column5" />
+                        <col class="column6" />
+                    </colgroup><thead>
+                        <tr>
+                            <td>
+                                Name
+                            </td>
+                            <td>
+                                Type
+                            </td>
+                            <td>
+                                Default
+                            </td>
+                            <td>
+                                Min
+                            </td>
+                            <td>
+                                Max
+                            </td>
+                            <td>
+                                Description
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="body-style">
+                                <span class="green-literal">frame</span>
+                            </td>
+                            <td class="body-style">
+                                <span class="non-terminal">frame</span>
+                            </td>
+                            <td class="body-style">
+                                The rest frame
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="description">
+                                The frame that defines the axes.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="body-style">
+                                <span class="literal">positiveOnly</span>
+                            </td>
+                            <td class="body-style">
+                                <span class="non-terminal">boolean</span>
+                            </td>
+                            <td class="body-style">
+                                false
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="description">
+                                Draw only the positive axes; otherwise, draw the full axes.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="body-style">
+                                <span class="literal">x</span>
+                            </td>
+                            <td class="body-style">
+                                <span class="non-terminal">boolean</span>
+                            </td>
+                            <td class="body-style">
+                                true
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="description">
+                                Draw the x axis.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="body-style">
+                                <span class="literal">t</span>
+                            </td>
+                            <td class="body-style">
+                                <span class="non-terminal">boolean</span>
+                            </td>
+                            <td class="body-style">
+                                true
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="description">
+                                Draw the t axis.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="body-style">
+                                <span class="literal">xLabel</span>
+                            </td>
+                            <td class="body-style">
+                                <span class="non-terminal">string</span>
+                            </td>
+                            <td class="body-style">
+                                ““
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="description">
+                                The label for the x axis.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="body-style">
+                                <span class="literal">tLabel</span>
+                            </td>
+                            <td class="body-style">
+                                <span class="non-terminal">string</span>
+                            </td>
+                            <td class="body-style">
+                                ““
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="description">
+                                The label for the t axis.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h3><a id="event"></a>event </h3>
+                <p><span class="literal">event</span><span class="non-terminal"> coordinate propertyList</span></p>
+                <p>The event command places a marker at the given location (relative to the rest frame).</p>
+                <table id="table-16" class="command-table">
+                    <colgroup>
+                        <col class="column1" />
+                        <col class="column2" />
+                        <col class="column3" />
+                        <col class="column4" />
+                        <col class="column5" />
+                        <col class="column6" />
+                    </colgroup><thead>
+                        <tr>
+                            <td>
+                                Name
+                            </td>
+                            <td>
+                                Type
+                            </td>
+                            <td>
+                                Default
+                            </td>
+                            <td>
+                                Min
+                            </td>
+                            <td>
+                                Max
+                            </td>
+                            <td>
+                                Description
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="body-style">
+                                <span class="red-literal">location</span>
+                            </td>
+                            <td class="body-style">
+                                <span class="non-terminal">coord</span>
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="description">
+                                The event location.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="body-style">
+                                <span class="literal">text</span>
+                            </td>
+                            <td class="body-style">
+                                <span class="non-terminal">String</span>
+                            </td>
+                            <td class="body-style">
+                                ""
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="description">
+                                A label for the text.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="body-style">
+                                <span class="literal">rotation</span>
+                            </td>
+                            <td class="body-style">
+                                <span class="non-terminal">angle</span>
+                            </td>
+                            <td class="body-style">
+                                0.0
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="description">
+                                The rotation of the text in degrees around the anchor point. Positive rotation values rotate counter-clockwise. 0 is horizontal.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="body-style">
+                                <span class="literal">frameRelative-Rotation</span>
+                            </td>
+                            <td class="body-style">
+                                <span class="non-terminal">boolean</span>
+                            </td>
+                            <td class="body-style">
+                                false
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="description">
+                                If true, the rotation angle changes with the drawing frame. If false, it's frame-independent.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="body-style">
+                                <span class="literal">boostTo</span>
+                            </td>
+                            <td class="body-style">
+                                <span class="non-terminal">frame</span>
+                            </td>
+                            <td class="body-style">
+                                none
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="description">
+                                The frame to boost to. The location is boosted to this frame and a hyperbolic line joins the two positions. If boostTo is omitted, the selected event shape is drawn. If a frame is supplied, a hyperbolic line connnects the location relative to the default frame and the location relative to the boost frame.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h3><a id="grid"></a>grid</h3>
+                <p><span class="literal">grid</span><span class="non-terminal"> frame propertyList</span></p>
+                <p>The grid command draws the grid for the given inertial frame. An observer may be substituted for a frame, in which case the observer's inertial frame at the observer's tau of 0 is used.</p>
+                <table id="table-14" class="command-table">
+                    <colgroup>
+                        <col class="column1" />
+                        <col class="column2" />
+                        <col class="column3" />
+                        <col class="column4" />
+                        <col class="column5" />
+                        <col class="column6" />
+                    </colgroup><thead>
+                        <tr>
+                            <td>
+                                Name
+                            </td>
+                            <td>
+                                Type
+                            </td>
+                            <td>
+                                Default
+                            </td>
+                            <td>
+                                Min
+                            </td>
+                            <td>
+                                Max
+                            </td>
+                            <td>
+                                Description
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="body-style">
+                                <span class="green-literal">frame</span>
+                            </td>
+                            <td class="body-style">
+                                <span class="non-terminal">frame</span>
+                            </td>
+                            <td class="body-style">
+                                The rest frame
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="description">
+                                The frame that defines the axes.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="body-style">
+                                <span class="literal">x</span>
+                            </td>
+                            <td class="body-style">
+                                <span class="non-terminal">boolean</span>
+                            </td>
+                            <td class="body-style">
+                                true
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="description">
+                                Draw the lines parallel to the <span class="non-terminal">x</span> axis.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="body-style">
+                                <span class="literal">t</span>
+                            </td>
+                            <td class="body-style">
+                                <span class="non-terminal">boolean</span>
+                            </td>
+                            <td class="body-style">
+                                true
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="description">
+                                Draw the lines parallel to the <span class="non-terminal">t</span> axis.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h3><a id="hypergrid"></a>hypergrid</h3>
+                <p class="literal">hypergrid</p>
+                <p>The hypergrid command has no command properties other than the stylesheet-related ones.</p>
+                <h3><a id="label"></a>label</h3>
+                <p><span class="literal">label</span><span class="non-terminal"> coordinate propertyList</span></p>
+                <p>The label command draws a label at the given location (relative to the rest frame).</p>
+                <table id="table-20" class="command-table">
+                    <colgroup>
+                        <col class="column1" />
+                        <col class="column2" />
+                        <col class="column3" />
+                        <col class="column4" />
+                        <col class="column5" />
+                        <col class="column6" />
+                    </colgroup><thead>
+                        <tr>
+                            <td>
+                                Name
+                            </td>
+                            <td>
+                                Type
+                            </td>
+                            <td>
+                                Default
+                            </td>
+                            <td>
+                                Min
+                            </td>
+                            <td>
+                                Max
+                            </td>
+                            <td>
+                                Description
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="body-style">
+                                <span class="red-literal">location</span><span class="literal"> </span>
+                            </td>
+                            <td class="body-style">
+                                <span class="non-terminal">coord</span>
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="description">
+                                The position to draw the text at.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="body-style">
+                                <span class="literal">text</span>
+                            </td>
+                            <td class="body-style">
+                                <span class="non-terminal">string</span>
+                            </td>
+                            <td class="body-style">
+                                <span class="non-terminal">""</span>
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="description">
+                                The text to draw.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="body-style">
+                                <span class="literal">rotation</span>
+                            </td>
+                            <td class="body-style">
+                                <span class="non-terminal">angle</span>
+                            </td>
+                            <td class="body-style">
+                                0.0
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="description">
+                                The rotation of the text in degrees around the anchor point. Positive rotation values rotate counter-clockwise.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="body-style">
+                                <span class="literal">frameRelative-Rotation</span>
+                            </td>
+                            <td class="body-style">
+                                <span class="non-terminal">boolean</span>
+                            </td>
+                            <td class="body-style">
+                                false
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="description">
+                                If true, the rotation angle changes with the drawing frame. If false, it's frame-independent.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h3><a id="line"></a>line</h3>
+                <p><span class="literal">line</span><span class="non-terminal"> line propertyList</span></p>
+                <p>The line command draws a line.</p>
+                <table id="table-17" class="command-table">
+                    <colgroup>
+                        <col class="column1" />
+                        <col class="column2" />
+                        <col class="column3" />
+                        <col class="column4" />
+                        <col class="column5" />
+                        <col class="column6" />
+                    </colgroup><thead>
+                        <tr>
+                            <td>
+                                Name
+                            </td>
+                            <td>
+                                Type
+                            </td>
+                            <td>
+                                Default
+                            </td>
+                            <td>
+                                Min
+                            </td>
+                            <td>
+                                Max
+                            </td>
+                            <td>
+                                Description
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="body-style">
+                                <span class="red-literal">line</span>
+                            </td>
+                            <td class="body-style">
+                                <span class="non-terminal">line</span>
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="description">
+                                The line to draw.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h3><a id="path"></a>path</h3>
+                <p><span class="literal">path</span><span class="non-terminal"> path propertyList</span></p>
+                <p>The path command draws a path.</p>
+                <ul>
+                    <li>If <span class="literal">closed</span> is true, the last point in the path is treated as connected to the first point.<br />
+                        If <span class="literal">stroke</span> is true,  the path outline is drawn.<br />
+                        If <span class="literal">fill</span> is true, the path is treated as closed and the interior is filled.</li>
+                </ul>
+                <table id="table-19" class="command-table">
+                    <colgroup>
+                        <col class="column1" />
+                        <col class="column2" />
+                        <col class="column3" />
+                        <col class="column4" />
+                        <col class="column5" />
+                        <col class="column6" />
+                    </colgroup><thead>
+                        <tr>
+                            <td>Name</td>
+                            <td>Type</td>
+                            <td>Default</td>
+                            <td>Min</td>
+                            <td>Max</td>
+                            <td>Description</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="body-style"><span class="red-literal">path</span></td>
+                            <td class="body-style"><span class="non-terminal">path</span></td>
+                            <td class="body-style">&nbsp;</td>
+                            <td class="body-style">&nbsp;</td>
+                            <td class="body-style">&nbsp;</td>
+                            <td class="description">The path to use in creating the fill.</td>
+                        </tr>
+                        <tr>
+                            <td class="body-style"><span class="literal">closed</span></td>
+                            <td class="body-style"><span class="non-terminal">boolean</span></td>
+                            <td class="body-style">false</td>
+                            <td class="body-style">&nbsp;</td>
+                            <td class="body-style">&nbsp;</td>
+                            <td class="description">Whether to close the path by connecting the first point to the last.</td>
+                        </tr>
+                        <tr>
+                            <td class="body-style"><span class="literal">stroke</span></td>
+                            <td class="body-style"><span class="non-terminal">boolean</span></td>
+                            <td class="body-style">true</td>
+                            <td class="body-style">&nbsp;</td>
+                            <td class="body-style">&nbsp;</td>
+                            <td class="description">Whether to draw the path.</td>
+                        </tr>
+                        <tr>
+                            <td class="body-style"><span class="literal">fill</span></td>
+                            <td class="body-style"><span class="non-terminal">boolean</span></td>
+                            <td class="body-style">false</td>
+                            <td class="body-style">&nbsp;</td>
+                            <td class="body-style">&nbsp;</td>
+                            <td class="description">Whether to fill the path.  For the fill, the path is treated as closed</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h3><a id="worldline"></a>worldline</h3>
+                <p><span class="literal">worldline</span><span class="non-terminal"> observer propertyList</span></p>
+                <p>The worldline command draws the worldline for an observer.</p>
+                <table id="table-18" class="command-table">
+                    <colgroup>
+                        <col class="column1" />
+                        <col class="column2" />
+                        <col class="column3" />
+                        <col class="column4" />
+                        <col class="column5" />
+                        <col class="column6" />
+                    </colgroup><thead>
+                        <tr>
+                            <td>
+                                Name
+                            </td>
+                            <td>
+                                Type
+                            </td>
+                            <td>
+                                Default
+                            </td>
+                            <td>
+                                Min
+                            </td>
+                            <td>
+                                Max
+                            </td>
+                            <td>
+                                Description
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="body-style">
+                                <span class="red-literal">observer</span>
+                            </td>
+                            <td class="body-style">
+                                <span class="non-terminal">observer</span>
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="body-style">
+                                &nbsp;
+                            </td>
+                            <td class="description">
+                                The observer whose worldline will be drawn.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </body>
+</html>

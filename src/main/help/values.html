@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"><!-- InstanceBegin template="/Templates/gamma-help.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="styles/help.css" type="text/css" />
+    <!-- InstanceBeginEditable name="doctitle" -->
+  <title>Help - Values</title>
+  <!-- InstanceEndEditable -->
+</head>
+
+<body>
+    <div id ="header">
+      <div id="main-page"><a href="index.html">Return to Top</a></div>
+      <!-- InstanceBeginEditable name="Header" -->
+          Help - Values
+	    
+  <!-- InstanceEndEditable --> </div>
+    <div id="main">
+      <div id="nav"> 
+          <!-- InstanceBeginEditable name="Nav" -->
+          <ol>
+            <li><a href="#primitives">Primitives</a>
+              <ol>
+                  <li><a href="#floats">Floats</a></li>
+                  <li><a href="#strings">Strings</a></li>
+              </ol>
+            </li>
+            <li><a href="#objects">Objects</a>
+              <ol>
+                <li><a href="#bounds">Bounds</a></li>
+                <li><a href="#coordinate">Coordinate</a></li>
+                <li><a href="#frame">Frame</a></li>
+                <li><a href="#interval">Interval</a></li>
+                <li><a href="#line">Line</a></li>
+                <li><a href="#observer">Observer</a></li>
+                <li><a href="#path">Path</a></li>
+              </ol></li>
+          </ol>
+          <!-- InstanceEndEditable --> 
+      </div>
+      <div id="content"> 
+          <!-- InstanceBeginEditable name="content" -->
+          <p><span class="note">See <a href="syntax.html">Syntax Notation</a> for information about the syntax notation used here.</span></p>
+          <h1><a id="primitives"></a>Primitives</h1>
+          <p>A primitive is an entity with a single value.</p>
+          <h2><a id="floats"></a>Floats</h2>
+          <p><span class="definition">Floats</span> are double precision numbers. Examples: 10, 5.0, .0125. Scientific notation is not currently supported.</p>
+          <p>Floats are also used to represent <span class="definition">booleans</span>, true/false values. In this case, 0 means false; any other value is true.</p>
+          <h2><a id="strings"></a>Strings</h2>
+          <p><span class="definition">Strings</span> are sequences of characters surrounded by the same quoting character, either single-quote (‘) or double-quote (“). The following character pairs can be used to include special characters into the string:</p>
+            <ul>
+              <li>\" – insert a double-quote</li>
+              <li>' – insert a single-quote</li>
+              <li>\n – insert a newline</li>
+              <li>\\ – insert a backslash</li>
+            </ul>
+          <h1><a id="objects"></a>Objects </h1>
+          <p>An <span class="definition">object</span> is an entity comprised of multiple values. Specific object types are required for certain operations.</p>
+          <p>Object values are called <span class="definition">fields</span>. Currently, only two objects have accessible fields, coordinates and frames. These fields can be accessed or set using the dereferencing operator &quot;.&quot;.          </p>
+          <p>Except for coordinates, all objects begin and end with brackets. The beginning bracket is followed by the object name. The rest of the object definition depends on the object.</p>
+          <h2><a id="bounds"></a>Bounds</h2>
+          <p><span class="literal">[ bounds</span> <span class="non-terminal">coordinate coordinate</span> <span class="literal">]</span></p>
+          <p>The <span class="definition">bounds</span> object creates a bounding box that can be applied to lines using the setBounds() function. Lines are normally infinite—the bounding box defines the x and t limits for the line in rest frame coordinates. The coordinates can be for any diagonally opposing corners.</p>
+          <p>When drawing a bounded line, only the segment that falls within the bounding box is drawn. For intersections, the intersection must fall within the bounding box.</p>
+          <p>The coordinates can include infinite values. For example, [bounds (0, 0) (inf, inf)] limits a line to the upper-right quadrant of the coordinate system.</p>
+          <h2><a id="coordinate"></a>Coordinate</h2>
+          <p><span class="literal">(</span> <span class="non-terminal">float</span> <span class="literal">,</span> <span class="non-terminal">float</span> <span class="literal">)</span></p>
+          <p>A <span class="definition">coordinate</span> stores two numbers. The meaning of the numbers depends on the context. When use with a drawing command, the values are interpreted as (x, t) values relative to the rest frame.</p>
+          <p>Coordinates have two fields: x and t. These can be accessed or modified directly (for example, <span class="code">a = c.x;</span> or <span class="code">c.t = 5;</span>).</p>
+          <h2><a id="frame"></a>Frame          </h2>
+          <p><span class="literal">[ frame</span> ( ( <span class="literal">velocity</span> <span class="non-terminal">float</span> ) | ( <span class="literal">origin</span> <span class="non-terminal">coordinate</span> ) )* <span class="literal">]</span><br>
+            <span class="literal">[ frame</span> <span class="literal">observer</span><span class="non-terminal"> observer</span> ( <span class="literal">at</span> ( <span class="literal">time</span> <span class="non-terminal">float</span> | <span class="literal">tau</span> <span class="non-terminal">float</span> | <span class="literal">distance</span> <span class="non-terminal">float</span> | <span class="literal">velocity</span> <span class="non-terminal">float</span> ) )? ) <span class="literal">]</span><br>
+          </p>
+          <p>A <span class="definition">frame</span> is an inertial frame of reference. In Gamma, inertial frames are identified by both a velocity and an origin. This is the first form shown above. If the velocity is omitted, it is 0. If the origin is omitted, it is (0, 0).</p>
+          <p>An inertial frame can also be identified by selecting a unique point on an observer's wordline. This is the second form. There are several options for the identifying the worldline point. Time and tau (observer's time) will always yield a unique point. Distance and velocity may not be unique; in this case, the first matching point is used. The frame selection always creates a frame; worldlines are infinite and, in this case, worldline intervals are ignored.</p>
+          <p>Frames have two fields: v and origin. These can be accessed or modified directly (for example, <span class="code">vel = f.v;</span> or <span class="code">f.origin = (10, 10);</span>).<br>
+          </p>
+          <h2><a id="interval"></a>Interval</h2>
+          <p><span class="literal">[  interval</span> ( <span class="literal">time</span> | <span class="literal">tau</span> | <span class="literal">distance</span> ) <span class="non-terminal">float</span> <span class="literal">to</span> <span class="non-terminal">float</span> <span class="literal">]</span></p>
+          <p><span class="definition">Intervals</span> are used to limit wordlines and are applied using the setInterval() function. Intervals are used (rather than bounds) to guarantee that the resulting worldline path is continuous.          </p>
+          <p>When drawing a worldline with an interval, only the segment that falls within the interval is drawn. For intersections, the intersection must fall within the interval.</p>
+          <h2><a id="line"></a>Line</h2>
+          <p><span class="literal">[ line  axis</span> ( <span class="literal">x</span> | <span class="literal">t</span> ) <span class="non-terminal">frame</span> ( <span class="literal">offset</span> <span class="non-terminal">float</span> )? ) <span class="literal">]</span><br>
+            <span class="literal">[ line angle</span> <span class="non-terminal">float</span> <span class="literal">through</span> <span class="non-terminal">coordinate</span> ) <span class="literal">]</span><br>
+          <span class="literal">[ line from</span> <span class="non-terminal">coordinate</span> <span class="literal">to</span> <span class="non-terminal">coordinate</span> <span class="literal">]</span></p>
+          <p>There are three ways to specify a <span class="definition">line</span>:</p>
+          <ul>
+            <li>The line can be parallel to the x or t axis of a given inertial frame. The line crosses through the point of the  axis not listed. For example, [line axis t fr offset 5] will be parallel to the t axis of the inertial frame identified by &quot;fr&quot; and will go through the point (5, 0).</li>
+            <li>The line can be at a given angle, going through the specified coordinate. (Note: Angles are in degrees.)</li>
+            <li>The line can cross two distinct points.</li>
+          </ul>
+          <p>Line are infinite, but can be bounded with a bounds object using the setBounds() function.</p>
+          <h2><a id="observer"></a>Observer</h2>
+          <p><span class="literal">[ observer</span> <span class="non-terminal">worldlineList</span>? <span class="literal">]</span></p>
+          <p><span class="definition">Observers</span> are the most complex of the objects in Gamma, so we'll go through their definition one step at a time. An observer is an object moving through spacetime. If the worldlineList is omitted, the observer created is equivalent to [observer origin(0, 0) distance 0 tau 0, velocity 0].</p>
+          <p><span class="non-terminal">worldlineList</span> → <span class="non-terminal">worldlineInitializer</span> | <span class="non-terminal">worldlineSegmentList</span> | ( <span class="non-terminal">worldlineInitializer</span> <span class="literal">,</span> <span class="non-terminal">wordlineSegmentList</span> )</p>
+          <p>The observer begins with an  initializer, a list of worldline segments, or both.</p>
+          <p><span class="non-terminal">worldlineInitializer</span> → ( <span class="literal">origin</span> <span class="non-terminal">coordinate</span> | <span class="literal">distance</span> <span class="non-terminal">float</span> | <span class="literal">tau</span> <span class="non-terminal">expr</span> )*</p>
+          <p>The initializer identifies a point that we will consider the worldline's origin. All parts are optional and the entire initializer can be omitted.</p>
+          <ul>
+            <li>Origin identifies the location of the worldline's origin relative to the rest frame. If omitted, it is (0, 0).</li>
+            <li>Distance gives the distance value at the worldline's origin. If omitted, it is 0.</li>
+            <li>Tau gives the observer's local time at the origin point. If omitted, it is 0.</li>
+          </ul>
+          <p><span class="non-terminal">worldlineSegmentList</span> →  <span class="non-terminal">worldlineSegment</span> ( <span class="literal">,</span> <span class="non-terminal">worldlineSegment</span> )* </p>
+          <p>The worldline segments consist of one or more segments separate by commas.</p>
+          <p><span class="non-terminal">worldlineSegment</span> → ( <span class="literal">velocity</span> <span class="non-terminal">float</span> | <span class="literal">acceleration</span> <span class="non-terminal">float</span> | <span class="literal">velocity</span> <span class="non-terminal">float</span> <span class="literal">acceleration</span> <span class="non-terminal">float</span> ) <span class="non-terminal">segmentLimit</span>?</p>
+          <p>Each segment has a velocity, an acceleration, or both. Every segment except the last must have a segment limit. The last segment can have a limit, but it is ignored.</p>
+          <ul>
+            <li>The velocity is the velocity at the first point of the segment. For the first segment, it is the velocity at the origin. Specifying a velocity for a segment other than the first creates an unphysical, instantaneous acceleration. If omitted, the velocity at the start of a segment is equal to the velocity at the end of the last segment (or 0 for the first segment.</li>
+            <li>Acceleration is specified in g's and is constant for the entire segment. </li>
+          </ul>
+          <p><span class="non-terminal">segmentLimit</span> → <span class="literal">time</span> <span class="non-terminal">float</span> | <span class="literal">tau</span> <span class="non-terminal">float</span> | <span class="literal">distance</span> <span class="non-terminal">float</span> | <span class="literal">velocity</span> <span class="non-terminal">float</span></p>
+          <p>The segment limit specifies the end of the segment. Except for velocity, all values are relative.</p>
+          <ul>
+            <li>Time specifies how much rest frame time will pass before the segment ends.</li>
+            <li>Tau specifies how much observer time will pass before the segment ends.</li>
+            <li>Distance specifies how much distance will be covered before the segment ends. An error will occur if the velocity and acceleration are 0 and the distance value is not 0. </li>
+            <li>Velocity specifies what velocity must be attained for the segment to end. An error will occur if the velocity cannot be reached.</li>
+          </ul>
+          <p>There is a segment before the first segment and a segment after the last. The prefix segment has the same  acceleration as the first segment and ends at the origin with the velocity, distance, and tau values given for the origin point. The suffix segment maintain the acceleration of the last segment.</p>
+          <p>Segments can be of zero length. To create a prefix segment with a velocity of 0, create the first segment with a velocity of 0 and a limit of 0 time, tau, or distance.</p>
+          <h2><a id="path"></a>Path</h2>
+          <p><span class="literal">[ path</span> <span class="non-terminal">coordinate</span> ( <span class="literal">,</span> <span class="non-terminal">coordinate</span> )+ <span class="literal">]</span></p>
+          <p>A <span class="definition">path</span> is a set of  points.</p>
+          <p>&nbsp;</p>
+          <!-- InstanceEndEditable --> 
+      </div>
+    </div>
+</body>
+<!-- InstanceEnd --></html>

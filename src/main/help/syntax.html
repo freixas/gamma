@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"><!-- InstanceBegin template="/Templates/gamma-help.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="styles/help.css" type="text/css" />
+    <!-- InstanceBeginEditable name="doctitle" -->
+  <title>Help - Syntax Notation</title>
+  <!-- InstanceEndEditable -->
+</head>
+
+<body>
+    <div id ="header">
+      <div id="main-page"><a href="index.html">Return to Top</a></div>
+      <!-- InstanceBeginEditable name="Header" -->
+          Help - Syntax Notation
+		  
+  <!-- InstanceEndEditable --> </div>
+    <div id="main">
+      <div id="nav"> 
+          <!-- InstanceBeginEditable name="Nav" -->
+          <ol>
+            <li><a href="#syntax-notation">Syntax Notation</a></li>
+          </ol>
+          <!-- InstanceEndEditable --> 
+      </div>
+      <div id="content"> 
+          <!-- InstanceBeginEditable name="content" -->
+              <h1><a id="syntax-notation"></a>Syntax Notation </h1>
+              <ul>
+                <li><span class="non-terminal">Italics</span> represent an element that is defined elsewhere.</li>
+                <li><span class="literal">Colored Bold</span> represents an element that is entered exactly as it appears in the syntax.</li>
+                <li>The two items above are an &quot;element.&quot;</li>
+                <li>Consecutive elements separated by spaces in the syntax can be separated by any amount of whitespace in the script or none at all.</li>
+                <li>Parentheses can be used to create an element from groups of elements.</li>
+                <li>A vertical bar (&quot;|&quot;) signifes a choice: one of the elements.<br>
+                </li>
+                <li>An element followed by a question mark (&quot;?&quot;) can appear 0 or 1 times (it's optional).</li>
+                <li>An element followed by an asterisk (&quot;*&quot;) can be used 0 or more times.</li>
+                <li>An element followed by a plus sign (&quot;+&quot;) can be used 1 or more times.</li>
+                <li>The definition for an element in italics may be given by listing the term followed by a right arrow (&quot;→&quot;) and then the definition.</li>
+              </ul>
+              <p>Note that scripts may be syntactically valid, but may still be invalid. The application will display an error when it encounters a problem.</p>
+              <p>You may encounter a something like: <span class="literal">origin</span> <span class="non-terminal">coordinate</span>. The correct syntax would be <span class="literal">origin</span> <span class="non-terminal">expression</span>. The notation should be interpreted as accepting a coordinate or any expression that evaluates to a coordinate.</p>
+              <!-- InstanceEndEditable --> 
+      </div>
+    </div>
+</body>
+<!-- InstanceEnd --></html>

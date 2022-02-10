@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="styles/help.css" type="text/css" />
+    <!-- TemplateBeginEditable name="doctitle" -->
+    <title>Untitled Document</title>
+    <!-- TemplateEndEditable -->
+</head>
+
+<body>
+    <div id ="header">
+      <div id="main-page"><a href="index.html">Return to Top</a></div>
+      <!-- TemplateBeginEditable name="Header" --> 
+      header 1
+      <!-- TemplateEndEditable --> </div>
+    <div id="main">
+      <div id="nav"> 
+          <!-- TemplateBeginEditable name="Nav" --> 
+          nav 
+          <!-- TemplateEndEditable --> 
+      </div>
+      <div id="content"> 
+          <!-- TemplateBeginEditable name="content" --> 
+          content 
+          <!-- TemplateEndEditable --> 
+      </div>
+    </div>
+</body>
+</html>

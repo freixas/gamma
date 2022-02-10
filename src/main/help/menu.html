@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"><!-- InstanceBegin template="/Templates/gamma-help.dwt" codeOutsideHTMLIsLocked="false" -->
+    <head>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="styles/help.css" type="text/css" />
+        <!-- InstanceBeginEditable name="doctitle" -->
+        <title>Help - Menu</title>
+        <!-- InstanceEndEditable -->
+    </head>
+
+    <body>
+        <div id ="header">
+            <div id="main-page"><a href="index.html">Return to Top</a></div>
+            <!-- InstanceBeginEditable name="Header" -->
+            Help - Menu
+
+            <!-- InstanceEndEditable --> </div>
+        <div id="main">
+            <div id="nav">
+                <!-- InstanceBeginEditable name="Nav" -->
+                <ol>
+                    <li><a href="#file-menu">File Menu</a>
+                        <ol>
+                            <li><a href="#new">New...</a></li>
+                            <li><a href="#open">Open...</a></li>
+                            <li><a href="#export-diagram">Export Diagram...</a></li>
+                            <li><a href="#close-window">Close Window</a></li>
+                            <li><a href="#preferences">Preferences...</a></li>
+                            <li><a href="#exit">Exit</a></li>
+                        </ol>
+                    </li>
+                    <li><a href="#window-menu">Window Menu</a>
+                        <ol>
+                            <li><a href="#new-window">New Window</a></li>
+                        </ol>
+                    </li>
+                    <li><a href="#help-menu">Help Menu</a>
+                        <ol>
+                            <li><a href="#sample-scripts">Sample Scripts...</a></li>
+                            <li><a href="#contents">Contents</a></li>
+                            <li><a href="#about-gamma">About Gamma</a></li>
+                        </ol>
+                    </li>
+                </ol>
+                <!-- InstanceEndEditable -->
+            </div>
+            <div id="content">
+                <!-- InstanceBeginEditable name="content" -->
+                <h1><a id="file-menu"></a>File Menu </h1>
+                <h2><a id="new"></a>New...</h2>
+                <p>Creates a file, associates it with the window, load the empty file, and executes the empty script. From then on, each time the file (or any dependent file) is saved, the file will be re-loaded and executed.</p>
+                <h2><a id="open"></a>Open...</h2>
+                <p>Opens an existing file, associates it with the window, loads the script, and executes it. From then on, each time the file (or any dependent file) is saved, the file will be re-loaded and executed.</p>
+                <h2><a id="export-diagram"></a>Export Diagram...</h2>
+                <p>Saves the image as a JPG, PNG, or TIFF.</p>
+                <h2><a id="close-window"></a>Close Window</h2>
+                <p>Closes the window.</p>
+                <h2><a id="preferences"></a>Preferences...</h2>
+                <p>Displays the Preferences dialog:</p>
+                <ul>
+                    <li>Display welcome dialog—enables/disables the Welcome dialog.</li>
+                    <li>Default scripts directory—set the default location for opening/saving script files.</li>
+                    <li>Default images directory—set the default location for exporting images.</li>
+                    <li>Default videos directory—set the default location for exporting videos (not yet implemented).</li>
+                    <li>Default stylesheet—set a stylesheet to use for all scripts. This is loaded after the factory stylesheet and before any script stylesheets.</li>
+                    <li>Editor command—set the command to use to open a script file in an editor. If empty, the application will not attempt to open an editor. The sequence <span class="literal">$F$</span> will be replaced by the file name.</li>
+                </ul>
+                <h2><a id="exit"></a>Exit              </h2>
+                <p>Exits the program.</p>
+                <h1><a id="window-menu"></a>Window Menu</h1>
+                <h2><a id="new-window"></a>New Window</h2>
+                <p>Creates a new window. The window will not have any file associated with it.</p>
+                <h1><a id="help-menu"></a>Help Menu</h1>
+                <h2><a id="sample-scripts"></a>Sample Scripts...</h2>
+                <p>Displays an Open File dialog in the installation's sample scripts directory. A sample script can then be selected the same as any other script file.</p>
+                <h2><a id="contents"></a>Contents</h2>
+                <p>Displays the help content you are now viewing.</p>
+                <h2><a id="about-gamma"></a>About Gamma</h2>
+                <p>Displays the About dialog.</p>
+                <!-- InstanceEndEditable -->
+            </div>
+        </div>
+    </body>
+    <!-- InstanceEnd -->
+</html>

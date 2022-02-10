@@ -1,0 +1,318 @@
+/*
+ Gamma - A Minkowski Spacetime Diagram Generator
+ Copyright (C) 2021-2022  by Antonio Freixas
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+/*
+    Created on : Feb 6, 2022, 9:45:32 AM
+    Author     : Antonio Freixas
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code&family=Lato:ital,wght@0,700;1,700&family=Nunito+Sans:wght@700&family=Roboto:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+/********************************************
+/* Tag styles
+ ********************************************/
+
+html {
+  overflow-y: hidden;
+}
+body {
+  display: flex;
+  flex-direction: column;
+  font: normal normal 1em/1.2 'Roboto', sans-serif;
+  z-index: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Lato', sans-serif;
+  font-weight: bold;
+  margin-top: 1.5em;
+}
+h1 {
+  font-size: 1.5em;
+}
+h2 {
+  font-size: 1.2em;
+}
+h3 {
+  font-size: 1em;
+}
+h4, h5, h6 {
+  font-size: 1em;
+  font-style: italic;
+}
+
+div > :first-child {
+  margin-top: 0 !important;
+}
+
+ol {
+  list-style: none;
+  counter-reset: level1;
+  padding-left: 0;
+}
+ol > li {
+  counter-increment: level1;
+  margin-top: .5em;
+}
+ol > li:before {
+  content: counter(level1, decimal) ". ";
+  font-weight: bold;
+}
+
+ol > li > ol {
+  list-style: none;
+  counter-reset: level2;
+  padding-left: 2em;
+}
+ol > li > ol > li {
+  counter-increment: level2;
+  margin-top: .1em;
+}
+ol > li > ol > li:before {
+  content: counter(level2, lower-alpha) ". ";
+  font-weight: bold;
+}
+
+ol > li > ol > li > ol {
+  list-style: none;
+  counter-reset: level3;
+  padding-left: 2em;
+}
+ol > li > ol > li > ol > li {
+  counter-increment: level3;
+}
+ol > li > ol > li > ol > li:before {
+  content: counter(level3, lower-roman) ". ";
+  font-weight: bold;
+}
+
+ul {
+  padding-left: 2em;
+}
+
+a {
+  text-decoration: none;
+}
+a:link, a:visited {
+  color: #048;
+}
+a:hover, a:active{
+  color: #B00;
+}
+
+/********************************************
+/* Class styles
+ ********************************************/
+
+.menu-item {
+  font-family: 'Nunito Sans', sans-serif;
+  font-weight: bold;
+}
+
+.literal {
+  font-family: 'Nunito Sans', sans-serif;
+  font-weight: bold;
+  color: #0178bf;
+}
+.green-literal {
+  font-family: 'Nunito Sans', sans-serif;
+  font-weight: bold;
+  color: forestgreen;
+}
+.red-literal {
+  font-family: 'Nunito Sans', sans-serif;
+  font-weight: bold;
+  color: crimson;
+}
+
+.non-terminal {
+  font-family: 'Roboto', sans-serif;
+  font-style: italic;
+}
+
+.definition {
+  font-style: italic;
+}
+
+.code {
+  font-family: 'Fira Code', monospace;
+}
+p.code {
+  margin: 0;
+}
+
+.item-intro {
+  font-weight: bold;
+}
+
+.note {
+  font: normal italic 1em/1.5 'Roboto', sans-serif;
+}
+
+p.footnote {
+  font-size: .8em;
+}
+span.footnote {
+  font-variant-position: super;
+}
+
+/********************************************
+/* Table styles
+ ********************************************/
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  table-layout: fixed;
+  width: 98%;
+}
+table tr {
+  padding: 0;
+  margin: 0;
+  font-size: .8em;
+}
+
+thead td {
+  font: bold normal 1em 'Nunito Sans', sans-serif;
+  text-align: center;
+  vertical-align: middle;
+  padding: 0;
+  border-bottom: solid 1px black;
+}
+tbody td {
+  font: normal normal 1em/1.5 'Roboto', sans-serif;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #EEE;
+}
+
+td {
+  padding: 8px 10px;
+}
+
+.command-table .column1 {
+  width: 12%;
+}
+.command-table .column2, .command-table .column3 {
+  width: 8%;
+}
+.command-table .column4, .command-table .column5 {
+  width: 8%;
+}
+.command-table .column6 {
+  width: 50%;
+}
+.operator-table .column1 {
+  width: 10%;
+}
+.operator-table .column2 {
+  width: 10%;
+}
+.command-table .column3 {
+  width: 10%;
+}
+.operator-table .column4 {
+  width: 10%
+}
+.command-table .column5 {
+  width: 10%;
+}
+.operator-table .column6 {
+  width: 10%;
+}
+.operator-table .column7 {
+  width: 40%;
+}
+
+.colorname-table {
+  font: normal normal .8em/1.5 'Roboto', sans-serif;
+}
+
+.function-table .column1 {
+  width: 250px;
+}
+.function-table .column2 {
+
+}
+.body-style {
+  text-align: center;
+  vertical-align: middle;
+}
+.description {
+  text-align: left;
+  vertical-align: top;
+}
+
+/********************************************
+/* ID styles
+ ********************************************/
+
+#header {
+  position: fixed;
+  width: 100%;
+  top: 0; left: 0;
+  padding: 5px 5px 10px 10px;
+  font-family: 'Lato', sans-serif;
+  font-size: 2em;
+  font-weight: bold;
+  border-bottom: solid 4px forestgreen;
+  background-color: white;
+  z-index: 1;
+}
+
+#main-page {
+  font-size: .5em;
+  float: right;
+  padding-top: 1em;
+  margin-right: 5em;
+}
+
+#main {
+  position: relative;
+  overflow-y: visible;
+  top: 0; left: 0;
+  display: flex;
+  margin-top: 80px;
+}
+
+#nav {
+  font: .8em 'Nunito Sans', sans-serif;
+  font-size: .8em;
+  position: fixed;
+  top: 90px;
+  flex-shrink: 0;
+  z-index: 1;
+  width: 200px;
+  height: calc(100vh - 90px);
+  overflow: auto;
+}
+
+#content {
+  height: calc(100vh - 90px);
+  overflow: auto;
+  top: 0;
+  flex-basis: 0px;
+  flex-shrink: 1;
+  flex-grow: 1;
+  padding-left: 210px;
+  max-width: 100%;
+  width: calc(100vw - 200px);
+  z-index: 0;
+}
+
+

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"><!-- InstanceBegin template="/Templates/gamma-help.dwt" codeOutsideHTMLIsLocked="false" -->
+    <head>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="styles/help.css" type="text/css" />
+        <!-- InstanceBeginEditable name="doctitle" -->
+        <title>Help - Quick Start</title>
+        <!-- InstanceEndEditable -->
+    </head>
+
+    <body>
+        <div id ="header">
+            <div id="main-page"><a href="index.html">Return to Top</a></div>
+            <!-- InstanceBeginEditable name="Header" -->
+            Help - Quick Start
+
+            <!-- InstanceEndEditable --> </div>
+        <div id="main">
+            <div id="nav">
+                <!-- InstanceBeginEditable name="Nav" -->
+                <ol>
+                    <li><a href="#editing-quick-start">Editing Quick Start</a></li>
+                    <li><a href="#script-quick-start">Script Quick Start</a></li>
+                    <li><a href="#stylesheet-quick-start">Stylesheet Quick Start</a></li>
+                </ol>
+                <!-- InstanceEndEditable -->
+            </div>
+            <div id="content">
+                <!-- InstanceBeginEditable name="content" -->
+                <h1><a id="editing-quick-start"></a>Editing Quick Start</h1>
+                <p>You edit in whatever text editor you want to use. File / New and File / Open assocaite a script file with a window; from then on, when you save the file, the file is re-loaded and executed.</p>
+                <p>If you have an editor command defined in the Preferences dialog, the application will use it when you associate the file with the window. This is not required. There is a default editor command defined when you first use the program—you can keep it, change it, or remove it.</p>
+                <h1><a id="script-quick-start"></a>Script Quick Start</h1>
+                <p>Begin with <span class="menu-item">Help / Sample Scripts...</span> There are a variety of sample scripts you can study, from simple to complex. </p>
+                <p>A script consists of a series of <a href="statements.html">statements</a>. One type of statement is a <a href="statements.html#command-statements">command</a>. Commands are things that actually draw something (or control how things are drawn), so focus on them first.</p>
+                <p>You will need to learn something about objects, but there are three objects you can start with: <a href="values.html#coordinate">coordinates</a>, <a href="values.html#frame">frames</a>, and <a href="values.html#observer">observers</a>.</p>
+                <h1><a id="stylesheet-quick-start"></a>Stylesheet Quick Start</h1>
+                <p><a href="statements.html#command-statements">Commands</a> control <em>what</em> is drawn; <a href="stylesheets.html">stylesheets</a> control <em>how</em> it is drawn (its appearance).</p>
+                <p>The stylesheet system is patterned after CSS (Cascading Style Sheets) used by web browsers and has a lot of features (and complexity). There are benefits to using it, but here's a way to get going quickly:</p>
+                <p>Every command has a <span class="literal">style</span> property. The value of this property is a string that contains a series of style properties, separated by semicolons (the final semicolon can be omitted).</p>
+                <p>The most common style property is <span class="literal">color</span>. For instance, write <span class="code">axes style: &quot;color: red&quot;;</span> to draw axes in red. There are many named colors; the most common (&quot;red&quot;, &quot;blue&quot;, &quot;green&quot;, etc.) are supported. If these don't suit you, you can write a color using the same notation as supported by <a href="https://en.wikipedia.org/wiki/Web_colors">CSS v1 or v2</a>.</p>
+                <p>For lines  (or things with lines, such as axes, or paths), use <span class="literal">line-thickness</span> and <span class="literal">line-style</span>. The former takes a number (the pixel thickness of the line) and the latter supports styles <span class="literal">solid</span>, <span class="literal">dashed</span>, and <span class="literal">dotted</span>. You can also add arrowheads in some cases with                <span class="literal">arrow</span> (values are <span class="literal">none</span>, <span class="literal">both</span>, <span class="literal">start</span>, and <span class="literal">end</span>). </p>
+                <p>For events, you might want to set the <span class="literal">event-diameter</span> (in pixels) or the <span class="literal">event-shape</span> (<span class="literal">circle</span>, <span class="literal">square</span>, <span class="literal">diamond</span>, or <span class="literal">star</span>).</p>
+                <p>For text, a box is drawn around the characters and the box is widened by the <span class="literal">text-padding</span> (a value in pixels). This box is then divided into 9 key points. You can select one of these points with a two-letter code: vertically T for top, M for middle, and B for bottom; horizontally L for left, C for center, and R for right. You specify this point with the <span class="literal">text-anchor</span> style.</p>
+                <!-- InstanceEndEditable -->
+            </div>
+        </div>
+    </body>
+    <!-- InstanceEnd -->
+</html>

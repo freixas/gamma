@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="styles/help.css" type="text/css" />
+        <title>Untitled Document</title>
+    </head>
+
+    <body>
+        <div id ="header">
+            <div id="main-page"><a href="index.html">Return to Top</a></div>
+            Help - Stylesheets </div>
+        <div id="main">
+            <div id="nav">
+              <ol>
+                <li><a href="#stylesheets">Stylesheets</a></li>
+                <li><a href="#rules">Rules</a></li>
+                <li><a href="#selectors">Selectors</a></li>
+                <li><a href="#style-properties">Style Properties</a>
+                  <ol>
+                    <li><a href="#color-hierarchies">Color Hierarchies</a></li>
+                    <li><a href="#line-hierarchies">Line Hierarchies</a></li>
+                    <li><a href="#font-hierarchies">Font Hierarchies</a></li>
+                    <li><a href="#text-hierarchies">Text Hierarchies</a></li>
+                    <li><a href="#tick-hierarchies">Tick Hierarchies</a></li>
+                    <li><a href="#hypergrid">Hypergrid</a></li>
+                    <li><a href="#miscellaneous">Miscellaneous</a></li>
+                    <li><a href="#color-values">Color Values</a>
+                      <ol>
+                        <li><a href="#hexadecimal-colors">Hexadecimal Colors</a></li>
+                        <li><a href="#color-names">Color Names</a></li>
+                        <li><a href="#color-functions">Color Functions</a></li>
+                      </ol>
+                    </li>
+                  </ol>
+                </li>
+                <li><a href="#default-stylesheet">Default Stylesheet</a></li>
+              </ol>
+            </div>
+            <div id="content">
+                <p class="note">See <a href="syntax.html">Syntax Notation</a> for information about the syntax notation used here.</p>
+                <h1><a id="stylesheets"></a>Stylesheets</h1>
+                <p><a href="statements.html#command-statements">Commands</a> control <em>what</em> is drawn; stylesheets control <em>how</em> it is drawn—the &quot;look.&quot;</p>
+                <p>The stylesheet system is feature rich, allowing control of just about every aspect of the diagram's design, but it is not immediately essential to creating a diagram. Consider using the <a href="quick-start.html#stylesheet-quick-start">Stylesheet Quick Start</a> at first.</p>
+                <p>A single diagram may contain multiple stylesheets. These are concatenated into a single stylesheet in this order:</p>
+                <ul>
+                    <li>The factory stylesheet</li>
+                    <li>A global stylesheet selected through the Preferences dialog</li>
+                    <li>Stylesheets defined using the <span class="literal">stylesheet</span> statement, in the order encountered</li>
+                </ul>
+                <p>Stylesheets consist of a sequence of zero or more <span class="definition">rules</span>.</p>
+                <h1><a id="rules"></a>Rules</h1>
+                <p>( <span class="non-terminal">selector</span> ( <span class="literal">,</span> <span class="non-terminal">selector</span> )* )? { ( <span class="non-terminal">styleProperty</span>? <span class="literal">;</span> )?* }</p>
+                <p>A rule consists of zero or more <span class="definition">selectors</span>, separated by commas, followed by a set of zero or more style properties enclosed within braces, with each style property ending with a semicolon.</p>
+                <p>The shorthand </p>
+                <p class="code">selector1, selector2 { ... some style properties .. }</p>
+                <p>is exactly equivalent to </p>
+                <p class="code">selector1 { ... some style properties .. }</p>
+                <p class="code">selector2 { ... the same style properties ... }</p>
+                <h1><a id="selectors"></a>Selectors</h1>
+                <p>Selectors are used to select which style properties are applied to a given command. </p>
+                <p>There are three things used to match a selector to a command: the command name, the command's id value and one or more of the classes listed in the command's class value. Let's look at an example:</p>
+                <p class="code">axes id: &quot;id1&quot;, class: &quot;class1, class2&quot;;</p>
+                <p>The three elements here are: the name &quot;axes&quot;, the id &quot;id1&quot; and the two classes &quot;class1&quot; and &quot;class2&quot; (which are separated by commas). When used in a selector, the id value is prefixed with a &quot;#&quot; and each classname is prefixed with a &quot;.&quot;. The elements desired for a match are then concatenated together. The following selectors would all match the command above:</p>
+                <ul>
+                    <li>axes, </li>
+                    <li>#id1</li>
+                    <li>.class2</li>
+                    <li>axes#id1</li>
+                    <li>axes.class1</li>
+                    <li>axes#id1.class1</li>
+                    <li>axes#id1.class.class2</li>
+                </ul>
+                <p>This is not a complete list. For a match to occur, all parts must match. For example, axes.class1.class3 would not match.</p>
+                <p>A rule with no selectors matches everything.</p>
+                <p>Each match selector has a score. The score begins at 0, adds 1 for the command name, 10 for each class, and 1000 for an id match. The style properties associated with a matched selector are moved as a whole into a new list, with the highest scoring matches placed lower in the list. Within the same score, rules that appear later in the stylesheet are placed lower in the list.</p>
+                <p>To create the final set of styling values for a command, each style property is applied, starting from the top of the list.</p>
+                <h1><a id="style-properties"></a>Style Properties</h1>
+                <p>Some style properties are &quot;shorthands&quot; for others. Setting one property may also cause others to be set, which may further cascade to others. For example, the <span class="literal">color</span> property will set the <span class="literal">div-color</span> property, which will then set the <span class="literal">x-div-color</span>, <span class="literal">t-div-color</span>, and <span class="literal">major-div-color</span> properties, the last of which sets two more. Therefore, setting <span class="literal">major-div-color</span> before <span class="literal">color</span> will have no effect.</p>
+                <p>The style property tables that follow indicate the inheritance hierachy in the &quot;Default&quot; value column. </p>
+                <h2><a id="color-hierarchies"></a>Color Hierarchies</h2>
+                <p>See the section on <a href="#color-values">Color Values</a> for the various ways a color value can be specified.</p>
+                <table id="table-1" class="command-table">
+                    <colgroup>
+                        <col class="column1" />
+                        <col class="column2" />
+                        <col class="column3" />
+                        <col class="column4" />
+                        <col class="column5" />
+                        <col class="column6" />
+                    </colgroup>
+                    <thead>
+                        <tr class="Row-Column-5">
+                            <td class="Header-Cell">Name</td>
+                            <td class="Header-Cell">Type</td>
+                            <td class="Header-Cell">Default</td>
+                            <td class="Header-Cell">Min</td>
+                            <td class="Header-Cell">Max</td>
+                            <td class="Header-Cell">Description</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="Row-Column-6">
+                            <td class="body-style"><span class="literal">color</span></td>
+                            <td class="body-style"><span class="non-terminal">color</span></td>
+                            <td class="body-style">#000000</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">The color for axes, grids, hypergrids, lines, paths, worldlines, event shapes, event boost lines, and text.</td>
+                        </tr>
+                        <tr class="Row-Column-7">
+                            <td class="body-style"><span class="literal">x-color</span></td>
+                            <td class="body-style"><span class="non-terminal">color</span></td>
+                            <td class="body-style"><span class="literal">color</span><span class="char-style-override-3"></span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">The color for the x axis, x grid lines, and x hypergrid lines.</td>
+                        </tr>
+                        <tr class="Row-Column-6">
+                            <td class="body-style"><span class="literal">t-color</span></td>
+                            <td class="body-style"><span class="non-terminal">color</span></td>
+                            <td class="body-style"><span class="literal">color</span><span class="char-style-override-3"></span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">The color for the t axis, t grid lines, and t hypergrid lines.</td>
+                        </tr>
+                        <tr class="Row-Column-8">
+                            <td class="body-style"><span class="literal">div-color</span></td>
+                            <td class="body-style"><span class="non-terminal">color</span></td>
+                            <td class="body-style"><span class="literal">color</span><span class="char-style-override-3"></span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">The color for tick marks, grid lines, and hypergrid lines.</td>
+                        </tr>
+                        <tr class="Row-Column-6">
+                            <td class="body-style"><span class="literal">x-div-color</span></td>
+                            <td class="body-style"><span class="non-terminal">color</span></td>
+                            <td class="body-style"><span class="literal">div-color</span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">The color for x tick marks, x grid lines, and x hypergrid lines.</td>
+                        </tr>
+                        <tr class="Row-Column-7">
+                            <td class="body-style"><span class="literal">t-div-color</span></td>
+                            <td class="body-style"><span class="non-terminal">color</span></td>
+                            <td class="body-style"><span class="literal">div-color</span><span class="char-style-override-3"></span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">The color for t tick marks, t grid lines, and t hypergrid lines.</td>
+                        </tr>
+                        <tr class="Row-Column-5">
+                            <td class="body-style"><span class="literal">major-div-color</span></td>
+                            <td class="body-style"><span class="non-terminal">color</span></td>
+                            <td class="body-style"><span class="literal">div-color</span><span class="char-style-override-3"></span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">The color for major tick marks, and major grid lines.</td>
+                        </tr>
+                        <tr class="Row-Column-7">
+                            <td class="body-style"><span class="literal">x-major-div–color</span></td>
+                            <td class="body-style"><span class="non-terminal">color</span></td>
+                            <td class="body-style"><span class="literal">major-div–color</span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">The color for major x tick marks, and major x grid lines.</td>
+                        </tr>
+                        <tr class="Row-Column-6">
+                            <td class="body-style"><span class="literal">t-major-div–color</span></td>
+                            <td class="body-style"><span class="non-terminal">color</span></td>
+                            <td class="body-style"><span class="literal">major-div–color</span><span class="char-style-override-3"></span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">The color for major t tick marks, and major t grid lines.</td>
+                        </tr>
+                        <tr class="Row-Column-8">
+                            <td class="body-style"><span class="literal">text-color</span></td>
+                            <td class="body-style"><span class="non-terminal">color</span></td>
+                            <td class="body-style"><span class="literal">color</span><span class="char-style-override-3"></span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">The color for all text.</td>
+                        </tr>
+                        <tr class="Row-Column-5">
+                            <td class="body-style"><span class="literal">x-text-color</span></td>
+                            <td class="body-style"><span class="non-terminal">color</span></td>
+                            <td class="body-style"><span class="literal">text-color</span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">The color for x tick marks.</td>
+                        </tr>
+                        <tr class="Row-Column-8">
+                            <td class="body-style"><span class="literal">t-text-color</span></td>
+                            <td class="body-style"><span class="non-terminal">color</span></td>
+                            <td class="body-style"><span class="literal">text-color</span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">The color for t tick marks.</td>
+                        </tr>
+                        <tr class="Row-Column-6">
+                            <td class="body-style"><span class="literal">background–color</span></td>
+                            <td class="body-style"><span class="non-terminal">color</span></td>
+                            <td class="body-style">#FFFFFF</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">The diagram background color and the fill color.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h2><a id="line-hierarchies"></a>Line Hierarchies</h2>
+                <table id="table-2" class="command-table">
+                    <colgroup>
+                        <col class="column1" />
+                        <col class="column2" />
+                        <col class="column3" />
+                        <col class="column4" />
+                        <col class="column5" />
+                        <col class="column6" />
+                    </colgroup>
+                   <thead>
+                        <tr class="Row-Column-5">
+                            <td class="Header-Cell">Name</td>
+                            <td class="Header-Cell">Type</td>
+                            <td class="Header-Cell">Default</td>
+                            <td class="Header-Cell">Min</td>
+                            <td class="Header-Cell">Max</td>
+                            <td class="Header-Cell">Description</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="Row-Column-6">
+                            <td class="body-style"><span class="literal">line-thickness</span></td>
+                            <td class="body-style"><span class="non-terminal">float</span></td>
+                            <td class="body-style">1.0</td>
+                            <td class="body-style">&gt; 0</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">The line thickness for axes, tick marks, grids, hypergrids, lines, worldlines, and event boost lines.</td>
+                        </tr>
+                        <tr class="Row-Column-7">
+                            <td class="body-style"><span class="literal">x-line-thickness</span></td>
+                            <td class="body-style"><span class="non-terminal">float</span></td>
+                            <td class="body-style"><span class="literal">line-thickness</span><span class="char-style-override-3"></span></td>
+                            <td class="body-style">&gt; 0</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">The line thickness for x axes, x tick marks, x grid lines, and x hypergrids lines.</td>
+                        </tr>
+                        <tr class="Row-Column-6">
+                            <td class="body-style"><span class="literal">t-line-thickness</span></td>
+                            <td class="body-style"><span class="non-terminal">float</span></td>
+                            <td class="body-style"><span class="literal">line-thickness</span><span class="char-style-override-3"></span></td>
+                            <td class="body-style">&gt; 0</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">The line thickness for t axes, t tick marks, t grid lines, and t hypergrids lines.</td>
+                        </tr>
+                        <tr class="Row-Column-7">
+                            <td class="body-style"><span class="literal">div-line-thickness</span></td>
+                            <td class="body-style"><span class="non-terminal">float</span></td>
+                            <td class="body-style"><span class="literal">line-thickness</span><span class="char-style-override-3"></span></td>
+                            <td class="body-style">&gt; 0</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">The line thickness for tick marks, x grid lines, and x hypergrid lines.</td>
+                        </tr>
+                        <tr class="Row-Column-6">
+                            <td class="body-style"><span class="literal">x-div-line-thickness</span></td>
+                            <td class="body-style"><span class="non-terminal">float</span></td>
+                            <td class="body-style"><span class="literal">div-line-thickness</span></td>
+                            <td class="body-style">&gt; 0</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">The line thickness for x tick marks, x grid lines, and x hypergrid lines.</td>
+                        </tr>
+                        <tr class="Row-Column-7">
+                            <td class="body-style"><span class="literal">t-div-line-thickness</span></td>
+                            <td class="body-style"><span class="non-terminal">float</span></td>
+                            <td class="body-style"><span class="literal">div-line-thickness</span></td>
+                            <td class="body-style">&gt; 0</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">The line thickness for t tick marks, t grid lines, and t hypergrid lines.</td>
+                        </tr>
+                        <tr class="Row-Column-6">
+                            <td class="body-style"><span class="literal">major-div-line-thickness</span></td>
+                            <td class="body-style"><span class="non-terminal">float</span></td>
+                            <td class="body-style"><span class="literal">div-line-thickness</span></td>
+                            <td class="body-style">&gt; 0</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">The line thickness for major tick marks, and major grid lines.</td>
+                        </tr>
+                        <tr class="Row-Column-7">
+                            <td class="body-style"><span class="literal">x-major-div-line-thickness</span></td>
+                            <td class="body-style"><span class="non-terminal">float</span></td>
+                            <td class="body-style"><span class="literal">major-div-line-thickness</span><span class="char-style-override-4"></span></td>
+                            <td class="body-style">&gt; 0</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">The line thickness for major x tick marks, and major x grid lines.</td>
+                        </tr>
+                        <tr class="Row-Column-6">
+                            <td class="body-style"><span class="literal">t-major-div-line-thickness</span><span class="Literal char-style-override-5"></span></td>
+                            <td class="body-style"><span class="non-terminal">float</span></td>
+                            <td class="body-style"><span class="literal">major-div-line-thickness</span><span class="char-style-override-4"></span></td>
+                            <td class="body-style">&gt; 0</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">The color for major t tick marks, and major t grid lines.</td>
+                        </tr>
+                        <tr class="Row-Column-9">
+                            <td class="body-style"><span class="literal">line-style</span></td>
+                            <td class="body-style"><span class="Table-Contents"><span class="literal">solid</span>, <span class="literal">dashed, dotted</span></span></td>
+                            <td class="body-style"><span class="literal">solid</span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">The line style for axes, tick marks, grids, hypergrids, lines, worldlines, and event boost lines.</td>
+                        </tr>
+                        <tr class="Row-Column-6">
+                            <td class="body-style"><span class="literal">x-line-style</span></td>
+                            <td class="body-style"><span class="literal">solid</span>, <span class="literal">dashed, dotted</span></td>
+                            <td class="body-style"><span class="literal">line-style</span><span class="char-style-override-3"></span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">The line style for x axes, x tick marks, x grid lines, and x hypergrids lines.</td>
+                        </tr>
+                        <tr class="Row-Column-7">
+                            <td class="body-style"><span class="literal">t-line-style</span></td>
+                            <td class="body-style"><span class="literal">solid</span>, <span class="literal">dashed, dotted</span></td>
+                            <td class="body-style"><span class="literal">line-style</span><span class="char-style-override-3"></span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">The line style for t axes, t tick marks, t grid lines, and t hypergrids lines.</td>
+                        </tr>
+                        <tr class="Row-Column-6">
+                            <td class="body-style"><span class="literal">div-line-style</span></td>
+                            <td class="body-style"><span class="literal">solid</span>, <span class="literal">dashed, dotted</span></td>
+                            <td class="body-style"><span class="literal">line-style</span><span class="char-style-override-3"></span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">The line style for tick marks, x grid lines, and x hypergrid lines.</td>
+                        </tr>
+                        <tr class="Row-Column-7">
+                            <td class="body-style"><span class="literal">x-div-line-style</span></td>
+                            <td class="body-style"><span class="literal">solid</span>, <span class="literal">dashed, dotted</span></td>
+                            <td class="body-style"><span class="literal">div-line-style</span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">The line style for x tick marks, x grid lines, and x hypergrid lines.</td>
+                        </tr>
+                        <tr class="Row-Column-6">
+                            <td class="body-style"><span class="literal">t-div-line-style</span></td>
+                            <td class="body-style"><span class="literal">solid</span>, <span class="literal">dashed, dotted</span></td>
+                            <td class="body-style"><span class="literal">div-line-style</span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">The line style for t tick marks, t grid lines, and t hypergrid lines.</td>
+                        </tr>
+                        <tr class="Row-Column-7">
+                            <td class="body-style"><span class="literal">major-div-line-style</span></td>
+                            <td class="body-style"><span class="literal">solid</span>, <span class="literal">dashed, dotted</span></td>
+                            <td class="body-style"><span class="literal">div-line-style</span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">The line style for major tick marks, and major grid lines.</td>
+                        </tr>
+                        <tr class="Row-Column-6">
+                            <td class="body-style"><span class="literal">x-major-div-line-style</span></td>
+                            <td class="body-style"><span class="literal">solid</span>, <span class="literal">dashed, dotted</span></td>
+                            <td class="body-style"><span class="literal">major-div-line-style</span><span class="char-style-override-4"></span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">The line style for major x tick marks, and major x grid lines.</td>
+                        </tr>
+                        <tr class="Row-Column-7">
+                            <td class="body-style"><span class="literal">t-major-div-line-style</span><span class="Literal char-style-override-5"></span></td>
+                            <td class="body-style"><span class="literal">solid</span>, <span class="literal">dashed, dotted</span></td>
+                            <td class="body-style"><span class="literal">major-div-line-style</span><span class="char-style-override-4"></span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">The color for major t tick marks, and major t grid lines.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h2><a id="font-hierarchies"></a>Font Hierarchies</h2>
+                <table id="table-4" class="command-table">
+                    <colgroup>
+                        <col class="column1" />
+                        <col class="column2" />
+                        <col class="column3" />
+                        <col class="column4" />
+                        <col class="column5" />
+                        <col class="column6" />
+                    </colgroup>
+                    <thead>
+                        <tr class="Row-Column-5">
+                            <td class="Header-Cell">Name</td>
+                            <td class="Header-Cell">Type</td>
+                            <td class="Header-Cell">Default</td>
+                            <td class="Header-Cell">Min</td>
+                            <td class="Header-Cell">Max</td>
+                            <td class="Header-Cell">Description</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="Row-Column-6">
+                            <td class="body-style"><span class="literal">font-family</span></td>
+                            <td class="body-style"><span class="non-terminal">string</span></td>
+                            <td class="body-style"><p class="Table-Contents">System <br />
+                                    dependent</p></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">Set the font family for any text.</td>
+                        </tr>
+                        <tr class="Row-Column-8">
+                            <td class="body-style"><span class="literal">tick-font-family</span></td>
+                            <td class="body-style"><span class="non-terminal">string</span></td>
+                            <td class="body-style"><span class="literal">font-family</span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">Set the font family for tick labels.</td>
+                        </tr>
+                        <tr class="Row-Column-6">
+                            <td class="body-style"><span class="literal">x-tick-font-family</span></td>
+                            <td class="body-style"><span class="non-terminal">string</span></td>
+                            <td class="body-style"><span class="literal">tick-font-family</span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">Set the font family for x tick labels.</td>
+                        </tr>
+                        <tr class="Row-Column-7">
+                            <td class="body-style"><span class="literal">t-tick-font-family</span></td>
+                            <td class="body-style"><span class="non-terminal">string</span></td>
+                            <td class="body-style"><span class="literal">tick-font-family</span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">Set the font family for t tick label.</td>
+                        </tr>
+                        <tr class="Row-Column-6">
+                            <td class="body-style"><span class="literal">font-weight</span></td>
+                            <td class="body-style"><span class="literal">normal</span>, others<span class="footnote">1</span></td>
+                            <td class="body-style"><span class="literal">normal</span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">Set the font weight for any text.</td>
+                        </tr>
+                        <tr class="Row-Column-7">
+                            <td class="body-style"><span class="literal">tick-font-weight</span></td>
+                            <td class="body-style"><span class="literal">normal</span>, others<span class="footnote">1</span></td>
+                            <td class="body-style"><span class="literal">font-weight</span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">Set the font weight for tick labels.</td>
+                        </tr>
+                        <tr class="Row-Column-6">
+                            <td class="body-style"><span class="literal">x-tick-font-weight</span></td>
+                            <td class="body-style"><span class="literal">normal</span>, others<span class="footnote">1</span></td>
+                            <td class="body-style"><span class="literal">tick-font-weight</span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">Set the font weight x tick labels.</td>
+                        </tr>
+                        <tr class="Row-Column-7">
+                            <td class="body-style"><span class="literal">x-tick-font-weight</span></td>
+                            <td class="body-style"><span class="literal">normal</span>, others<span class="footnote">1</span></td>
+                            <td class="body-style"><span class="literal">tick-font-weight</span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">Set the font weight t tick labels.</td>
+                        </tr>
+                        <tr class="Row-Column-5">
+                            <td class="body-style"><span class="literal">font-style</span></td>
+                            <td class="body-style"><span class="literal">regular</span>, <span class="literal">italic</span></td>
+                            <td class="body-style"><span class="literal">regular</span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">Set the font style for any text.</td>
+                        </tr>
+                        <tr class="Row-Column-8">
+                            <td class="body-style"><span class="literal">tick-font-style</span></td>
+                            <td class="body-style"><span class="literal">regular</span>, <span class="literal">italic</span></td>
+                            <td class="body-style"><span class="literal">font-style</span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">Set the font style for tick labels.</td>
+                        </tr>
+                        <tr class="Row-Column-6">
+                            <td class="body-style"><span class="literal">x-tick-font-style</span></td>
+                            <td class="body-style"><span class="literal">regular</span>, <span class="literal">italic</span></td>
+                            <td class="body-style"><span class="literal">tick-font-style</span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">Set the font style for x tick labels.</td>
+                        </tr>
+                        <tr class="Row-Column-7">
+                            <td class="body-style"><span class="literal">t-tick-font-style</span></td>
+                            <td class="body-style"><span class="literal">regular</span>, <span class="literal">italic</span></td>
+                            <td class="body-style"><span class="literal">tick-font-style</span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">Set the font style for t tick labels.</td>
+                        </tr>
+                        <tr class="Row-Column-6">
+                            <td class="body-style"><span class="literal">font-size</span></td>
+                            <td class="body-style"><span class="non-terminal">float</span></td>
+                            <td class="body-style">10.0</td>
+                            <td class="body-style">&gt; 0</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">Set the font size for any text. This is the height of the text from ascender to descender. (text)</td>
+                        </tr>
+                        <tr class="Row-Column-8">
+                            <td class="body-style"><span class="literal">tick-font-size</span></td>
+                            <td class="body-style"><span class="non-terminal">float</span></td>
+                            <td class="body-style"><span class="literal">font-size</span><span class="Symbolic-Reference char-style-override-7"></span></td>
+                            <td class="body-style">&gt; 0</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">Set the font size for tick labels.</td>
+                        </tr>
+                        <tr class="Row-Column-5">
+                            <td class="body-style"><span class="literal">x-tick-font-size</span></td>
+                            <td class="body-style"><span class="non-terminal">float</span></td>
+                            <td class="body-style"><span class="literal">tick-font-size</span></td>
+                            <td class="body-style">&gt; 0</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">Set the font size for x tick labels.</td>
+                        </tr>
+                        <tr class="Row-Column-8">
+                            <td class="body-style"><span class="literal">t-tick-font-size</span></td>
+                            <td class="body-style"><span class="non-terminal">float</span></td>
+                            <td class="body-style"><span class="literal">tick-font-size</span></td>
+                            <td class="body-style">&gt; 0</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">Set the font size for t tick labels.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p class="footnote"><span class="footnote">1</span> Other valid font weights are: <span class="literal">thin</span>, <span class="literal">extra light</span>, <span class="literal">ultra light</span>, <span class="literal">light</span>, <span class="literal">medium</span>, <span class="literal">semi bold</span>, <span class="literal">demi bold</span>, <span class="literal">bold</span>, <span class="literal">extra bold</span>, <span class="literal">ultra bold</span>, <span class="literal">black</span>, <span class="literal">heavy</span>, and  numbers 0 to 1000 (with the latter being heaviest). Weights with spaces in their name must be quoted.</p>
+                <h2><a id="text-hierarchies"></a>Text Hierarchies</h2>
+                <table id="table-5" class="command-table">
+                    <colgroup>
+                        <col class="column1" />
+                        <col class="column2" />
+                        <col class="column3" />
+                        <col class="column4" />
+                        <col class="column5" />
+                        <col class="column6" />
+                    </colgroup>
+                    <thead>
+                        <tr class="Row-Column-5">
+                            <td class="Header-Cell">Name</td>
+                            <td class="Header-Cell">Type</td>
+                            <td class="Header-Cell">Default</td>
+                            <td class="Header-Cell">Min</td>
+                            <td class="Header-Cell">Max</td>
+                            <td class="Header-Cell">Description</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="Row-Column-10">
+                            <td class="body-style"><span class="literal">text-padding</span></td>
+                            <td class="body-style"><span class="non-terminal">float</span></td>
+                            <td class="body-style">2.0</td>
+                            <td class="body-style">0</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">Set the text padding. Find the bounding box of the text (from left to right and from highest ascender to lowest descender) and pad each side of the box with the given number of transparent pixels. (Note: may be changed to padding.)</td>
+                        </tr>
+                        <tr class="Row-Column-7">
+                            <td class="body-style"><span class="literal">text-padding-top</span></td>
+                            <td class="body-style"><span class="non-terminal">float</span></td>
+                            <td class="body-style"><span class="literal">text-padding</span><span class="char-style-override-3"></span></td>
+                            <td class="body-style">0</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">Set the top text padding. (Note: may be changed to padding-top.)</td>
+                        </tr>
+                        <tr class="Row-Column-6">
+                            <td class="body-style"><span class="literal">text-padding–bottom</span></td>
+                            <td class="body-style"><span class="non-terminal">float</span></td>
+                            <td class="body-style"><span class="literal">text-padding</span><span class="char-style-override-3"></span></td>
+                            <td class="body-style">0</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">Set the bottom text padding. (Note: may be changed to padding-bottom.)</td>
+                        </tr>
+                        <tr class="Row-Column-7">
+                            <td class="body-style"><span class="literal">text-padding-left</span></td>
+                            <td class="body-style"><span class="non-terminal">float</span></td>
+                            <td class="body-style"><span class="literal">text-padding</span><span class="char-style-override-3"></span></td>
+                            <td class="body-style">0</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">Set the top left padding. (Note: may be changed to padding-left.)</td>
+                        </tr>
+                        <tr class="Row-Column-6">
+                            <td class="body-style"><span class="literal">text-padding-right</span></td>
+                            <td class="body-style"><span class="non-terminal">float</span></td>
+                            <td class="body-style"><span class="literal">text-padding</span><span class="char-style-override-3"></span></td>
+                            <td class="body-style">0</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">Set the top right padding. (Note: may be changed to padding-right.)</td>
+                        </tr>
+                        <tr class="Row-Column-11">
+                            <td class="body-style"><span class="literal">text-anchor</span></td>
+                            <td class="body-style"><span class="literal">TL</span>, <span class="literal">TC</span>, <span class="literal">TR</span>,
+                                <span class="literal">ML</span>, <span class="literal">MC</span>, <span class="literal">MR</span>,
+                                <span class="literal">BL</span>, <span class="literal">BC</span>, <span class="literal">BR</span></td>
+                            <td class="body-style"><span class="literal">TC</span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">Calculate the bounding box for a text string, including the padding. Determine the 9 possible anchor points. T=top, M=middle, B=baseline, L=left, C=center, R=right. The anchor point is the point that is positioned at the given text position.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h2><a id="tick-hierarchies"></a>Tick Hierarchies</h2>
+                <table id="table-6" class="command-table">
+                    <colgroup>
+                        <col class="column1" />
+                        <col class="column2" />
+                        <col class="column3" />
+                        <col class="column4" />
+                        <col class="column5" />
+                        <col class="column6" />
+                    </colgroup>
+                    <thead>
+                        <tr class="Row-Column-5">
+                            <td class="Header-Cell">Name</td>
+                            <td class="Header-Cell">Type</td>
+                            <td class="Header-Cell">Default</td>
+                            <td class="Header-Cell">Min</td>
+                            <td class="Header-Cell">Max</td>
+                            <td class="Header-Cell">Description</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="Row-Column-5">
+                            <td class="body-style"><span class="literal">ticks</span></td>
+                            <td class="body-style"><span class="non-terminal">boolean</span></td>
+                            <td class="body-style"><span class="literal">true</span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">Draw the tick marks.</td>
+                        </tr>
+                        <tr class="Row-Column-8">
+                            <td class="body-style"><span class="literal">x-ticks</span></td>
+                            <td class="body-style"><span class="non-terminal">boolean</span></td>
+                            <td class="body-style"><span class="literal">ticks</span><span class="char-style-override-3"></span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">Draw the x tick marks.</td>
+                        </tr>
+                        <tr class="Row-Column-5">
+                            <td class="body-style"><span class="literal">t-ticks</span></td>
+                            <td class="body-style"><span class="non-terminal">boolean</span></td>
+                            <td class="body-style"><span class="literal">ticks</span><span class="char-style-override-3"></span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">Draw the t tick marks.</td>
+                        </tr>
+                        <tr class="Row-Column-8">
+                            <td class="body-style"><span class="literal">tick-labels</span></td>
+                            <td class="body-style"><span class="non-terminal">boolean</span></td>
+                            <td class="body-style">true</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">Label the tick marks (only if drawn).</td>
+                        </tr>
+                        <tr class="Row-Column-5">
+                            <td class="body-style"><span class="literal">x-tick-labels</span></td>
+                            <td class="body-style"><span class="non-terminal">boolean</span></td>
+                            <td class="body-style"><span class="literal">tick-labels</span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">Label the x tick marks (only if drawn).</td>
+                        </tr>
+                        <tr class="Row-Column-8">
+                            <td class="body-style"><span class="literal">t-tick-labels</span></td>
+                            <td class="body-style"><span class="non-terminal">boolean</span></td>
+                            <td class="body-style"><span class="literal">tick-labels</span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">Label the t tick marks (only if drawn).</td>
+                        </tr>
+                        <tr class="Row-Column-6">
+                            <td class="body-style"><span class="literal">tick-length</span></td>
+                            <td class="body-style"><span class="non-terminal">float</span></td>
+                            <td class="body-style">3.0</td>
+                            <td class="body-style">0</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">The length of the tick marks. The actual length is this length + the axis line thickness.</td>
+                        </tr>
+                        <tr class="Row-Column-7">
+                            <td class="body-style"><span class="literal">major-tick-length</span></td>
+                            <td class="body-style"><span class="non-terminal">float</span></td>
+                            <td class="body-style">10.0</td>
+                            <td class="body-style">0</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">The length of the major tick marks. The actual length is this length + the axis tick line thickness.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h2><a id="hypergrid"></a>Hypergrid</h2>
+                <table id="table-7" class="command-table">
+                    <colgroup>
+                        <col class="column1" />
+                        <col class="column2" />
+                        <col class="column3" />
+                        <col class="column4" />
+                        <col class="column5" />
+                        <col class="column6" />
+                    </colgroup>
+                   <thead>
+                        <tr class="Row-Column-5">
+                            <td class="Header-Cell">Name</td>
+                            <td class="Header-Cell">Type</td>
+                            <td class="Header-Cell">Default</td>
+                            <td class="Header-Cell">Min</td>
+                            <td class="Header-Cell">Max</td>
+                            <td class="Header-Cell">Description</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="Row-Column-5">
+                            <td class="body-style"><span class="literal">left-quadrant</span></td>
+                            <td class="body-style"><span class="non-terminal">boolean</span></td>
+                            <td class="body-style"><span class="literal">true</span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">Draw the hypergrid in the left quadrant.</td>
+                        </tr>
+                        <tr class="Row-Column-8">
+                            <td class="body-style"><span class="literal">right-quadrant</span></td>
+                            <td class="body-style"><span class="non-terminal">boolean</span></td>
+                            <td class="body-style"><span class="literal">true</span><span class="char-style-override-3"></span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">Draw the hypergrid in the right quadrant.</td>
+                        </tr>
+                        <tr class="Row-Column-5">
+                            <td class="body-style"><span class="literal">top-quadrant</span></td>
+                            <td class="body-style"><span class="non-terminal">boolean</span></td>
+                            <td class="body-style"><span class="literal">true</span><span class="char-style-override-3"></span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">Draw the hypergrid in the top quadrant.</td>
+                        </tr>
+                        <tr class="Row-Column-7">
+                            <td class="body-style"><span class="literal">bottom-quadrant</span></td>
+                            <td class="body-style"><span class="non-terminal">boolean</span></td>
+                            <td class="body-style"><span class="literal">true</span><span class="char-style-override-3"></span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">Draw the hypergrid in the bottom quadrant.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h2><a id="miscellaneous"></a>Miscellaneous</h2>
+                <table id="table-8" class="command-table">
+                    <colgroup>
+                        <col class="column1" />
+                        <col class="column2" />
+                        <col class="column3" />
+                        <col class="column4" />
+                        <col class="column5" />
+                        <col class="column6" />
+                    </colgroup>
+                    <thead>
+                        <tr class="Row-Column-5">
+                            <td class="Header-Cell">Name</td>
+                            <td class="Header-Cell">Type</td>
+                            <td class="Header-Cell">Default</td>
+                            <td class="Header-Cell">Min</td>
+                            <td class="Header-Cell">Max</td>
+                            <td class="Header-Cell">Description</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="Row-Column-13">
+                            <td class="body-style"><span class="literal">opacity</span></td>
+                            <td class="body-style"><span class="non-terminal">double</span></td>
+                            <td class="body-style">1.0</td>
+                            <td class="body-style">0.0</td>
+                            <td class="body-style">1.0</td>
+                            <td class="description">Sets the opacity of all elements generated by a command. 0.0 is completely transparent; 1.0 is completely opaque.</td>
+                        </tr>
+                        <tr class="Row-Column-14">
+                            <td class="body-style"><span class="literal">arrow</span></td>
+                            <td class="body-style"><span class="literal">none</span>, <span class="literal">both</span>, <span class="literal">start</span>, <span class="literal">end</span></td>
+                            <td class="body-style"><span class="literal">none</span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">Place arrowheads at the start, end, or both of lines. This applies to the explicitly clipped ends of lines or worldlines, to non-closed paths, to axes, and to event boost lines. For most things, the start is the end with the smaller <span class="Coordinates">t</span> coordinate. If the <span class="Coordinates">t</span> coordinates are the same for both ends,  the start is the end with the smaller <span class="Coordinates">x</span> coordinate.  For paths, the start and end are defined by the path.</td>
+                        </tr>
+                        <tr class="Row-Column-5">
+                            <td class="body-style"><span class="literal">arrow-width</span></td>
+                            <td class="body-style"><span class="non-terminal">float</span></td>
+                            <td class="body-style">10.0</td>
+                            <td class="body-style">&gt;0</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">If the arrowhead is horizontal, this is its width.</td>
+                        </tr>
+                        <tr class="Row-Column-8">
+                            <td class="body-style"><span class="literal">arrow-height</span></td>
+                            <td class="body-style"><span class="non-terminal">float</span></td>
+                            <td class="body-style">8.0</td>
+                            <td class="body-style">&gt;0</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">If the arrowhead is horizontal, this is its height.</td>
+                        </tr>
+                        <tr class="Row-Column-5">
+                            <td class="body-style"><span class="literal">event-diameter</span></td>
+                            <td class="body-style"><span class="non-terminal">float</span></td>
+                            <td class="body-style">5.0</td>
+                            <td class="body-style">&gt; 0</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">Set the diameter of an event shape.</td>
+                        </tr>
+                        <tr class="Row-Column-15">
+                            <td class="body-style"><span class="literal">event-shape</span></td>
+                            <td class="body-style"><span class="literal">circle</span><span class="non-terminal">, </span><span class="literal">square</span><span class="non-terminal">, </span><span class="literal">diamond</span><span class="non-terminal">, </span><span class="literal">star</span></td>
+                            <td class="body-style"><span class="literal">circle</span></td>
+                            <td class="body-style">&#160;</td>
+                            <td class="body-style">&#160;</td>
+                            <td class="description">The shape representing an event. A circle that bounds the shape determines the diameter. The center of the circle is the shape&apos;s attachment point.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h2><a id="color-values"></a>Color Values</h2>
+              <p>There are three ways to name colors: using hexidecimal values, color names, or color functions.</p>
+                <h3><a id="hexadecimal-colors"></a>Hexadecimal Colors</h3>
+                <p>Hexidecimal colors use one byte each (written in hexidecimal) for red, green, blue, and alpha values, for a total of 8 hexidecimal characters. The 8 characters are preceded with a &quot;#&quot;. </p>
+                <p>If there are only three or four characters, each characters is doubled (e.g. &quot;#123&quot; becomes &quot;#112233&quot;). If there are now only six characters, FF is appended (an alpha value that means fully opaque).</p>
+                <h3><a id="color-names"></a>Color Names</h3>
+                <p>The following color names may be used wherever a color is required. The corresponding hex value is in parentheses: </p>
+                <table class="colorname-table">
+                    <tbody>
+                        <tr>
+                            <td>ALICEBLUE</td>
+                            <td>#F0F8FF</td>
+                            <td>ANTIQUEWHITE</td>
+                            <td>#FAEBD7</td>
+                            <td>AQUA</td>
+                            <td>#00FFFF</td>
+                        </tr>
+                        <tr>
+                            <td>AQUAMARINE</td>
+                            <td>#7FFFD4</td>
+                            <td>AZURE</td>
+                            <td>#F0FFFF</td>
+                            <td>BEIGE</td>
+                            <td>#F5F5DC</td>
+                        </tr>
+                        <tr>
+                            <td>BISQUE</td>
+                            <td>#FFE4C4</td>
+                            <td>BLACK</td>
+                            <td>#000000</td>
+                            <td>BLANCHEDALMOND</td>
+                            <td>#FFEBCD</td>
+                        </tr>
+                        <tr>
+                            <td>BLUE</td>
+                            <td>#0000FF</td>
+                            <td>BLUEVIOLET</td>
+                            <td>#8A2BE2</td>
+                            <td>BROWN</td>
+                            <td>#A52A2A</td>
+                        </tr>
+                        <tr>
+                            <td>BURLYWOOD</td>
+                            <td>#DEB887</td>
+                            <td>CADETBLUE</td>
+                            <td>#5F9EA0</td>
+                            <td>CHARTREUSE</td>
+                            <td>#7FFF00</td>
+                        </tr>
+                        <tr>
+                            <td>CHOCOLATE</td>
+                            <td>#D2691E</td>
+                            <td>CORAL</td>
+                            <td>#FF7F50</td>
+                            <td>CORNFLOWERBLUE</td>
+                            <td>#6495ED</td>
+                        </tr>
+                        <tr>
+                            <td>CORNSILK</td>
+                            <td>#FFF8DC</td>
+                            <td>CRIMSON</td>
+                            <td>#DC143C</td>
+                            <td>CYAN</td>
+                            <td>#00FFFF</td>
+                        </tr>
+                        <tr>
+                            <td>DARKBLUE</td>
+                            <td>#00008B</td>
+                            <td>DARKCYAN</td>
+                            <td>#008B8B</td>
+                            <td>DARKGOLDENROD</td>
+                            <td>#B8860B</td>
+                        </tr>
+                        <tr>
+                            <td>DARKGRAY</td>
+                            <td>#A9A9A9</td>
+                            <td>DARKGREEN</td>
+                            <td>#006400</td>
+                            <td>DARKGREY</td>
+                            <td>#A9A9A9</td>
+                        </tr>
+                        <tr>
+                            <td>DARKKHAKI</td>
+                            <td>#BDB76B</td>
+                            <td>DARKMAGENTA</td>
+                            <td>#8B008B</td>
+                            <td>DARKOLIVEGREEN</td>
+                            <td>#556B2F</td>
+                        </tr>
+                        <tr>
+                            <td>DARKORANGE</td>
+                            <td>#FF8C00</td>
+                            <td>DARKORCHID</td>
+                            <td>#9932CC</td>
+                            <td>DARKRED</td>
+                            <td>#8B0000</td>
+                        </tr>
+                        <tr>
+                            <td>DARKSALMON</td>
+                            <td>#E9967A</td>
+                            <td>DARKSEAGREEN</td>
+                            <td>#8FBC8F</td>
+                            <td>DARKSLATEBLUE</td>
+                            <td>#483D8B</td>
+                        </tr>
+                        <tr>
+                            <td>DARKSLATEGRAY</td>
+                            <td>#2F4F4F</td>
+                            <td>DARKSLATEGREY</td>
+                            <td>#2F4F4F</td>
+                            <td>DARKTURQUOISE</td>
+                            <td>#00CED1</td>
+                        </tr>
+                        <tr>
+                            <td>DARKVIOLET</td>
+                            <td>#9400D3</td>
+                            <td>DEEPPINK</td>
+                            <td>#FF1493</td>
+                            <td>DEEPSKYBLUE</td>
+                            <td>#00BFFF</td>
+                        </tr>
+                        <tr>
+                            <td>DIMGRAY</td>
+                            <td>#696969</td>
+                            <td>DIMGREY</td>
+                            <td>#696969</td>
+                            <td>DODGERBLUE</td>
+                            <td>#1E90FF</td>
+                        </tr>
+                        <tr>
+                            <td>FIREBRICK</td>
+                            <td>#B22222</td>
+                            <td>FLORALWHITE</td>
+                            <td>#FFFAF0</td>
+                            <td>FORESTGREEN</td>
+                            <td>#228B22</td>
+                        </tr>
+                        <tr>
+                            <td>FUCHSIA</td>
+                            <td>#FF00FF</td>
+                            <td>GAINSBORO</td>
+                            <td>#DCDCDC</td>
+                            <td>GHOSTWHITE</td>
+                            <td>#F8F8FF</td>
+                        </tr>
+                        <tr>
+                            <td>GOLD</td>
+                            <td>#FFD700</td>
+                            <td>GOLDENROD</td>
+                            <td>#DAA520</td>
+                            <td>GRAY</td>
+                            <td>#808080</td>
+                        </tr>
+                        <tr>
+                            <td>GREEN</td>
+                            <td>#008000</td>
+                            <td>GREENYELLOW</td>
+                            <td>#ADFF2F</td>
+                            <td>GREY</td>
+                            <td>#808080</td>
+                        </tr>
+                        <tr>
+                            <td>HONEYDEW</td>
+                            <td>#F0FFF0</td>
+                            <td>HOTPINK</td>
+                            <td>#FF69B4</td>
+                            <td>INDIANRED</td>
+                            <td>#CD5C5C</td>
+                        </tr>
+                        <tr>
+                            <td>INDIGO</td>
+                            <td>#4B0082</td>
+                            <td>IVORY</td>
+                            <td>#FFFFF0</td>
+                            <td>KHAKI</td>
+                            <td>#F0E68C</td>
+                        </tr>
+                        <tr>
+                            <td>LAVENDER</td>
+                            <td>#E6E6FA</td>
+                            <td>LAVENDERBLUSH</td>
+                            <td>#FFF0F5</td>
+                            <td>LAWNGREEN</td>
+                            <td>#7CFC00</td>
+                        </tr>
+                        <tr>
+                            <td>LEMONCHIFFON</td>
+                            <td>#FFFACD</td>
+                            <td>LIGHTBLUE</td>
+                            <td>#ADD8E6</td>
+                            <td>LIGHTCORAL</td>
+                            <td>#F08080</td>
+                        </tr>
+                        <tr>
+                            <td>LIGHTCYAN</td>
+                            <td>#E0FFFF</td>
+                            <td>LIGHTGOLDENRODYELLOW</td>
+                            <td>#FAFAD2</td>
+                            <td>LIGHTGRAY</td>
+                            <td>#D3D3D3</td>
+                        </tr>
+                        <tr>
+                            <td>LIGHTGREEN</td>
+                            <td>#90EE90</td>
+                            <td>LIGHTGREY</td>
+                            <td>#D3D3D3</td>
+                            <td>LIGHTPINK</td>
+                            <td>#FFB6C1</td>
+                        </tr>
+                        <tr>
+                            <td>LIGHTSALMON</td>
+                            <td>#FFA07A</td>
+                            <td>LIGHTSEAGREEN</td>
+                            <td>#20B2AA</td>
+                            <td>LIGHTSKYBLUE</td>
+                            <td>#87CEFA</td>
+                        </tr>
+                        <tr>
+                            <td>LIGHTSLATEGRAY</td>
+                            <td>#778899</td>
+                            <td>LIGHTSLATEGREY</td>
+                            <td>#778899</td>
+                            <td>LIGHTSTEELBLUE</td>
+                            <td>#B0C4DE</td>
+                        </tr>
+                        <tr>
+                            <td>LIGHTYELLOW</td>
+                            <td>#FFFFE0</td>
+                            <td>LIME</td>
+                            <td>#00FF00</td>
+                            <td>LIMEGREEN</td>
+                            <td>#32CD32</td>
+                        </tr>
+                        <tr>
+                            <td>LINEN</td>
+                            <td>#FAF0E6</td>
+                            <td>MAGENTA</td>
+                            <td>#FF00FF</td>
+                            <td>MAROON</td>
+                            <td>#800000</td>
+                        </tr>
+                        <tr>
+                            <td>MEDIUMAQUAMARINE</td>
+                            <td>#66CDAA</td>
+                            <td>MEDIUMBLUE</td>
+                            <td>#0000CD</td>
+                            <td>MEDIUMORCHID</td>
+                            <td>#BA55D3</td>
+                        </tr>
+                        <tr>
+                            <td>MEDIUMPURPLE</td>
+                            <td>#9370DB</td>
+                            <td>MEDIUMSEAGREEN</td>
+                            <td>#3CB371</td>
+                            <td>MEDIUMSLATEBLUE</td>
+                            <td>#7B68EE</td>
+                        </tr>
+                        <tr>
+                            <td>MEDIUMSPRINGGREEN</td>
+                            <td>#00FA9A</td>
+                            <td>MEDIUMTURQUOISE</td>
+                            <td>#48D1CC</td>
+                            <td>MEDIUMVIOLETRED</td>
+                            <td>#C71585</td>
+                        </tr>
+                        <tr>
+                            <td>MIDNIGHTBLUE</td>
+                            <td>#191970</td>
+                            <td>MINTCREAM</td>
+                            <td>#F5FFFA</td>
+                            <td>MISTYROSE</td>
+                            <td>#FFE4E1</td>
+                        </tr>
+                        <tr>
+                            <td>MOCCASIN</td>
+                            <td>#FFE4B5</td>
+                            <td>NAVAJOWHITE</td>
+                            <td>#FFDEAD</td>
+                            <td>NAVY</td>
+                            <td>#000080</td>
+                        </tr>
+                        <tr>
+                            <td>OLDLACE</td>
+                            <td>#FDF5E6</td>
+                            <td>OLIVE</td>
+                            <td>#808000</td>
+                            <td>OLIVEDRAB</td>
+                            <td>#6B8E23</td>
+                        </tr>
+                        <tr>
+                            <td>ORANGE</td>
+                            <td>#FFA500</td>
+                            <td>ORANGERED</td>
+                            <td>#FF4500</td>
+                            <td>ORCHID</td>
+                            <td>#DA70D6</td>
+                        </tr>
+                        <tr>
+                            <td>PALEGOLDENROD</td>
+                            <td>#EEE8AA</td>
+                            <td>PALEGREEN</td>
+                            <td>#98FB98</td>
+                            <td>PALETURQUOISE</td>
+                            <td>#AFEEEE</td>
+                        </tr>
+                        <tr>
+                            <td>PALEVIOLETRED</td>
+                            <td>#DB7093</td>
+                            <td>PAPAYAWHIP</td>
+                            <td>#FFEFD5</td>
+                            <td>PEACHPUFF</td>
+                            <td>#FFDAB9</td>
+                        </tr>
+                        <tr>
+                            <td>PERU</td>
+                            <td>#CD853F</td>
+                            <td>PINK</td>
+                            <td>#FFC0CB</td>
+                            <td>PLUM</td>
+                            <td>#DDA0DD</td>
+                        </tr>
+                        <tr>
+                            <td>POWDERBLUE</td>
+                            <td>#B0E0E6</td>
+                            <td>PURPLE</td>
+                            <td>#800080</td>
+                            <td>RED</td>
+                            <td>#FF0000</td>
+                        </tr>
+                        <tr>
+                            <td>ROSYBROWN</td>
+                            <td>#BC8F8F</td>
+                            <td>ROYALBLUE</td>
+                            <td>#4169E1</td>
+                            <td>SADDLEBROWN</td>
+                            <td>#8B4513</td>
+                        </tr>
+                        <tr>
+                            <td>SALMON</td>
+                            <td>#FA8072</td>
+                            <td>SANDYBROWN</td>
+                            <td>#F4A460</td>
+                            <td>SEAGREEN</td>
+                            <td>#2E8B57</td>
+                        </tr>
+                        <tr>
+                            <td>SEASHELL</td>
+                            <td>#FFF5EE</td>
+                            <td>SIENNA</td>
+                            <td>#A0522D</td>
+                            <td>SILVER</td>
+                            <td>#C0C0C0</td>
+                        </tr>
+                        <tr>
+                            <td>SKYBLUE</td>
+                            <td>#87CEEB</td>
+                            <td>SLATEBLUE</td>
+                            <td>#6A5ACD</td>
+                            <td>SLATEGRAY</td>
+                            <td>#708090</td>
+                        </tr>
+                        <tr>
+                            <td>SLATEGREY</td>
+                            <td>#708090</td>
+                            <td>SNOW</td>
+                            <td>#FFFAFA</td>
+                            <td>SPRINGGREEN</td>
+                            <td>#00FF7F</td>
+                        </tr>
+                        <tr>
+                            <td>STEELBLUE</td>
+                            <td>#4682B4</td>
+                            <td>TAN</td>
+                            <td>#D2B48C</td>
+                            <td>TEAL</td>
+                            <td>#008080</td>
+                        </tr>
+                        <tr>
+                            <td>THISTLE</td>
+                            <td>#D8BFD8</td>
+                            <td>TOMATO</td>
+                            <td>#FF6347</td>
+                            <td>TRANSPARENT</td>
+                            <td>#00000000.</td>
+                        </tr>
+                        <tr>
+                            <td>TURQUOISE</td>
+                            <td>#40E0D0</td>
+                            <td>VIOLET</td>
+                            <td>#EE82EE</td>
+                            <td>WHEAT</td>
+                            <td>#F5DEB3</td>
+                        </tr>
+                        <tr>
+                            <td>WHITE</td>
+                            <td>#FFFFFF</td>
+                            <td>WHITESMOKE</td>
+                            <td>#F5F5F5</td>
+                            <td>YELLOW</td>
+                            <td>#FFFF00</td>
+                        </tr>
+                        <tr>
+                            <td>YELLOWGREEN</td>
+                            <td>#9ACD32</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h3><a id="color-functions"></a>Color Functions </h3>
+                <p>There are four color functions:</p>
+                <ul>
+                    <li> <span class="literal">rgb()</span>: This takes three values, for red, green, and blue. The values can range from 0 to 255 or 0 to 100%.</li>
+                    <li> <span class="literal">rgba()</span>: This takes four values. The first three are the same as for rgb(). The fourth is an alpha value from 0.0 to 1.0.</li>
+                    <li> <span class="literal">hls()</span>: This takes three values. The first is a hue, from 0 to 360, with red being 0 (or 360). The second values range from 0 to 100% and are saturation and lightness.</li>
+                    <li> <span class="literal">hsla()</span>: This takes four values. The first three are the same as for hsl(). The fourth is an alpha value from 0.0 to 1.0.</li>
+                </ul>
+                <h1> <a id="default-stylesheet"></a>Default Stylesheet</h1>
+                <p> Since most style properties default to the values given above, the default stylesheet is mainly useful for command-specific defaults.</p>
+                <p class="code">grid { color: #CCC; }</p>
+                <p class="code"> hypergrid { color: #3D3; }</p>
+                <p class="code"> worldline { color: #00F; }</p>
+                <p class="code"> axes { font-size: 14; tick-font-size: 10; }</p>
+            </div>
+        </div>
+    </body>
+</html>
