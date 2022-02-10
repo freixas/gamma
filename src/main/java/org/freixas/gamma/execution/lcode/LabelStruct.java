@@ -28,9 +28,10 @@ import org.freixas.gamma.value.Frame;
 public class LabelStruct extends Struct
 {
     public Coordinate location;
+    public boolean locationSet = false;
     public String text = "";
     public double rotation = 0.0;
-    public boolean locationSet = false;
+    public boolean frameRelativeRotation = false;
 
     public LabelStruct()
     {
@@ -46,6 +47,8 @@ public class LabelStruct extends Struct
     public void relativeTo(Frame prime)
     {
         location = prime.toFrame(location);
-        rotation = Relativity.toPrimeAngle(rotation, prime.getV());
+        if (frameRelativeRotation) {
+            rotation = Relativity.toPrimeAngle(rotation, prime.getV());
+        }
     }
 }

@@ -69,7 +69,7 @@ public abstract class HCode extends ExecutorContext
     // DYNAMIC_NAME
     static final FunctionalTwoArg<Object, String, String> dynamicName = (engine, obj, baseName) -> {
         if (obj instanceof Double dbl) {
-            int index = Util.toInt(dbl);
+            int index = Util.roundToInt(dbl);
             return baseName + "$" + index;
         }
         else if (obj instanceof String str) {

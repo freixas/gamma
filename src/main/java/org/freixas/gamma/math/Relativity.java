@@ -381,67 +381,45 @@ public final class Relativity
      */
     public static double toPrimeAngle(double angle, double v)
     {
+        // We accept any angle, but normalize the angle to within -180 to + 180
+
         double angle180 = Util.normalizeAngle180(angle);
+
+        // If the angle is some version of 45/-45 degrees, return the same angle
+        // we received
 
         if (Math.abs(angle180) == 45 || Math.abs(angle180) == 135) {
             return angle;
         }
 
         // Tangent is a periodic function, with its main interval being from
-        // -90 to 90. If the angle. We'll normalize the angle to the range -180
-        // to 180. If the result falls outside the -90 to 90 range, we'll need
-        // to invert the final result
-
-        boolean invert = Math.abs(angle180) > 90;
+        // -90 to 90. When we normalize the angle to being within -90 to 90, we
+        // lose half our range. We can recover it by inverting the final result
 
         double angle90 = Util.normalizeAngle90(angle);
+        boolean invert = Math.abs(angle180) > 90;
+
+        // Convert the angle to a velocity relative to whichever axis is
+        // appropriate. Convert the velocity to the equivalent in the new
+        // inertial frame. Convert the new velocity back to angle with respect
+        // to the same axis we first used
+
         double v1 = Math.abs(angle90) < 45 ? angleXToV(angle90) : angleTToV(angle90);
         double v2 = vPrime(v1, v);
         double vAngle = Math.abs(angle90) < 45 ? vToXAngle(v2) : vToTAngle(v2);
 
-        if ((v2 > 0 && vAngle > 45) || (v2 < 0 && vAngle < -45)) invert = !invert;
+        // If the angle was between converted using the t axis, then there is
+        // a discontinuity if the velocity changes signs. The final angle might
+        // come out as -89 when it should really be 91. If so, we need to invert
+        // the result (possibly inverting an inversion)
 
-        System.out.println("\n(angle = " + angle + " v = " + v + ") angle180 = " + angle180 + " angle90 = " + angle90 + " v1 = " + v1 + " v2 = " + v2 + " vAngle = " + vAngle);
+        if (Math.abs(angle90) > 45 && Util.sign(v1) != Util.sign(v2)) invert = !invert;
+
+        // Return the possibly inverted angle. If we don't invert, the value
+        // will be within -90 to 90, so we don't need to normalize it
 
         if (invert) vAngle = Util.normalizeAngle180(vAngle + 180);
-        vAngle = Util.normalizeAngle180(vAngle);
-
-        System.out.println("Final vAngle = " + vAngle);
-
         return vAngle;
-
-//        // The angles associated with velocity are in the range -90 to 90. The
-//        // angles we receive can be anything. Normalize the angle to be between
-//        // -180 and 180. Also normalize to be within -90 to 90.
-//
-//        angle = Util.normalizeAngle180(angle);
-//        double angle90 = Util.normalizeAngle90(angle);
-//
-//        // Check whether the angle is the angle of light: +/- 45 degrees
-//
-//        if (Math.abs(angle) == 45 || Math.abs(angle) == 135) {
-//            return angle;
-//        }
-//
-//        // X angle
-//
-//        else if (angle90 > -45 && angle90 < 45) {
-//            double v1 = angleXToV(angle90);
-//            double v2 = vPrime(v1, v);
-//            double vAngle = vToXAngle(v2);
-//            return vAngle;
-//            // return Util.normalizeAngle180(vAngle + 180);
-//        }
-//
-//        // T angle
-//
-//        else {
-//            double v1 = angleTToV(angle90);
-//            double v2 = vPrime(v1, v);
-//            double vAngle = vToTAngle(v2);
-//            if ((v1 <= 0 && v2 <= 0) || (v1 >= 0 && v2 >= 0)) return vAngle;
-//            return Util.normalizeAngle180(vAngle + 180);
-//        }
     }
 
 }

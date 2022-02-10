@@ -336,6 +336,19 @@ public final class Util
         return (int)(d >= 0 ? Math.ceil(d - 0.5) : Math.floor(d + 0.5));
     }
 
+    /**
+     * Round a double to a double by rounding toward zero. 1.5 becomes 1 and
+     * -1.5 becomes -1.
+     *
+     * @param d The value to round.
+     *
+     * @return The rounded value.
+     */
+    static public double roundToDouble(double d)
+    {
+        return d >= 0 ? Math.ceil(d - 0.5) : Math.floor(d + 0.5);
+    }
+
     static public boolean toBoolean(double d)
     {
         return !fuzzyZero(d);

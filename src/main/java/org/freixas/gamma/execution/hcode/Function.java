@@ -282,7 +282,7 @@ public abstract class Function extends ExecutorContext
     // ROUND
     static final FunctionalOneArg<Double, Double> round = (engine, arg1) -> {
 	if (arg1 == null) throw new ExecutionException("round() function's value is null");
-	return (double)Math.round(arg1);
+	return (double)Util.roundToDouble(arg1);
     };
     // SIGN
     static final FunctionalOneArg<Double, Double> sign = (engine, arg1) -> {

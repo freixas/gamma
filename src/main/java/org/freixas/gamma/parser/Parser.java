@@ -504,7 +504,7 @@ public class Parser
 
         Label labelDone = new Label(labelId++);
         Label labelElse = labelDone;
-        if (elseCodes.size() > 0) labelElse = new Label(labelId++);
+        if (!elseCodes.isEmpty()) labelElse = new Label(labelId++);
 
         // Add the test for the conditional expression. If false, this
         // jumps to the else clause (if any) or to the next statement. If
@@ -520,7 +520,7 @@ public class Parser
         // the next statement. Then we add the label that marks the start of
         // the else clause and add the else clause code
 
-        if (elseCodes.size() > 0) {
+        if (!elseCodes.isEmpty()) {
             codes.add(new JumpHCode(labelDone.getId()));
             codes.add(labelElse);
             codes.addAll(elseCodes);

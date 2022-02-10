@@ -32,8 +32,10 @@ public class EventStruct extends Struct
     static Coordinate coord = new Coordinate(0.0, 0.0);
 
     public Coordinate location = coord;
+    public boolean locationSet = false;
     public String text = "";
     public double rotation = 0.0;
+    public boolean frameRelativeRotation = false;
     public Frame boostTo = null;
 
     public boolean boostX = false;
@@ -58,7 +60,9 @@ public class EventStruct extends Struct
     public void relativeTo(Frame prime)
     {
         location = prime.toFrame(location);
-        rotation = Relativity.toPrimeAngle(rotation, prime.getV());
+        if (frameRelativeRotation) {
+            rotation = Relativity.toPrimeAngle(rotation, prime.getV());
+        }
         if (boostTo != null) {
             boostTo = boostTo.relativeTo(prime);
         }

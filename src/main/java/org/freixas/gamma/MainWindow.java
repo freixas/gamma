@@ -528,7 +528,7 @@ public final class MainWindow extends Stage
             slider.focusedProperty().addListener(
                 (value, oldValue, newValue) -> {
                     Tooltip tooltip = slider.getTooltip();
-                    tooltip.hide();
+                    if (tooltip != null) tooltip.hide();
                 });
             slider.setOnMouseClicked((MouseEvent event) -> {
                 if (event.getClickCount() == 2) {

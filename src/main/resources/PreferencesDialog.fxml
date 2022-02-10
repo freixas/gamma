@@ -45,8 +45,8 @@
                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
                </rowConstraints>
                <children>
-                  <CheckBox fx:id="greetings" maxHeight="-Infinity" maxWidth="-Infinity" mnemonicParsing="false" selected="true" text="greetings" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.hgrow="NEVER" GridPane.valignment="CENTER" GridPane.vgrow="NEVER" />
-                  <Label maxWidth="1.7976931348623157E308" text="Display greetings dialog" GridPane.hgrow="NEVER">
+                  <CheckBox fx:id="greetings" maxHeight="-Infinity" maxWidth="-Infinity" mnemonicParsing="false" selected="true" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.hgrow="NEVER" GridPane.valignment="CENTER" GridPane.vgrow="NEVER" />
+                  <Label maxWidth="1.7976931348623157E308" text="Display Welcome dialog" GridPane.hgrow="NEVER">
                      <opaqueInsets>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </opaqueInsets>
