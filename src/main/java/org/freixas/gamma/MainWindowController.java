@@ -16,9 +16,11 @@
  */
 package org.freixas.gamma;
 
+import java.awt.Desktop;
 import org.freixas.gamma.file.ExportDiagramDialog;
 import org.freixas.gamma.preferences.PreferencesDialog;
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
@@ -82,12 +84,6 @@ public class MainWindowController implements Initializable
     @FXML
     private MenuItem helpQuickStart;
 
-    /**
-     * Initializes the controller class.
-     *
-     * @param url
-     * @param rb
-     */
     @Override
     public void initialize(URL url, ResourceBundle rb)
     {
@@ -178,20 +174,49 @@ public class MainWindowController implements Initializable
     @FXML
     private void helpSampleScripts(ActionEvent event)
     {
-        new Alert(Alert.AlertType.INFORMATION, "Help Menu Sample Scripts called!").show();
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Open A Sample Script File");
+        fileChooser.getExtensionFilters().addAll(
+            new ExtensionFilter("All Files", "*.*"));
+        fileChooser.setInitialDirectory(Gamma.SAMPLE_SCRIPTS_LOCATION);
+
+        File selectedFile = fileChooser.showOpenDialog(mainWindow);
+        if (selectedFile != null) {
+            mainWindow.setScript(selectedFile, null);
+        }
+
     }
 
     @FXML
     private void helpQuickStart(ActionEvent event)
     {
-        new Alert(Alert.AlertType.INFORMATION, "Help Menu Quick Start called!").show();
-
+        try {
+            File helpFile = new File(Gamma.HELP_LOCATION.getAbsolutePath() + "/quick-start.html");
+            Desktop.getDesktop().browse(helpFile.toURI());
+        }
+        catch (IOException e) {
+            mainWindow.showTextAreaAlert(
+                Alert.AlertType.ERROR, "Help Error", "Help Error",
+                "Error when trying to view help:\n\n" + e.getLocalizedMessage() + "\n\n" +
+                "Look in the installation folder for help/quick-start.html and open it in your browser.",
+                true);
+        }
     }
 
     @FXML
     private void helpMenuContents(ActionEvent event)
     {
-        new Alert(Alert.AlertType.INFORMATION, "Help Menu Contents called!").show();
+        try {
+            File helpFile = new File(Gamma.HELP_LOCATION.getAbsolutePath() + "/index.html");
+            Desktop.getDesktop().browse(helpFile.toURI());
+        }
+        catch (IOException e) {
+            mainWindow.showTextAreaAlert(
+                Alert.AlertType.ERROR, "Help Error", "Help Error",
+                "Error when trying to view help:\n\n" + e.getLocalizedMessage() + "\n\n" +
+                "Look in the installation folder for help/index.html and open it in your browser.",
+                true);
+        }
     }
 
     @FXML

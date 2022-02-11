@@ -1,0 +1,62 @@
+// Test arrow heads on boosted events
+//
+// Moving from the center out, the first pair of blue/red lines should
+// have arrows at the start (signaled by the star).
+// The second pairs should have arrows at the end.
+// The third pairs should have arrows at both ends;
+// The fourth pairs should have no arrows.
+//
+// Further test can be done by enabling the frame statement or
+// animating it
+
+stylesheet "
+  .a { color: red; }
+  .b { color: blue; }
+  .arrow-none  { arrow: none; }
+  .arrow-start { arrow: start; }
+  .arrow-end   { arrow: end; }
+  .arrow-both  { arrow: both; }
+  event { event-shape: star; event-diameter: 5; }
+";
+
+display scale: 2;
+
+range v1 = 0 from 0 to +.9 label "+Red/-Blue Velocity";
+range v2 = 0 from -.9 to +.9 label "Viewing Frame Velocity";
+
+a = [observer velocity -v1];
+b = [observer velocity +v1];
+frame [observer velocity v2];
+
+axes a, class: "a";
+axes b, class: "b";
+axes defFrame;
+
+d1 = 5;
+d2 = 10;
+d3 = 15;
+d4 = 20;
+
+p = d1;
+event ( p,     0), boostTo: a, class: "a, arrow-start";
+event (-p,     0), boostTo: a, class: "a, arrow-start";
+event ( p - 1, 0), boostTo: b ,class: "b, arrow-start";
+event (-p - 1, 0), boostTo: b, class: "b, arrow-start";
+
+p = d2;
+event ( p,     0), boostTo: a, class: "a, arrow-end";
+event (-p,     0), boostTo: a, class: "a, arrow-end";
+event ( p - 1, 0), boostTo: b ,class: "b, arrow-end";
+event (-p - 1, 0), boostTo: b, class: "b, arrow-end";
+
+p = d3;
+event ( p,     0), boostTo: a, class: "a, arrow-both";
+event (-p,     0), boostTo: a, class: "a, arrow-both";
+event ( p - 1, 0), boostTo: b ,class: "b, arrow-both";
+event (-p - 1, 0), boostTo: b, class: "b, arrow-both";
+
+p = d4;
+event ( p,     0), boostTo: a, class: "a, arrow-none";
+event (-p,     0), boostTo: a, class: "a, arrow-none";
+event ( p - 1, 0), boostTo: b ,class: "b, arrow-none";
+event (-p - 1, 0), boostTo: b, class: "b, arrow-none";

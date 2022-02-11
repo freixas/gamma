@@ -46,7 +46,7 @@ public class CSSTokenizer extends Tokenizer
     public ArrayList<Token<?>> tokenize() throws ParseException
     {
         TokenContext context;
-        Token token;
+        Token<?> token;
 
         initialize();
         next();
@@ -140,7 +140,7 @@ public class CSSTokenizer extends Tokenizer
 
             // Invalid character
 
-            else {
+            else if (c != EOF) {
                 context = captureContext();
                 throw new ParseException(new Token<>(Token.Type.STRING, Character.toString(c), context), "Invalid character : '" + c + "'");
             }
@@ -224,7 +224,7 @@ public class CSSTokenizer extends Tokenizer
         catch (IllegalArgumentException e) {
             context.setCharEnd(charPos);
             throw new ParseException(
-                new Token(Token.Type.STRING, number.toString(), context), "Invalid color value: '" + number + "'");
+                    new Token<>(Token.Type.STRING, number.toString(), context), "Invalid color value: '" + number + "'");
         }
     }
 
@@ -258,7 +258,7 @@ public class CSSTokenizer extends Tokenizer
 
             if (c == EOF) {
                 context.setCharEnd(charPos);
-                throw new ParseException(new Token(Token.Type.STRING, builder.toString(), context), "Expected a color function");
+                throw new ParseException(new Token<>(Token.Type.STRING, builder.toString(), context), "Expected a color function");
             }
 
             // We found a ')'. Let's see if we have a valid color function
@@ -269,7 +269,7 @@ public class CSSTokenizer extends Tokenizer
                 }
                 catch (IllegalArgumentException e) {
                     context.setCharEnd(charPos);
-                    throw new ParseException(new Token(Token.Type.STRING, builder.toString(), context), "Expected a color function");
+                    throw new ParseException(new Token<>(Token.Type.STRING, builder.toString(), context), "Expected a color function");
                 }
             }
         }

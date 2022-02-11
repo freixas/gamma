@@ -11,7 +11,7 @@
   <name>Gamma</name>
   <description>A Minskowski spacetime diagram generator.</description>
   <!-- FIXME change it to the project's website -->
-  <url></url>
+  <!--<url></url>-->
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -101,6 +101,8 @@
                       <archive>
                           <manifest>
                               <mainClass>org.freixas.gamma.Gamma</mainClass>
+                              <addClasspath>true</addClasspath>
+                              <classpathPrefix>lib/</classpathPrefix>
                           </manifest>
                       </archive>
                   </configuration>
@@ -135,6 +137,66 @@
                   <artifactId>maven-release-plugin</artifactId>
                   <version>3.0.0-M5</version>
               </plugin>
+              <plugin>
+                  <artifactId>maven-assembly-plugin</artifactId>
+                  <version>3.3.0</version>
+                  <configuration>
+                      <descriptors>
+                          <descriptor>src/assembly/dep.xml</descriptor>
+                      </descriptors>
+                  </configuration>
+              </plugin>
+              <plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-shade-plugin</artifactId>
+                  <version>3.2.4</version>
+                  <executions>
+                      <execution>
+                          <phase>package</phase>
+                          <goals>
+                              <goal>shade</goal>
+                          </goals>
+                          <configuration>
+                              <minimizeJar>true</minimizeJar>
+                              <artifactSet>
+                                  <excludes>
+                                      <exclude>org.openjfx:javafx-controls</exclude>
+                                      <exclude>org.openjfx:javafx-fxml</exclude>
+                                      <exclude>org.openjfx:javafx-media</exclude>
+                                      <exclude>org.openjfx:javafx-swing</exclude>
+                                      <exclude>org.openjfx:javafx-web</exclude>
+                                      <exclude>org.openjfx:javafx-graphics</exclude>
+                                      <exclude>org.openjfx:javafx-base</exclude>
+                                  </excludes>
+                                  <filters>
+                                      <filter>
+                                          <artifact>commons-cli:commons-cli</artifact>
+                                          <includes>
+                                              <include>**</include>
+                                          </includes>
+                                      </filter>
+                                  </filters>
+                              </artifactSet>
+                          </configuration>
+                      </execution>
+                  </executions>
+              </plugin>
+              <!--<plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-dependency-plugin</artifactId>
+                  <version>3.2.0</version>
+                  <executions>
+                      <execution>
+                          <phase>install</phase>
+                          <goals>
+                              <goal>copy-dependencies</goal>
+                          </goals>
+                          <configuration>
+                              <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                          </configuration>
+                      </execution>
+                  </executions>
+              </plugin>-->
           </plugins>
       </pluginManagement>
   </build>

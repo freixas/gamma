@@ -33,6 +33,8 @@ import org.freixas.gamma.css.value.StyleException;
 import org.freixas.gamma.css.value.Stylesheet;
 import org.freixas.gamma.preferences.PreferencesManager;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import javax.swing.JFileChooser;
 
 /**
@@ -67,6 +69,10 @@ public class Gamma extends Application
         IS_LINUX = osName.contains("nix") || osName.contains("nux") || osName.contains("aix");
     }
 
+    static public File RUNTIME_LOCATION;
+    static public File HELP_LOCATION;
+    static public File SAMPLE_SCRIPTS_LOCATION;
+
     private static int windowID = 1;
     private static final ArrayList<MainWindow> windowList = new ArrayList<>();
 
@@ -95,6 +101,23 @@ public class Gamma extends Application
     @Override
     public void start(Stage primaryStage)
     {
+        String path = Gamma.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        String decodedPath = URLDecoder.decode(path, StandardCharsets.UTF_8);
+        File runtimeLocation = new File(decodedPath);
+
+        if (decodedPath.endsWith("gamma/target/classes/")) {
+            RUNTIME_LOCATION = runtimeLocation.getParentFile().getParentFile();
+            String location = RUNTIME_LOCATION.getAbsolutePath();
+            HELP_LOCATION = new File(location + "/src/main/help");
+            SAMPLE_SCRIPTS_LOCATION = new File(location + "/src/main/sample_scripts");
+        }
+        else {
+            RUNTIME_LOCATION = runtimeLocation.getParentFile();
+            String location = RUNTIME_LOCATION.getAbsolutePath();
+            HELP_LOCATION = new File(location + "/help");
+            SAMPLE_SCRIPTS_LOCATION = new File(location + "/sample_scripts");
+        }
+
         List<String> list = getParameters().getRaw();
         String[] args = new String[list.size()];
         for (int i = 0; i < list.size(); i++) {
@@ -194,7 +217,7 @@ public class Gamma extends Application
      * @param defaultDirectories The default directories to use for file dialogs
      * in the new window, one for each type of file (SCRIPT, IMAGE, and VIDEO).
      *
-     * @throws java.lang.Exception
+     * @throws java.lang.Exception On any exception.
      */
     public static void newMainWindow(File file, File[] defaultDirectories) throws Exception
     {
@@ -280,7 +303,7 @@ public class Gamma extends Application
     // *
     // **********************************************************************
 
-    static private void quickAlert(String message)
+    static private void quickAlert(@SuppressWarnings("SameParameterValue") String message)
     {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Concurrency Problem");

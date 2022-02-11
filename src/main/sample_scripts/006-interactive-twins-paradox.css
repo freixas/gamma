@@ -1,0 +1,60 @@
+/* Bob's Settings */
+
+.bob {
+  color: blue;
+}
+axes.bob {
+  color: #88F;
+}
+grid.bob {
+  color: #CCF;
+}
+.bob.simul {
+  color: cyan;
+}
+.bob.calculatedTime {
+  text-anchor: BR;
+  text-padding-right:30;
+}
+.bob.seenTime {
+  text-color: #BBF;
+  text-anchor: TR;
+  text-padding-right:30;
+}
+
+/* Alice's Settings */
+
+.alice, worldline.alice {
+  color: red;
+}
+axes.alice {
+  color: #F88;
+}
+grid.alice {
+  color: #FCC;
+}
+.alice.simul {
+  color: magenta;
+}
+.alice.calculatedTime {
+  text-anchor: BL;
+}
+.alice.seenTime {
+  text-color: #FBB;
+  text-anchor: TL;
+}
+
+.light {
+  color: yellow;
+}
+
+/* Global */
+
+{
+  font-family: "Georgia";
+  font-style: italic;
+  tick-font-weight: bold;
+  event-diameter: 15;
+  text-padding: 10;
+  font-size: 16;
+}

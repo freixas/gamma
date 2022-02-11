@@ -121,7 +121,7 @@ public class ScriptTokenizer extends Tokenizer
 
             // Invalid character
 
-            else {
+            else  if (c != EOF) {
                 context = captureContext();
                 throw new ParseException(new Token<>(Token.Type.STRING, Character.toString(c), context), "Invalid character : '" + c + "'");
             }

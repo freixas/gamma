@@ -1,0 +1,39 @@
+// ************************************************************
+// *
+// * BASIC EXAMPLE OF SOME COMMANDS
+// *
+// ************************************************************
+
+// Set the display precision
+
+set displayPrecision 2;
+
+// Create a constant-velocity observer
+
+obs1 = [observer velocity 0.5];
+
+// Create a constant acceleration observer
+
+obs2 = [observer origin (10,0) acceleration .01];
+
+// Draw rest frame grid
+
+grid;
+
+// Draw rest frame axes
+
+axes;
+
+// Draw our two observer's worldlines, in two different colors
+
+worldline obs1 style: "color: blue";
+worldline obs2 style: "color: red";
+
+// We can't intersect two observer's worldline,s but we can intersect
+// a line with an observer
+
+obs1Line = [line axis t obs1 offset 0];
+intersection = intersect(obs1Line, obs2);
+
+event intersection text: intersection,
+    style: "text-padding: 5; text-anchor: TL";

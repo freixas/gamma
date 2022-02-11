@@ -1,0 +1,82 @@
+// ************************************************************
+// *
+// * INTERACTIVE LORENTZ TRANSFORM EXAMPLE
+// *
+// ************************************************************
+
+stylesheet "
+  .bob {
+    color: black;
+  }
+  path.bob {
+    color: #CCC;
+    line-style: dashed;
+  }
+  label.bob {
+    text-padding: 5;
+    text-anchor: BC;
+  }
+  .alice {
+    color: #080;
+  }
+  path.alice {
+    color: #8F8;
+    line-style: dotted;
+    line-thickness: 4;
+  }
+  label.alice {
+    text-padding: 5;
+    text-anchor: TC;
+  }
+";
+
+display scale: 2;
+
+range aliceV = .5 from 0 to .9 label "Velocity";
+bob =   [observer velocity 0];
+alice = [observer velocity aliceV];
+
+range eX = 20 from -40 to 40 label "X coordinate";
+range eT = 20 from -40 to 40 label "T coordinate";
+e = (eX, eT);
+
+// Lines to rest axes
+
+bobXLine = [line axis x bob offset e.t];
+bobTLine = [line axis t bob offset e.x];
+bobXAxis = [line axis x bob offset 0];
+bobTAxis = [line axis t bob offset 0];
+bobXIntersect = intersect(bobTLine, bobXAxis);
+bobTIntersect = intersect(bobXLine, bobTAxis);
+
+path [path bobXIntersect, e], class: "bob";
+path [path bobTIntersect, e], class: "bob";
+
+// Lines to moving axes
+
+eP = e -> alice;
+
+aliceXLine = [line axis x alice offset eP.t];
+aliceTLine = [line axis t alice offset eP.x];
+aliceXAxis = [line axis x alice offset 0];
+aliceTAxis = [line axis t alice offset 0];
+aliceXIntersect = intersect(aliceTLine, aliceXAxis);
+aliceTIntersect = intersect(aliceXLine, aliceTAxis);
+
+path [path aliceXIntersect, e], class: "alice";
+path [path aliceTIntersect, e], class: "alice";
+
+axes bob,   class: "bob";
+axes alice, class: "alice";
+
+// The event
+
+event e, style: "color: #C00";
+label e, text: e,  class: "bob";
+label e, text: eP, class: "alice";
+
+set displayPrecision 2, printPrecision 2;
+
+toggle viewpoint = false label "Moving view";
+if (viewpoint) frame alice;
+if (!viewpoint) frame bob;

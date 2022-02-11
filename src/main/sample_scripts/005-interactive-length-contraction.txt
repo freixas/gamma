@@ -1,0 +1,145 @@
+// ************************************************************
+// *
+// * SHOW HOW LENGTH CONTRACTION WORKS
+// *
+// ************************************************************
+
+// Set up styling
+
+stylesheet "
+  worldline.moving   { color: #8404; }
+  line.present       { line-style: dashed; color: #C00; }
+  path.moving-length { line-thickness: 5; color: #840; }
+  path.rest-length   { line-thickness: 5; color: #080; }
+  path.length        { line-style: dotted; color: #080; }
+  path.contr-length  { line-style: dotted; color: #840; }
+  .annotation        { arrow: both; font-size: 20; }
+  .annotation1       { text-padding:  5; text-anchor: TC; color: #080; }
+  .annoation2        { text-padding: 10; text-anchor: BC; color: #840; }
+";
+
+display origin: (25, 25), scale: 25;
+
+////////////////////////////////////////
+// SETUP
+////////////////////////////////////////
+
+// Set the velocity desired for this demonstration
+
+animate v = 0 to .99 step .01;
+animation reps: 50, speed: 1;
+
+// Set the desired proper length of the moving object, the one whose
+// contraction we want to observe
+
+length = 1;
+
+////////////////////////////////////////
+// CALCULATIONS
+////////////////////////////////////////
+
+// The middle of the structure will pass through the origin at time 0
+
+middle = [observer origin (0, 0) velocity v];
+
+// At time 0, find out where the front and back are relative to the
+// middle. These coordinates are converted to rest frame coordinates
+
+time0Back =  (-length / 2, 0) <- middle;
+time0Front = (+length / 2, 0) <- middle;
+
+// Create observers for the front and back
+
+back =   [observer origin time0Back  velocity v];
+front =  [observer origin time0Front velocity v];
+
+// Create a line at rest time t = 1. which is where we will measure
+// the length. This line represents the "present" for an observer at
+// rest
+
+present = [line axis x defFrame offset 1];
+
+// Intersect this line with the worldlines of the front and back.
+// These are the positions of the front and back at time 1 relative to
+// the rest observer
+
+time1Front = intersect(present, front);
+time1Back  = intersect(present, back);
+
+// At time 1, let's calculate where the opposite end of the moving
+// object is in rest coordinates.
+//
+// The back is located -length units from the front measured so that
+// the local clocks on the front and back of the moving object are
+// equal. We then conver the coordinate to the rest frame
+
+time1FrontToBack = (-length, tToTau(time1Front.t, front)) <- front;
+
+// The back is handled the same way
+
+time1BackToFront = (+length, tToTau(time1Back.t, back))   <- back;
+
+////////////////////////////////////////
+// DRAWING
+////////////////////////////////////////
+
+// Draw the rest axes
+
+axes defFrame;
+
+// Show the worldlines for the ends of the length
+
+worldline back,  class: "moving";
+worldline front, class: "moving";
+
+// Draw the "present"
+
+line present, class: "present";
+
+// Draw the lengths as seen by the moving object at the time the front
+// end is at the rest frame's time 1 and at the time the back end is
+// at the rest frame's time 1
+
+path [path time1Front, time1FrontToBack], class: "moving-length";
+path [path time1Back,  time1BackToFront], class: "moving-length";
+
+// Draw the length as seen in the rest frame
+
+path [path time1Front, time1Back], class: "rest-length";
+
+////////////////////////////////////////
+// DRAWING
+////////////////////////////////////////
+
+// Annotate the rest frame length
+
+contractedLength = time1Front.x - time1Back.x;
+
+path [path time1Back,  (time1Back.x,  -.4)], class: "length";
+path [path time1Front, (time1Front.x, -.4)], class: "length";
+
+path [path (time1Back.x, -.4), (time1Front.x, -.4)],
+    class: "annotation, annotation1";
+
+label ((time1Front.x + time1Back.x) / 2, -.4),
+    text: toString(contractedLength, 3),
+    class: "annotation, annotation1";
+
+// Annotate the moving frame length
+
+xAngle = toXAngle(back);
+annLine = [line angle xAngle through (time1Back.x, time1Back.t + .4)];
+
+contrLengthLine1 = [line angle xAngle+90 through time1Back];
+contrLengthLine2 = [line angle xAngle+90 through time1BackToFront];
+
+annP1 = intersect(annLine, contrLengthLine1);
+annP2 = intersect(annLine, contrLengthLine2);
+
+path [path annP1, time1Back],        class: "contr-length";
+path [path annP2, time1BackToFront], class: "contr-length";
+path [path annP1, annP2], class: "annotation, annotation1";
+
+label ((annP2.x + annP1.x)/2, (annP2.t + annP1.t)/2),
+    text: toString(length, 3), rotation:  toXAngle(back),
+    class: "annotation, annotation2";

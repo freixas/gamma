@@ -1,0 +1,97 @@
+set printPrecision 1;
+obs = [observer ];
+
+print ;
+print "(1,1) -> [frame velocity .8]  is " + ((1,1) -> [frame velocity .8]);
+print "(1,1) <- [frame velocity .8]  is " + ((1,1) <- [frame velocity .8]);
+
+print ;
+print "!true is " + !true;
+print "!false is " + !false;
+
+print ;
+print "!obs is " + !obs;
+print "!null is " + !null;
+
+print ;
+if (obs) print "if (obs) -- true"; else print "if (obs) - false";
+if (null) print "if (null) -- true"; else print "if (null) - false";
+
+print ;
+print "true || true is " + (true || true);
+print "true || false is " + (true || false);
+print "false || false is " + (false || false);
+
+print ;
+print "true || true is " + (true || true);
+print "true || null is " + (true || null);
+print "null || null is " + (null || null);
+
+print ;
+print "obs || obs is " + (obs || obs);
+print "obs || false is " + (obs || false);
+print "false || false is " + (false || false);
+
+print ;
+print "true && true is " + (true && true);
+print "true && false is " + (true && false);
+print "false && false is " + (false && false);
+
+print ;
+print "true && true is " + (true && true);
+print "true && null is " + (true && null);
+print "null && null is " + (null && null);
+
+print ;
+print "obs && obs is " + (obs && obs);
+print "obs && null is " + (obs && null);
+print "null && null is " + (null && null);
+
+print ;
+print "10 == 10 is " + (10 == 10);
+print "10 == 9 is " + (10 == 9);
+
+print ;
+print "10 != 10 is " + (10 != 10);
+print "10 != 9 is " + (10 != 9);
+
+print ;
+print "10 > 1 is " + (10 > 1);
+print "1 > 10 is " + (1 > 10);
+
+print ;
+print "10 < 1 is " + (10 < 1);
+print "10 < 10 is " + (10 < 10);
+
+print ;
+print "10 >= 1 is " + (10 >= 1);
+print "10 >= 10 is " + (10 >= 10);
+print "10 >= 11 is " + (10 >= 11);
+
+print ;
+print "10 <= 1 is " + (10 <= 1);
+print "10 <= 10 is " + (10 <= 10);
+print "10 <= 11 is " + (10 <= 11);
+
+print ;
+print "10+10 is " + ( 10+10);
+print "10-10 is " + (10-10);
+
+print ;
+print "+10 is " + (+10);
+print "-10 is " + (-10);
+
+print ;
+print "10*10 is " + (10*10);
+print "10/10 is " + (10/10);
+print "10 % 10 is " + (10 % 10);
+print "10 % 9 is " + (10 % 9);
+
+print ;
+print "10^10 is " + (10^10);
+
+print ;
+print "(1,2).x is " + ((1,2).x);
+
+print ;
+print "(5+3) is " + ((5+3));

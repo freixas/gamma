@@ -1,0 +1,199 @@
+// *****************************************************************
+// *
+// * INTERACTIVE BELL'S SPACESHIP PARADOX
+// *
+// *  Bell's spaceship paradox is a thought experiment in special
+// *  relativity.
+// *
+// *  A delicate thread hangs between two spaceships. They
+// *  start accelerating simultaneously and equally as measured in the
+// *  rest frame, thus having the same velocity and maintaining the same
+// *  distance appart at all times as viewed from the rest frame.
+// *
+// *  Will the thread break?
+// *
+// *****************************************************************
+
+set displayPrecision 2;
+
+// ****************************************
+// * CREATE A STYLESHEET
+// ****************************************
+
+stylesheet "
+  event { event-diameter: 10; }
+  .rest { color: black; text-anchor: TR; text-padding: 10; }
+  .left { color: blue; text-anchor: TC; text-padding: 10; }
+  .right, worldline.right { color: red; text-anchor: TL; text-padding: 10; }
+  event.thread { event-shape: star; event-diameter: 5; }
+  .thick { line-thickness: 3; }
+";
+
+// ****************************************
+// * SET UP THE OBSERVERS
+// ****************************************
+
+// Set up the obserers. We have a rest observer and a left and right spaceship
+
+leftShipStartX = 10;
+rightShipStartX = 20;
+
+restObserver = [observer ];
+leftShip = [observer origin (leftShipStartX,0) velocity 0 time 0, acceleration 1];
+rightShip = [observer origin (rightShipStartX,0) velocity 0 time 0, acceleration 1];
+
+// Set up observers for points along the string
+
+for i = leftShipStartX to rightShipStartX step 1 {
+    thread[i] = [observer origin (i,0) velocity 0 time 0, acceleration 1];
+}
+
+// ****************************************
+// * SET UP THE ANIMATION
+// ****************************************
+
+// The thread is attached at time 0. If it doesn't break, it will be
+// jettisoned at the following rest frame time. We will animate what
+// happens during this time
+
+attachThreadTime = 0;
+detachThreadTime = 5;
+animation ;
+animate t = attachThreadTime to detachThreadTime step .02;
+
+// Set up an interval for the rest time during which the thread is
+// attached and create new observers bounded by this interval
+
+threadAttachedInterval = [interval time 0 to detachThreadTime];
+threadAttachedLeft = setInterval(leftShip, threadAttachedInterval);
+threadAttachedRight = setInterval(rightShip, threadAttachedInterval);
+
+// ****************************************
+// * SET UP THE USER INTERFACE
+// ****************************************
+
+choice scenario = 1 choices
+    "RestObserver observer", "Left spaceship", "Right spaceship"
+    label "Relative to ";
+
+if      (scenario == 1)	obs = restObserver;
+else if (scenario == 2)	obs = threadAttachedLeft;
+else if (scenario == 3) obs = threadAttachedRight;
+else print "Scenario " + scenario + " is invalid!";
+
+obsFrame = [frame observer obs at time t];
+frame obsFrame;
+
+// ********************
+
+choice simulScenario = 1 choices
+    "RestObserver observer", "Left spaceship", "Right spaceship"
+    label "Line of simultaneity";
+
+if      (simulScenario == 1) simulObs = restObserver;
+else if (simulScenario == 2) simulObs = threadAttachedLeft;
+else if (simulScenario == 3) simulObs = threadAttachedRight;
+else print "simulScenario " + simulScenario + " is invalid!";
+
+// Create a line that goes through the chosen observer at time t and
+// is parallel to the observer's x axis
+
+simulObsFrame = [frame observer simulObs at time t];
+lineOfSimultaneity = [line axis x simulObsFrame offset tToTau(t, simulObs)];
+
+restPosition = intersect(lineOfSimultaneity, restObserver);
+leftShipPosition = intersect(lineOfSimultaneity, leftShip);
+rightShipPosition = intersect(lineOfSimultaneity, rightShip);
+
+// For the thread, we always use the rest frame's line of simultaneity
+
+for i = leftShipStartX to rightShipStartX step 1 {
+    threadPos[i] = (tToX(t, thread[i]), t);
+}
+
+// ********************
+
+choice timeSeen = 4 choices
+    "Rest observer", "Left spaceship", "Right spaceship", "Don't display"
+    label "Time as seen by";
+
+if      (timeSeen == 1) seenBy = restObserver;
+else if (timeSeen == 2) seenBy = threadAttachedLeft;
+else if (timeSeen == 3) seenBy = threadAttachedRight;
+
+// Send out light rays and record the intersection
+
+if (timeSeen < 4) {
+    seenByPosition = (tToX(t, seenBy), t);
+    ray1 = [line angle -45 through seenByPosition];
+    ray2 = [line angle +45 through seenByPosition];
+}
+
+if (timeSeen == 1) {
+    restTime = t;
+    leftTime = tToTau(intersect(ray1, leftShip).t, leftShip);
+    rightTime = tToTau(intersect(ray1, rightShip).t, rightShip);
+}
+else if (timeSeen == 2) {
+    restTime = intersect(ray2, restObserver).t;
+    leftTime = tToTau(t, leftShip);
+    rightTime = tToTau(intersect(ray1, rightShip).t, rightShip);
+}
+else if (timeSeen == 3) {
+    restTime = intersect(ray2, restObserver).t;
+    leftTime = tToTau(intersect(ray2, leftShip).t, leftShip);
+    rightTime = tToTau(t, rightShip);
+}
+
+// ********************
+
+toggle displayThread = false label "Display thread";
+
+// ****************************************
+// * DRAW THE DIAGRAM
+// ****************************************
+
+// Draw the axes for whichever observer's viewpoint we are viewing
+// relative to
+
+axes obsFrame;
+
+// Draw the line of simultaneity, but rather than using a line, use an
+// x axis, which will have tick marks
+
+axes [frame origin (tToX(t, simulObs), t) velocity simulObsFrame.v], t: false, style: "color: cyan";
+
+// Draw the portion of the worldlines where the thread is attached
+
+worldline threadAttachedLeft, class: "left, thick";
+worldline threadAttachedRight, class: "right, thick";
+
+// Draw the full worldline
+
+worldline leftShip, class: "left";
+worldline rightShip, class: "right";
+
+// Place events at each observer's position along whatever line of
+// simultaneity was chosen
+
+if (restPosition != null)      event restPosition, class: "rest";
+if (leftShipPosition != null)  event leftShipPosition, class: "left";
+if (rightShipPosition != null) event rightShipPosition, class: "right";
+
+// Optionally display the thread so that each thread point has the
+// same rest t value (and will also have the same tau)
+
+if (displayThread) {
+    for i = leftShipStartX to rightShipStartX step 1 {
+	event threadPos[i], class: "thread";
+    }
+}
+
+// Optionally display the times seen with respect to whomever was
+// chosen
+
+if (timeSeen < 4) {
+    if (restPosition != null)      label restPosition, text: restTime, class: "rest";
+    if (leftShipPosition != null)  label leftShipPosition, text: leftTime, class: "left";
+    if (rightShipPosition != null) label rightShipPosition, text: rightTime, class: "right";
+}

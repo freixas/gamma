@@ -1,0 +1,123 @@
+stylesheet "
+  axes {
+    font-family: 'Georgia';
+    font-weight: bold;
+    font-style: italic;
+    tick-font-family: 'Futura';
+    tick-font-weight: normal;
+    tick-font-style: regular;
+  }
+  event {
+    text-padding: 5;
+  }
+  path {
+    color: green;
+    line-thickness: 5;
+    line-style: dotted;
+    background-color: cyan;
+  }
+  label {
+    color: #00000088;
+    font-family: Futura;
+    font-size: 40;
+    font-weight: bold;
+    font-style: regular;
+    text-padding: 0;
+    text-anchor: MC;
+  }
+
+";
+
+toggle axis1 = true label "Observer 1";
+range  axis1Velocity = 0 from -.9 to .9 label "Observer 1's velocity";
+toggle grid1 = false label "Observer 1's grid";
+
+toggle axis2 = false label "Observer 2";
+range  axis2Velocity = .8 from -.9 to .9 label "Observer 2's velocity";
+toggle grid2 = false label "Observer 2's grid";
+
+toggle showObs3 = false label "Observer 3 (acc)";
+
+toggle addAxisLabels = false label "Axis labels";
+xAxis1Label = "";
+tAxis1Label = "";
+xAxis2Label = "";
+tAxis2Label = "";
+if (addAxisLabels) {
+    xAxis1Label = "x";
+    tAxis1Label = "t";
+    xAxis2Label = "x'";
+    tAxis2Label = "t'";
+}
+
+toggle addAxisArrows = false label "Axis arrows";
+axisArrows = "";
+if (addAxisArrows) {
+    axisArrows = "; arrow: end";
+}
+
+toggle hypergrid = false label "Hypergrid";
+
+toggle addEvents = false label "Add events";
+toggle addEventLabels = false label "Add event labels";
+toggle boostEvents = false label "Boost events";
+
+toggle lightLines = false label "Add light lines";
+
+toggle showPath = false label "Add a path";
+toggle pathClosed = false label "Close path";
+toggle strokePath = true label "Stroke path";
+toggle fillPath = false label "Fill path";
+
+toggle addLabel = false label "Add a label";
+range labelRot = 0 from 0 to 360 label "Label rotation";
+
+// ************************************************************
+
+obs1 = [observer velocity axis1Velocity];
+obs2 = [observer velocity axis2Velocity];
+obs3 = [observer velocity 0 time 0, acceleration 1 time 2, acceleration -1 time 2, acceleration 0];
+
+
+if (grid1) grid obs1;
+if (grid2) grid obs2, style: "color: #FCC";
+if (hypergrid) hypergrid ;
+
+if (axis2) axes obs2, xLabel: xAxis2Label, tLabel: tAxis2Label,  style: "color: red" + axisArrows;
+if (axis1) axes obs1, xLabel: xAxis1Label,  tLabel: tAxis1Label, style: axisArrows;
+if (showObs3) worldline obs3;
+
+if (addEvents) {
+    eLabel1 = "";
+    eLabel2 = "";
+    eLabel3 = "";
+    if (addEventLabels) {
+	eLabel1 = "(10, 20)";
+	eLabel2 = "(50, 40)";
+	eLabel3 = "(-25, -10)";
+    }
+    if (!boostEvents) {
+	event (10, 20),   text: eLabel1, style: "color: blue; event-shape: circle";
+	event (50, 40),   text: eLabel2, style: "color: green; event-shape: diamond";
+	event (-25, -10), text: eLabel3, style: "color: magenta; event-shape: star";
+    }
+    else {
+	event (10, 20),   text: eLabel1, boostTo: obs2, style: "color: blue; event-shape: circle";
+	event (50, 40),   text: eLabel2, boostTo: obs2, style: "color: green; event-shape: diamond";
+	event (-25, -10), text: eLabel3, boostTo: obs2, style: "color: magenta; event-shape: star";
+    }
+}
+
+if (lightLines) {
+  line [line angle  45 through (0,0)], style: "color: #ED0";
+  line [line angle -45 through (0,0)], style: "color: #ED0";
+}
+
+if (showPath) {
+    path = [path (10, 10), (10, 20), (20, 20), (20, 10)];
+    path path closed: pathClosed, stroke: strokePath, fill: fillPath;
+}
+
+if (addLabel) {
+    label (0, 0), text: "Label", style: "text-rotation: " + labelRot;
+}
