@@ -72,8 +72,8 @@ public class FileWatcher extends Thread
      */
     public boolean hasSameFiles(File file, ArrayList<File> dependentFiles)
     {
-        if (this.dependentFiles == null && dependentFiles != null) return false;
-        if (this.dependentFiles != null && dependentFiles == null) return false;
+        if (this.file == null || file == null) return false;
+        if (this.dependentFiles == null || dependentFiles == null) return false;
         return this.file.equals(file) && this.dependentFiles.equals(dependentFiles);
     }
 
@@ -87,7 +87,7 @@ public class FileWatcher extends Thread
      *     ... etc. ...
      * }
      * </code>
-     * @return
+     * @return A list of exceptions.
      */
     public List<Exception> getExceptionList()
     {
@@ -111,15 +111,9 @@ public class FileWatcher extends Thread
             Parser parser = new Parser(file, script);
             parser.parse();
             Platform.runLater(new ScriptParseCompleteHandler(window, parser));
-        }
-        catch (IOException | ParseException e) {
+        } catch (Exception e) {
             list.add(e);
-            e.printStackTrace();
-            Platform.runLater(new ScriptParseErrorHandler(window, list));
-        }
-        catch (Exception e) {
-            list.add(e);
-            e.printStackTrace();
+            // e.printStackTrace();
             Platform.runLater(new ScriptParseErrorHandler(window, list));
         }
     }
@@ -161,9 +155,8 @@ public class FileWatcher extends Thread
             // Create a watch key for each unique parent of each dependent file
 
             if (dependentFiles != null) {
-                Iterator<File> iter = dependentFiles.iterator();
-                while (iter.hasNext()) {
-                    Path dependentPath = iter.next().toPath();
+                for (File dependentFile : dependentFiles) {
+                    Path dependentPath = dependentFile.toPath();
                     Path dependentParent = dependentPath.getParent();
 
                     // If a watch key exists for the parent directory, just add
@@ -199,7 +192,7 @@ public class FileWatcher extends Thread
                 // Check to see if we should terminate
 
                 if (isStopped()) {
-                    System.err.println("Stop request detected. Terminating file watcher for " + file);
+                    // System.err.println("Stop request detected. Terminating file watcher for " + file);
                     return;
                 }
 
@@ -209,7 +202,7 @@ public class FileWatcher extends Thread
                     for (WatchEvent<?> event : key.pollEvents()) {
 
                         WatchEvent.Kind<?> kind = event.kind();
-                        System.err.println("Event kind : " + kind + " - File : " + event.context());
+                        // System.err.println("Event kind : " + kind + " - File : " + event.context());
 
                         if (kind == StandardWatchEventKinds.ENTRY_CREATE ||
                             kind == StandardWatchEventKinds.ENTRY_MODIFY) {
@@ -225,7 +218,7 @@ public class FileWatcher extends Thread
 
                             @SuppressWarnings("unchecked")
                             Path detectedPath = ((WatchEvent<Path>)event).context();
-                            System.err.print("File " + detectedPath + "\n");
+                            // System.err.print("File " + detectedPath + "\n");
 
                             // See if the file detected is on our list
 
@@ -238,9 +231,9 @@ public class FileWatcher extends Thread
                                 Path fullDetectedPath = parentDirectory.resolve(detectedPath);
 
                                 File detectedFile = fullDetectedPath.toFile();
-                                Long modTime = detectedFile.lastModified();
+                                long modTime = detectedFile.lastModified();
                                 if (modTime > lastModTime + 1000) {
-                                    System.err.println("doOnChange()\n");
+                                    // System.err.println("doOnChange()\n");
                                     doOnChange();
                                     lastModTime = modTime;
                                 }
@@ -250,8 +243,9 @@ public class FileWatcher extends Thread
                         else if (kind == StandardWatchEventKinds.ENTRY_DELETE) {
                             @SuppressWarnings("unchecked")
                             Path filename = ((WatchEvent<Path>)event).context();
-                            System.err.print("Filename is " + filename + "\n");
+                            // System.err.print("Filename is " + filename + "\n");
 
+                            //noinspection StatementWithEmptyBody
                             if (filename.toString().equals(file.getName())) {
                                 // ???
                             }
@@ -260,16 +254,7 @@ public class FileWatcher extends Thread
                     poll = key.reset();
                 }
             }
-        }
-        catch (IOException e) {
-            list.add(e);
-            Platform.runLater(new ScriptParseErrorHandler(window, list));
-        }
-        catch (InterruptedException e) {
-            list.add(e);
-            Platform.runLater(new ScriptParseErrorHandler(window, list));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             list.add(e);
             Platform.runLater(new ScriptParseErrorHandler(window, list));
         }

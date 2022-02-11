@@ -39,6 +39,9 @@
         <fileSet>
             <directory>${project.basedir}/src/main/icons</directory>
             <outputDirectory>/icons</outputDirectory>
+            <includes>
+                <include>gamma*</include>
+            </includes>
         </fileSet>
         <fileSet>
             <directory>${project.basedir}/src/main/help</directory>

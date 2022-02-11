@@ -4,7 +4,7 @@
 // *
 // ************************************************************
 
-stylesheet external "004-twins-paradox.css";
+stylesheet external "006-interactive-twins-paradox.css";
 
 choice model = 1 choices "No acceleration", "1g acceleration" label "Acceleration" restart;
 

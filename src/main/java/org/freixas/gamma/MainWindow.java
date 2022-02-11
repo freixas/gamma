@@ -66,7 +66,6 @@ public final class MainWindow extends Stage
     private final int ID;
     private File script;
     private final File[] directoryDefaults;
-    private final MainWindowController controller;
 
     private MenuItem fileMenuExportDiagram;
     private MenuItem fileMenuExportVideo;
@@ -106,9 +105,9 @@ public final class MainWindow extends Stage
      * @param directoryDefaults The default directories to use when opening or
      * saving files.
      *
-     * @throws Exception
+     * @throws Exception For any exception.
      */
-    @SuppressWarnings("LeakingThisInConstructor")
+    @SuppressWarnings({"LeakingThisInConstructor", "ConstantConditions"})
     public MainWindow(int ID, File script, File[] directoryDefaults) throws Exception
     {
         // We can't fully deal with the file until the main window is
@@ -128,7 +127,7 @@ public final class MainWindow extends Stage
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(getClass().getResource("/MainWindow.fxml"));
         Parent root = loader.load();
-        controller = loader.getController();
+        MainWindowController controller = loader.getController();
         controller.setMainWindow(this);
         setScene(new Scene(root));
 
@@ -148,7 +147,7 @@ public final class MainWindow extends Stage
                     greetings.show();
                     displayGreetingsDialog = false;
                 }
-                catch (Exception e) { e.printStackTrace(); }
+                catch (Exception e) { /* e.printStackTrace(); */ }
             }
         });
 
@@ -583,7 +582,7 @@ public final class MainWindow extends Stage
             dialog.displayError(e);
         }
         catch (Exception e2) {
-            e2.printStackTrace();
+            // e2.printStackTrace();
             showTextAreaAlert(Alert.AlertType.ERROR, "Syntax Error", "Syntax Error", e.getLocalizedMessage(), true);
         }
     }
@@ -600,7 +599,7 @@ public final class MainWindow extends Stage
             dialog.displayError(e);
         }
         catch (Exception e2) {
-            e2.printStackTrace();
+            // e2.printStackTrace();
             showTextAreaAlert(Alert.AlertType.ERROR, "Runtime Error", "Runtime Error", e.getLocalizedMessage(), true);
         }
     }

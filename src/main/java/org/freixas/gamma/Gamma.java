@@ -198,7 +198,7 @@ public class Gamma extends Application
         }
         catch (Exception e) {
             System.out.println("Failed to open a window: " + e.getLocalizedMessage());
-            e.printStackTrace();
+            // e.printStackTrace();
         }
 
         primaryStage.close();

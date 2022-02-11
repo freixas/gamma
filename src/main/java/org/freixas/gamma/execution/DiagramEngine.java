@@ -140,7 +140,7 @@ public class DiagramEngine
     {
         close();
 
-        e.printStackTrace();
+        // e.printStackTrace();
         if (e instanceof GammaRuntimeException gammaRuntimeException) {
             window.showRuntimeException(gammaRuntimeException);
         }
