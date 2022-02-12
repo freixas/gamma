@@ -36,6 +36,7 @@
             <outputDirectory>/sample_scripts</outputDirectory>
             <includes>
                 <include>*.txt</include>
+                <include>*.css</include>
             </includes>
         </fileSet>
         <fileSet>
