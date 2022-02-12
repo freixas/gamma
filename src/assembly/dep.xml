@@ -8,6 +8,8 @@
     <includeBaseDirectory>false</includeBaseDirectory>
     <dependencySets>
         <dependencySet>
+            <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+            <outputDirectory>/lib</outputDirectory>
             <excludes>
                 <exclude>org.openjfx:javafx-controls</exclude>
                 <exclude>org.openjfx:javafx-fxml</exclude>

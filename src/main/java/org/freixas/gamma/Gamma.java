@@ -33,8 +33,11 @@ import org.freixas.gamma.css.value.StyleException;
 import org.freixas.gamma.css.value.Stylesheet;
 import org.freixas.gamma.preferences.PreferencesManager;
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.jar.Manifest;
 import javax.swing.JFileChooser;
 
 /**
@@ -112,7 +115,7 @@ public class Gamma extends Application
             SAMPLE_SCRIPTS_LOCATION = new File(location + "/src/main/sample_scripts");
         }
         else {
-            RUNTIME_LOCATION = runtimeLocation.getParentFile();
+            RUNTIME_LOCATION = runtimeLocation.getParentFile().getParentFile();
             String location = RUNTIME_LOCATION.getAbsolutePath();
             HELP_LOCATION = new File(location + "/help");
             SAMPLE_SCRIPTS_LOCATION = new File(location + "/sample_scripts");
@@ -143,13 +146,7 @@ public class Gamma extends Application
             }
 
             else if (line.hasOption("version")) {
-                String version = this.getClass().getPackage().getImplementationVersion();
-                if (version == null) {
-                    System.out.println("Development version");
-                }
-                else {
-                    System.out.println("Version " + this.getClass().getPackage().getImplementationVersion());
-                }
+                System.out.println(Version.VERSION);
                 System.exit(0);
             }
 
@@ -204,7 +201,15 @@ public class Gamma extends Application
         primaryStage.close();
     }
 
-    // **********************************************************************
+private void displayPackageDetails(final Package pkg)
+   {
+      final String name = pkg.getName();
+      System.out.println(name);
+      System.out.println("\tSpec Title/Version: " + pkg.getSpecificationTitle() + " " + pkg.getSpecificationVersion());
+      System.out.println("\tSpec Vendor: " +  pkg.getSpecificationVendor());
+      System.out.println("\tImplementation: " + pkg.getImplementationTitle() + " " + pkg.getImplementationVersion());
+      System.out.println("\tImplementation Vendor: " + pkg.getImplementationVendor());
+   }    // **********************************************************************
     // *
     // * Window Management
     // *

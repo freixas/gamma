@@ -222,7 +222,11 @@ public class MainWindowController implements Initializable
     @FXML
     private void helpMenuAbout(ActionEvent event)
     {
-        new Alert(Alert.AlertType.INFORMATION, "Help About called!").show();
+        try {
+            AboutDialog aboutDialog = new AboutDialog(mainWindow);
+            aboutDialog.show();
+        }
+        catch (Exception e) { }
     }
 
     /**
