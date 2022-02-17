@@ -17,26 +17,54 @@
 package org.freixas.gamma;
 
 /**
+ * Exceptions caused by programming errors.
  *
  * @author Antonio Freixas
  */
-@SuppressWarnings("serial")
 public class ProgrammingException extends RuntimeException
 {
+    // **********************************************************************
+    // *
+    // * Constructors
+    // *
+    // **********************************************************************
+
+    /**
+     *  Create a Programming exception. Include an error message.
+     *
+     * @param message The error message.
+     */
     public ProgrammingException(String message)
     {
-        super(message);
+        this(message, null);
     }
+
+    /**
+     * Create a Programming exception. Include the exception that caused it.
+     *
+     * @param cause The exception which caused the problem.
+     */
+    public ProgrammingException(Throwable cause)
+    {
+        this(null, cause);
+    }
+    /**
+     *  Create a Programming exception. Include the error message and the
+     *  exception that caused this exception
+     *
+     * @param message The error message.
+     * @param cause The exception which caused the problem.
+     */
 
     public ProgrammingException(String message, Throwable cause)
     {
-        super(message +
-              (cause != null ?
-                (cause.getLocalizedMessage() != null ? "\nCaused by " + cause.getLocalizedMessage() : "") : ""), cause);
+        super(
+            message != null ?
+                (message + (cause != null ?
+                    (cause.getLocalizedMessage() != null ? "\nCaused by " + cause.getLocalizedMessage() : "") :
+                     "")) :
+                (cause.getLocalizedMessage() != null ? "\nCaused by " + cause.getLocalizedMessage() : ""),
+            cause);
     }
 
-    public ProgrammingException(Throwable cause)
-    {
-        super(cause);
-    }
 }

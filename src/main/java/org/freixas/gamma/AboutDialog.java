@@ -21,11 +21,14 @@ import javafx.scene.Scene;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import java.io.IOException;
+
 /**
+ * This class is used to manage the About dialog.
  *
  * @author Antonio Freixas
  */
-public class AboutDialog extends Stage
+public final class AboutDialog extends Stage
 {
 
     // **********************************************************************
@@ -34,9 +37,14 @@ public class AboutDialog extends Stage
     // *
     // **********************************************************************
 
-    public AboutDialog(MainWindow window) throws Exception
+    /**
+     * Create an About dialog.
+     *
+     * @param window The parent window.
+     * @throws IOException If the FXML file fails to load.
+     */
+    public AboutDialog(MainWindow window) throws IOException
     {
-
         // Load the view (FXML file) and controller. Get a reference to the controller.
 
         FXMLLoader loader = new FXMLLoader();

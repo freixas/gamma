@@ -30,11 +30,11 @@ import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 
 /**
- * FXML Controller class
+ * FXML Controller class for the Greetings dialog.
  *
  * @author Antonio Freixas
  */
-public class GreetingsDialogController implements Initializable
+public final class GreetingsDialogController implements Initializable
 {
     @FXML
     private GridPane buttonBar;
@@ -45,18 +45,17 @@ public class GreetingsDialogController implements Initializable
     @FXML
     private WebView html;
 
-    /**
-     * Initializes the controller class.
-     * @param url
-     * @param rb
-     */
     @Override
     public void initialize(URL url, ResourceBundle rb)
     {
-        WebEngine engine = html.getEngine();
+        // Monitor the display toggle
+
         displayOption.selectedProperty().addListener(
             (Object, oldValue, newValue) -> PreferencesManager.setDisplayGreetingMessage(!newValue));
 
+        // Load the greetings message
+
+        WebEngine engine = html.getEngine();
         URL greetingsURL = getClass().getResource("/greetings.html");
         if (greetingsURL != null) {
             engine.load(greetingsURL.toString());
@@ -64,7 +63,7 @@ public class GreetingsDialogController implements Initializable
     }
 
     @FXML
-    void handleClose(ActionEvent event) {
+    private void handleClose(ActionEvent event) {
         closeButton.getScene().getWindow().hide();
     }
 

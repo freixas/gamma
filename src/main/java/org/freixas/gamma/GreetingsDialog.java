@@ -21,11 +21,16 @@ import javafx.scene.Scene;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import java.io.IOException;
+
 /**
+ * This class handles the Greetings dialog. This is displayed by default the first time
+ * the user runs the program and until they disable it (it can be re-enabled in
+ * the Preferences dialog).
  *
  * @author Antonio Freixas
  */
-public class GreetingsDialog extends Stage
+public final class GreetingsDialog extends Stage
 {
 
     // **********************************************************************
@@ -34,9 +39,14 @@ public class GreetingsDialog extends Stage
     // *
     // **********************************************************************
 
-    public GreetingsDialog(MainWindow window) throws Exception
+    /**
+     * Create a Greetings dialog.
+     *
+     * @param window The parent window.
+     * @throws IOException if there is a problem loading the associated FXML file.
+     */
+    public GreetingsDialog(MainWindow window) throws IOException
     {
-
         // Load the view (FXML file) and controller. Get a reference to the controller.
 
         FXMLLoader loader = new FXMLLoader();

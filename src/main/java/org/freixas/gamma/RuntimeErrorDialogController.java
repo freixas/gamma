@@ -26,6 +26,7 @@ import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 
 /**
+ * FXML Controller for the RuntimeError dialog.
  *
  * @author Antonio Freixas
  */
@@ -46,18 +47,28 @@ public class RuntimeErrorDialogController {
     @FXML
     private Label headerSubtitle;
 
-
+    /**
+     *  Close the dialog when the Close button is pressed.
+     */
     @FXML
-    void handleClose(ActionEvent event) {
+    private void handleClose(ActionEvent ignoredEvent) {
         closeButton.getScene().getWindow().hide();
     }
 
+    /**
+     * Set the dialog for displaying programming errors.
+     */
     public void setForProgrammingError()
     {
         headerTitle.setText("Programming Error");
         headerSubtitle.setText("This error should not have occurred:");
     }
 
+    /**
+     * Set the content for the web view.
+     *
+     * @param htmlContent The content for the web view.
+     */
     public void setHTML(String htmlContent)
     {
         WebEngine engine = html.getEngine();

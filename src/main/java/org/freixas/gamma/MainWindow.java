@@ -16,33 +16,15 @@
  */
 package org.freixas.gamma;
 
-import org.freixas.gamma.execution.ScriptPrintDialog;
-import org.freixas.gamma.execution.DiagramEngine;
-import java.io.File;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
-
-import org.freixas.gamma.file.FileWatcher;
-import org.freixas.gamma.preferences.PreferencesManager;
-import org.freixas.gamma.value.ChoiceVariable;
-import org.freixas.gamma.value.ToggleVariable;
-import org.freixas.gamma.value.DisplayVariable;
-import org.freixas.gamma.value.RangeVariable;
-import java.io.IOException;
-import java.util.ArrayList;
-import javafx.collections.FXCollections;
-import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Point2D;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -50,29 +32,51 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Screen;
+import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
+import org.freixas.gamma.execution.DiagramEngine;
+import org.freixas.gamma.execution.ScriptPrintDialog;
+import org.freixas.gamma.file.FileWatcher;
 import org.freixas.gamma.parser.ParseException;
+import org.freixas.gamma.preferences.PreferencesManager;
+import org.freixas.gamma.value.ChoiceVariable;
+import org.freixas.gamma.value.DisplayVariable;
+import org.freixas.gamma.value.RangeVariable;
+import org.freixas.gamma.value.ToggleVariable;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 
 /**
- * This class manages the view / controller / model for one main window. It
- * creates the view (from an FXML file) and the controller. It also creates and
- * manages any model classes associated with the view / controller.
+ * This is the main window of the Gamma application. Each window manages its own script,
+ * so everything involved in running a script needs to eventually use a context associated
+ * with this window.
  *
  * @author Antonio Freixas
  *
  */
 public final class MainWindow extends Stage
 {
+    // The toggle for whether to display the Greetings dialog or not.
+    // This is global to all main windows -- only the first main window displayed
+    // should display the Greetings dialog, and only if the setting is enabled
 
-    private final int ID;
-    private File script;
-    private final File[] directoryDefaults;
+    static private boolean displayGreetingsDialog = PreferencesManager.getDisplayGreetingMessage();
+
+    private final int ID;                       // The window's ID
+    private File script;                        // The associated script
+    private final File[] directoryDefaults;     // The default dirs for each type of file
+
+    // Various menu items
 
     private MenuItem fileMenuExportDiagram;
     private MenuItem fileMenuExportVideo;
     private MenuItem fileMenuPrint;
     private MenuItem fileMenuClose = null;
 
-    private boolean hasDisplayControls;
+    // Various containers/controls
 
     private VBox top;
     private SplitPane controlsSplitter;
@@ -80,16 +84,20 @@ public final class MainWindow extends Stage
     private ScrollPane scrollPane;
     private VBox displayControlArea;
 
-    private Screen screen;
+    private ScriptPrintDialog scriptPrintDialog = null;
+
+    private Screen screen;                      // The screen the window originated on
+
+    private boolean hasDisplayControls;         // True if display controls exist
+
+    // Used to monitor for changes in the associated script
 
     private FileWatcher watcher = null;
     private Thread watcherThread = null;
 
-    private DiagramEngine diagramEngine = null;
-    private Canvas canvas;
+    private DiagramEngine diagramEngine = null; // The diagram engine
+    private Canvas canvas;                      // The diagram drawing area
 
-    private static boolean displayGreetingsDialog = PreferencesManager.getDisplayGreetingMessage();
-    private ScriptPrintDialog scriptPrintDialog = null;
 
     // **********************************************************************
     // *
@@ -107,7 +115,7 @@ public final class MainWindow extends Stage
      *
      * @throws Exception For any exception.
      */
-    @SuppressWarnings({"LeakingThisInConstructor", "ConstantConditions"})
+
     public MainWindow(int ID, File script, File[] directoryDefaults) throws Exception
     {
         // We can't fully deal with the file until the main window is
@@ -120,7 +128,7 @@ public final class MainWindow extends Stage
         // The script file must be an absolute file or else it gets messed
         // up when it's turned into an absolute path in the FileWatcher
 
-        final File absoluteScript = script!= null ? script.getAbsoluteFile() : null;
+        File absoluteScript = script!= null ? script.getAbsoluteFile() : null;
 
         // Load the view (FXML file) and controller. Get a reference to the controller.
 
@@ -131,7 +139,8 @@ public final class MainWindow extends Stage
         controller.setMainWindow(this);
         setScene(new Scene(root));
 
-        // The FXML file has display controls by default
+        // The FXML file has display controls by default. This just means that we have
+        // a side panel that comes from the FXML file
 
         hasDisplayControls = true;
 
@@ -155,20 +164,26 @@ public final class MainWindow extends Stage
 
         // Add icons
 
-        getIcons().addAll(
-            new Image(getClass().getResourceAsStream("/gamma-icon-16x16.png")),
-            new Image(getClass().getResourceAsStream("/gamma-icon-24x24.png")),
-            new Image(getClass().getResourceAsStream("/gamma-icon-32x32.png")),
-            new Image(getClass().getResourceAsStream("/gamma-icon-48x48.png")),
-            new Image(getClass().getResourceAsStream("/gamma-icon-256x256.png"))
-        );
+        InputStream icon16 = getClass().getResourceAsStream("/gamma-icon-16x16.png");
+        InputStream icon24 = getClass().getResourceAsStream("/gamma-icon-24x24.png");
+        InputStream icon32 = getClass().getResourceAsStream("/gamma-icon-32x32.png");
+        InputStream icon48 = getClass().getResourceAsStream("/gamma-icon-48x48.png");
+        InputStream icon256 = getClass().getResourceAsStream("/gamma-icon-256x256.png");
+
+        if (icon16 != null) getIcons().add(new Image(icon16));
+        if (icon24 != null) getIcons().add(new Image(icon24));
+        if (icon32 != null) getIcons().add(new Image(icon32));
+        if (icon48 != null) getIcons().add(new Image(icon48));
+        if (icon256 != null) getIcons().add(new Image(icon256));
+
+        // Show the window
 
         show();
     }
 
     // **********************************************************************
     // *
-    // * Getters / Settings
+    // * Getters / Setters
     // *
     // **********************************************************************
 
@@ -186,6 +201,65 @@ public final class MainWindow extends Stage
     }
 
     /**
+     * Get all current default directories being used for various file dialogs.
+     *
+     * @return The current default directories being used for various file dialogs.
+     */
+
+    public File[] getDirectoryDefaults()
+    {
+        return directoryDefaults;
+    }
+
+    /**
+     * Get the default directory to use for file dialogs for a specific type
+     * of file
+     * <p>
+     * If we already have a default for the file type, use it. If we don't,
+     * but we have a script file and the request is for scripts, use the
+     * script's parent directory. Otherwise, use a global default.
+     *
+     * @param type The type of file whose default directory we want.
+     *
+     * @return The directory to use for various file dialogs.
+     */
+    public File getDefaultDirectory(Gamma.FileType type)
+    {
+        if (directoryDefaults[type.getValue()] == null) {
+
+            // If we want the default directory to use for a script and we have
+            // an associated file, use its parent directory
+
+            if (type == Gamma.FileType.SCRIPT && script != null) {
+                directoryDefaults[type.getValue()] = script.getParentFile();
+            }
+
+            // Otherwise, ask for the global default
+
+            else {
+                directoryDefaults[type.getValue()] = PreferencesManager.getDefaultDirectory(type);
+            }
+        }
+        return directoryDefaults[type.getValue()];
+    }
+
+    /**
+     * Set the default directory to use for file dialogs for a specific type of
+     * file.
+     *
+     * @param type The type of file whose default directory we want.
+     * @param dir The default directory to use.
+     */
+    public void setDefaultDirectory(Gamma.FileType type, File dir)
+    {
+        if (dir == null) return;
+        if (!dir.exists()) return;
+        if (!dir.isDirectory()) dir = dir.getParentFile();
+
+        directoryDefaults[type.getValue()] = dir;
+    }
+
+    /**
      * Get the script file associated with this main window. The file can be
      * null.
      *
@@ -197,36 +271,12 @@ public final class MainWindow extends Stage
     }
 
     /**
-     * Get the current default directories being used for various file dialogs.
-     *
-     * @return The current default directories being used for various file dialogs.
-     */
-
-    public File[] getDirectoryDefaults()
-    {
-        return directoryDefaults;
-    }
-
-    public Screen getScreen()
-    {
-        ObservableList<Screen> screens = Screen.getScreensForRectangle(getX(), getY(), 1.0, 1.0);
-        if (screens.size() < 1) {
-            if (screen != null) return screen;
-            screen = Screen.getPrimary();
-            return screen;
-        }
-        screen = screens.get(0);
-        return screen;
-    }
-
-    /**
      * Set the script file associated with this main window. The file can be
      * null.
      * <p>
-     *
      * Certain menu items are enabled or disabled depending on whether the script
      * is null. The title bar is updated to display the file name. If the script
-     * is not null, the associated script is run.
+     * is not null, setting the associated script is run.
      *
      * @param script The script file associated with this window.
      */
@@ -240,15 +290,22 @@ public final class MainWindow extends Stage
         fileMenuExportVideo.setDisable(disable);
         fileMenuPrint.setDisable(disable);
 
+        // If we have a non-null script
+
         if (script != null) {
 
             // Update the title bar
 
             setTitle("Gamma - " + script.getName());
 
-            // Determine if we must create a new watcher
+            // Decide if we have a new script file
 
-            if (watcherThread == null || !watcher.hasSameFiles(script, dependentFiles)) {
+            boolean isNewScript = !script.equals(this.script);
+
+            // Determine if we must create a new watcher. It's possible to call setScript()
+            // with the same set of files
+
+            if (watcherThread == null || isNewScript || !watcher.hasSameFiles(script, dependentFiles)) {
 
                 // Stop any existing watcher
 
@@ -260,7 +317,7 @@ public final class MainWindow extends Stage
                 // a new script file (requiring an immediate parse/display) or
                 // whether we are just updating the dependent files
 
-                watcher = new FileWatcher(script, dependentFiles, this, !script.equals(this.script));
+                watcher = new FileWatcher(script, dependentFiles, this, isNewScript);
                 watcherThread = new Thread(watcher);
                 watcherThread.start();
                 if (diagramEngine != null) {
@@ -268,30 +325,70 @@ public final class MainWindow extends Stage
                     diagramEngine = null;
                 }
             }
+
+            // Did we change the file? If so, try to open the editor on it
+
+            if (isNewScript) {
+                String editorCommand = PreferencesManager.getEditorCommand();
+                if (editorCommand.length() > 0) {
+                    editorCommand = editorCommand.replace("$F$", script.toString());
+                    try {
+                        Runtime.getRuntime().exec(editorCommand);
+                    }
+                    catch (IOException e) {
+                        showTextAreaAlert(
+                                Alert.AlertType.ERROR, "Editor Command Error", "Editor Command Error",
+                                "Error when trying to execute this editor command:\n\n" + editorCommand +"\n\n" +
+                                        "Error is:\n\n" +
+                                        e.getLocalizedMessage(),
+                                true);
+                    }
+                }
+            }
+
         }
 
-        // Did we change the file? If so, try to open the editor on it
+        // We don't really support going from a non-null file to a null file, but just in case...
 
-        if (script != null && !script.equals(this.script)) {
-            String editorCommand = PreferencesManager.getEditorCommand();
-            if (editorCommand.length() > 0) {
-                editorCommand = editorCommand.replace("$F$", script.toString());
-                try {
-                    Runtime.getRuntime().exec(editorCommand);
-                }
-                catch (IOException e) {
-                    showTextAreaAlert(
-                        Alert.AlertType.ERROR, "Editor Command Error", "Editor Command Error",
-                        "Error when trying to execute this editor command:\n\n" + editorCommand +"\n\n" +
-                        "Error is:\n\n" +
-                        e.getLocalizedMessage(),
-                        true);
-                }
+        else {
+            setTitle("Gamma");
+
+            if (watcherThread != null) {
+                watcher.stopThread();
             }
         }
 
+        // Save the new file and update the default directory for scripts
+
         this.script = script;
-        setDefaultDirectory(Gamma.FileType.SCRIPT, script);
+        if (script != null) setDefaultDirectory(Gamma.FileType.SCRIPT, script);
+    }
+
+    /**
+     * Get the screen on which this window was created.
+     *
+     * @return The screen on which this window was created.
+     */
+    public Screen getScreen()
+    {
+        ObservableList<Screen> screens = Screen.getScreensForRectangle(getX(), getY(), 1.0, 1.0);
+        if (screens.size() < 1) {
+            if (screen != null) return screen;
+            screen = Screen.getPrimary();
+            return screen;
+        }
+        screen = screens.get(0);
+        return screen;
+    }
+
+    /**
+     * Get the canvas. The canvas is the area in which diagrams are drawn.
+     *
+     * @return The canvas
+     */
+    public Canvas getCanvas()
+    {
+        return canvas;
     }
 
     /**
@@ -322,62 +419,6 @@ public final class MainWindow extends Stage
         // Disable display controls by default
 
         enableDisplayControls(false);
-    }
-
-    /**
-     * Return the canvas. The canvas is the area in which diagrams are drawn.
-     *
-     * @return The canvas
-     */
-    public Canvas getCanvas()
-    {
-        return canvas;
-    }
-
-    /**
-     * Get the default directory to use for various file dialogs.
-     *
-     * If we already have a default for the file type, use it. If we don't,
-     * but we have a script file and the request is for scripts, use the
-     * script's parent directory. Otherwise, use a global default.
-     *
-     * @param type The type of file whose default directory we want.
-     *
-     * @return The directory to use for various file dialogs.
-     */
-    public File getDefaultDirectory(Gamma.FileType type)
-    {
-        if (directoryDefaults[type.getValue()] == null) {
-
-            // If we want the default directory to use for a script and we have
-            // an associated file, use its parent directory
-
-            if (type == Gamma.FileType.SCRIPT && script != null) {
-                directoryDefaults[type.getValue()] = script.getParentFile();
-            }
-
-            // Otherwise, ask for the global default
-
-            else {
-                directoryDefaults[type.getValue()] = PreferencesManager.getDefaultDirectory(type);
-            }
-        }
-        return directoryDefaults[type.getValue()];
-    }
-
-    /**
-     * Set the default directory to use for the various file dialogs.
-     *
-     * @param type The type of file whose default directory we want.
-     * @param dir The default directory to use.
-     */
-    public void setDefaultDirectory(Gamma.FileType type, File dir)
-    {
-        if (dir == null) return;
-        if (!dir.exists()) return;
-        if (!dir.isDirectory()) dir = dir.getParentFile();
-
-        directoryDefaults[type.getValue()] = dir;
     }
 
     // **********************************************************************
@@ -435,11 +476,9 @@ public final class MainWindow extends Stage
         canvas = (Canvas)getScene().lookup("#diagramArea");
 
         // The scroll pane provides scrolling support for all the display
-        // controls and appears in the right side pane in the SplitPane
+        // controls and appears on the right side pane in the SplitPane
 
         scrollPane = (ScrollPane)getScene().lookup("#scrollPane");
-//        scrollPane.managedProperty().bind(scrollPane.visibleProperty());
-//        scrollPane.setVisible(false);
 
         // The display control area holds all the display controls
 
@@ -581,6 +620,9 @@ public final class MainWindow extends Stage
             SyntaxErrorDialog dialog = new SyntaxErrorDialog(this);
             dialog.displayError(e);
         }
+
+        // If our SyntaxError dialog fails, use a plain Alert dialog
+
         catch (Exception e2) {
             // e2.printStackTrace();
             showTextAreaAlert(Alert.AlertType.ERROR, "Syntax Error", "Syntax Error", e.getLocalizedMessage(), true);
@@ -598,6 +640,9 @@ public final class MainWindow extends Stage
             RuntimeErrorDialog dialog = new RuntimeErrorDialog(this);
             dialog.displayError(e);
         }
+
+        // If our RuntimeError dialog fails, use a plain Alert dialog
+
         catch (Exception e2) {
             // e2.printStackTrace();
             showTextAreaAlert(Alert.AlertType.ERROR, "Runtime Error", "Runtime Error", e.getLocalizedMessage(), true);
@@ -636,7 +681,7 @@ public final class MainWindow extends Stage
     }
 
     /**
-     * Add text to the HCode's print dialog.
+     * Add text to the HCode's Print dialog text area.
      *
      * @param str The text to add. A newline is added to the string.
      */
@@ -647,12 +692,18 @@ public final class MainWindow extends Stage
                 scriptPrintDialog = new ScriptPrintDialog(this);
             }
             catch (Exception e) {
-                showTextAreaAlert(Alert.AlertType.ERROR, "Error", "Error", "Failed to open a Script Print dialog: " + e.getLocalizedMessage(), true);
+                showTextAreaAlert(
+                        Alert.AlertType.ERROR, "Error", "Error",
+                        "Failed to open a Script Print dialog: " + e.getLocalizedMessage(), true);
             }
         }
         scriptPrintDialog.appendText(str + "\n");
         scriptPrintDialog.show();
     }
+
+    /**
+     * Clear the HCode's Print dialog text area.
+     */
 
     public void clearScriptPrintDialog()
     {
@@ -672,7 +723,7 @@ public final class MainWindow extends Stage
      */
     public void setCloseState(boolean enable)
     {
-        fileMenuClose.setDisable(!enable);
+        if (fileMenuClose != null) fileMenuClose.setDisable(!enable);
     }
 
     /**
@@ -689,6 +740,7 @@ public final class MainWindow extends Stage
         script = null;
 
         if (diagramEngine != null) diagramEngine.close();
+        diagramEngine = null;
         super.close();
     }
 

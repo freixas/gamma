@@ -27,11 +27,11 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 
 /**
- * FXML Controller class
+ * FXML Controller class for the About dialog.
  *
  * @author Antonio Freixas
  */
-public class AboutDialogController implements Initializable
+public final class AboutDialogController implements Initializable
 {
     @FXML
     private GridPane buttonBar;
@@ -43,11 +43,17 @@ public class AboutDialogController implements Initializable
     @Override
     public void initialize(URL url, ResourceBundle rb)
     {
+        // The version number is the only variable element of the About dialog
+
         versionLabel.setText("Version: " + Version.VERSION);
     }
 
+    /**
+     *  Close the dialog when the Close button is pressed.
+     */
     @FXML
-    void handleClose(ActionEvent event) {
+    private void handleClose(ActionEvent ignoredEvent)
+    {
         closeButton.getScene().getWindow().hide();
     }
 

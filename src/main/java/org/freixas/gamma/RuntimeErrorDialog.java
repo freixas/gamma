@@ -18,28 +18,52 @@ package org.freixas.gamma;
 
 import org.freixas.gamma.parser.TokenContext;
 
+import java.io.IOException;
+
 /**
+ * The RuntimeError dialog displays script runtime errors in a nice
+ * dialog that shows the location of the error along with some context.
  *
  * @author Antonio Freixas
  */
-public class RuntimeErrorDialog extends ScriptErrorDialog
+public final class RuntimeErrorDialog extends ScriptErrorDialog
 {
-
     // **********************************************************************
     // *
     // * Constructor
     // *
     // **********************************************************************
 
-    public RuntimeErrorDialog(MainWindow window) throws Exception
+    /**
+     * Create an RuntimeError dialog.
+     *
+     * @param window The parent window.
+     * @throws IOException If the FXML file fails to load.
+     */
+    public RuntimeErrorDialog(MainWindow window) throws IOException
     {
         super(window, "/RuntimeErrorDialog.fxml", "Runtime Error");
     }
 
+    // **********************************************************************
+    // *
+    // * Show
+    // *
+    // **********************************************************************
+
+    /**
+     * Display the RuntimeError dialog.
+     *
+     * @param e The GammaRuntime exception with all the error information.
+     */
     public void displayError(GammaRuntimeException e)
     {
         String message = e.getLocalizedMessage();
         TokenContext context = e.getTokenContext();
+
+        // We have two types of runtime exceptions: User problems
+        // (Execution exceptions) and programming errors (Programming exceptions).
+        // Set the appropriate type.
 
         if (e.getType() == GammaRuntimeException.Type.PROGRAMMING) {
             ((RuntimeErrorDialogController)getController()).setForProgrammingError();
@@ -47,8 +71,13 @@ public class RuntimeErrorDialog extends ScriptErrorDialog
 
         String html;
 
+        // For some errors, we might not have a context
+
         if (context != null) {
             String code = context.getCode();
+
+            // For runtime errors, we only know the starting line for the
+            // statement in which the error occurred
 
             int prevLineEnd = code.lastIndexOf("\n", context.getCharStart());
             String linesOK1 = prevLineEnd > -1 ? getLinesBeforeError(code, prevLineEnd) : null;
@@ -60,6 +89,8 @@ public class RuntimeErrorDialog extends ScriptErrorDialog
             int curLineEnd = nextLineStart > - 1 ? nextLineStart : code.length();
 
             String lineError = code.substring(curLineStart, curLineEnd);
+
+            // Create the message
 
             html =
                 HTML_PREFIX +
@@ -87,6 +118,8 @@ public class RuntimeErrorDialog extends ScriptErrorDialog
                 "<p>You should not have received this error. Please report it to gamma@freixas.org.</p>" : "") +
                 HTML_SUFFIX;
         }
+
+        // Display it
 
         ((RuntimeErrorDialogController)getController()).setHTML(html);
         showAndWait();

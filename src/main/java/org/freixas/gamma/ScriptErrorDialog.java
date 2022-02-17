@@ -21,14 +21,19 @@ import javafx.scene.Scene;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import java.io.IOException;
+
 /**
+ * This is the parent for the SyntaxError and RuntimeError dialogs.
  *
  * @author Antonio Freixas
  */
 public class ScriptErrorDialog extends Stage
 {
-
-    public static final String HTML_PREFIX =
+    /**
+     * The common HTML prefix code used by subclasses.
+     */
+    static protected final String HTML_PREFIX =
         "<!DOCTYPE html>" +
         "<html>" +
         "<head>" +
@@ -56,12 +61,17 @@ public class ScriptErrorDialog extends Stage
         "</head>" +
         "<body>";
 
-    public static final String HTML_SUFFIX =
+    /**
+     * The common HTML suffix  code used by subclasses.
+     */
+    static protected final String HTML_SUFFIX =
         "</body>" +
         "</html>";
 
+    /**
+     * The FXML controller.
+     */
     private final Object controller;
-
 
     // **********************************************************************
     // *
@@ -69,7 +79,16 @@ public class ScriptErrorDialog extends Stage
     // *
     // **********************************************************************
 
-    public ScriptErrorDialog(MainWindow window, String resourceName, String  title) throws Exception
+    /**
+     * Create a ScriptError dialog.
+     *
+     * @param window The parent window.
+     * @param resourceName The name of the FXML file for the dialog.
+     * @param title The dialog title.
+     *
+     * @throws IOException If the FXML file fails to load.
+     */
+    public ScriptErrorDialog(MainWindow window, String resourceName, String  title) throws IOException
     {
         // Load the view (FXML file) and controller. Get a reference to the controller.
 
@@ -85,10 +104,27 @@ public class ScriptErrorDialog extends Stage
         setTitle(title);
     }
 
-    public Object getController()
+    // **********************************************************************
+    // *
+    // * Getters
+    // *
+    // **********************************************************************
+
+    /**
+     * Get the controller loaded.
+     *
+     * @return The controller.
+     */
+    protected Object getController()
     {
         return controller;
     }
+
+    // **********************************************************************
+    // *
+    // * Utility Methods
+    // *
+    // **********************************************************************
 
     /**
      * Get two full lines before the line containing the error (if that many
@@ -106,17 +142,24 @@ public class ScriptErrorDialog extends Stage
         int lineCount = 0;
         int start = end;
 
+        // The start value begins at the end and moves backwards, collecting
+        // lines until there are enough
+
         while (start > -1) {
             char c = code.charAt(start);
             if (c == '\n') {
                 lineCount++;
+
+                // If we have more than one line, turn newlines into HTML
+                // line breaks
+
                 if (lineCount > 2) {
-                    return code.substring(start + 1, end + 1).replace("\n", "<br/>");
+                    return escapeHTML(code.substring(start + 1, end + 1)).replace("\n", "<br/>");
                 }
             }
             start--;
         }
-        return code.substring(0, end + 1).replace("\n", "<br/>");
+        return escapeHTML(code.substring(0, end + 1)).replace("\n", "<br/>");
     }
 
     /**
@@ -134,20 +177,42 @@ public class ScriptErrorDialog extends Stage
 
         int lineCount = 0;
 
+        // The end value begins at the start and advances, collecting lines
+        // until there are enough
+
         while (end < code.length() - 1) {
             char c = code.charAt(end);
             if (c == '\n') {
                 lineCount++;
                 if (lineCount > 3) {
-                    return code.substring(start, end).replace("\n", "<br/>");
+                    return escapeHTML(code.substring(start, end)).replace("\n", "<br/>");
                 }
             }
             end++;
         }
-        return code.substring(start, code.length()).replace("\n", "<br/>");
-
+        return escapeHTML(code.substring(start)).replace("\n", "<br/>");
     }
 
-
+    /**
+     * Given a string of text, escape any special characters that would interfere
+     * with turning the text into HTML.
+     *
+     * @param s The string.
+     *
+     * @return The escaped string.
+     */
+    protected String escapeHTML(String s)
+    {
+        StringBuilder out = new StringBuilder(Math.max(16, s.length()));
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (c > 127 || c == '"' || c == '\'' || c == '<' || c == '>' || c == '&') {
+                out.append("&#"); out.append((int) c); out.append(';');
+            }
+            else {
+                out.append(c);
+            }
+        } return out.toString();
+    }
 
 }

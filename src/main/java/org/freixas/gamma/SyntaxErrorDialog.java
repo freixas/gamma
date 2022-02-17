@@ -19,24 +19,44 @@ package org.freixas.gamma;
 import org.freixas.gamma.parser.ParseException;
 import org.freixas.gamma.parser.TokenContext;
 
+import java.io.IOException;
+
 /**
+ * The SyntaxError dialog displays script syntax errors in a nice
+ * dialog that shows the location of the error along with some context.
  *
  * @author Antonio Freixas
  */
-public class SyntaxErrorDialog extends ScriptErrorDialog
+public final class SyntaxErrorDialog extends ScriptErrorDialog
 {
-
     // **********************************************************************
     // *
     // * Constructor
     // *
     // **********************************************************************
 
-    public SyntaxErrorDialog(MainWindow window) throws Exception
+    /**
+     * Create an SyntaxError dialog.
+     *
+     * @param window The parent window.
+     * @throws IOException If the FXML file fails to load.
+     */
+    public SyntaxErrorDialog(MainWindow window) throws IOException
     {
         super(window, "/SyntaxErrorDialog.fxml", "Syntax Error");
     }
 
+    // **********************************************************************
+    // *
+    // * Show
+    // *
+    // **********************************************************************
+
+    /**
+     * Display the SyntaxError  dialog.
+     *
+     * @param e The Parse exception with all the error information.
+     */
     public void displayError(ParseException e)
     {
         TokenContext context = e.getToken().getContext();
@@ -46,6 +66,8 @@ public class SyntaxErrorDialog extends ScriptErrorDialog
         String linesOK1 = getLinesBeforeError(context.getCode(), context.getCharStart() - 1);
         String error = getError(context);
         String linesUnknown = getLinesAfterError(context.getCode(), context.getCharEnd() + 1);
+
+        // Create the message
 
         String html =
             HTML_PREFIX +
@@ -61,11 +83,20 @@ public class SyntaxErrorDialog extends ScriptErrorDialog
             "<p>Error: <span class='msg'>" + message + "</span></p>" +
             HTML_SUFFIX;
 
+        // Display it
+
         ((SyntaxErrorDialogController)getController()).setHTML(html);
         showAndWait();
     }
 
-    protected String getError(TokenContext context)
+    /**
+     * Get the error token, formatted properly for HTML.
+     *
+     * @param context The token context.
+     *
+     * @return The error token as a String.
+     */
+    private String getError(TokenContext context)
     {
         return context.getCode().substring(context.getCharStart(), context.getCharEnd() + 1).replace("\n", "<br/>");
     }

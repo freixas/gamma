@@ -33,23 +33,23 @@ import org.freixas.gamma.css.value.StyleException;
 import org.freixas.gamma.css.value.Stylesheet;
 import org.freixas.gamma.preferences.PreferencesManager;
 import java.io.IOException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.jar.Manifest;
 import javax.swing.JFileChooser;
 
 /**
  * The main application class.
  *
- * Anything functionality that is associated with the application and not
+ * Any functionality that is associated with the application and not
  * associated with just one window is included here. This includes the
  * functionality for creating a new main window.
  *
+ * This class keeps track of all the windows that exist and ensures that
+ * the state of various menu buttons are set properly.
+ *
  * @author Antonio Freixas
  */
-public class Gamma extends Application
+public final class Gamma extends Application
 {
     public enum FileType  {
         SCRIPT(0), IMAGE(1), VIDEO(2);
@@ -59,29 +59,50 @@ public class Gamma extends Application
         public int getValue() { return value; }
     }
 
+    /**
+     *  The location of the user's normal home directory. On Windows,  this is \Users\name\Documents, not
+     *  \Users\name (i.e. not the "user.home" system property).
+     */
     static public final File USER_DATA_HOME = new JFileChooser().getFileSystemView().getDefaultDirectory();
+
+    // Detect various platform types
 
     static public final boolean IS_WINDOWS;
     static public final boolean IS_MAC;
     static public final boolean IS_LINUX;
 
     static {
-        String osName = System.getProperty("os.name").toLowerCase();
+        final String osName = System.getProperty("os.name").toLowerCase();
         IS_WINDOWS = osName.contains("win");
         IS_MAC = osName.contains("mac");
         IS_LINUX = osName.contains("nix") || osName.contains("nux") || osName.contains("aix");
     }
 
+    /**
+     * The location of the jar file. We locate other files relative to this location.
+     */
     static public File RUNTIME_LOCATION;
+
+    /**
+     * The location of the help files.
+     */
     static public File HELP_LOCATION;
+
+    /**
+     * The location of the sample scripts.
+     */
     static public File SAMPLE_SCRIPTS_LOCATION;
 
-    private static int windowID = 1;
-    private static final ArrayList<MainWindow> windowList = new ArrayList<>();
+    /**
+     * Every window has an ID that locates it in the windowList. The windowID is the value
+     * we'll assign to the next window created.
+     */
+    static private int windowID = 1;
+    static private final ArrayList<MainWindow> windowList = new ArrayList<>();
 
     // **********************************************************************
     // *
-    // * Main
+    // * MAIN
     // *
     // **********************************************************************
 
@@ -104,9 +125,12 @@ public class Gamma extends Application
     @Override
     public void start(Stage primaryStage)
     {
-        String path = Gamma.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-        String decodedPath = URLDecoder.decode(path, StandardCharsets.UTF_8);
-        File runtimeLocation = new File(decodedPath);
+        final String path = Gamma.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        final String decodedPath = URLDecoder.decode(path, StandardCharsets.UTF_8);
+        final File runtimeLocation = new File(decodedPath);
+
+        // Determine the location of various files. The location varies depending on whether the program is
+        // being executed from an IDE or from a jar file
 
         if (decodedPath.endsWith("gamma/target/classes/")) {
             RUNTIME_LOCATION = runtimeLocation.getParentFile().getParentFile();
@@ -121,6 +145,8 @@ public class Gamma extends Application
             SAMPLE_SCRIPTS_LOCATION = new File(location + "/sample_scripts");
         }
 
+        // Process the command line options
+
         List<String> list = getParameters().getRaw();
         String[] args = new String[list.size()];
         for (int i = 0; i < list.size(); i++) {
@@ -129,7 +155,10 @@ public class Gamma extends Application
 
         CommandLineParser parser = new DefaultParser();
 
-        // create the Options
+        // Create the Options
+        //
+        // Other than the overriding the default stylesheet (set in the Preferences dialog), every other
+        // parameter is assumed to be a script file to open
 
         Options options = new Options();
         options.addOption("h", "help", false, "displays this help message");
@@ -201,15 +230,7 @@ public class Gamma extends Application
         primaryStage.close();
     }
 
-private void displayPackageDetails(final Package pkg)
-   {
-      final String name = pkg.getName();
-      System.out.println(name);
-      System.out.println("\tSpec Title/Version: " + pkg.getSpecificationTitle() + " " + pkg.getSpecificationVersion());
-      System.out.println("\tSpec Vendor: " +  pkg.getSpecificationVendor());
-      System.out.println("\tImplementation: " + pkg.getImplementationTitle() + " " + pkg.getImplementationVersion());
-      System.out.println("\tImplementation Vendor: " + pkg.getImplementationVendor());
-   }    // **********************************************************************
+    // **********************************************************************
     // *
     // * Window Management
     // *
@@ -227,7 +248,7 @@ private void displayPackageDetails(final Package pkg)
     public static void newMainWindow(File file, File[] defaultDirectories) throws Exception
     {
         // Go through all the existing windows and set the Close button's state
-        // appropriately
+        // appropriately -- Close is available only if there is more than one window
 
         for (MainWindow w : windowList) {
             w.setCloseState(windowList.size() + 1 > 1);
@@ -263,7 +284,7 @@ private void displayPackageDetails(final Package pkg)
 
         Platform.exit();
 
-        // Unfortunately, some threads are blocked and will not know to stop,
+        // Unfortunately, some threads may be blocked and will not know to stop,
         // so we have to resort to this to exit everything
 
         System.exit(0);

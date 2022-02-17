@@ -22,11 +22,22 @@ import java.io.InputStream;
 import java.util.Properties;
 
 /**
+ * Get the version number associated with this instance of the application. If
+ * we are not running from a jar file, the version is always "Development". If
+ * we are running from a jar file, the version comes from the version property
+ * in /META-INF/maven/org.freixas.gamma/gamma/pom.properties.
+ * <p>
+ * This class contains just one static variable, which is set by a static
+ * initializer. Version.VERSION provides access to the version number as a
+ * String.
  *
  * @author Antonio Freixas
  */
 public class Version
 {
+    /**
+     * Gamma's version number.
+     */
     static String VERSION;
 
     static {
@@ -41,7 +52,11 @@ public class Version
                 VERSION = properties.getProperty("version");
             }
         }
-        catch (IOException e) { }
+
+        // If we get any error trying to read the resource, the version
+        // defaults to "Development"
+
+        catch (IOException ignored) { }
     }
 
 }
