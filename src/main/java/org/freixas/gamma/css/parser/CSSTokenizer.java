@@ -26,22 +26,36 @@ import java.io.File;
 import java.util.ArrayList;
 
 /**
+ * Tokenize a stylesheet.
  *
  * @author Antonio Freixas
  */
-public class CSSTokenizer extends Tokenizer
+public final class CSSTokenizer extends Tokenizer
 {
+    // **********************************************************************
+    // *
+    // * Constructors
+    // *
+    // **********************************************************************
+
+    /**
+     * Create a stylesheet (CSS) tokenizer.
+     *
+     * @param file The file from which the stylesheet was read. This file is
+     * only used to store in a TokenContext. It could potentially be null.
+     * @param css The CSS code to tokenize.
+     */
     public CSSTokenizer(File file, String css)
     {
         super(file, css, "", "+,:;(){}");
     }
 
-    /**
-     * Tokenize the css.
-     *
-     * @return A list of Tokens.
-     * @throws ParseException When an invalid token is found.
-     */
+    // **********************************************************************
+    // *
+    // * Tokenize
+    // *
+    // **********************************************************************
+
     @Override
     public ArrayList<Token<?>> tokenize() throws ParseException
     {
@@ -149,12 +163,11 @@ public class CSSTokenizer extends Tokenizer
         context = captureContext();
         list.add(new Token<>(Token.Type.EOF, EOF, context));
 
-        debugTokens(list);
         return list;
     }
 
     /**
-     * Get a selector token. '
+     * Get a selector token.
      * <p>
      * When called, the current character should be the first character of the selector.
      * On return, current character will be the first character after the selector.

@@ -16,45 +16,50 @@
  */
 package org.freixas.gamma.css.parser;
 
-import org.freixas.gamma.parser.TokenContext;
-import org.freixas.gamma.css.value.Rule;
-import org.freixas.gamma.css.value.Selector;
-import org.freixas.gamma.css.value.StyleException;
-import org.freixas.gamma.css.value.StyleProperties;
-import org.freixas.gamma.css.value.StyleProperty;
-import org.freixas.gamma.css.value.StylePropertyDefinition;
-import org.freixas.gamma.css.value.Stylesheet;
+import org.freixas.gamma.css.value.*;
 import org.freixas.gamma.parser.ParseException;
 import org.freixas.gamma.parser.Token;
+import org.freixas.gamma.parser.TokenContext;
+
 import java.io.File;
 import java.util.ArrayList;
-import javafx.scene.paint.Color;
 
 /**
+ * This class handles parsing stylesheets.
  *
  * @author Antonio Freixas
  */
-@SuppressWarnings("ResultOfObjectAllocationIgnored")
-public class CSSParser
+public final class CSSParser
 {
-    private final File file;
-    private final String css;
-    private ArrayList<Token<?>> tokens;
+    private final File file;                // The file associated with the stylesheet
+    private final String css;               // The code to parse
+    private ArrayList<Token<?>> tokens;     // The tokens from tokenizing the code
 
     private final Token<?> dummyToken = new Token<>(Token.Type.DELIMITER, '~', new TokenContext(null, "", 0, 0, 0, 0));
 
-    private int tokenPtr;
-    private Token<?> curToken;
-    private Token<?> peek;
+    private int tokenPtr;                   // The pointer to the current token
+    private Token<?> curToken;              // The current token
+    private Token<?> peek;                  // The token after the current token
 
-    private Stylesheet stylesheet;
+    private Stylesheet stylesheet;          // The stylesheet produced by parsing
 
-    @SuppressWarnings("ResultOfObjectAllocationIgnored")
+    // **********************************************************************
+    // *
+    // * Constructors
+    // *
+    // **********************************************************************
+
     public CSSParser(File file, String css)
     {
         this.file = file;
         this.css = css;
     }
+
+    // **********************************************************************
+    // *
+    // * Getters
+    // *
+    // **********************************************************************
 
     /**
      * Get the tokens produced by parsing.
@@ -76,11 +81,17 @@ public class CSSParser
         return this.stylesheet;
     }
 
+    // **********************************************************************
+    // *
+    // * Parse
+    // *
+    // **********************************************************************
+
     /**
      * Parse the css.
      *
      * @return The stylesheet produced by parsing.
-     * @throws ParseException
+     * @throws ParseException When a syntax error occurs.
      */
     public Stylesheet parse() throws ParseException
     {
@@ -101,10 +112,29 @@ public class CSSParser
         return stylesheet;
     }
 
+    // **********************************************************************
+    // *
+    // * Recursive Descent Parsing
+    // *
+    // **********************************************************************
+
+    // Recursive descent parsing was chosen because it is simple, flexible,
+    // and maintainable. In the case of left variables, it allows us an infinite
+    // look-ahead that lets us avoid having keywords.
+    //
+    // To fully understand the methods here, one should have access to the
+    // syntax definition in the specification.
+
     // Generally, each parse method should assume it should start processing
     // the current token. Each parse statement should return with the current
     // token set to the token after whatever syntax it covers.
 
+    /**
+     * Parse the stylesheet.
+     *
+     * @return A stylesheet.
+     * @throws ParseException If a syntax error occurs.
+     */
     private Stylesheet parseCSS() throws ParseException
     {
         stylesheet = new Stylesheet();
@@ -117,6 +147,12 @@ public class CSSParser
         return stylesheet;
     }
 
+    /**
+     * Parse a rule.
+     *
+     * @return A stylesheet rule.
+     * @throws ParseException If a syntax error occurs.
+     */
     private Rule parseRule() throws ParseException
     {
         Rule rule = new Rule();
@@ -177,9 +213,15 @@ public class CSSParser
         return rule;
     }
 
+    /**
+     * Parse a style property.
+     *
+     * @return A style property.
+     * @throws ParseException If a syntax error occurs.
+     */
     private StyleProperty parseStyleProperty() throws ParseException
     {
-        // We should be point to the style property name or to a ';' if we
+        // We should be pointed to the style property name or to a ';' if we
         // have an empty property
 
         String name = null;
@@ -214,18 +256,12 @@ public class CSSParser
 
         try {
             if (isDelimiter() && getChar() == '-') {
-                Double value = parseFloat();
+                double value = parseFloat();
                 if (!Double.isNaN(value)) {
                     StylePropertyDefinition definition = StylePropertyDefinition.toDefinition(name);
                     return new StyleProperty(name, value, definition);
                 }
             }
-
-//            if (isName() && getString().equals("rgb")) {
-//                Color color = parseRGB();
-//                StylePropertyDefinition definition = StylePropertyDefinition.toDefinition(name);
-//                return new StyleProperty(name, color, definition);
-//            }
             else {
                 StyleProperty property = StyleProperties.createStyleProperty(name, curToken);
                 nextToken();
@@ -239,61 +275,12 @@ public class CSSParser
         return null;        // Should never be reached
     }
 
-//    private Color parseRGB() throws ParseException
-//    {
-//        // The current token is "rgb"
-//
-//        nextToken();
-//
-//        // Look for a '('
-//
-//        if (!isDelimiter() || getChar() != '(') {
-//            throwParseException("Expected '('");
-//        }
-//        nextToken();
-//
-//        // Look for 3 numbers
-//
-//        double colors[] = new double[3];
-//        for (int i = 0; i < 3; i++) {
-//            Double value = parseFloat();
-//            if (!Double.isNaN(value)) {
-//                colors[i] = Math.min(Math.max(0, value), 255.0);
-//            }
-//            else {
-//                throwParseException("Expected a number");
-//            }
-//            nextToken();
-//
-//            if (i < 2) {
-//                if (isDelimiter() && getChar() == ',') {
-//                    nextToken();
-//                }
-//                else {
-//                    throwParseException("Expected a ','");
-//                }
-//            }
-//        }
-//
-//        // Look for an optional 4th number
-//
-//        double alpha = 1.0;
-//
-//        if (isDelimiter() && getChar() == ',') {
-//            nextToken();
-//
-//            Double value = parseFloat();
-//            if (!Double.isNaN(value)) {
-//                alpha = Math.min(Math.max(0, getNumber()), 1.0);
-//            }
-//            else {
-//                throwParseException("Expected a number");
-//            }
-//        }
-//        return new Color(colors[0], colors[1], colors[2], alpha);
-//    }
-//
-    private double parseFloat() throws ParseException
+    /**
+     * Parse a floating point number.
+     *
+     * @return A floating point number.
+     */
+    private double parseFloat()
     {
         double sign = 1;
 
@@ -311,6 +298,10 @@ public class CSSParser
         return Double.NaN;
     }
 
+    /**
+     * Get the next token. The token is available in the global variable
+     * 'curToken'.
+     */
     private void nextToken()
     {
         // If the current token is EOF, we can't move forward.
@@ -332,29 +323,12 @@ public class CSSParser
         if (!isEOF()) peek = tokens.get(tokenPtr + 1);
     }
 
-    private void returnToken()
-    {
-        // When we return first token, we want to set the tokens to what they
-        // were before the last nextToken() call.
-        // The current token become the peek token.
-
-        peek = curToken;
-
-        // If we can't decrement the tokenPtr, point curToken to the dummy
-        // token
-
-        if (tokenPtr < 0) {
-            curToken = dummyToken;
-        }
-
-        // Otherwise, decrement the tokenPtr and get the token there
-
-        else {
-            tokenPtr--;
-            curToken = tokens.get(tokenPtr);
-        }
-    }
-
+    /**
+     * Set the current token to the token pointed to.
+     *
+     * @param ptr The pointer to the token we should now point to.
+     */
+    @SuppressWarnings("SameParameterValue")
     private void setCurrentTokenTo(int ptr)
     {
         if (ptr < 0) {
@@ -375,9 +349,9 @@ public class CSSParser
         }
     }
 
+    // Various shortcut methods
+
     private boolean isNumber() { return curToken.isNumber(); }
-    private boolean isColor() { return curToken.isColor(); }
-    private boolean isString() { return curToken.isString(); }
     private boolean isSelector() { return curToken.isSelector(); }
     private boolean isName() { return curToken.isName(); }
     private boolean isDelimiter() { return curToken.isDelimiter(); }
