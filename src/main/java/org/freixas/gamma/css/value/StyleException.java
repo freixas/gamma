@@ -18,15 +18,27 @@
 package org.freixas.gamma.css.value;
 
 /**
+ * Exceptions caused by stylesheet syntax errors.
  *
  * @author Antonio Freixas
  */
-@SuppressWarnings("serial")
-public class StyleException extends Exception
+
+public final class StyleException extends Exception
 {
-    public StyleException(String msg)
+    // **********************************************************************
+    // *
+    // * Constructors
+    // *
+    // **********************************************************************
+
+    /**
+     *  Create a Style exception. There is always an error message.
+     *
+     * @param message The error message.
+     */
+    public StyleException(String message)
     {
-        super(msg);
+        super(message);
     }
 
 }

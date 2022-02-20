@@ -21,39 +21,89 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
+ * A stylesheet Rule. A stylesheet contains a sequence of Rules, each of
+ * which consist of a set of selectors and a sequence of style properties.
  *
  * @author Antonio Freixas
  */
-public class Rule
+public final class Rule
 {
+    /**
+     * The list of selectors.
+     */
     private final ArrayList<Selector> selectors;
+
+    /**
+     * The list of style properties
+     */
     private final ArrayList<StyleProperty> properties;
 
+    // **********************************************************************
+    // *
+    // * Constructors
+    // *
+    // **********************************************************************
+
+    /**
+     * Create an empty rule.
+     */
     public Rule()
     {
         selectors = new ArrayList<>();
         properties = new ArrayList<>();
     }
 
+    // **********************************************************************
+    // *
+    // * Getters / Setters
+    // *
+    // **********************************************************************
+
+    /**
+     * Get the list of selectors.
+     *
+     * @return The list of selectors.
+     */
     public ArrayList<Selector> getSelectors()
     {
         return selectors;
     }
 
-    public ArrayList<StyleProperty> getProperties()
-    {
-        return properties;
-    }
-
+    /**
+     * Add a selector to the Rule.
+     *
+     * @param selector The selector to add.
+     */
     public void addSelector(Selector selector)
     {
         selectors.add(selector);
     }
 
+    /**
+     * Get the list of style properties.
+     *
+     * @return The list of style properties.
+     */
+    public ArrayList<StyleProperty> getProperties()
+    {
+        return properties;
+    }
+
+    /**
+     * Add a style property to the Rule.
+     *
+     * @param styleProperty The style property to add.
+     */
     public void addStyleProperty(StyleProperty styleProperty)
     {
         properties.add(styleProperty);
     }
+
+    // **********************************************************************
+    // *
+    // * Features
+    // *
+    // **********************************************************************
 
     /**
      * Get the score for the selector with the best match to a command's
@@ -78,9 +128,9 @@ public class Rule
         int score = -1;
 
         // System.err.println("Matching rule");
-        for (int i = 0; i < selectors.size(); i++) {
-            int selectorScore = selectors.get(i).getMatchScore(commandName, id, classes);
-            if (selectorScore > - 1) {
+        for (Selector selector : selectors) {
+            int selectorScore = selector.getMatchScore(commandName, id, classes);
+            if (selectorScore > -1) {
                 score = Math.max(score, selectorScore);
                 // System.err.println("Score " + selectorScore + " for " + selectors.get(i));
             }
@@ -97,9 +147,8 @@ public class Rule
      */
     public void setStyleStructValues(StyleStruct styles)
     {
-        Iterator<StyleProperty> iter = properties.iterator();
-        while (iter.hasNext()) {
-            iter.next().setStyleStructValues(styles);
+        for (StyleProperty property : properties) {
+            property.setStyleStructValues(styles);
         }
     }
 

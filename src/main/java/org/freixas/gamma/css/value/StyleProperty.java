@@ -21,11 +21,17 @@ import org.freixas.gamma.ProgrammingException;
 import java.lang.reflect.Field;
 
 /**
+ * A style property. A style property looks much like script properties: a name,
+ * followed by a colon and a value. Each Rule in a stylesheet contains a set
+ * of style properties.
  *
  * @author Antonio Freixas
  */
-public class StyleProperty
+public final class StyleProperty
 {
+    /**
+     * The types of style property values.
+     */
     public enum Type
     {
         FLOAT, STRING, COLOR, BOOLEAN,
@@ -35,10 +41,16 @@ public class StyleProperty
         FONT
     }
 
-    private final Type type;
-    private final Object value;
-    private final StylePropertyDefinition definition;
-    private final Field field;
+    private final Type type;                            // The type of this property
+    private final Object value;                         // The value of this property
+    private final StylePropertyDefinition definition;   // The associated definition
+    private final Field field;                          // The matching field in the StyleStruct
+
+    // **********************************************************************
+    // *
+    // * Constructors
+    // *
+    // **********************************************************************
 
     public StyleProperty(String name, Object value, StylePropertyDefinition definition) throws StyleException
     {
@@ -54,20 +66,47 @@ public class StyleProperty
         }
     }
 
+    // **********************************************************************
+    // *
+    // * Getters
+    // *
+    // **********************************************************************
+
+    /**
+     * Get the style property's value's type.
+     *
+     * @return The style property's value's type.
+     */
     public Type getType()
     {
         return type;
     }
 
+    /**
+     * Get the style property's value.
+     *
+     * @return The style property's value.
+     */
     public Object getValue()
     {
         return value;
     }
 
+    /**
+     * Get the style property definition associated with this style property.
+     *
+     * @return The style property definition associated with this style property.
+     */
     public StylePropertyDefinition getDefinition()
     {
         return definition;
     }
+
+    // **********************************************************************
+    // *
+    // * Features
+    // *
+    // **********************************************************************
 
     /**
      * Set one or more values in a StyleStruct. We set the value in the
@@ -78,9 +117,6 @@ public class StyleProperty
     public void setStyleStructValues(StyleStruct styles)
     {
         try {
-
-            // System.err.println("Applying " + this);
-
             // If we have a matching field in the StyleStruct, set it
 
             if (field != null) {
@@ -88,10 +124,10 @@ public class StyleProperty
                     field.set(styles, value);
                 }
                 else if (field.getType().getName().equals("double") && value.getClass() == Double.class) {
-                    field.set(styles, (double)value);
+                    field.set(styles, value);
                 }
                 else if (field.getType().getName().equals("boolean") && value.getClass() == Boolean.class) {
-                    field.set(styles, (boolean)value);
+                    field.set(styles, value);
                 }
                 else {
                     throw new ProgrammingException("StyleProperty.setStyleStructValue: Can't assign value to field");
@@ -111,7 +147,7 @@ public class StyleProperty
             // set the matching font to null
 
             StylePropertyDefinition fontDependency;
-            if ((fontDependency = definition.getfontDependency()) != null) {
+            if ((fontDependency = definition.getFontDependency()) != null) {
                 fontDependency.setStyleStructValue(styles, null);
             }
         }
@@ -119,6 +155,12 @@ public class StyleProperty
             throw new ProgrammingException("StyleProperty.setStyleStructValue", e);
         }
     }
+
+    // **********************************************************************
+    // *
+    // * Standard methods: toString, clone hashCode, equals
+    // *
+    // **********************************************************************
 
     @Override
     public String toString()

@@ -24,17 +24,40 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * A stylesheet Selector. Selectors are parts of a Rule. These can be matched to
+ * command names, IDs and classes to determine a match with a Rule.
  *
  * @author Antonio Freixas
  */
-public class Selector
+public final class Selector
 {
-    private static final Pattern COMMAND_NAME_PATTERN = Pattern.compile("^(display|frame|animation|axes|grid|hypergrid|event|line|worldline|path|label)$");
+    /**
+     * This pattern is used to identify all possible command names. If a new
+     * command is added, this string should be updated, so a future refactoring
+     * should probably try to centralize the location of all command names
+     */
+    static private final Pattern COMMAND_NAME_PATTERN = Pattern.compile("^(display|frame|animation|axes|grid|hypergrid|event|line|worldline|path|label)$");
 
-    private String commandName;
-    private String id;
-    private String[] classes;
+    private String commandName; // The command name in this selector
+    private String id;          // The ID in this selector
+    private String[] classes;   // The set of classes in this selector
 
+    // **********************************************************************
+    // *
+    // * Constructors
+    // *
+    // **********************************************************************
+
+    /**
+     *  Create a Selector from a name. The pattern for a selector is:
+     *  <p>
+     *  command-name # id . class1 . class2 ...
+     *  <p>
+     *  Each part is optional.
+     *
+     * @param name The selector name
+     * @throws StyleException If a syntax error occurs.
+     */
     public Selector(String name) throws StyleException
     {
         if (name == null || name.length() == 0) {
@@ -134,24 +157,49 @@ public class Selector
             classes = new String[cls.size()];
             classes = cls.toArray(classes);
         }
-
-        // System.err.println("Created " + this);
     }
 
+    // **********************************************************************
+    // *
+    // * Getters
+    // *
+    // **********************************************************************
+
+    /**
+     * Get the command name part of the selector. Null if none.
+     *
+     * @return The command name part of the selector.
+     */
     public String getCommandName()
     {
         return commandName;
     }
 
+    /**
+     * Get the id part of the selector. Null if none.
+     *
+     * @return The id part of the selector. Null if none.
+     */
     public String getId()
     {
         return id;
     }
 
+    /**
+     * Get the classes in the selector. Null if none.
+     *
+     * @return The classes in the selector.
+     */
     public String[] getClasses()
     {
         return classes;
     }
+
+    // **********************************************************************
+    // *
+    // * Features
+    // *
+    // **********************************************************************
 
     /**
      * Get the match score for this selector and a command's name, id, or
@@ -212,6 +260,12 @@ public class Selector
 
         return score;
     }
+
+    // **********************************************************************
+    // *
+    // * Standard methods: toString, clone hashCode, equals
+    // *
+    // **********************************************************************
 
     @Override
     public String toString()

@@ -31,9 +31,16 @@ import javafx.scene.text.Font;
  *
  * @author Antonio Freixas
  */
-public class StylePropertyDefinition
+public final class StylePropertyDefinition
 {
+    /**
+     * Possible minimum values.
+     */
     public enum Min { NONE, EQ0, GT0 }
+
+    /**
+     * Possible maximum values.
+     */
     public enum Max { NONE, EQ1 }
 
     // **********************************************************************
@@ -42,12 +49,21 @@ public class StylePropertyDefinition
     // *
     // **********************************************************************
 
-    static final HashMap<String, Field> fieldMap = new HashMap<>();
+    /**
+     * A map of property names to definitions.
+     */
     static final HashMap<String, StylePropertyDefinition> defMap = new HashMap<>();
+
+    /**
+     * The Fields in a StyleStruct
+     */
     static final Field[] fields;
 
+    /**
+     * A map of field names to Fields.
+     */
+    static final HashMap<String, Field> fieldMap = new HashMap<>();
     static {
-
         // Put all the fields in the StyleStruct into a HashMap
 
         fields = StyleStruct.class.getFields();
@@ -154,20 +170,20 @@ public class StylePropertyDefinition
     static final StylePropertyDefinition font = new StylePropertyDefinition("?font", fieldMap.get("font"), StyleProperty.Type.FONT, fontDep);
 
     static {
-        xTickFontFamily.setfontDependency(xTickFont);
-        xTickFontWeight.setfontDependency(xTickFont);
-        xTickFontStyle.setfontDependency(xTickFont);
-        xTickFontSize.setfontDependency(xTickFont);
+        xTickFontFamily.setFontDependency(xTickFont);
+        xTickFontWeight.setFontDependency(xTickFont);
+        xTickFontStyle.setFontDependency(xTickFont);
+        xTickFontSize.setFontDependency(xTickFont);
 
-        tTickFontFamily.setfontDependency(tTickFont);
-        tTickFontWeight.setfontDependency(tTickFont);
-        tTickFontStyle.setfontDependency(tTickFont);
-        tTickFontSize.setfontDependency(tTickFont);
+        tTickFontFamily.setFontDependency(tTickFont);
+        tTickFontWeight.setFontDependency(tTickFont);
+        tTickFontStyle.setFontDependency(tTickFont);
+        tTickFontSize.setFontDependency(tTickFont);
 
-        fontFamily.setfontDependency(font);
-        fontWeight.setfontDependency(font);
-        fontStyle.setfontDependency(font);
-        fontSize.setfontDependency(font);
+        fontFamily.setFontDependency(font);
+        fontWeight.setFontDependency(font);
+        fontStyle.setFontDependency(font);
+        fontSize.setFontDependency(font);
     }
 
     // Text
@@ -329,13 +345,13 @@ public class StylePropertyDefinition
         defMap.put("event-shape", eventShape);
     }
 
-    private final String propName;
-    private final Field field;
-    private final StyleProperty.Type type;
-    private final Min min;
-    private final Max max;
-    private final StylePropertyDefinition[] dependencies;
-    private StylePropertyDefinition fDependency;
+    private final String propName;          // The property name
+    private final Field field;              // The associated Field in StyleStruct
+    private final StyleProperty.Type type;  // The property data type
+    private final Min min;                  // The minimum value
+    private final Max max;                  // The maximum value
+    private final StylePropertyDefinition[] dependencies;   // The dependent properties
+    private StylePropertyDefinition fDependency;            // The dependent font properties
 
     // **********************************************************************
     // *
@@ -343,12 +359,28 @@ public class StylePropertyDefinition
     // *
     // **********************************************************************
 
+    /**
+     * Create a StylePropertyDefinition. There are no minimums, maximums, or
+     * dependencies.
+     *
+     * @param propName The property name.
+     * @param field The associated Field in StyleStruct.
+     * @param type The property's value's data type.
+     */
     public StylePropertyDefinition(
         String propName, Field field, StyleProperty.Type type)
     {
         this(propName, field, type, Min.NONE, Max.NONE, null);
     }
 
+    /**
+     * Create a StylePropertyDefinition. There are no minimums or maximums.
+     *
+     * @param propName The property name.
+     * @param field The associated Field in StyleStruct.
+     * @param type The property's value's data type.
+     * @param dependencies The dependent properties.
+     */
     public StylePropertyDefinition(
         String propName, Field field, StyleProperty.Type type,
         StylePropertyDefinition[] dependencies)
@@ -356,18 +388,44 @@ public class StylePropertyDefinition
         this(propName, field, type, Min.NONE, Max.NONE, dependencies);
     }
 
+    /**
+     * Create a StylePropertyDefinition. There are no maximum or dependencies.
+     *
+     * @param propName The property name.
+     * @param field The associated Field in StyleStruct.
+     * @param type The property's value's data type.
+     * @param min The minimum value.
+     */
     public StylePropertyDefinition(
         String propName, Field field, StyleProperty.Type type, Min min)
     {
         this(propName, field, type, min, Max.NONE, null);
     }
 
+    /**
+     * Create a StylePropertyDefinition. There are no dependencies.
+     *
+     * @param propName The property name.
+     * @param field The associated Field in StyleStruct.
+     * @param type The property's value's data type.
+     * @param min The minimum value.
+     * @param max The maximum value.
+     */
     public StylePropertyDefinition(
         String propName, Field field, StyleProperty.Type type, Min min, Max max)
     {
         this(propName, field, type, min, max, null);
     }
 
+    /**
+     * Create a StylePropertyDefinition. There are no dependencies.
+     *
+     * @param propName The property name.
+     * @param field The associated Field in StyleStruct.
+     * @param type The property's value's data type.
+     * @param min The minimum value.
+     * @param dependencies The dependent properties.
+     */
     public StylePropertyDefinition(
         String propName, Field field, StyleProperty.Type type, Min min,
         StylePropertyDefinition[] dependencies)
@@ -375,6 +433,16 @@ public class StylePropertyDefinition
         this(propName, field, type, min, Max.NONE, dependencies);
     }
 
+    /**
+     * Create a StylePropertyDefinition. There are no dependencies.
+     *
+     * @param propName The property name.
+     * @param field The associated Field in StyleStruct.
+     * @param type The property's value's data type.
+     * @param min The minimum value.
+     * @param max The maximum value.
+     * @param dependencies The dependent properties.
+     */
     public StylePropertyDefinition(
         String propName, Field field, StyleProperty.Type type, Min min, Max max,
         StylePropertyDefinition[] dependencies)
@@ -388,57 +456,102 @@ public class StylePropertyDefinition
         this.fDependency = null;
     }
 
-    public static StylePropertyDefinition toDefinition(String name)
-    {
-        return defMap.get(name);
-    }
-
     // **********************************************************************
     // *
     // * Getters
     // *
     // **********************************************************************
 
+    /**
+     * Get the property's value's type.
+     *
+     * @return The property's value's type.
+     */
     public StyleProperty.Type getType()
     {
         return type;
     }
 
+    /**
+     * Get the property name.
+     *
+     * @return The property name.
+     */
     public String getPropName()
     {
         return propName;
     }
 
+    /**
+     * Get the associated Field in the StyleStruct.
+     *
+     * @return The associated Field in the StyleStruct.
+     */
     public Field getField()
     {
         return field;
     }
 
+    /**
+     * Get the minimum allowed value (might be NONE, meaning no minimum).
+     *
+     * @return The minimum allowed value (might be NONE, meaning no minimum).
+     */
     public Min getMin()
     {
         return min;
     }
 
+    /**
+     * Get the maximum allowed value (might be NONE, meaning no maximum).
+     *
+     * @return The maximum allowed value (might be NONE, meaning no maximum).
+     */
     public Max getMax()
     {
         return max;
     }
 
+    /**
+     * Get a list of the dependent properties. When this property is set, all its
+     * dependent properties should also be set to the same value.
+     *
+     * @return A list of the dependent properties.
+     */
     public StylePropertyDefinition[] getDependencies()
     {
         return dependencies;
     }
 
-    public StylePropertyDefinition getfontDependency()
+    /**
+     * Get the dependent font, if any. When this property is set (font name,
+     * size, posture, weight), its dependent font should be set.
+     *
+     * @return The dependent font, if any (null, if none).
+     */
+    public StylePropertyDefinition getFontDependency()
     {
         return fDependency;
     }
 
-    public void setfontDependency(StylePropertyDefinition fDependency)
+    /**
+     * Set the dependent font, if any. When this property is set (font name,
+     * size, posture, weight), its dependent font should be set.
+     *
+     * @param fDependency  The dependent font, if any.
+     */
+     public void setFontDependency(StylePropertyDefinition fDependency)
     {
         this.fDependency = fDependency;
     }
 
+    /**
+     * Set the Field in the StyleStruct associated with this property to the
+     * given value. If we have dependent values, set them as well.
+     *
+     * @param styles The StyleStruct whose Field(s) we will set.
+     * @param value The value to set.
+     */
     public void setStyleStructValue(StyleStruct styles, Object value)
     {
         try {
@@ -450,10 +563,10 @@ public class StylePropertyDefinition
                     field.set(styles, value);
                 }
                 else if (field.getType().getName().equals("double") && value.getClass() == Double.class) {
-                    field.set(styles, (double)value);
+                    field.set(styles, value);
                 }
                 else if (field.getType().getName().equals("boolean") && value.getClass() == Boolean.class) {
-                    field.set(styles, (boolean)value);
+                    field.set(styles, value);
                 }
                 else {
                     throw new ProgrammingException("StylePropertyDefinition.setStyleStructValue: Can't assign value to field");
@@ -471,6 +584,18 @@ public class StylePropertyDefinition
         catch (IllegalArgumentException | IllegalAccessException e) {
             throw new ProgrammingException("StylePropertyDefinition.setStyleStructValue", e);
         }
+    }
+
+    /**
+     * Convert a property name to a definition.
+     *
+     * @param name The property name.
+     *
+     * @return The property definition or null if none.
+     */
+    static public StylePropertyDefinition toDefinition(String name)
+    {
+        return defMap.get(name);
     }
 
     /**

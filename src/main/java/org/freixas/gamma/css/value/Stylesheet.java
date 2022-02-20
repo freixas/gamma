@@ -30,13 +30,25 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- *
+ * The stylesheet, a list of Rules, each containing selectors and style properties,
+ * that are matched with script commands to define the appearance of the things
+ * that are drawn in the diagram.
+ * <p>
+ * Stylesheets are modelled after CSS (Cascading Style Sheets) from HTML.
+ * 
  * @author Antonio Freixas
  */
-public class Stylesheet
+public final class Stylesheet
 {
+    /**
+     * The default stylesheet (as a string), the stylesheet with the lowest precedence.
+     */
     static final String DEFAULT_STYLESHEET_STRING =
         "grid { color: #CCC; } hypergrid { color: #3D3; } worldline { color: #00F; } axes { font-size: 14; tick-font-size: 10; }";
+
+    /**
+     * The default stylesheet (as a Stylesheet), the stylesheet with the lowest precedence.
+     */
     static public Stylesheet DEFAULT_STYLESHEET;
     static {
         try {
@@ -44,14 +56,28 @@ public class Stylesheet
         }
         catch (ParseException ignored) { }
     }
+
+    /**
+     * The user's default stylesheet, next in precedence to the default stylesheet.
+     */
     static public Stylesheet USER_STYLESHEET = null;
 
-    private static final Comparator<Pair<Integer, Rule>> scoreComparator = Comparator.comparingInt(Pair::getKey);
+    // Used to compare match scores
 
-    private static final Pattern ID_PATTERN = Pattern.compile("^[-a-zA-Z_][-a-zA-Z_0-9]*$");
-    private static final Pattern CLASS_PATTERN = Pattern.compile("^([-a-zA-Z_][-a-zA-Z_0-9]*)(\\s*,\\s*[-a-zA-Z_][-a-zA-Z_0-9]*)*$");
+    static private final Comparator<Pair<Integer, Rule>> scoreComparator = Comparator.comparingInt(Pair::getKey);
+
+    // Patterns used to match stylesheet IDs and classes
+
+    static private final Pattern ID_PATTERN = Pattern.compile("^[-a-zA-Z_][-a-zA-Z_0-9]*$");
+    static private final Pattern CLASS_PATTERN = Pattern.compile("^([-a-zA-Z_][-a-zA-Z_0-9]*)(\\s*,\\s*[-a-zA-Z_][-a-zA-Z_0-9]*)*$");
+
+    // A stylesheet is a list of Rules.
 
     private final ArrayList<Rule> rules;
+
+    // When a stylesheet is matched to a command, we wind up with another
+    // stylesheet. We cache and re-use these stylesheets when we can.
+
     private boolean cacheEnabled;
     private HashMap<String, StyleStruct>styleStructCache;
     private final HashMap<String, Stylesheet>stylesheetCache;
@@ -62,6 +88,9 @@ public class Stylesheet
     // *
     // **********************************************************************
 
+    /**
+     * Create a new, empty stylesheet.
+     */
     public Stylesheet()
     {
         rules = new ArrayList<>();
@@ -136,6 +165,11 @@ public class Stylesheet
         return cacheEnabled;
     }
 
+    /**
+     * Enable or disable the cache.
+     *
+     * @param cacheEnabled If true, the cache is enabled.
+     */
     public void setCacheEnabled(boolean cacheEnabled)
     {
         this.cacheEnabled = cacheEnabled;
@@ -150,6 +184,11 @@ public class Stylesheet
     // *
     // **********************************************************************
 
+    /**
+     * Add a Rule to the stylesheet.
+     *
+     * @param rule The Rule to add.
+     */
     public void addRule(Rule rule)
     {
         rules.add(rule);
@@ -197,7 +236,6 @@ public class Stylesheet
      *
      * @return The created StyleStruct
      */
-    @SuppressWarnings("null")
     public StyleStruct createStyleStruct(File file, String commandName, String id, String cls, String style)
     {
         // We have two caches:
