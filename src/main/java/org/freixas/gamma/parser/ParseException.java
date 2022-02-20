@@ -17,20 +17,43 @@
 package org.freixas.gamma.parser;
 
 /**
+ * Exceptions causes by syntax errors.
  *
  * @author Antonio Freixas
  */
-@SuppressWarnings("serial")
-public class ParseException extends Exception
+public final class ParseException extends Exception
 {
     private final Token<?> token;
 
+    // **********************************************************************
+    // *
+    // * Constructors
+    // *
+    // **********************************************************************
+
+    /**
+     *  Create a Parse exception. There is always an error message.
+     *
+     * @param token The token at which the error was found.
+     * @param message The error message.
+     */
     public ParseException(Token<?> token, String message)
     {
         super(message);
         this.token = token;
     }
 
+    // **********************************************************************
+    // *
+    // * Getters
+    // *
+    // **********************************************************************
+
+    /**
+     * Get the token associated with this exception.
+     *
+     * @return The token associated with this exception.
+     */
     public Token<?> getToken()
     {
         return token;

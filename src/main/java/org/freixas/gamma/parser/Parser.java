@@ -36,26 +36,83 @@ import java.util.Stack;
 import javafx.util.Pair;
 
 /**
+ * This class handles parsing scripts.
  *
  * @author Antonio Freixas
  */
-@SuppressWarnings("ResultOfObjectAllocationIgnored")
-public class Parser
+public final class Parser
 {
-    class Op
-    {
-        static private boolean initialized = false;
+    // **********************************************************************
+    // *
+    // * Inner Class Op
+    // *
+    // **********************************************************************
 
-        final String operator;
-        final boolean isLeftAssoc;
-        final boolean isBinary;
-        final int precedence;
+    /**
+     * This class is used to determine the precedence and associativity of the
+     * various operators.
+     *
+     * @param operator The characters that make up the operator.
+     * @param isLeftAssoc True if the operator is left associative, false if the
+     * operator is right associative.
+     * @param isBinary True if this is a binary operator, false if it is a
+     * unary operator.
+     * @param precedence The precedence of the operator. Lower values have
+     * higher precedence.
+     */
+    private record Op(String operator, boolean isLeftAssoc, boolean isBinary, int precedence)
+    {
+        static {
+            new Op("<-", true, true, 8);
+            new Op("->", true, true, 8);
+
+            new Op("||", true, true, 9);
+            new Op("&&", true, true, 10);
+
+            new Op("==", true, true, 11);
+            new Op("!=", true, true, 11);
+
+            new Op("<", true, true, 12);
+            new Op(">", true, true, 12);
+            new Op("<=", true, true, 12);
+            new Op(">=", true, true, 12);
+
+            new Op("+", true, true, 13);
+            new Op("-", true, true, 13);
+
+            new Op("*", true, true, 14);
+            new Op("/", true, true, 14);
+            new Op("%", true, true, 14);
+
+            new Op("^", false, true, 15);
+
+            new Op("!", false, false, 16);
+            new Op("+", false, false, 16);
+            new Op("-", false, false, 16);
+
+            new Op(".", true, true, 20);
+
+            new Op("(", false, true, 21);
+            new Op("FUNC", true, true, 1000); // Used for function names
+        }
+
+        // Binary and unary operators are placed in separate tables
 
         static HashMap<String, Op> binary = new HashMap<>();
         static HashMap<String, Op> unary = new HashMap<>();
 
-        @SuppressWarnings("LeakingThisInConstructor")
-        Op(String operator, boolean isLeftAssoc, boolean isBinary, int precedence)
+        /**
+         * Create an operator.
+         *
+         * @param operator The characters that make up the operator.
+         * @param isLeftAssoc True if the operator is left associative, false if the
+         * operator is right associative.
+         * @param isBinary True if this is a binary operator, false if it is a
+         * unary operator.
+         * @param precedence The precedence of the operator. Lower values have
+         * higher precedence.
+         */
+        private Op(String operator, boolean isLeftAssoc, boolean isBinary, int precedence)
         {
             this.operator = operator;
             this.isLeftAssoc = isLeftAssoc;
@@ -71,18 +128,16 @@ public class Parser
             else {
                 unary.put(operator, this);
             }
-
-            initialized = true;
         }
 
         /**
-         * A factory method for creating operators. Given an operator string,
-         * it finds and returns a matching operator.
+         * A factory method for creating operators. Given an operator string, it
+         * finds and returns a matching operator.
          *
          * @param operator The operator character string.
          * @param isBinary True if the operator is binary, false if it's unary.
          *
-         * @return
+         * @return The matching operator.
          */
         static Op find(String operator, boolean isBinary)
         {
@@ -99,45 +154,60 @@ public class Parser
             return result;
         }
 
-        /**
-         * Return true if at least one Op has been created.
-         *
-         * @return True if at least one Op has been created
-         */
-        static boolean isInitialized()
-        {
-            return initialized;
-        }
-
         @Override
         public String toString()
         {
             return "Op{" + "operator=" + operator + '}';
         }
+
     }
 
-    class OpToken<T> extends Token<T>
+    // **********************************************************************
+    // *
+    // * Inner Class OpToken
+    // *
+    // **********************************************************************
+
+    static private final class OpToken<T> extends Token<T>
     {
         private final Token<T> token;
         private final Op op;
-        private int id;
+        private int labelId;
 
+        /**
+         *  Create an OpToken. This class turns an operator (Op) into a Token.
+         *
+         * @param token The token.
+         * @param op The operator.
+         */
         OpToken(Token<T> token, Op op)
         {
             super(token.getType(), token.getValue(), token.getContext());
             this.token = token;
             this.op = op;
-            this.id = -1;
+            this.labelId = -1;
         }
 
-        public void setId(int id)
+        /**
+         *  Set the operator's ID. Some operators need to jump to a label and
+         *  the ID identifies which label they are associated with.
+         *
+         * @param id The operator's ID.
+         */
+        public void setLabelId(int id)
         {
-            this.id = id;
+            this.labelId = id;
         }
 
-        public int getId()
+        /**
+         * Get the operator's ID. Some operators need to jump to a label and the
+         * ID identifies which label they are associated with.
+         *
+         * @return The operator's ID.
+         */
+        public int getLabelId()
         {
-            return id;
+            return labelId;
         }
 
         @Override
@@ -148,71 +218,53 @@ public class Parser
 
     }
 
-    private final File file;
-    private final String script;
-    private ArrayList<Token<?>> tokens;
-    private LinkedList<Object> hCodes;
-    private Stylesheet stylesheet;
-    private ArrayList<File> dependentFiles;
+    // **********************************************************************
+    // *
+    // * Main Class
+    // *
+    // **********************************************************************
 
-    private boolean animationStatementIsPresent;
-    private boolean animationVariableIsPresent;
-    private boolean displayVariableIsPresent;
+    private final File file;                // The file associated with the script
+    private final String script;            // The code to parse
+    private ArrayList<Token<?>> tokens;     // The tokens from tokenizing the code
+    private LinkedList<Object> hCodes;      // The h-codes produced by parsing
+    private Stylesheet stylesheet;          // The final stylesheet
+    private ArrayList<File> dependentFiles; // A list of all dependent files
 
-    private int labelId;
+    private boolean animationStatementIsPresent;    // True if an animation statement is found
+    private boolean animationVariableIsPresent;     // True if an animation variable is present
+    private boolean displayVariableIsPresent;       // True if a display variable is present
+
+    private int labelId;                    // Used to identify jump destinations
     private LinkedList<Pair<Label, Label>> loopLabels;
 
-    private SetStatement setStatement;
+    private SetStatement setStatement;      // The set statement parsed
 
     private final Token<?> dummyToken = new Token<>(Token.Type.DELIMITER, '~', new TokenContext(null, "", 0, 0, 0, 0));
 
-    private int tokenPtr;
-    private Token<?> curToken;
-    private Token<?> peek;
+    private int tokenPtr;                   // The pointer to the current token
+    private Token<?> curToken;              // The current token
+    private Token<?> peek;                  // The token after the current token
 
-    @SuppressWarnings("ResultOfObjectAllocationIgnored")
+    /**
+     * Create a parser.
+     *
+     * @param file The file from which the code was read. This file is only
+     * used to store in a TokenContext. It could potentially be null.
+     * @param script The script code.
+     */
     public Parser(File file, String script)
     {
         this.file = file;
         this.script = script;
         this.hCodes = new LinkedList<>();
-
-        // We only need to initialize the opcode tables once.
-
-        if (!Op.isInitialized()) {
-            new Op("<-", true,  true,  8);
-            new Op("->", true,  true,  8);
-
-            new Op("||", true,  true,  9);
-            new Op("&&", true,  true,  10);
-
-            new Op("==", true,  true,  11);
-            new Op("!=", true,  true,  11);
-
-            new Op("<",  true,  true,  12);
-            new Op(">",  true,  true,  12);
-            new Op("<=", true,  true,  12);
-            new Op(">=", true,  true,  12);
-
-            new Op("+",  true,  true,  13);
-            new Op("-",  true,  true,  13);
-
-            new Op("*",  true,  true,  14);
-            new Op("/",  true,  true,  14);
-            new Op("%",  true,  true,  14);
-
-            new Op("^",  false, true,  15);
-
-            new Op("!",  false, false, 16);
-            new Op("+",  false, false, 16);
-            new Op("-",  false, false, 16);
-
-            new Op(".",  true,  true,  20);
-
-            new Op("(",  false, true,  21);
-            new Op("FUNC",  true,  true,  1000); // Used for function names
-        }
     }
+
+    // **********************************************************************
+    // *
+    // * Getters
+    // *
+    // **********************************************************************
 
     /**
      * Get the tokens produced by parsing.
@@ -225,9 +277,9 @@ public class Parser
     }
 
     /**
-     * Get the hCodes produced by parsing.
+     * Get the h-codes produced by parsing.
      *
-     * @return The hCodes produced by parsing.
+     * @return The h-codes produced by parsing.
      */
     public LinkedList<Object> getHCodes()
     {
@@ -265,25 +317,48 @@ public class Parser
         return setStatement;
     }
 
+    /**
+     * Get the final stylesheet for the script.
+     *
+     * @return The final stylesheet for the script.
+     */
     public Stylesheet getStylesheet()
     {
         return stylesheet;
     }
 
+    /**
+     * Get the file associated with the script. It may be null.
+     *
+     * @return The file associated with the script.
+     */
     public File getFile()
     {
         return file;
     }
 
+    /**
+     * Get a list of all the dependent files. These are files referred to by
+     * include or stylesheet statements.
+     *
+     * @return A list of all the dependent files.
+     */
     public ArrayList<File> getDependentFiles()
     {
         return dependentFiles;
     }
 
+    // **********************************************************************
+    // *
+    // * Parse
+    // *
+    // **********************************************************************
+
     /**
-     * Parse the script
-     * @return
-     * @throws ParseException
+     * Parse the script.
+     *
+     * @return A linked list of h-codes.
+     * @throws ParseException If a syntax error occurs.
      */
     public LinkedList<Object> parse() throws ParseException
     {
@@ -293,33 +368,64 @@ public class Parser
         stylesheet = new Stylesheet();
         this.dependentFiles = new ArrayList<>();
 
+        labelId = 0;
         loopLabels = new LinkedList<>();
 
         setStatement = new SetStatement();
 
-        labelId = 0;
+        // Tokenize the script. We'll only deal with tokens
 
         Tokenizer tokenizer = new ScriptTokenizer(file, script);
         tokens = tokenizer.tokenize();
 
-        // tokenPtr points to the current token.
-        // When we start, it points one before the start of the token list.
+        // tokenPtr points to the current token. When we start, it points one
+        // before the start of the token list.
+        //
         // The current token is a dummy token.
-        // Peek is the token after the current one.
-        // It starts out as the a item on the token list.
+        //
+        // Peek is the token after the current one. It starts out as the first
+        // item on the token list.
+        //
         // The token list always has at least one item. The last token is
         // always the EOF token.
 
         setCurrentTokenTo(-1);
 
+        // We parse using recursive descent. Begin by parsing the program
+        // non-terminal
+
         hCodes = parseProgram();
+
+        // Return the h-codes
+
         return hCodes;
     }
+
+    // **********************************************************************
+    // *
+    // * Recursive Descent Parsing
+    // *
+    // **********************************************************************
+
+    // Recursive descent parsing was chosen because it is simple, flexible,
+    // and maintainable. In the case of left variables, it allows us an infinite
+    // look-ahead that lets us avoid having keywords.
+    //
+    // Expressions are the only thing not parsed with recursive descent.
+    //
+    // To fully understand the methods here, one should have access to the
+    // syntax definition in the specification.
 
     // Generally, each parse method should assume it should start processing
     // the current token. Each parse statement should return with the current
     // token set to the token after whatever syntax it covers.
 
+    /**
+     * Parse a program.
+     *
+     * @return A list of h-codes.
+     * @throws ParseException When a syntax error occurs.
+     */
     private LinkedList<Object> parseProgram() throws ParseException
     {
         LinkedList<Object> codes = new LinkedList<>();
@@ -332,9 +438,19 @@ public class Parser
         return codes;
     }
 
+    /**
+     * Parse a statementBlock.
+     *
+     * @return A list of h-codes.
+     * @throws ParseException When a syntax error occurs.
+     */
     private LinkedList<Object> parseStatementBlock() throws ParseException
     {
         LinkedList<Object> codes = new LinkedList<>();
+
+        // The things we check for are the things that terminate a
+        // statement block. The caller will receive the terminating token
+        // and gets to decide if it is legal or not
 
         while (!isEOF() && !(isDelimiter() && getChar() == '}')) {
 
@@ -359,6 +475,12 @@ public class Parser
         return codes;
     }
 
+    /**
+     * Parse a statement.
+     *
+     * @return A list of h-codes.
+     * @throws ParseException When a syntax error occurs.
+     */
     private LinkedList<Object> parseStatement() throws ParseException
     {
         LinkedList<Object> codes = new LinkedList<>();
@@ -368,7 +490,7 @@ public class Parser
         if (isName()) {
             codes.add(new LineInfoHCode(curToken));
 
-            // Look far ahead to see if we might have a plain assigment statement
+            // Look far ahead to see if we might have a plain assignment statement
 
             int curState = tokenPtr;
             boolean isLeftVariable;
@@ -420,7 +542,7 @@ public class Parser
             nextToken();
         }
 
-        // Neither: error
+        // None of the above: error
 
         else {
             throwParseException("Expected the start of a statement");
@@ -429,11 +551,16 @@ public class Parser
         return codes;
     }
 
+    /**
+     * Parse a semicolonStatement
+     *
+     * @return A list of h-codes.
+     * @throws ParseException When a syntax error occurs.
+     */
     private LinkedList<Object> parseSemicolonStatement(boolean leftVariableDetected) throws ParseException
     {
-        LinkedList<Object> codes = new LinkedList<>();
 
-        codes.addAll(parseSimpleStatement(leftVariableDetected));
+        LinkedList<Object> codes = new LinkedList<>(parseSimpleStatement(leftVariableDetected));
 
         if (!isDelimiter() || getChar() != ';') {
             throwParseException("Expected a ';'");
@@ -443,6 +570,12 @@ public class Parser
         return codes;
     }
 
+    /**
+     * Parse a simpleStatement.
+     *
+     * @return A list of h-codes.
+     * @throws ParseException When a syntax error occurs.
+     */
     private LinkedList<Object> parseSimpleStatement(boolean leftVariableDetected) throws ParseException
     {
         LinkedList<Object> codes = new LinkedList<>();
@@ -472,9 +605,14 @@ public class Parser
         return codes;
     }
 
+    /**
+     * Parse an ifStatement.
+     *
+     * @return A list of h-codes.
+     * @throws ParseException When a syntax error occurs.
+     */
     private LinkedList<Object> parseIfStatement() throws ParseException
     {
-        LinkedList<Object> codes = new LinkedList<>();
 
         // We start knowing only that the current token points to "if"
 
@@ -486,7 +624,7 @@ public class Parser
         // Add the conditional expression
 
         nextToken();
-        codes.addAll(parseExpr());
+        LinkedList<Object> codes = new LinkedList<>(parseExpr());
 
         if (!isDelimiter() || getChar() != ')') {
             throwParseException("Expected ')'");
@@ -526,19 +664,29 @@ public class Parser
             codes.addAll(elseCodes);
         }
 
-        // Finally we label the end of the entire if statement
+        // Finally, we label the end of the entire if statement
 
         codes.add(labelDone);
 
         return codes;
     }
 
+    /**
+     * Parse a whileStatement.
+     *
+     * @return A list of h-codes.
+     * @throws ParseException When a syntax error occurs.
+     */
     private LinkedList<Object> parseWhileStatement() throws ParseException
     {
         LinkedList<Object> codes = new LinkedList<>();
 
+        // These labels identify the test condition and the exit point
+
         Label labelStart = new Label(labelId++);
         Label labelDone = new Label(labelId++);
+
+        // loopLabels are used by 'continue' and 'break'
 
         loopLabels.push(new Pair<>(labelStart, labelDone));
 
@@ -563,6 +711,9 @@ public class Parser
 
         codes.add(new JumpIfFalseHCode(labelDone.getId()));
 
+        // Add the statement that forms the body of the while statement and
+        // jump back to the test
+
         codes.addAll(parseStatement());
         codes.add(new JumpHCode(labelStart.getId()));
         codes.add(labelDone);
@@ -572,13 +723,24 @@ public class Parser
         return codes;
     }
 
+    /**
+     * Parse a forStatement.
+     *
+     * @return A list of h-codes.
+     * @throws ParseException When a syntax error occurs.
+     */
     private LinkedList<Object> parseForStatement() throws ParseException
     {
         LinkedList<Object> codes = new LinkedList<>();
 
+        // These labels identify the start of the body of the for statement,
+        // the location of the increment and test, and the exit point
+
         Label labelStart = new Label(labelId++);
         Label labelContinue = new Label(labelId++);
         Label labelDone = new Label(labelId++);
+
+        // loopLabels are used by 'continue' and 'break'
 
         loopLabels.push(new Pair<>(labelContinue, labelDone));
 
@@ -629,10 +791,13 @@ public class Parser
         codes.addAll(initialValue);
         codes.add(new AssignHCode());
 
-        // Calculate and save the final and stepConstant values
+        // Calculate and save the final and step values
 
         String finalVariable = loopVariable + "$$final";
         String stepVariable = loopVariable + "$$step";
+
+        // We will do some optimization depending on whether the final
+        // value is a variable or a constant
 
         boolean finalIsConstant = (finalValue.size() == 1) && (finalValue.get(0) instanceof Double);
         Double finalConstant = 1.0;
@@ -646,6 +811,9 @@ public class Parser
             codes.add(new AssignHCode());
         }
 
+        // We will also do some optimization depending on whether the step
+        // value is a variable or a constant
+
         boolean stepIsConstant = (stepValue.size() == 1) && (stepValue.get(0) instanceof Double);
         Double stepConstant = 1.0;
         if (stepIsConstant) {
@@ -658,11 +826,13 @@ public class Parser
             codes.add(new AssignHCode());
         }
 
-        // Test: if (loopVariable$$step == 0) exit
+        // If the step variable is a constant and is 0, then we skip
+        // generating any code for the body of the 'for' statement
 
         if (!(stepIsConstant && (double)stepValue.get(0) == 0.0)) {
 
-            // Alternative code when the stepConstant value is not a constant
+            // Alternative code when the stepConstant value is not a constant.
+            // If the step size is 0, we jump over the body
 
             if (!stepIsConstant) {
                 codes.add(stepVariable);
@@ -678,6 +848,7 @@ public class Parser
             //          (loopVariable$$step < 0 && loopVariable < loopVariable$$final)) exit
 
             // If the step value is a constant, we only need to do one comparison
+            // in the h-code
 
             if (stepIsConstant) {
                 if (stepConstant > 0) {
@@ -713,6 +884,10 @@ public class Parser
                 Label label1 = new Label(labelId++);
                 Label label2 = new Label(labelId++);
                 Label label3 = new Label(labelId++);
+
+                // The code is a little involved because we need to handle
+                // things differently depending on whether the step size is
+                // less than or greater than 0
 
                 codes.add(stepVariable);
                 codes.add(new GenericHCode(HCode.Type.FETCH));
@@ -795,6 +970,12 @@ public class Parser
         return codes;
     }
 
+    /**
+     * Parse a breakStatement.
+     *
+     * @return A list of h-codes.
+     * @throws ParseException When a syntax error occurs.
+     */
     private LinkedList<Object> parseBreakStatement() throws ParseException
     {
         LinkedList<Object> codes = new LinkedList<>();
@@ -802,16 +983,31 @@ public class Parser
          // We start knowing that the current token is "break"
 
         nextToken();
+
+        // The jump points we need are in the loopLabels stack. If we don't
+        // find anything, we're not in a loop
+
         if (loopLabels.size() < 1) {
             throwParseException("The break statement is not inside a loop");
         }
+
+        // Grab the pair of labels at the top of the stack
+
         Pair<Label, Label> pair = loopLabels.get(0);
+
+        // The second value is the exit point of the loop
 
         codes.add(new JumpHCode(pair.getValue().getId()));
 
         return codes;
     }
 
+    /**
+     * Parse a continue statement.
+     *
+     * @return A list of h-codes.
+     * @throws ParseException When a syntax error occurs.
+     */
     private LinkedList<Object> parseContinueStatement() throws ParseException
     {
         LinkedList<Object> codes = new LinkedList<>();
@@ -819,16 +1015,32 @@ public class Parser
          // We start knowing that the current token is "break"
 
         nextToken();
+
+        // The jump points we need are in the loopLabels stack. If we don't
+        // find anything, we're not in a loop
+
         if (loopLabels.size() < 1) {
             throwParseException("The continue statement is not inside a loop");
         }
+
+        // Grab the pair of labels at the top of the stack
+
         Pair<Label, Label> pair = loopLabels.get(0);
+
+        // The first value (the key) is the point at which to continue the loop
 
         codes.add(new JumpHCode(pair.getKey().getId()));
 
         return codes;
     }
 
+    /**
+     * Parse an include statement. The associated file is read and tokenized.
+     * The tokens are inserted at the current position, and we continue from
+     * there.
+     *
+     * @throws ParseException When a syntax error occurs.
+     */
     private void parseIncludeStatement() throws ParseException
     {
         // We start knowing that the current token is "include"
@@ -850,19 +1062,27 @@ public class Parser
         }
 
         try {
+            // Try to read the file
+
             String name = getString();
             File includeFile = new File(name);
             if (!includeFile.isAbsolute()) {
                 includeFile = new File(file.getParent(), name);
             }
             if (!includeFile.exists()) {
-                throwParseException("File '" + includeFile.toString() +"' does not exist.");
+                throwParseException("File '" + includeFile +"' does not exist.");
             }
             if (includeFile.isDirectory()) {
-                throwParseException("File '" + includeFile.toString() +"' is a directory.");
+                throwParseException("File '" + includeFile +"' is a directory.");
             }
             String includeScript = Files.readString(includeFile.toPath());
+
+            // Add it to the list of dependent files
+
             dependentFiles.add(includeFile);
+
+            // Tokenize it
+
             Tokenizer tokenizer = new ScriptTokenizer(includeFile, includeScript);
             ArrayList<Token<?>> includeTokens = tokenizer.tokenize();
 
@@ -890,7 +1110,13 @@ public class Parser
         }
     }
 
-    private LinkedList<Object> parseStylesheetStatement() throws ParseException
+    /**
+     * Parse a stylesheet. The stylesheet is appended to the master
+     * stylesheet.
+     *
+     * @throws ParseException When a syntax error occurs.
+     */
+    private void parseStylesheetStatement() throws ParseException
     {
         // We start knowing that the current token is "stylesheet"
 
@@ -904,7 +1130,7 @@ public class Parser
             nextToken();
         }
 
-        //The next token must be a string
+        // The next token must be a string
 
         String css = null;
         if (isString()) {
@@ -919,7 +1145,8 @@ public class Parser
             File stylesheetFile;
             Stylesheet sheet;
 
-            // If the stylesheet is external, read it
+            // If the stylesheet is external, read it and parse it into
+            // a stylesheet
 
             if (isExternal) {
                 stylesheetFile = new File(css);
@@ -933,6 +1160,8 @@ public class Parser
                 sheet = Stylesheet.createStylesheet(file, css);
             }
 
+            // Add the stylesheet to the master stylesheet
+
             stylesheet.addStylesheet(sheet);
         }
         catch (IOException e) {
@@ -941,10 +1170,15 @@ public class Parser
         catch (StyleException e) {
             throwParseException(e.getLocalizedMessage());
         }
-
-        return null;
     }
 
+    /**
+     * Parse a set statement. The global set statement is updated. If we have
+     * more than one set statement in the script, the master set statement will
+     * be updated with whatever settings we find here.
+     *
+     * @throws ParseException When a syntax error occurs.
+     */
     private void parseSetStatement() throws ParseException
     {
         // We start knowing that the current token is "set"
@@ -967,6 +1201,7 @@ public class Parser
             // Look for units
 
             switch (getString()) {
+
                 case "units" -> {
                     if (foundUnits) {
                         throwParseException("Units are set twice");
@@ -978,6 +1213,7 @@ public class Parser
                     nextToken();
                     foundUnits = true;
                 }
+
                 case "displayPrecision" -> {
                     if (foundDisplayPrecision) {
                         throwParseException("Display precision is set twice");
@@ -989,6 +1225,7 @@ public class Parser
                     nextToken();
                     foundDisplayPrecision = true;
                 }
+
                 case "printPrecision" -> {
                     if (foundPrintPrecision) {
                         throwParseException("Print precision is set twice");
@@ -1000,9 +1237,8 @@ public class Parser
                     nextToken();
                     foundPrintPrecision = true;
                 }
-                default -> {
-                    throwParseException("Expected 'units', 'displayPrecision', or 'printPrecision'");
-                }
+
+                default -> throwParseException("Expected 'units', 'displayPrecision', or 'printPrecision'");
             }
 
             // We need to find a comma before looking for other settings
@@ -1016,6 +1252,12 @@ public class Parser
         if (foundPrintPrecision) setStatement.setPrintPrecision(printPrecision);
     }
 
+    /**
+     * Parse a printStatement.
+     *
+     * @return A list of h-codes.
+     * @throws ParseException When a syntax error occurs.
+     */
     private LinkedList<Object> parsePrintStatement() throws ParseException
     {
         LinkedList<Object> codes = new LinkedList<>();
@@ -1039,29 +1281,40 @@ public class Parser
         return codes;
     }
 
+    /**
+     * Parse a plain assignment statement. Because we need to do an infinite
+     * lookahead to determine if we have an assignment statement. the left
+     * variable has already been parsed.
+     *
+     * @return A list of h-codes.
+     * @throws ParseException When a syntax error occurs.
+     */
     private LinkedList<Object> parseAssignmentStatement() throws ParseException
     {
-        LinkedList<Object> codes = new LinkedList<>();
-
         // We start knowing that the current token is '=' and that we've already
         // processed the left variable
 
         nextToken();
-        codes.addAll(parseExpr());
+        LinkedList<Object> codes = new LinkedList<>(parseExpr());
         codes.add(new AssignHCode());
 
         return codes;
     }
 
+    /**
+     * Parse an animation assignment statement.
+     *
+     * @return A list of h-codes.
+     * @throws ParseException When a syntax error occurs.
+     */
     private LinkedList<Object> parseAnimationAssignmentStatement() throws ParseException
     {
-        LinkedList<Object> codes = new LinkedList<>();
         Token<?> toToken = null;
 
         // We start knowing that the current token is "animate"
 
         nextToken();
-        codes.addAll(parseLeftVariable());
+        LinkedList<Object> codes = new LinkedList<>(parseLeftVariable());
 
         if (!isDelimiter() || getChar() != '=') {
             throwParseException("Expected '='");
@@ -1105,14 +1358,18 @@ public class Parser
         return codes;
     }
 
+    /**
+     * Parse a range assignment statement.
+     *
+     * @return A list of h-codes.
+     * @throws ParseException When a syntax error occurs.
+     */
     private LinkedList<Object> parseRangeAssignmentStatement() throws ParseException
     {
-        LinkedList<Object> codes = new LinkedList<>();
-
         // We start knowing that the current token is "range"
 
         nextToken();
-        codes.addAll(parseLeftVariable());
+        LinkedList<Object> codes = new LinkedList<>(parseLeftVariable());
 
         if (!isDelimiter() || getChar() != '=') {
             throwParseException("Expected '='");
@@ -1151,14 +1408,19 @@ public class Parser
         return codes;
     }
 
+    /**
+     * Parse a toggle assignment statement.
+     *
+     * @return A list of h-codes.
+     * @throws ParseException When a syntax error occurs.
+     */
     private LinkedList<Object> parseToggleAssignmentStatement() throws ParseException
     {
-        LinkedList<Object> codes = new LinkedList<>();
 
         // We start knowing that the current token is "toggle"
 
         nextToken();
-        codes.addAll(parseLeftVariable());
+        LinkedList<Object> codes = new LinkedList<>(parseLeftVariable());
 
         if (!isDelimiter() || getChar() != '=') {
             throwParseException("Expected '='");
@@ -1189,14 +1451,18 @@ public class Parser
         return codes;
     }
 
+    /**
+     * Parse a choice assignment statement.
+     *
+     * @return A list of h-codes.
+     * @throws ParseException When a syntax error occurs.
+     */
     private LinkedList<Object> parseChoiceAssignmentStatement() throws ParseException
     {
-        LinkedList<Object> codes = new LinkedList<>();
-
         // We start knowing that the current token is "choice"
 
         nextToken();
-        codes.addAll(parseLeftVariable());
+        LinkedList<Object> codes = new LinkedList<>(parseLeftVariable());
 
         if (!isDelimiter() || getChar() != '=') {
             throwParseException("Expected '='");
@@ -1213,8 +1479,7 @@ public class Parser
         }
 
         int numChoices = 1;
-        LinkedList<Object> choicesCodes = new LinkedList<>();
-        choicesCodes.addAll(parseExpr());
+        LinkedList<Object> choicesCodes = new LinkedList<>(parseExpr());
 
         while (isDelimiter() && getChar() == ',') {
             nextToken();
@@ -1253,6 +1518,12 @@ public class Parser
         return codes;
     }
 
+    /**
+     * Parse a commandStatement.
+     *
+     * @return A list of h-codes.
+     * @throws ParseException When a syntax error occurs.
+     */
     private LinkedList<Object> parseCommandStatement() throws ParseException
     {
         LinkedList<Object> codes = new LinkedList<>();
@@ -1278,30 +1549,18 @@ public class Parser
 
         nextToken();
 
-        // Some properties require an expression, some allow an expression, and
-        // some have neither requirement
+        // Some properties require an expression at the start, some allow an
+        // expression at the start, and some have neither requirement
 
         int propertyCount = 0;
         switch (name) {
-            case "frame" -> {
+            case "frame", "axes", "grid" -> {
                 if (!peekForProperty()) {
                     codes.addAll(parseDefaultCommandProperty("frame"));
                     propertyCount = 1;
                 }
             }
-            case "axes" -> {
-                if (!peekForProperty()) {
-                    codes.addAll(parseDefaultCommandProperty("frame"));
-                    propertyCount = 1;
-                }
-            }
-            case "grid" -> {
-                if (!peekForProperty()) {
-                    codes.addAll(parseDefaultCommandProperty("frame"));
-                    propertyCount = 1;
-                }
-            }
-            case "event" -> {
+            case "event", "label" -> {
                 codes.addAll(parseDefaultCommandProperty("location"));
                 propertyCount = 1;
             }
@@ -1315,10 +1574,6 @@ public class Parser
             }
             case "path" -> {
                 codes.addAll(parseDefaultCommandProperty("path"));
-                propertyCount = 1;
-            }
-            case "label" -> {
-                codes.addAll(parseDefaultCommandProperty("location"));
                 propertyCount = 1;
             }
 
@@ -1348,6 +1603,15 @@ public class Parser
             (isName() && peek.isDelimiter() && peek.getChar() == ':');
     }
 
+    /**
+     * Parse the default property for a command. By the time this method is
+     * called, we know that either this property is optional but exists, or is
+     * not optional and must exist.
+     *
+     * @param propName The name of the default property.
+     * @return A list of h-codes.
+     * @throws ParseException When a syntax error occurs.
+     */
     private LinkedList<Object> parseDefaultCommandProperty(String propName) throws ParseException
     {
         LinkedList<Object> codes = new LinkedList<>();
@@ -1362,6 +1626,12 @@ public class Parser
         return codes;
     }
 
+    /**
+     * Parse a leftVariable.
+     *
+     * @return A list of h-codes.
+     * @throws ParseException When a syntax error occurs.
+     */
     private LinkedList<Object> parseLeftVariable() throws ParseException
     {
         LinkedList<Object> codes = new LinkedList<>();
@@ -1401,6 +1671,13 @@ public class Parser
         }
     }
 
+    /**
+     * Parse a variable that is to the left of the "=" in an assignment
+     * statement. This is either a plain variable or an array variable.
+     *
+     * @return A list of h-codes.
+     * @throws ParseException When a syntax error occurs.
+     */
     private LinkedList<Object> parseVariable() throws ParseException
     {
         LinkedList<Object> codes = new LinkedList<>();
@@ -1449,6 +1726,12 @@ public class Parser
         return codes;
     }
 
+    /**
+     * Parse an object.
+     *
+     * @return A list of h-codes.
+     * @throws ParseException When a syntax error occurs.
+     */
     private LinkedList<Object> parseObject() throws ParseException
     {
         // We start knowing that the current token is "[" (this
@@ -1485,20 +1768,25 @@ public class Parser
         return null;
     }
 
+    /**
+     * Parse an observer object.
+     *
+     * @return A list of h-codes.
+     * @throws ParseException When a syntax error occurs.
+     */
     private LinkedList<Object> parseObserverObj() throws ParseException
     {
-        LinkedList<Object> codes = new LinkedList<>();
 
         // We start knowing that the current token points
         // to "observer"
 
         nextToken();
-        codes.addAll(parseWorldlineInitializer());
+        LinkedList<Object> codes = new LinkedList<>(parseWorldlineInitializer());
 
         // Worldline segments are optional
 
         if (isName() && (getString().equals("velocity") || getString().equals("acceleration"))) {
-            codes.addAll(parseWorldlineSegments());
+            codes.addAll(parseWorldlineSegmentList());
         }
         else {
             codes.add(1);     // Insert 0 count if none
@@ -1509,6 +1797,12 @@ public class Parser
         return codes;
     }
 
+    /**
+     * Parse a worldlineInitializer.
+     *
+     * @return A list of h-codes.
+     * @throws ParseException When a syntax error occurs.
+     */
     private LinkedList<Object> parseWorldlineInitializer() throws ParseException
     {
         LinkedList<Object> codes = new LinkedList<>();
@@ -1576,7 +1870,13 @@ public class Parser
        return codes;
     }
 
-    private LinkedList<Object> parseWorldlineSegments() throws ParseException
+    /**
+     * Parse a worldlineSegmentList.
+     *
+     * @return A list of h-codes.
+     * @throws ParseException When a syntax error occurs.
+     */
+    private LinkedList<Object> parseWorldlineSegmentList() throws ParseException
     {
         LinkedList<Object> codes = new LinkedList<>();
 
@@ -1593,11 +1893,17 @@ public class Parser
             }
         }
 
-        codes.add(count + 1); // Allow for worldline initializer
+        codes.add(count + 1);   // Allow for the worldline initializer
 
         return codes;
     }
 
+    /**
+     * Parse a worldlineSegment.
+     *
+     * @return A list of h-codes.
+     * @throws ParseException When a syntax error occurs.
+     */
     private LinkedList<Object> parseWorldlineSegment() throws ParseException
     {
         LinkedList<Object> codes = new LinkedList<>();
@@ -1673,6 +1979,12 @@ public class Parser
         return codes;
     }
 
+    /**
+     * Parse a frame object.
+     *
+     * @return A list of h-codes.
+     * @throws ParseException When a syntax error occurs.
+     */
     private LinkedList<Object> parseFrameObj() throws ParseException
     {
         LinkedList<Object> codes = new LinkedList<>();
@@ -1778,6 +2090,12 @@ public class Parser
         return codes;
     }
 
+    /**
+     * Parse a line object.
+     *
+     * @return A list of h-codes.
+     * @throws ParseException When a syntax error occurs.
+     */
     private LinkedList<Object> parseLineObj() throws ParseException
     {
         // We start knowing that the current token points
@@ -1809,6 +2127,12 @@ public class Parser
         return null;
     }
 
+    /**
+     * Parse an axis line object.
+     *
+     * @return A list of h-codes.
+     * @throws ParseException When a syntax error occurs.
+     */
     private LinkedList<Object> parseAxisLine() throws ParseException
     {
         LinkedList<Object> codes = new LinkedList<>();
@@ -1819,12 +2143,8 @@ public class Parser
         nextToken();
         if (isName()) {
             switch (getString()) {
-                case "x" -> {
-                    codes.add(Line.AxisType.X);
-                }
-                case "t" -> {
-                    codes.add(Line.AxisType.T);
-                }
+                case "x" -> codes.add(Line.AxisType.X);
+                case "t" -> codes.add(Line.AxisType.T);
                 default -> throwParseException("Expected 'x' or 't'");
             }
         }
@@ -1845,15 +2165,19 @@ public class Parser
         return codes;
     }
 
+    /**
+     * Parse an angle line object.
+     *
+     * @return A list of h-codes.
+     * @throws ParseException When a syntax error occurs.
+     */
     private LinkedList<Object> parseAngleLine() throws ParseException
     {
-        LinkedList<Object> codes = new LinkedList<>();
-
         // We start knowing that the current token points to
         // "angle"
 
         nextToken();
-        codes.addAll(parseExpr());
+        LinkedList<Object> codes = new LinkedList<>(parseExpr());
 
         if (isName() && getString().equals("through")) {
             nextToken();
@@ -1868,15 +2192,19 @@ public class Parser
         return codes;
     }
 
+    /**
+     * Parse an endpoint line object.
+     *
+     * @return A list of h-codes.
+     * @throws ParseException When a syntax error occurs.
+     */
     private LinkedList<Object> parseEndpointLine() throws ParseException
     {
-        LinkedList<Object> codes = new LinkedList<>();
-
         // We start knowing that the current token points to
         // "from"
 
         nextToken();
-        codes.addAll(parseExpr());
+        LinkedList<Object> codes = new LinkedList<>(parseExpr());
 
         if (isName() && getString().equals("to")) {
             nextToken();
@@ -1891,6 +2219,12 @@ public class Parser
         return codes;
     }
 
+    /**
+     * Parse a path object.
+     *
+     * @return A list of h-codes.
+     * @throws ParseException When a syntax error occurs.
+     */
     private LinkedList<Object> parsePathObj() throws ParseException
     {
         LinkedList<Object> codes = new LinkedList<>();
@@ -1911,6 +2245,12 @@ public class Parser
         return codes;
     }
 
+    /**
+     * Parse a bounds object.
+     *
+     * @return A list of h-codes.
+     * @throws ParseException When a syntax error occurs.
+     */
     private LinkedList<Object> parseBoundsObj() throws ParseException
     {
         LinkedList<Object> codes = new LinkedList<>();
@@ -1926,6 +2266,12 @@ public class Parser
         return codes;
     }
 
+    /**
+     * Parse an interval object.
+     *
+     * @return A list of h-codes.
+     * @throws ParseException When a syntax error occurs.
+     */
     private LinkedList<Object> parseIntervalObj() throws ParseException
     {
         LinkedList<Object> codes = new LinkedList<>();
@@ -1937,18 +2283,10 @@ public class Parser
 
         if (isName()) {
             switch (getString()) {
-                case "time" -> {
-                    codes.add(Interval.Type.T);
-                }
-                case "tau" -> {
-                    codes.add(Interval.Type.TAU);
-                }
-                case "distance" -> {
-                    codes.add(Interval.Type.D);
-                }
-                default -> {
-                    throwParseException("Expected 'time', 'tau' or 'distance'");
-                }
+                case "time" -> codes.add(Interval.Type.T);
+                case "tau" -> codes.add(Interval.Type.TAU);
+                case "distance" -> codes.add(Interval.Type.D);
+                default -> throwParseException("Expected 'time', 'tau' or 'distance'");
             }
         }
         else {
@@ -1970,6 +2308,12 @@ public class Parser
         return codes;
     }
 
+    /**
+     * Parse a propertyList.
+     *
+     * @return A list of h-codes.
+     * @throws ParseException When a syntax error occurs.
+     */
     private LinkedList<Object> parsePropertyList(int extraProperties) throws ParseException
     {
         LinkedList<Object> codes = new LinkedList<>();
@@ -1977,7 +2321,7 @@ public class Parser
         // We start knowing that the current token points
         // to the start of the property list
         //
-        // The property list can be empty. Otherwise, it can start with the a
+        // The property list can be empty. Otherwise, it can start with the
         // property element or an expression.
 
         boolean isPropElem = isName() && peek.isDelimiter() && peek.getChar() == ':';
@@ -2027,6 +2371,12 @@ public class Parser
         return codes;
     }
 
+    /**
+     * Parse an expression. This method does not use recursive descent.
+     *
+     * @return A list of h-codes.
+     * @throws ParseException When a syntax error occurs.
+     */
     private LinkedList<Object> parseExpr() throws ParseException
     {
         LinkedList<Object> codes = new LinkedList<>();
@@ -2091,7 +2441,7 @@ public class Parser
                     OpToken<?> topToken = ops.pop();
                     if (!topToken.op.operator.equals("(")) {
                         codes.add(opTokenToHCode(topToken));
-                        int id  = topToken.getId();
+                        int id  = topToken.getLabelId();
                         if (id != -1) codes.add(new Label(id));
                     }
                     else {
@@ -2145,7 +2495,7 @@ public class Parser
                     OpToken<?> topToken = ops.pop();
                     if (!topToken.op.operator.equals("(")) {
                         codes.add(opTokenToHCode(topToken));
-                        int id  = topToken.getId();
+                        int id  = topToken.getLabelId();
                         if (id != -1) codes.add(new Label(id));
                     }
                     else {
@@ -2178,7 +2528,7 @@ public class Parser
                    throwParseException("Invalid commas inside parentheses");
                 }
 
-                // Finished a level of parantheses
+                // Finished a level of parentheses
 
                 level--;
             }
@@ -2210,7 +2560,7 @@ public class Parser
                         OpToken<?> topToken = ops.pop();
                         if (!topToken.op.operator.equals("(")) {
                             codes.add(opTokenToHCode(topToken));
-                            int id  = topToken.getId();
+                            int id  = topToken.getLabelId();
                             if (id != -1) codes.add(new Label(id));
                         }
                         else {
@@ -2230,13 +2580,13 @@ public class Parser
                 if (getString().equals("&&")) {
                     int id = labelId++;
                     codes.add(new JumpAndHCode(id));
-                    newOpToken.setId(id);
+                    newOpToken.setLabelId(id);
                 }
 
                 else if (getString().equals("||")) {
                     int id = labelId++;
                     codes.add(new JumpOrHCode(id));
-                    newOpToken.setId(id);
+                    newOpToken.setLabelId(id);
                 }
 
                 // Add the new operator to the operator stack
@@ -2245,7 +2595,7 @@ public class Parser
             }
 
             // Since we are not using recursive descent to parse expressions,
-            // we need to know when we're done with an expression
+            // we need to know when we're done with an expression.
             //
             // An expression begins with a number, a string, a name, an open
             // paren ("(") or an open bracket ("["). Let's call these things
@@ -2313,7 +2663,7 @@ public class Parser
                 while (ops.size() > 0) {
                     OpToken<?> topToken = ops.pop();
                     codes.add(opTokenToHCode(topToken));
-                    int id  = topToken.getId();
+                    int id  = topToken.getLabelId();
                     if (id != -1) codes.add(new Label(id));
                 }
 
@@ -2328,6 +2678,7 @@ public class Parser
      *
      * @return True if the next token could start an expression.
      */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     private boolean isExprStart()
     {
         // An expression begins with a number, a string, a name, an open
@@ -2342,6 +2693,12 @@ public class Parser
 
     }
 
+    /**
+     * Convert an OpToken to h-code.
+     *
+     * @param t The token to convert.
+     * @return The resulting h-code.
+     */
     private HCode opTokenToHCode(OpToken<?> t)
     {
         switch (t.op.operator) {
@@ -2386,6 +2743,10 @@ public class Parser
         return null;
     }
 
+    /**
+     * Get the next token. The token is available in the global variable
+     * 'curToken'.
+     */
     private void nextToken()
     {
         // If the current token is EOF, we can't move forward.
@@ -2407,29 +2768,11 @@ public class Parser
         if (!isEOF()) peek = tokens.get(tokenPtr + 1);
     }
 
-    private void returnToken()
-    {
-        // When we return a token, we want to set the tokens to what they
-        // were before the last nextToken() call.
-        // The current token become the peek token.
-
-        peek = curToken;
-
-        // If we can't decrement the tokenPtr, point curToken to the dummy
-        // token
-
-        if (tokenPtr < 0) {
-            curToken = dummyToken;
-        }
-
-        // Otherwise, decrement the tokenPtr and get the token there
-
-        else {
-            tokenPtr--;
-            curToken = tokens.get(tokenPtr);
-        }
-    }
-
+    /**
+     * Set the current token to the token pointed to.
+     *
+     * @param ptr The pointer to the token we should now point to.
+     */
     private void setCurrentTokenTo(int ptr)
     {
         if (ptr < 0) {
@@ -2449,6 +2792,8 @@ public class Parser
             if (!isEOF()) peek = tokens.get(tokenPtr + 1);
         }
     }
+
+    // Various shortcut methods
 
     private boolean isNumber() { return curToken.isNumber(); }
     private boolean isString() { return curToken.isString(); }

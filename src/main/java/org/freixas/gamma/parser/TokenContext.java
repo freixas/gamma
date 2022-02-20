@@ -18,7 +18,7 @@ package org.freixas.gamma.parser;
 
 import java.io.File;
 
-public class TokenContext {
+public final class TokenContext {
     private final File file;
     private final String code;
     private final int lineNumber;
@@ -29,7 +29,7 @@ public class TokenContext {
     /**
      * Capture information about a token for use in reporting errors.
      *
-     * @param file The file from which the token cam from. May be null.
+     * @param file The file from which the token came. May be null.
      * @param code The entire code string containing the token.
      * @param lineNumber The line number of the line on which the token starts.
      * The first line is line 1.
@@ -52,34 +52,96 @@ public class TokenContext {
         this.charEnd = charEnd;
     }
 
+    // **********************************************************************
+    // *
+    // * Getters / Setters
+    // *
+    // **********************************************************************
+
+    /**
+     * Get the file from which the token came. May be null.
+     *
+     * @return The file from which the token came. May be null.
+     */
     public File getFile() {
         return file;
     }
 
+    /**
+     * Get the entire code string containing the token.
+     *
+     * @return The entire code string containing the token.
+     */
     public String getCode() {
         return code;
     }
 
+    /**
+     * Get the line number of the line on which the token starts. The first line
+     * is line 1
+     *
+     * @return The line number of the line on which the token starts. * The
+     * first line is line 1
+     */
     public int getLineNumber() {
         return lineNumber;
     }
 
+    /**
+     * Get the character number of the first character of the token relative to
+     * the line. The first character is character 1.
+     *
+     * @return The character number of the first character of the token relative
+     * to the line. The first character is character 1.
+     */
     public int getCharNumber() {
         return charNumber;
     }
 
+    /**
+     * Get the character position of the first character of the token relative
+     * to the entire code string. The first possible code position is 0.
+     *
+     * @return The character position of the first character of the token
+     * relative to the entire code string. The first possible code position is
+     * 0.
+     */
     public int getCharStart() {
         return charStart;
     }
 
+    /**
+     * Get the character position of the last character of the token relative to
+     * the entire code string. For a one-character token, this will be the same
+     * as charStart.
+     *
+     * @return The character position of the last character of the token
+     * relative to the entire code string. For a one-character token, this will
+     * be the same as charStart.
+     */
     public int getCharEnd() {
         return charEnd;
     }
 
+    /**
+     * Set the character position of the last character of the token relative to
+     * the entire code string. For a one-character token, this will be the same
+     * as charStart.
+     *
+     * @param charEnd The character position of the last character of the token
+     * relative to the entire code string. For a one-character token, this will
+     * be the same as charStart.
+     */
     public void setCharEnd(int charEnd)
     {
         this.charEnd = charEnd;
     }
+
+    // **********************************************************************
+    // *
+    // * Standard methods: toString, clone hashCode, equals
+    // *
+    // **********************************************************************
 
     @Override
     public String toString() {

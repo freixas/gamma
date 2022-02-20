@@ -21,23 +21,36 @@ import java.io.File;
 import java.util.ArrayList;
 
 /**
+ * Tokenize a script.
  *
  * @author Antonio Freixas
  */
-public class ScriptTokenizer extends Tokenizer
+public final class ScriptTokenizer extends Tokenizer
 {
+    // **********************************************************************
+    // *
+    // * Constructors
+    // *
+    // **********************************************************************
+
+    /**
+     * Create a script tokenizer.
+     *
+     * @param file The file from which the script was read. This file is
+     * only used to store in a TokenContext. It could potentially be null.
+     * @param code The code to tokenize.
+     */
     public ScriptTokenizer(File file, String code)
     {
         super(file, code, "+-*/^.<>!&|%=", ";,:=[](){}");
     }
 
-    /**
-     * Tokenize the script.
-     *
-     * @return A list of Tokens.
-     *
-     * @throws ParseException When an invalid token is found.
-     */
+    // **********************************************************************
+    // *
+    // * Tokenize
+    // *
+    // **********************************************************************
+
     @Override
     public ArrayList<Token<?>> tokenize() throws ParseException
     {
@@ -136,9 +149,9 @@ public class ScriptTokenizer extends Tokenizer
     /**
      * Get a name token.
      * <p>
-     * When called, the current character should be the first character of the name, which
-     * will be a letter of an underscore. On return, the current character will be the
-     * first character after the name.
+     * When called, the current character should be the first character of the
+     * name, which will be a letter of an underscore. On return, the current
+     * character will be the first character after the name.
      *
      * @return A string.
      */
@@ -154,9 +167,11 @@ public class ScriptTokenizer extends Tokenizer
     }
 
     /**
-     *  When called, the current character is an operator character. Operators can be one- or two-characters long.
-     *  Some single-character operator characters aren't legal operators. On return, the current character is the
-     *  character after the operator if we found a valid operator; otherwise, the current character remains unchanged.
+     * When called, the current character is an operator character. Operators
+     * can be one- or two-characters long. Some single-character operator
+     * characters aren't legal operators. On return, the current character is
+     * the character after the operator if we found a valid operator; otherwise,
+     * the current character remains unchanged.
      *
      * @return The operator string if we found a valid operator; null otherwise.
      */

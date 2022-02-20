@@ -16,32 +16,41 @@
  */
 package org.freixas.gamma.parser;
 
-import java.io.File;
 import javafx.scene.paint.Color;
 
 /**
  * When a script is parsed, it is first tokenized.
- * This class stores information on each token.
+ * This class stores information about each token.
  *
  * @param <T>
  * @author Antonio Freixas
  */
 public class Token<T>
 {
+    /**
+     * The types of tokens.
+     */
     public enum Type {
         NUMBER, COLOR, STRING, OPERATOR, SELECTOR, NAME, DELIMITER, EOF
     }
 
     private final Type type;
     private final T value;
-    private TokenContext context;
+    private final TokenContext context;
+
+    // **********************************************************************
+    // *
+    // * Constructors
+    // *
+    // **********************************************************************
 
     /**
      * Create a Token.
      *
      * @param type The token type.
      * @param value The token's value.
-     * @param context The context for the token. This identifies the position of the token in the code.
+     * @param context The context for the token. This identifies the position of
+     * the token in the code.
      */
     public Token(Type type, T value, TokenContext context)
     {
@@ -50,14 +59,19 @@ public class Token<T>
         this.context = context;
     }
 
-    public boolean isInstruction() { return false; }
+    // **********************************************************************
+    // *
+    // * Getters
+    // *
+    // **********************************************************************
 
     /**
-     * Get the token's type.
+     * Get the token's type. Alternatively, you can call any of the
+     * various if...() methods to see if the token is of a specific type.
      *
      * @return The token's type.
      */
-    public Type getType()
+    public final Type getType()
     {
         return type;
     }
@@ -67,7 +81,7 @@ public class Token<T>
      *
      * @return The token's value.
      */
-    public T getValue()
+    public final  T getValue()
     {
         return value;
     }
@@ -77,23 +91,63 @@ public class Token<T>
      *
      * @return The token context.
      */
-    public TokenContext getContext() {
+    public final TokenContext getContext() {
         return context;
     }
 
-    public boolean isNumber() { return type == Token.Type.NUMBER; }
-    public boolean isColor() { return type == Token.Type.COLOR; }
-    public boolean isString() { return type == Token.Type.STRING; }
-    public boolean isOperator() { return type == Token.Type.OPERATOR; }
-    public boolean isSelector() { return type == Token.Type.SELECTOR; }
-    public boolean isName() { return type == Token.Type.NAME; }
-    public boolean isDelimiter() { return type == Token.Type.DELIMITER; }
-    public boolean isEOF() { return type == Token.Type.EOF; }
+    /**
+     * Return the value cast to a char. The Token should be checked to
+     * see if it is a delimiter before calling this method.
+     *
+     * @return The value cast to a char.
+     */
+    public final char getChar() { return (char)getValue(); }
 
-    public char getChar() { return (Character)getValue(); }
-    public double getNumber() { return (Double)getValue(); }
-    public Color getColor() { return (Color)getValue(); }
-    public String getString() { return (String)getValue(); }
+    /**
+     * Return the value cast to a double. The Token should be checked to
+     * see if it is a number before calling this method.
+     *
+     * @return The value cast to a double.
+     */
+    public final double getNumber() { return (Double)getValue(); }
+
+    /**
+     * Return the value cast to a Color. The Token should be checked to
+     * see if it is a Color before calling this method.
+     *
+     * @return The value cast to a Color.
+     */
+    public final Color getColor() { return (Color)getValue(); }
+
+    /**
+     * Return the value cast to a String. The Token should be checked to
+     * see if it is a string, selector, name, or delimiter before calling this
+     * method.
+     *
+     * @return The value cast to a String.
+     */
+    public final String getString() { return (String)getValue(); }
+
+    // **********************************************************************
+    // *
+    // * Informational
+    // *
+    // **********************************************************************
+
+    public final boolean isNumber() { return type == Token.Type.NUMBER; }
+    public final boolean isColor() { return type == Token.Type.COLOR; }
+    public final boolean isString() { return type == Token.Type.STRING; }
+    public final boolean isOperator() { return type == Token.Type.OPERATOR; }
+    public final boolean isSelector() { return type == Token.Type.SELECTOR; }
+    public final boolean isName() { return type == Token.Type.NAME; }
+    public final boolean isDelimiter() { return type == Token.Type.DELIMITER; }
+    public final boolean isEOF() { return type == Token.Type.EOF; }
+
+    // **********************************************************************
+    // *
+    // * Standard methods: toString, clone hashCode, equals
+    // *
+    // **********************************************************************
 
     @Override
     public String toString()
