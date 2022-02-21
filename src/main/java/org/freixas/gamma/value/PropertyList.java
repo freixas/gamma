@@ -43,12 +43,11 @@ public class PropertyList implements PropertyElement, ExecutionMutable
     }
 
     @Override
-    public Object createCopy()
+    public PropertyList createCopy()
     {
         try {
-            Class cls = this.getClass();
-            @SuppressWarnings("unchecked")
-            Constructor constructor = cls.getConstructor();
+            Class<?> cls = this.getClass();
+            Constructor<?> constructor = cls.getConstructor();
             PropertyList newPropertyList = (PropertyList)constructor.newInstance();
 
             for (int i = 0; i < size(); i++) {
@@ -95,7 +94,7 @@ public class PropertyList implements PropertyElement, ExecutionMutable
      * If the element is or contains a property that is already in the list,
      * the existing element is removed and the new one is added at the end.
      *
-     * @param element
+     * @param element The element to add.
      */
     public void add(PropertyElement element)
     {
@@ -127,16 +126,15 @@ public class PropertyList implements PropertyElement, ExecutionMutable
 
     protected void addList(PropertyList list)
     {
-        ListIterator<Property> iter = list.properties.listIterator();
-        while (iter.hasNext()) {
-            addProperty(iter.next());
+        for (Property property : list.properties) {
+            addProperty(property);
         }
     }
 
     /**
      * Get the number of properties in the container.
      *
-     * @return
+     * @return The number of properties in the container.
      */
     public int size()
     {

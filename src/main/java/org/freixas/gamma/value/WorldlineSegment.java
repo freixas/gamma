@@ -36,7 +36,7 @@ import org.freixas.gamma.math.Util;
  * Once a segment has been created, it can be modified to extend backward or
  * forward in time (or both) by an infinite amount.
  * <p>
- * A WorldlineSegment provides most but not all of the functions found in
+ * A WorldlineSegment provides most but not all the functions found in
  * OffsetAcceleration. The functions work a bit differently: if a specific
  * source value does not fall between the start and end of the segment, then
  * NaN is returned.
@@ -111,8 +111,8 @@ import org.freixas.gamma.math.Util;
  * See http://web.physics.ucsb.edu/~fratus/phys103/LN/IGR.pdf See
  * https://math.ucr.edu/home/baez/physics/Relativity/SR/Rocket/rocket.html
  *
- * @see gamma.math.Acceleration
- * @see gamma.math.OffsetAcceleration
+ * @see org.freixas.gamma.math.Acceleration
+ * @see org.freixas.gamma.math.OffsetAcceleration
  *
  * @author Antonio Freixas
  */
@@ -187,7 +187,9 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
                     if (limitValue == 0.0) {
                         maxT = vPoint.t;
                     }
-                    maxT = curve.tauToT(finalTau);
+                    else {
+                        maxT = curve.tauToT(finalTau);
+                    }
                 }
                 case D -> {
                     double finalD = d + limitValue;
@@ -360,7 +362,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
     }
 
     @Override
-    public Object createCopy()
+    public WorldlineSegment createCopy()
     {
         return new WorldlineSegment(this);
     }
@@ -651,6 +653,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
      * @return Gamma. If d matches no segment points, return NaN. If d matches
      * all segment points return gamma for the v that occurs earliest in time.
      */
+     @SuppressWarnings("unused")
      public double dToGamma(double d)
     {
         if (Util.fuzzyLT(d, min.d) || Util.fuzzyGT(d, max.d)) return Double.NaN;
@@ -850,6 +853,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
      * @param other The other observer.
      * @return The intersection or null if none.
      */
+    @SuppressWarnings("unused")
     public Coordinate intersect(WorldlineSegment other)
     {
         // TO DO

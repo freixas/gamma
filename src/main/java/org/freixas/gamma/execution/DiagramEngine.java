@@ -40,7 +40,6 @@ public class DiagramEngine
     private final MainWindow window;
     private final HCodeProgram program;
     private final boolean isAnimated;
-    private final boolean hasDisplayVariables;
     private final SetStatement setStatement;
     private final Stylesheet stylesheet;
 
@@ -53,12 +52,11 @@ public class DiagramEngine
     private boolean isClosed;
 
     @SuppressWarnings("LeakingThisInConstructor")
-    public DiagramEngine(MainWindow window, LinkedList<Object> hCodes, boolean isAnimated, boolean hasDisplayVariables, SetStatement setStatement, Stylesheet stylesheet)
+    public DiagramEngine(MainWindow window, LinkedList<Object> hCodes, boolean isAnimated, SetStatement setStatement, Stylesheet stylesheet)
     {
         this.window = window;
         this.program = new HCodeProgram(hCodes);
         this.isAnimated = isAnimated;
-        this.hasDisplayVariables = hasDisplayVariables;
         this.setStatement = setStatement;
         this.stylesheet = stylesheet;
 
@@ -82,7 +80,7 @@ public class DiagramEngine
            // Execute animated scripts
 
             if (isAnimated) {
-                animationEngine = new AnimationEngine(window, setStatement, stylesheet, program, hasDisplayVariables);
+                animationEngine = new AnimationEngine(window, setStatement, stylesheet, program);
                 animationEngine.execute();
             }
 
@@ -91,13 +89,6 @@ public class DiagramEngine
             else {
                 hCodeEngine = new HCodeEngine(window, setStatement, stylesheet, program);
                 hCodeEngine.execute();
-
-//                // If we have dynamic variables, we need add the controls to the main window
-//
-//                dynamicSymbolTable = hCodeEngine.getDynamicSymbolTable();
-//                if (hasDisplayVariables) {
-//                    dynamicSymbolTable.addDisplayControls(window);
-//                }
              }
         }
         catch (Throwable e) {

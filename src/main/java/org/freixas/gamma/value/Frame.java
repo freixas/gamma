@@ -29,12 +29,12 @@ import java.util.Objects;
  */
 public class Frame  extends ObjectContainer implements ExecutionMutable, Displayable
 {
-    static private String[] propertyNames = { "v", "origin" };
+    static private final String[] PROPERTY_NAMES = { "v", "origin" };
 
     public enum AtType implements ExecutionImmutable
     {
         T, TAU, D, V
-    };
+    }
 
     private Coordinate origin;
     private double v;
@@ -63,7 +63,7 @@ public class Frame  extends ObjectContainer implements ExecutionMutable, Display
      */
     public Frame(Observer observer, AtType type, double value)
     {
-        super(propertyNames);
+        super(PROPERTY_NAMES);
 
         double x;
         double t;
@@ -99,9 +99,7 @@ public class Frame  extends ObjectContainer implements ExecutionMutable, Display
                 tau = observer.vToTau(v);
             }
 
-            default -> {
-                v = x = t = tau = 0;
-            }
+            default -> v = x = t = tau = 0;
         }
 
         // Determine the size of the axes (relative to 1 when v = 0)
@@ -127,7 +125,7 @@ public class Frame  extends ObjectContainer implements ExecutionMutable, Display
      */
     public Frame(Frame other)
     {
-        super(propertyNames);
+        super(PROPERTY_NAMES);
         if (other != null) {
             this.v = other.v;
             this.origin = new Coordinate(other.origin);
@@ -139,13 +137,13 @@ public class Frame  extends ObjectContainer implements ExecutionMutable, Display
 
     public Frame(Coordinate origin, double v)
     {
-        super(propertyNames);
+        super(PROPERTY_NAMES);
         this.origin = origin;
         this.v = v;
     }
 
     @Override
-    public Object createCopy()
+    public Frame createCopy()
     {
         return new Frame(this);
     }
@@ -241,8 +239,8 @@ public class Frame  extends ObjectContainer implements ExecutionMutable, Display
      * Convert a coordinate relative to this frame to one relative to the rest
      * frame.
      *
-     * @param x
-     * @param t
+     * @param x The x coordinate.
+     * @param t The t coordinate.
      *
      * @return The transformed coordinate.
      */

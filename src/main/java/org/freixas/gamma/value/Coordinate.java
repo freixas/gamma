@@ -18,7 +18,6 @@ package org.freixas.gamma.value;
 
 import org.freixas.gamma.execution.ExecutionException;
 import org.freixas.gamma.execution.HCodeEngine;
-import org.freixas.gamma.math.Relativity;
 import org.freixas.gamma.math.Util;
 import javafx.geometry.Point2D;
 
@@ -28,7 +27,7 @@ import javafx.geometry.Point2D;
  */
 public class Coordinate extends ObjectContainer implements ExecutionMutable, Displayable
 {
-    static private String[] propertyNames = { "x", "t" };
+    static private final String[] propertyNames = { "x", "t" };
 
     public double x;
     public double t;
@@ -79,7 +78,7 @@ public class Coordinate extends ObjectContainer implements ExecutionMutable, Dis
     }
 
     @Override
-    public Object createCopy()
+    public Coordinate createCopy()
     {
         return new Coordinate(this);
     }
@@ -136,8 +135,8 @@ public class Coordinate extends ObjectContainer implements ExecutionMutable, Dis
         // property name is used, so we don't need to re-check here
 
         switch (name) {
-            case "x" -> { x = (Double)value; }
-            case "t" -> { t = (Double)value; }
+            case "x" -> x = (Double)value;
+            case "t" -> t = (Double)value;
         }
     }
 
