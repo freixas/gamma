@@ -35,12 +35,12 @@ public class AccelerationTest
     }
 
     @BeforeClass
-    public static void setUpClass()
+    static public void setUpClass()
     {
     }
 
     @AfterClass
-    public static void tearDownClass()
+    static public void tearDownClass()
     {
     }
 
@@ -102,7 +102,7 @@ public class AccelerationTest
                     double t = Acceleration.vToT(0, 0);
                     fail("Should have thrown an ArithmeticException");
                 }
-                catch (ArithmeticException e) {
+                catch (ArithmeticException ignored) {
                 }
             }
             else {
@@ -125,7 +125,7 @@ public class AccelerationTest
                     double t = Acceleration.vToT(0, 0);
                     fail("Should have thrown an ArithmeticException");
                 }
-                catch (ArithmeticException e) {
+                catch (ArithmeticException ignored) {
                 }
             }
             else {
@@ -187,7 +187,7 @@ public class AccelerationTest
                     double t = Acceleration.dToT(0, 0);
                     fail("Should have thrown an ArithmeticException");
                 }
-                catch (ArithmeticException e) {
+                catch (ArithmeticException ignored) {
                 }
             }
             else {
@@ -210,7 +210,7 @@ public class AccelerationTest
                     double t = Acceleration.dToTau(0, 0);
                     fail("Should have thrown an ArithmeticException");
                 }
-                catch (ArithmeticException e) {
+                catch (ArithmeticException ignored) {
                 }
             }
             else {

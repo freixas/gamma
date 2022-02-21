@@ -36,14 +36,14 @@ import javafx.scene.transform.NonInvertibleTransformException;
  */
 public class Label
 {
-    private static javafx.scene.text.Text textNode = null;
+    static private javafx.scene.text.Text textNode = null;
 
-    public static void draw(Context context, LabelStruct struct, StyleStruct styles)
+    static public void draw(Context context, LabelStruct struct, StyleStruct styles)
     {
         draw(context, struct, styles.textColor, styles.font, styles);
     }
 
-    public static void draw(Context context, LabelStruct struct, Color color, Font font, StyleStruct styles)
+    static public void draw(Context context, LabelStruct struct, Color color, Font font, StyleStruct styles)
     {
         // NOTE: + angle is counterclockwise. - angle is clockwise
 
@@ -144,7 +144,7 @@ public class Label
         }
     }
 
-    public static Bounds getTextBounds(String text, Font font)
+    static public Bounds getTextBounds(String text, Font font)
     {
         if (textNode == null) {
             textNode = new javafx.scene.text.Text();

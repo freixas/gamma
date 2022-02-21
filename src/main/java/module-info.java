@@ -18,21 +18,21 @@
 
 module org.freixas.gamma
 {
+    requires java.base;
+    requires java.desktop;
     requires java.prefs;
 
     requires javafx.base;
     requires javafx.controls;
     requires javafx.fxml;
+    requires javafx.swing;
+    requires javafx.web;
+
     opens org.freixas.gamma to javafx.fxml, javafx.graphics;
     opens org.freixas.gamma.execution to javafx.fxml;
     opens org.freixas.gamma.file to javafx.fxml;
     opens org.freixas.gamma.preferences to javafx.fxml;
-//    opens org.freixas.gamma.print to javafx.fxml;
-    requires javafx.media;
-    requires javafx.swing;
-    requires javafx.web;
 
     requires commons.cli;
-
-    requires java.base;
+    requires org.jetbrains.annotations;
 }

@@ -29,7 +29,8 @@ import javafx.scene.transform.Affine;
  */
 public class Bounds implements ExecutionMutable, Displayable
 {
-    public static Bounds INFINITE_BOUNDS = new Bounds(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+    @SuppressWarnings("unused")
+    static public Bounds INFINITE_BOUNDS = new Bounds(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 
     public Coordinate min;
     public Coordinate max;
@@ -116,7 +117,7 @@ public class Bounds implements ExecutionMutable, Displayable
     }
 
     @Override
-    public Object createCopy()
+    public Bounds createCopy()
     {
         return new Bounds(this);
     }
@@ -229,30 +230,32 @@ public class Bounds implements ExecutionMutable, Displayable
     }
 
     /**
-     * Return true if a line segment is completely inside this bounds.
+     * Return true if a line segment is completely inside this bounding box.
      *
      * @param segment The line segment.
      * @return True if a line segment is completely inside the clip.
      */
+    @SuppressWarnings("unused")
     public boolean completelyInsideClip(LineSegment segment)
     {
-	int outcode0 = computeOutCode(segment.getPoint1());
-	int outcode1 = computeOutCode(segment.getPoint2());
-	return (outcode0 | outcode1) == 0;
+	int outCode0 = computeOutCode(segment.getPoint1());
+	int outCode1 = computeOutCode(segment.getPoint2());
+	return (outCode0 | outCode1) == 0;
     }
 
     /**
-     * Return true if a line segment is completely outside this bounds.
+     * Return true if a line segment is completely outside this bounding box.
      *
      * @param segment The line segment.
      * @return True if a line segment is completely outside the clip.
      */
 
+    @SuppressWarnings("unused")
     public boolean completelyOutsideClip(LineSegment segment)
     {
-	int outcode0 = computeOutCode(segment.getPoint1());
-	int outcode1 = computeOutCode(segment.getPoint2());
-	return (outcode0 & outcode1) != 0;
+	int outCode0 = computeOutCode(segment.getPoint1());
+	int outCode1 = computeOutCode(segment.getPoint2());
+	return (outCode0 & outCode1) != 0;
     }
 
     /**
@@ -305,7 +308,7 @@ public class Bounds implements ExecutionMutable, Displayable
             Math.min(max.t, other.max.t));
     }
     /**
-     * Intersect a line segment with this bounds. This method returns
+     * Intersect a line segment with this bounding box. This method returns
      * a line segment that lies completely within the bounds or null if there
      * is no intersection.
      *
@@ -317,54 +320,54 @@ public class Bounds implements ExecutionMutable, Displayable
     {
         // Copy the line segment
 
-	segment = new LineSegment(segment);
+        segment = new LineSegment(segment);
 
-	int outcode0 = computeOutCode(segment.getPoint1());
-	int outcode1 = computeOutCode(segment.getPoint2());
-	boolean accept = false;
+        int outCode0 = computeOutCode(segment.getPoint1());
+        int outCode1 = computeOutCode(segment.getPoint2());
+        boolean accept = false;
 
         double slopeXT = Double.NaN;
         double slopeTX = Double.NaN;
 
-	while (true) {
+        while (true) {
 
-	    // Bitwise OR is 0: both points inside clip; trivially
-	    // accept and exit loop
+            // Bitwise OR is 0: both points inside clip; trivially
+            // accept and exit loop
 
-	    if ((outcode0 | outcode1) == 0) {
-		accept = true;
-		break;
-	    }
+            if ((outCode0 | outCode1) == 0) {
+                accept = true;
+                break;
+            }
 
-	    // Bitwise AND is not 0: both points share an outside zone
-	    // (LEFT, RIGHT, TOP, or BOTTOM), so both must be outside
-	    // window; exit loop (accept is false)
+            // Bitwise AND is not 0: both points share an outside zone
+            // (LEFT, RIGHT, TOP, or BOTTOM), so both must be outside
+            // window; exit loop (accept if false)
 
-	    else if ((outcode0 & outcode1) != 0) {
-		break;
-	    }
+            else if ((outCode0 & outCode1) != 0) {
+                break;
+            }
 
-	    // Failed both tests, so calculate the line segment to clip
-	    // from an outside point to an intersection with clip edge
+            // Failed both tests, so calculate the line segment to clip
+            // from an outside point to an intersection with clip edge
 
-	    else {
-		double x = 0.0;
-		double t = 0.0;
+            else {
+                double x = 0.0;
+                double t = 0.0;
 
-		// At least one endpoint is outside the clip
-		// rectangle; pick it.
+                // At least one endpoint is outside the clip
+                // rectangle; pick it.
 
-		int outcodeOut = outcode0 != 0 ? outcode0 : outcode1;
+                int outCodeOut = outCode0 != 0 ? outCode0 : outCode1;
 
-		// Now find the intersection point; use formulas:
+                // Now find the intersection point; use formulas:
                 //
-		//   slope = (t1 - t0) / (x1 - x0)
-		//   x = x0 + (1 / slope) * (tm - t0), where tm is tmin or tmax
-		//   t = t0 + slope       * (xm - x0), where xm is xmin or xmax
+                //   slope = (t1 - t0) / (x1 - x0)
+                //   x = x0 + (1 / slope) * (tm - t0), where tm is tMin or tMax
+                //   t = t0 + slope       * (xm - x0), where xm is xMin or xMax
                 //
-		// No need to worry about divide-by-zero because, in
-		// each case, the outcode bit being tested guarantees
-		// the denominator is non-zero
+                // No need to worry about divide-by-zero because, in
+                // each case, the outCode bit being tested guarantees
+                // the denominator is non-zero
 
                 // Calculate the slopes if not yet set
 
@@ -375,7 +378,7 @@ public class Bounds implements ExecutionMutable, Displayable
                     else {
                         slopeXT = (segment.getPoint2().x - segment.getPoint1().x) / (segment.getPoint2().t - segment.getPoint1().t);
                     }
-                   if (Util.fuzzyEQ(segment.getPoint2().x, segment.getPoint1().x)) {
+                    if (Util.fuzzyEQ(segment.getPoint2().x, segment.getPoint1().x)) {
                         slopeTX = Double.POSITIVE_INFINITY;
                     }
                     else {
@@ -383,35 +386,35 @@ public class Bounds implements ExecutionMutable, Displayable
                     }
                 }
 
-		if ((outcodeOut & 0x08) != 0) { 	// Point is above the clip window
-		    t = max.t;
-		    x = segment.getPoint1().x + slopeXT * (t - segment.getPoint1().t);
-		}
-		else if ((outcodeOut & 0x04) != 0) { // Point is below the clip window
-		    t = min.t;
-		    x = segment.getPoint1().x + slopeXT * (t - segment.getPoint1().t);
-		}
-		else if ((outcodeOut & 0x02) != 0) {  // Point is to the right of clip window
-		    x = max.x;
-		    t = segment.getPoint1().t + slopeTX * (x - segment.getPoint1().x);
-		}
-		else if ((outcodeOut & 0x01) != 0) {   // Point is to the left of clip window
-		    x = min.x;
-		    t = segment.getPoint1().t + slopeTX * (x - segment.getPoint1().x);
-		}
+                if ((outCodeOut & 0x08) != 0) {    // Point is above the clip window
+                    t = max.t;
+                    x = segment.getPoint1().x + slopeXT * (t - segment.getPoint1().t);
+                }
+                else if ((outCodeOut & 0x04) != 0) { // Point is below the clip window
+                    t = min.t;
+                    x = segment.getPoint1().x + slopeXT * (t - segment.getPoint1().t);
+                }
+                else if ((outCodeOut & 0x02) != 0) {  // Point is to the right of clip window
+                    x = max.x;
+                    t = segment.getPoint1().t + slopeTX * (x - segment.getPoint1().x);
+                }
+                else if ((outCodeOut & 0x01) != 0) {   // Point is to the left of clip window
+                    x = min.x;
+                    t = segment.getPoint1().t + slopeTX * (x - segment.getPoint1().x);
+                }
 
-		// Now we move outside point to intersection point to clip
-		// and get ready for next pass.
+                // Now we move outside point to intersection point to clip
+                // and get ready for next pass.
 
-		if (outcodeOut == outcode0) {
+                if (outCodeOut == outCode0) {
                     segment.getPoint1().setTo(x, t);
-		    outcode0 = computeOutCode(segment.getPoint1());
-		}
-		else {
-		    segment.getPoint2().setTo(x, t);
-		    outcode1 = computeOutCode(segment.getPoint2());
-		}
-	    }
+                    outCode0 = computeOutCode(segment.getPoint1());
+                }
+                else {
+                    segment.getPoint2().setTo(x, t);
+                    outCode1 = computeOutCode(segment.getPoint2());
+                }
+            }
 	}
 
 	if (accept) return segment;

@@ -48,7 +48,7 @@ import org.freixas.gamma.parser.TokenContext;
  */
 public class HCodeEngine
 {
-    private static final Frame defFrame = new Frame(new ConcreteObserver(new WInitializer(new Coordinate(0.0, 0.0), 0.0, 0.0), new ArrayList<>()), Frame.AtType.TAU, 0);
+    static private final Frame defFrame = new Frame(new ConcreteObserver(new WInitializer(new Coordinate(0.0, 0.0), 0.0, 0.0), new ArrayList<>()), Frame.AtType.TAU, 0);
 
     private final MainWindow window;
     private final SetStatement setStatement;
@@ -58,7 +58,6 @@ public class HCodeEngine
 
     private final DynamicSymbolTable dynamicTable;
     private int precision;
-    private final SetStatement.PrecisionType precisionType;
 
     SymbolTable table;
     private LCodeEngine lCodeEngine;
@@ -67,7 +66,7 @@ public class HCodeEngine
 
     TokenContext tokenContext;
 
-    private boolean isClosed;
+    private final boolean isClosed;
 
     public HCodeEngine(MainWindow window, SetStatement setStatement, Stylesheet stylesheet, HCodeProgram program)
     {
@@ -92,8 +91,7 @@ public class HCodeEngine
 
         this.hCodeExecutor = new HCodeExecutor(this);
         this.functionExecutor = new FunctionExecutor();
-        precisionType = SetStatement.PrecisionType.DISPLAY;
-        setPrecision(precisionType);
+        setPrecision(SetStatement.PrecisionType.DISPLAY);
     }
 
     private void initializeSymbolTable(SymbolTable table)
@@ -184,7 +182,7 @@ public class HCodeEngine
         this.tokenContext = tokenContext;
     }
 
-    public static Frame getDefFrame()
+    static public Frame getDefFrame()
     {
         return new Frame(defFrame);
     }
@@ -225,8 +223,6 @@ public class HCodeEngine
 
         try {
             while (programCounter < code.size()) {
-                if (isClosed) return;
-
 //                System.err.print(programCounter + ": ");
                 Object obj = code.get(programCounter);
                 if (!(obj instanceof HCode) && !(obj instanceof Label)) {
@@ -250,7 +246,7 @@ public class HCodeEngine
 
                         List<Object> data = program.getData(argInfoHCode);
 
-                        // Execute the hCode
+                        // Execute the h-code
 
                         argInfo.checkTypes(data);
                         argInfoHCode.execute(this, data);

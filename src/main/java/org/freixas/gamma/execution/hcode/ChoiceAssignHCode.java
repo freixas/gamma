@@ -31,7 +31,7 @@ import java.util.List;
  */
 public class ChoiceAssignHCode extends ArgInfoHCode
 {
-    private static final ArgInfo argInfo;
+    static private final ArgInfo argInfo;
 
     static {
         ArrayList<ArgInfo.Type> argTypes = new ArrayList<>();

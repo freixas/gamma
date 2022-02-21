@@ -112,7 +112,7 @@ public abstract class Struct
      * @param cls The class of the Struct subclass.
      * @return The fields in a HashMap.
      */
-    private static HashMap<String, Field> getFields(Class<?> cls)
+    static private HashMap<String, Field> getFields(Class<?> cls)
     {
         Field[] fields = cls.getFields();
         HashMap<String, Field> fieldMap = new HashMap<>();
@@ -129,7 +129,7 @@ public abstract class Struct
      * @param cls The class of the Struct subclass.
      * @return The methods in a HashMap.
      */
-    private static HashMap<String, Method> getMethods(Class<?> cls)
+    static private HashMap<String, Method> getMethods(Class<?> cls)
     {
         Method[] methods = cls.getMethods();
         HashMap<String, Method> methodMap = new HashMap<>();
@@ -189,9 +189,9 @@ public abstract class Struct
      * @param cmdName The name of the command.
      * @param list The property list used to initialize the structure.
      *
-     * @return
+     * @return The created structure.
      */
-    public static Struct createNewStruct(HCodeEngine engine, String cmdName, PropertyList list)
+    static public Struct createNewStruct(HCodeEngine engine, String cmdName, PropertyList list)
     {
         try {
 
@@ -203,7 +203,7 @@ public abstract class Struct
 
             // Call the constructor to create a new instance
 
-            Constructor cmdStructConstructor = cmdStructClass.getConstructor();
+            Constructor<?> cmdStructConstructor = cmdStructClass.getConstructor();
             Struct cmdStruct = (Struct)cmdStructConstructor.newInstance();
 
             initializeStruct(engine, cmdStruct, cmdName, list);
@@ -224,7 +224,7 @@ public abstract class Struct
      * @param cmdName The name of the command.
      * @param list The property list used to initialize the structure.
      */
-    public static void initializeStruct(HCodeEngine engine, Struct cmdStruct, String cmdName, PropertyList list)
+    static public void initializeStruct(HCodeEngine engine, Struct cmdStruct, String cmdName, PropertyList list)
     {
         try {
             String capCmdName = cmdName.substring(0, 1).toUpperCase() + cmdName.substring(1);
@@ -264,9 +264,7 @@ public abstract class Struct
             // We have a missing property when a field ending with "Set" is false
 
             Set<String> fieldNames = fieldMap.keySet();
-            Iterator<String> iter = fieldNames.iterator();
-            while (iter.hasNext()) {
-                String fieldName = iter.next();
+            for (String fieldName : fieldNames) {
                 if (fieldName.matches(".*Set$")) {
                     Field field = fieldMap.get(fieldName);
                     if (!field.getBoolean(cmdStruct)) {
@@ -285,7 +283,7 @@ public abstract class Struct
         }
     }
 
-    private static void setValue(
+    static private void setValue(
         HCodeEngine engine,
         Object instance,
         HashMap<String, Field> fieldMap, Field field,
@@ -333,7 +331,7 @@ public abstract class Struct
         // Field can be a double, int, color, or boolean
 
         else if (Double.class.isAssignableFrom(propertyValue.getClass())) {
-            Double dbl = (Double)propertyValue;
+            double dbl = (Double)propertyValue;
             if (field.getType() == double.class) {
                 field.setDouble(instance, dbl);
             }

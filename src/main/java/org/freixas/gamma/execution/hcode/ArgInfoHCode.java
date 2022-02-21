@@ -47,7 +47,7 @@ abstract public class ArgInfoHCode extends HCode
      * Execute the HCode.
      *
      * @param engine The HCode engine.
-     * @param data The arguments for this hCode instruction.
+     * @param data The arguments for this h-code instruction.
      */
     abstract public void execute(HCodeEngine engine, List<Object> data);
 

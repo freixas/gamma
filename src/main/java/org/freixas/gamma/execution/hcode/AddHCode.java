@@ -34,7 +34,7 @@ import java.util.List;
  */
 public class AddHCode extends ArgInfoHCode
 {
-    private static final ArgInfo argInfo;
+    static private final ArgInfo argInfo;
     static {
         ArrayList<ArgInfo.Type> argTypes = new ArrayList<>();
         argTypes.add(ArgInfo.Type.ANY);
@@ -74,22 +74,24 @@ public class AddHCode extends ArgInfoHCode
             String string2;
 
             if (isDouble1) {
-                string1 = engine.toDisplayableString((Double)arg1);
+                string1 = engine.toDisplayableString(arg1);
             }
             else if (isDisplayable1) {
                 string1 = ((Displayable)arg1).toDisplayableString(engine);
             }
             else {
+                //noinspection ConstantConditions
                 string1 = (String)arg1;
             }
 
             if (isDouble2) {
-                string2 = engine.toDisplayableString((Double)arg2);
+                string2 = engine.toDisplayableString(arg2);
             }
             else if (isDisplayable2) {
                 string2 = ((Displayable)arg2).toDisplayableString(engine);
             }
             else {
+                //noinspection ConstantConditions
                 string2 = (String)arg2;
             }
 

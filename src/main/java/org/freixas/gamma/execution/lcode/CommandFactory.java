@@ -44,7 +44,7 @@ public class CommandFactory
         commandMap.put("label", new LabelCommandExec());
     }
 
-    public static Command createCommand(HCodeEngine engine, String name, PropertyList properties)
+    static public Command createCommand(HCodeEngine engine, String name, PropertyList properties)
     {
         CommandExec exec = commandMap.get(name);
         if (exec == null) throw new ProgrammingException("Unexpected command name '" + name + ";");

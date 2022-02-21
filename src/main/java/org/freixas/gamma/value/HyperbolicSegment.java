@@ -121,7 +121,7 @@ public class HyperbolicSegment extends CurveSegment implements ExecutionImmutabl
      *
      * @return The bounding box for the offset acceleration curve.
      */
-    private static Bounds getBounds(
+    static private Bounds getBounds(
         double minX, double minT, double maxX, double maxT, OffsetAcceleration curve)
     {
         Coordinate offset = curve.getOffset();
@@ -265,18 +265,10 @@ public class HyperbolicSegment extends CurveSegment implements ExecutionImmutabl
     {
         double t1 = curve.xToT(x, false);
         double t2 = curve.xToT(x, true);
-        /**
-         * DEVELOPMENT CODE
-         */
-        if ((Util.fuzzyLT(t1, min) || Util.fuzzyGT(t1, max)) &&
-            (Util.fuzzyLT(t2, min) || Util.fuzzyGT(t2, max))) {
-            throw new ProgrammingException("HyperbolicSegment.xToTWithin()");
-        }
-        /**
-         * END DEVELOPMENT CODE
-         */
+
         if (Util.fuzzyLT(t1, min) || Util.fuzzyGT(t1, max)) return t2;
         if (Util.fuzzyLT(t2, min) || Util.fuzzyGT(t2, max)) return t1;
+
         if (later) return Math.max(t1, t2);
         return Math.min(t1, t2);
 

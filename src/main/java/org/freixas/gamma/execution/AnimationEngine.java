@@ -23,6 +23,8 @@ import org.freixas.gamma.execution.lcode.AnimationStruct;
 import org.freixas.gamma.math.Util;
 import org.freixas.gamma.value.AnimationVariable;
 import org.freixas.gamma.value.DynamicVariable;
+
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
@@ -47,7 +49,7 @@ public class AnimationEngine
         RUNNING, STOPPED, NOT_SET
     }
 
-    class DiagramAnimationTimer extends AnimationTimer
+    static class DiagramAnimationTimer extends AnimationTimer
     {
         private final AnimationEngine animationEngine;
         private double FPS;
@@ -128,9 +130,7 @@ public class AnimationEngine
                 }
                 catch (Throwable e) {
                     animationEngine.stop();
-                    Platform.runLater(() -> {
-                        animationEngine.window.getDiagramEngine().handleException(e);
-                    });
+                    Platform.runLater(() -> animationEngine.window.getDiagramEngine().handleException(e));
                 }
             }
         }
@@ -138,13 +138,12 @@ public class AnimationEngine
 
     // Maximum of 10 hours of animation at 30 FPS
 
-    private static final int MAX_FRAMES = 10 * 60 * 60 * 30;
+    static private final int MAX_FRAMES = 10 * 60 * 60 * 30;
 
     private final MainWindow window;
     private final SetStatement setStatement;
     private final Stylesheet stylesheet;
     private final HCodeProgram program;
-    private final boolean hasDisplayVariables;
 
     private DynamicSymbolTable dynamicSymbolTable;
     private Set<String> symbolNames;
@@ -179,13 +178,12 @@ public class AnimationEngine
 
     private boolean isClosed;
 
-    public AnimationEngine(MainWindow window, SetStatement setStatement, Stylesheet stylesheet, HCodeProgram program, boolean hasDisplayVariables)
+    public AnimationEngine(MainWindow window, SetStatement setStatement, Stylesheet stylesheet, HCodeProgram program)
     {
         this.window = window;
         this.setStatement = setStatement;
         this.stylesheet = stylesheet;
         this.program = program;
-        this.hasDisplayVariables = hasDisplayVariables;
 
         this.hCodeEngine = null;
         this.timer = null;
@@ -196,7 +194,7 @@ public class AnimationEngine
         setup();
     }
 
-    public final void setup()
+    private void setup()
     {
         // Get the drawing area
 
@@ -209,8 +207,11 @@ public class AnimationEngine
         buttonAnimStepForward   = (Button)window.getScene().lookup("#animStepForward");
         buttonAnimPlayPause     = (Button)window.getScene().lookup("#animPlay");
 
-        playImage = new ImageView(new Image(window.getClass().getResourceAsStream("/player_play.png")));
-        stopImage = new ImageView(new Image(window.getClass().getResourceAsStream("/player_stop.png")));
+        InputStream playIS = window.getClass().getResourceAsStream("/player_play.png");
+        InputStream stopIS = window.getClass().getResourceAsStream("/player_stop.png");
+
+        playImage = playIS == null ? null : new ImageView(new Image(playIS));
+        stopImage = stopIS == null ? null : new ImageView(new Image(stopIS));
 
         // Enable the button area
 
@@ -398,16 +399,16 @@ public class AnimationEngine
             buttonAnimStepBackward.setDisable(true);
             buttonAnimStepForward.setDisable(true);
 
-            buttonAnimPlayPause.setGraphic(stopImage);
+            if (stopImage != null) buttonAnimPlayPause.setGraphic(stopImage);
         }
         else if (state == State.STOPPED) {
-            buttonAnimStart.setDisable(false || absFrame == 0);
-            buttonAnimEnd.setDisable(false || absFrame == absMaxFrame);
-            buttonAnimPlayPause.setDisable(false || absFrame == absMaxFrame);
-            buttonAnimStepBackward.setDisable(false || absFrame == 0);
-            buttonAnimStepForward.setDisable(false || absFrame == absMaxFrame);
+            buttonAnimStart.setDisable(absFrame == 0);
+            buttonAnimEnd.setDisable( absFrame == absMaxFrame);
+            buttonAnimPlayPause.setDisable(absFrame == absMaxFrame);
+            buttonAnimStepBackward.setDisable(absFrame == 0);
+            buttonAnimStepForward.setDisable(absFrame == absMaxFrame);
 
-            buttonAnimPlayPause.setGraphic(playImage);
+            if (playImage != null) buttonAnimPlayPause.setGraphic(playImage);
         }
     }
 
@@ -464,8 +465,8 @@ public class AnimationEngine
                 }
             }
 
-            for (int i = 0; i < names.size(); i++) {
-                dynamicSymbolTable.remove(names.get(i));
+            for (String name : names) {
+                dynamicSymbolTable.remove(name);
             }
 
             // Execute the hcode once to add in any new/changes animation variables
@@ -552,13 +553,11 @@ public class AnimationEngine
     {
         if (isClosed) return;
 
-        Iterator<String> iter = symbolNames.iterator();
-
         // Tell all the animation variables to update to match the current
         // frame value
 
-        while (iter.hasNext()) {
-            DynamicVariable dynamicVariable = dynamicSymbolTable.getDynamicVariable(iter.next());
+        for (String symbolName : symbolNames) {
+            DynamicVariable dynamicVariable = dynamicSymbolTable.getDynamicVariable(symbolName);
             if (dynamicVariable instanceof AnimationVariable var) {
                 var.setCurrentValue(frame);
             }
@@ -589,16 +588,14 @@ public class AnimationEngine
     {
         int maxFrames = -1;
 
-        Iterator<String> iter = symbolNames.iterator();
-
-        while (iter.hasNext()) {
-            DynamicVariable dynamicVariable = dynamicSymbolTable.getDynamicVariable(iter.next());
+        for (String symbolName : symbolNames) {
+            DynamicVariable dynamicVariable = dynamicSymbolTable.getDynamicVariable(symbolName);
             if (dynamicVariable instanceof AnimationVariable var) {
-                if (Double.isNaN(var.getFinalValue()))  continue;
+                if (Double.isNaN(var.getFinalValue())) continue;
 
                 double start = var.getInitialValue();
-                double step  = var.getStepSize();
-                double end   = var.getFinalValue();
+                double step = var.getStepSize();
+                double end = var.getFinalValue();
 
                 int numSteps;
 

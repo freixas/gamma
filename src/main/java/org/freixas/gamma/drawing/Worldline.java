@@ -32,7 +32,7 @@ import java.util.ArrayList;
  */
 public class Worldline
 {
-    public static void draw(Context context, WorldlineStruct struct, StyleStruct styles)
+    static public void draw(Context context, WorldlineStruct struct, StyleStruct styles)
     {
         GraphicsContext gc = context.gc;
 
@@ -163,7 +163,7 @@ public class Worldline
         gc.restore();
     }
 
-    private static double[] getAngles(WorldlineEndpoint min, WorldlineEndpoint max)
+    static private double[] getAngles(WorldlineEndpoint min, WorldlineEndpoint max)
     {
         double angleAtStart, angleAtEnd;
         double vStart = min.v;

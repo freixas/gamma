@@ -35,7 +35,7 @@ import java.util.List;
  */
 public class AssignHCode extends ArgInfoHCode
 {
-    private static final ArgInfo argInfo;
+    static private final ArgInfo argInfo;
 
     static {
         ArrayList<ArgInfo.Type> argTypes = new ArrayList<>();

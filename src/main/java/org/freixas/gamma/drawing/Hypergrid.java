@@ -31,9 +31,9 @@ import org.freixas.gamma.value.HyperbolicSegment;
  */
 public class Hypergrid
 {
-    public static final double MIN_GRID_SIZE = 20;
+    static public final double MIN_GRID_SIZE = 20;
 
-    public static void draw(Context context, HypergridStruct struct,
+    static public void draw(Context context, HypergridStruct struct,
                             StyleStruct styles)
     {
         GraphicsContext gc = context.gc;
@@ -129,7 +129,7 @@ public class Hypergrid
      * a range of points on the x-axis. Any hypergrid hyperbola drawn through
      * that range of points will cross the bounding box.
      */
-    private static double[] calculateXRange(Bounds bounds)
+    static private double[] calculateXRange(Bounds bounds)
     {
         // The formula for our hyperbolas is t = sqrt(x^2 + 2x / a).
         //
@@ -169,6 +169,7 @@ public class Hypergrid
 
         // Completely inside, the bounds need no adjustment
 
+        //noinspection StatementWithEmptyBody
         if ((bounds.max.x < 0 && absMaxX > absMinT && absMaxX > absMaxT) ||
             (bounds.min.x > 0 && absMinX > absMinT && absMinX > absMaxT)) {
             // Do nothing

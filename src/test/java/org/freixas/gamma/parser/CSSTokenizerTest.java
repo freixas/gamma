@@ -38,12 +38,12 @@ public class CSSTokenizerTest
     }
 
     @BeforeClass
-    public static void setUpClass()
+    static public void setUpClass()
     {
     }
 
     @AfterClass
-    public static void tearDownClass()
+    static public void tearDownClass()
     {
     }
 

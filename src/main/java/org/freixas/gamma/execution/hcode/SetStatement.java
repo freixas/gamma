@@ -28,11 +28,11 @@ public class SetStatement
         DISPLAY, PRINT
     }
 
-    public static final double DEFAULT_UNITS = 1.0;
-    public static final double DEFAULT_DISPLAY_PRECISION = 12.0;
-    public static final double DEFAULT_PRINT_PRECISION = 12.0;
+    static public final double DEFAULT_UNITS = 1.0;
+    static public final double DEFAULT_DISPLAY_PRECISION = 12.0;
+    static public final double DEFAULT_PRINT_PRECISION = 12.0;
 
-    private double units = DEFAULT_UNITS;
+    private double units;
     private int displayPrecision = Util.toInt(DEFAULT_DISPLAY_PRECISION);
     private int printPrecision = Util.toInt(DEFAULT_PRINT_PRECISION);
 

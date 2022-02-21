@@ -32,7 +32,7 @@ import java.util.List;
  */
 public class JumpHCode extends ArgInfoHCode implements Jump
 {
-    private static final ArgInfo argInfo;
+    static private final ArgInfo argInfo;
 
     static {
         ArrayList<ArgInfo.Type> argTypes = new ArrayList<>();

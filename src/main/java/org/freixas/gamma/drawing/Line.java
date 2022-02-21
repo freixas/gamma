@@ -41,7 +41,7 @@ public class Line
      * @param struct The line command structure.
      * @param styles The styles to use.
      */
-    public static void draw(Context context, LineStruct struct, StyleStruct styles)
+    static public void draw(Context context, LineStruct struct, StyleStruct styles)
     {
         StyleProperties.Arrow arrowStyle = styles.arrow;
 
@@ -92,7 +92,7 @@ public class Line
         styles.arrow = arrowStyle;
     }
 
-    private static void suppressStartArrow(StyleStruct styles)
+    static private void suppressStartArrow(StyleStruct styles)
     {
         if (styles.arrow == StyleProperties.Arrow.START) {
             styles.arrow = StyleProperties.Arrow.NONE;
@@ -102,7 +102,7 @@ public class Line
         }
     }
 
-    private static void suppressEndArrow(StyleStruct styles)
+    static private void suppressEndArrow(StyleStruct styles)
     {
         if (styles.arrow == StyleProperties.Arrow.END) {
             styles.arrow = StyleProperties.Arrow.NONE;

@@ -41,7 +41,8 @@ public class Axis
 {
     static final double IDEAL_TICK_SPACING = 20.0;
 
-    public static void draw(Context context, AxesStruct struct,
+    @SuppressWarnings("ConstantConditions")
+    static public void draw(Context context, AxesStruct struct,
                             AxesStruct.AxisStruct axisStruct, double tickScale,
                             StyleStruct styles)
     {
@@ -736,7 +737,7 @@ public class Axis
      * @return A format string which can be used to produce values with the
      * given number of significant digits (using String.format()).
      */
-    private static String getTickFormat(double minValue, double maxValue, double delta)
+    static private String getTickFormat(double minValue, double maxValue, double delta)
     {
         minValue = Math.abs(minValue);
         maxValue = Math.abs(maxValue);
@@ -792,7 +793,7 @@ public class Axis
      * @return A number that can be used with the remainder operator to determine
      * whether to display or skip a particular tick mark.
      */
-    private static Dimension2D getMaxTickDimensions(
+    static private Dimension2D getMaxTickDimensions(
         double minValue, double maxValue, String format, Font font)
     {
         String minString = String.format(format, minValue);
@@ -820,7 +821,7 @@ public class Axis
      * @return A number that can be used with the remainder operator to determine
      * whether to display or skip a particular tick mark.
      */
-    private static int getLabelSkip(Dimension2D maxTickDimension, double delta, double scale)
+    static private int getLabelSkip(Dimension2D maxTickDimension, double delta, double scale)
     {
         double maxWidth = maxTickDimension.getWidth() * scale * 2;
         double s = maxWidth / delta;
@@ -848,7 +849,7 @@ public class Axis
      *
      * @return A new, rotated line segment.
      */
-    private static LineSegment rotateSegment(double x1, double t1, double x2, double t2, Affine rotation)
+    static private LineSegment rotateSegment(double x1, double t1, double x2, double t2, Affine rotation)
     {
         Point2D p1 = rotation.transform(x1, t1);
         Point2D p2 = rotation.transform(x2, t2);
@@ -866,7 +867,7 @@ public class Axis
      * @param compareRightEdge If true, move the label so that its right edge touches the closest line crossing. If
      * false, we use the left edge.
      */
-    private static void adjustBounds(Bounds bounds, Bounds extendedBounds, LineSegment segment, boolean compareRightEdge)
+    static private void adjustBounds(Bounds bounds, Bounds extendedBounds, LineSegment segment, boolean compareRightEdge)
     {
         LineSegment newSegment = segment.intersect(extendedBounds);
         if (newSegment == null) return;
@@ -885,7 +886,7 @@ public class Axis
         }
     }
 
-//    private static void debugDrawBounds(Context context, Bounds bounds, Affine transform, Color color)
+//    static private void debugDrawBounds(Context context, Bounds bounds, Affine transform, Color color)
 //    {
 //        Point2D p1 = transform.transform(bounds.min.x, bounds.min.t);
 //        Point2D p2 = transform.transform(bounds.min.x, bounds.max.t);

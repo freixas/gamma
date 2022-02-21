@@ -35,12 +35,12 @@ public class ConcreteLineTest
     }
 
     @BeforeClass
-    public static void setUpClass()
+    static public void setUpClass()
     {
     }
 
     @AfterClass
-    public static void tearDownClass()
+    static public void tearDownClass()
     {
     }
 
@@ -201,8 +201,8 @@ public class ConcreteLineTest
     {
         System.out.println("infiniteIntersect");
 
-        Double pInf = Double.POSITIVE_INFINITY;
-        Double nInf = Double.NEGATIVE_INFINITY;
+        double pInf = Double.POSITIVE_INFINITY;
+        double nInf = Double.NEGATIVE_INFINITY;
 
         Bounds[] bounds = {
             new Bounds(-10, -10, 10, 10),

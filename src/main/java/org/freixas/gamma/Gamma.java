@@ -111,7 +111,7 @@ public final class Gamma extends Application
      *
      * @param args The command line arguments.
      */
-    public static void main(String[] args)
+    static public void main(String[] args)
     {
         launch(args);
     }
@@ -245,7 +245,7 @@ public final class Gamma extends Application
      *
      * @throws java.lang.Exception On any exception.
      */
-    public static void newMainWindow(File file, File[] defaultDirectories) throws Exception
+    static public void newMainWindow(File file, File[] defaultDirectories) throws Exception
     {
         // Go through all the existing windows and set the Close button's state
         // appropriately -- Close is available only if there is more than one window
@@ -266,7 +266,7 @@ public final class Gamma extends Application
      *
      * @return The number of main windows in the application.
      */
-    public static int getWindowCount()
+    static public int getWindowCount()
     {
         if (!Platform.isFxApplicationThread()) Gamma.quickAlert("Not FX Thread");
         return windowList.size();
@@ -276,7 +276,7 @@ public final class Gamma extends Application
      * Exit the application by closing all windows (letting the windows
      * release any resources) and then exiting the GUI.
      */
-    public static void exit()
+    static public void exit()
     {
         while (windowList.size() > 1) {
             closeWindow(windowList.get(0));
@@ -302,7 +302,7 @@ public final class Gamma extends Application
      *
      * @param window The window to close.
      */
-    public static void closeWindow(MainWindow window)
+    static public void closeWindow(MainWindow window)
     {
         // If we have just one window (which we are about to close), go through
         // exit() instead

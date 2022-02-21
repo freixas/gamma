@@ -32,7 +32,7 @@ public class Arrow
     public final static double ARROW_WIDTH = 10;
     public final static double ARROW_HEIGHT = 8;
 
-    public static void draw(Context context, Coordinate location, double angle,
+    static public void draw(Context context, Coordinate location, double angle,
                             StyleStruct styles)
     {
         GraphicsContext gc = context.gc;

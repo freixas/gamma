@@ -25,7 +25,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * The HCodeProgram receives the hCode produced by the parser and transforms
+ * The HCodeProgram receives the h-code produced by the parser and transforms
  * it into separate HCode and data stacks. A master copy of the data can be
  * saved if the program will be executed multiple times.
  * <p>
@@ -64,15 +64,14 @@ public class HCodeProgram
         // Now that we know where every label's location is, let's find all the
         // Jump instructions and convert their label to a location
 
-        for (int i = 0; i < codes.size(); i++) {
-            Object code = codes.get(i);
+        for (Object code : codes) {
             if (code instanceof Jump jump) {
                 Integer id = jump.getId();
                 if (!labels.containsKey(id)) {
                     throw new ProgrammingException("HCodeProgram: Label '" + jump.getId() + "' not found");
                 }
-               int location = labels.get(id);
-               jump.setJumpLocation(location);
+                int location = labels.get(id);
+                jump.setJumpLocation(location);
             }
         }
     }
@@ -99,7 +98,7 @@ public class HCodeProgram
      * arbitrary HCode, but the next HCode in the current execution of the
      * program.
      *
-     * @param hCode The HCode whose data we want.
+     * @param hCode The h-code whose data we want.
      *
      * @return A list of the matching data. While this list contains only the
      * data for the current HCode, changes to the returned data affect the

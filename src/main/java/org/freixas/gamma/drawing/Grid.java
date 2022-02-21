@@ -33,9 +33,9 @@ import javafx.scene.paint.Color;
  */
 public class Grid
 {
-    public static final double MIN_GRID_SIZE = 20;
+    static public final double MIN_GRID_SIZE = 20;
 
-    public static void draw(Context context, GridStruct struct, StyleStruct styles)
+    static public void draw(Context context, GridStruct struct, StyleStruct styles)
     {
         GraphicsContext gc = context.gc;
         Frame frame = struct.frame;

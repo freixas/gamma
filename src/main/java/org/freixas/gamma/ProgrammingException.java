@@ -33,7 +33,7 @@ public class ProgrammingException extends RuntimeException
      *  Create a Programming exception. Include an error message.
      *
      * @param message The error message.
-     */
+      */
     public ProgrammingException(String message)
     {
         this(message, null);
@@ -48,6 +48,7 @@ public class ProgrammingException extends RuntimeException
     {
         this(null, cause);
     }
+
     /**
      *  Create a Programming exception. Include the error message and the
      *  exception that caused this exception

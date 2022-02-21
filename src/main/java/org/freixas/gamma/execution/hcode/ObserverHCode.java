@@ -32,7 +32,7 @@ import java.util.List;
  */
 public class ObserverHCode extends ArgInfoHCode
 {
-    private static final ArgInfo argInfo;
+    static private final ArgInfo argInfo;
     static {
         ArrayList<ArgInfo.Type> argTypes = new ArrayList<>();
         argTypes.add(ArgInfo.Type.W_INITIALIZER);

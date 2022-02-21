@@ -50,60 +50,60 @@ public class PreferencesManager
 
     // DISPLAY GREETING MESSAGE
 
-    static public final boolean getDisplayGreetingMessage()
+    static public boolean getDisplayGreetingMessage()
     {
         return userPreferences.getBoolean("DISPLAY_GREETING", true);
     }
 
-    static public final void setDisplayGreetingMessage(boolean displayGreetingMessage)
+    static public void setDisplayGreetingMessage(boolean displayGreetingMessage)
     {
         userPreferences.putBoolean("DISPLAY_GREETING", displayGreetingMessage);
     }
 
     // DEFAULT SCRIPTS DIRECTORY
 
-    static public final String getDefaultScriptsDirectory()
+    static public String getDefaultScriptsDirectory()
     {
         return userPreferences.get("DEFAULT_SCRIPT_DIRECTORY", BASE_SCRIPTS_DIRECTORY);
     }
 
-    static public final void setDefaultScriptsDirectory(String defaultScriptsDirectory)
+    static public void setDefaultScriptsDirectory(String defaultScriptsDirectory)
     {
         userPreferences.put("DEFAULT_SCRIPT_DIRECTORY", defaultScriptsDirectory != null ? defaultScriptsDirectory : "");
     }
 
     // DEFAULT IMAGES DIRECTORY
 
-    static public final String getDefaultImagesDirectory()
+    static public String getDefaultImagesDirectory()
     {
         return userPreferences.get("DEFAULT_IMAGE_DIRECTORY", BASE_IMAGES_DIRECTORY);
     }
 
-    static public final void setDefaultImagesDirectory(String defaultImagesDirectory)
+    static public void setDefaultImagesDirectory(String defaultImagesDirectory)
     {
         userPreferences.put("DEFAULT_IMAGE_DIRECTORY", defaultImagesDirectory != null ? defaultImagesDirectory : "");
     }
 
     // DEFAULT VIDEOS DIRECTORY
 
-    static public final String getDefaultVideosDirectory()
+    static public String getDefaultVideosDirectory()
     {
         return userPreferences.get("DEFAULT_VIDEO_DIRECTORY", BASE_VIDEOS_DIRECTORY);
     }
 
-    static public final void setDefaultVideosDirectory(String defaultVideosDirectory)
+    static public void setDefaultVideosDirectory(String defaultVideosDirectory)
     {
         userPreferences.put("DEFAULT_VIDEO_DIRECTORY", defaultVideosDirectory != null ? defaultVideosDirectory : "");
     }
 
     // DEFAULT STYLESHEET
 
-    static public final String getDefaultStylesheet()
+    static public String getDefaultStylesheet()
     {
         return userPreferences.get("DEFAULT_STYLESHEET", "");
     }
 
-    static public final void setDefaultStylesheet(String defaultStylesheet)
+    static public void setDefaultStylesheet(String defaultStylesheet)
     {
 
         userPreferences.put("DEFAULT_STYLESHEET", defaultStylesheet != null ? defaultStylesheet : "");
@@ -111,7 +111,7 @@ public class PreferencesManager
 
     // EDITOR COMMAND
 
-    static public final String getEditorCommand()
+    static public String getEditorCommand()
     {
         String defaultEditorCommand = "";
         if (Gamma.IS_WINDOWS) { defaultEditorCommand = WINDOWS_DEFAULT_EDITOR_COMMAND; }
@@ -121,55 +121,55 @@ public class PreferencesManager
         return userPreferences.get("EDITOR_COMMAND", defaultEditorCommand);
     }
 
-    static public final void setEditorCommand(String editorCommand)
+    static public void setEditorCommand(String editorCommand)
     {
         userPreferences.put("EDITOR_COMMAND", editorCommand != null ? editorCommand : "");
     }
 
     // EXPORT IMAGE FORMAT
 
-    static public final int getImageFormat()
+    static public int getImageFormat()
     {
         return userPreferences.getInt("IMAGE_FORMAT", IMAGE_FORMAT);
     }
 
-    static public final void setImageFormat(int imageFormat)
+    static public void setImageFormat(int imageFormat)
     {
         userPreferences.putInt("IMAGE_FORMAT", imageFormat);
     }
 
     // EXPORT IMAGE COMPRESSION
 
-    static public final float getImageCompression()
+    static public float getImageCompression()
     {
         return userPreferences.getFloat("IMAGE_COMPRESSION", IMAGE_COMPRESSION);
     }
 
-    static public final void setImageCompression(float imageCompression)
+    static public void setImageCompression(float imageCompression)
     {
         userPreferences.putFloat("IMAGE_COMPRESSION", imageCompression);
     }
 
     // EXPORT IMAGE PROGRESSIVE
 
-    static public final boolean getImageProgressive()
+    static public boolean getImageProgressive()
     {
         return userPreferences.getBoolean("IMAGE_PROGRESSIVE", IMAGE_PROGRESSIVE);
     }
 
-    static public final void setImageProgressive(boolean isProgressive)
+    static public void setImageProgressive(boolean isProgressive)
     {
         userPreferences.putBoolean("IMAGE_PROGRESSIVE", isProgressive);
     }
 
     // IMAGE DPI
 
-    static public final int getImagePPI()
+    static public int getImagePPI()
     {
         return userPreferences.getInt("IMAGE_PPI", IMAGE_PPI);
     }
 
-    static public final void setImagePPI(int dpi)
+    static public void setImagePPI(int dpi)
     {
         userPreferences.putInt("IMAGE_PPI", dpi);
     }
@@ -196,7 +196,7 @@ public class PreferencesManager
      *
      * @param type The type of file.
      */
-    public static File getDefaultDirectory(Gamma.FileType type)
+    static public File getDefaultDirectory(Gamma.FileType type)
     {
         String directoryName;
         String defaultName;
@@ -235,8 +235,7 @@ public class PreferencesManager
             // Does it exist?
 
             if (!defaultDirectory.exists()) {
-                defaultDirectory.mkdir();
-                if (defaultDirectory.exists()) {
+                 if (defaultDirectory.mkdirs() && defaultDirectory.exists()) {
                     return defaultDirectory;
                 }
             }
@@ -252,8 +251,7 @@ public class PreferencesManager
         }
 
         if (!defaultDirectory.exists()) {
-            defaultDirectory.mkdir();
-            if (defaultDirectory.exists()) {
+            if (defaultDirectory.mkdirs() && defaultDirectory.exists()) {
                 return defaultDirectory;
             }
         }
@@ -266,12 +264,12 @@ public class PreferencesManager
             return defaultDirectory;
         }
         if (!defaultDirectory.exists()) {
-            defaultDirectory.mkdir();
-            if (defaultDirectory.exists()) {
+            if (defaultDirectory.mkdirs() && defaultDirectory.exists()) {
                 return defaultDirectory;
             }
         }
         // Final option: user.home
+
         return new File(System.getProperty("user.home"));
     }
 

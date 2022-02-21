@@ -7,17 +7,8 @@
             </packagings>
             <goals>
                 <goal>process-classes</goal>
-                <goal>org.codehaus.mojo:exec-maven-plugin:3.0.0:exec</goal>
+                <goal>javafx:run</goal>
             </goals>
-            <properties>
-                
-                <exec.args>${exec.vmArgs} -classpath %classpath ${exec.mainClass} ${exec.appArgs}</exec.args>
-                <exec.appArgs>test-rotations.txt</exec.appArgs>
-                <exec.mainClass>org.freixas.gamma.Gamma</exec.mainClass>
-                <exec.executable>java</exec.executable>
-                <exec.vmArgs>--module-path "C:\Program Files\JavaFX\lib" --add-modules javafx.controls,javafx.fxml,javafx.media,javafx.swing,javafx.web ${vmArgs}</exec.vmArgs>
-                <exec.workingdir>D:\Users\tony\Documents\Gamma\Tests</exec.workingdir>
-            </properties>
         </action>
         <action>
             <actionName>debug</actionName>
@@ -26,18 +17,8 @@
             </packagings>
             <goals>
                 <goal>process-classes</goal>
-                <goal>org.codehaus.mojo:exec-maven-plugin:3.0.0:exec</goal>
+                <goal>javafx:run</goal>
             </goals>
-            <properties>
-                
-                <exec.args>${exec.vmArgs} -classpath %classpath ${exec.mainClass} ${exec.appArgs}</exec.args>
-                <exec.appArgs>test-rotations.txt</exec.appArgs>
-                <exec.mainClass>org.freixas.gamma.Gamma</exec.mainClass>
-                <exec.executable>java</exec.executable>
-                <jpda.listen>true</jpda.listen>
-                <exec.vmArgs>--module-path "C:\Program Files\JavaFX\lib" --add-modules javafx.controls,javafx.fxml,javafx.media,javafx.swing,javafx.web ${vmArgs} -agentlib:jdwp=transport=dt_socket,server=n,address=${jpda.address}</exec.vmArgs>
-                <exec.workingdir>D:\Users\tony\Documents\Gamma\Tests</exec.workingdir>
-            </properties>
         </action>
         <action>
             <actionName>run.single.main</actionName>
@@ -84,12 +65,12 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:3.0.0:exec</goal>
             </goals>
             <properties>
-                <exec.vmArgs>--module-path "C:\Program Files\JavaFX\lib" --add-modules javafx.controls,javafx.fxml,javafx.media,javafx.swing,javafx.web</exec.vmArgs>
+                <exec.vmArgs>--module-path "D:\Users\tony\Documents\Java\gamma\target\classes;C:\Program Files\JavaFX\lib" --add-modules org.freixas.gamma</exec.vmArgs>
                 <exec.args>${exec.vmArgs} -classpath %classpath ${exec.mainClass} ${exec.appArgs}</exec.args>
                 <exec.mainClass>org.freixas.gamma.Gamma</exec.mainClass>
                 <exec.executable>java</exec.executable>
-                <exec.appArgs>test-rotations.txt</exec.appArgs>
-                <exec.workingdir>D:\Users\tony\Documents\Gamma\Tests</exec.workingdir>
+                <!--<exec.appArgs></exec.appArgs>
+                <exec.workingdir></exec.workingdir>-->
             </properties>
         </action>
         <action>

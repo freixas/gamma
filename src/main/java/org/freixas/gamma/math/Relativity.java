@@ -27,8 +27,8 @@ public final class Relativity
     // We cache the last v and gamma values so as to speed up
     // the gamma calculation
 
-    private static double v = Double.NaN;
-    private static double gamma;
+    static private double v = Double.NaN;
+    static private double gamma;
 
     // TERMS:
     //   x = proper distance
@@ -199,7 +199,7 @@ public final class Relativity
      * @param tau The time in frame F', the moving frame.
      * @param v The velocity of the moving observer
      *
-     * @return
+     * @return Time for the rest observer.
      */
     static public double tauToT(double tau, double v) {
 	return tau * Relativity.gamma(v);
@@ -308,7 +308,7 @@ public final class Relativity
      *
      * @return The x axis angle in degrees.
      */
-    public static double vToXAngle(double v)
+    static public double vToXAngle(double v)
     {
         return Math.toDegrees(Math.atan(v));
     }
@@ -322,7 +322,7 @@ public final class Relativity
      *
      * @return The velocity.
      */
-    public static double angleXToV(double angle)
+    static public double angleXToV(double angle)
     {
         return Math.tan(Math.toRadians(angle));
     }
@@ -337,7 +337,7 @@ public final class Relativity
      *
      * @return The t axis angle in degrees.
      */
-    public static double vToTAngle(double v)
+    static public double vToTAngle(double v)
     {
         double angle = Math.toDegrees(Math.atan(v));
         if (angle >= 0) {
@@ -357,7 +357,7 @@ public final class Relativity
      *
      * @return The velocity.
      */
-    public static double angleTToV(double angle)
+    static public double angleTToV(double angle)
     {
         angle = Math.toRadians(angle);
         if (angle >= 0) {
@@ -379,7 +379,7 @@ public final class Relativity
      * @return The angle in degrees in the prime frame in the range -180,
      * exclusive, to 180, inclusive.
      */
-    public static double toPrimeAngle(double angle, double v)
+    static public double toPrimeAngle(double angle, double v)
     {
         // We accept any angle, but normalize the angle to within -180 to + 180
 

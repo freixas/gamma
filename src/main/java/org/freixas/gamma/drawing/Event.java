@@ -32,10 +32,10 @@ import javafx.scene.shape.FillRule;
  */
 public class Event
 {
-    private static final double DIAMOND_DIAMETER_SCALE = Math.sqrt(2);
+    static private final double DIAMOND_DIAMETER_SCALE = Math.sqrt(2);
 
-    private static final double[] pathX = new double[5];
-    private static final double[] pathY = new double[5];
+    static private final double[] pathX = new double[5];
+    static private final double[] pathY = new double[5];
 
     static {
         double[] outerAngles = {
@@ -58,7 +58,7 @@ public class Event
         }
     }
 
-    public static void draw(Context context, EventStruct struct, StyleStruct styles)
+    static public void draw(Context context, EventStruct struct, StyleStruct styles)
     {
         GraphicsContext gc = context.gc;
 
@@ -77,12 +77,8 @@ public class Event
         Coordinate location = struct.location;
 
         switch(styles.eventShape) {
-            case CIRCLE -> {
-                gc.fillOval(location.x - halfDiameter, location.t - halfDiameter, diameter, diameter);
-            }
-            case SQUARE -> {
-                gc.fillRect(location.x - halfDiameter, location.t - halfDiameter, diameter, diameter);
-            }
+            case CIRCLE -> gc.fillOval(location.x - halfDiameter, location.t - halfDiameter, diameter, diameter);
+            case SQUARE -> gc.fillRect(location.x - halfDiameter, location.t - halfDiameter, diameter, diameter);
             case DIAMOND -> {
                 double halfHeightDiameter = halfDiameter * DIAMOND_DIAMETER_SCALE;
                 gc.beginPath();

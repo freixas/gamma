@@ -17,8 +17,8 @@
 package org.freixas.gamma.value;
 
 import org.freixas.gamma.ProgrammingException;
+
 import java.util.Collection;
-import java.util.Iterator;
 
 /**
  *
@@ -32,9 +32,9 @@ public class ExecutionMutableSupport
      *
      * @param obj The object to copy.
      *
-     * @return The copied object.
+     * @return The copied item.
      */
-    public static Object copy(Object obj)
+    static public Object copy(Object obj)
     {
         if (obj instanceof String ||
             obj instanceof Integer ||
@@ -48,12 +48,18 @@ public class ExecutionMutableSupport
         throw new ProgrammingException("ExecutionMutableSupport:copy()");
     }
 
-    @SuppressWarnings("unchecked")
-    public static void copy(Collection src, Collection dst)
+    /**
+     * Copy the src collection to the destination. Do a shallow copy of primitives
+     * and immutable objects and a deep copy of mutable objects.
+     *
+     * @param src The source collection.
+     * @param dst The destination collection.
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    static public void copy(Collection src, Collection dst)
     {
-        Iterator iter = src.iterator();
-        while (iter.hasNext()) {
-            dst.add(copy(iter.next()));
+        for (Object o : src) {
+            dst.add(copy(o));
         }
     }
 

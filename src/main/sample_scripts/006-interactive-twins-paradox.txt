@@ -12,7 +12,7 @@ display origin: (50, 50), scale: 3;
 set displayPrecision 2;
 debug = false;
 
-animation reps: 1;
+animation ;
 
 // Twins Paradox Without/With Acceleration
 

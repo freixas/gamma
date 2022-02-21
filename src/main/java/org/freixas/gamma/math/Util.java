@@ -26,7 +26,7 @@ import java.util.Objects;
  */
 public final class Util
 {
-    public static final double EPSILON = 5.0E-12;
+    static public final double EPSILON = 5.0E-12;
 
     private Util() {}
 

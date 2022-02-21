@@ -30,21 +30,22 @@ import static org.junit.Assert.*;
  *
  * @author Antonio Freixas
  */
+@SuppressWarnings({ "ConstantConditions", "UnusedAssignment" })
 public class OffsetAccelerationTest
 {
-    public static final double EPSILON = 5.0E-10;
+    static public final double EPSILON = 5.0E-10;
 
     public OffsetAccelerationTest()
     {
     }
 
     @BeforeClass
-    public static void setUpClass()
+    static public void setUpClass()
     {
     }
 
     @AfterClass
-    public static void tearDownClass()
+    static public void tearDownClass()
     {
     }
 
@@ -69,7 +70,7 @@ public class OffsetAccelerationTest
                     double x = oa.vToX(0);
                     fail("Should have thrown an ArithmeticException");
                 }
-                catch (ArithmeticException e) {
+                catch (ArithmeticException ignored) {
                 }
             }
             else {
@@ -94,7 +95,7 @@ public class OffsetAccelerationTest
                     double d = oa.vToD(0);
                     fail("Should have thrown an ArithmeticException");
                 }
-                catch (ArithmeticException e) {
+                catch (ArithmeticException ignored) {
                 }
             }
             else {
@@ -119,7 +120,7 @@ public class OffsetAccelerationTest
                     double t = oa.vToT(0);
                     fail("Should have thrown an ArithmeticException");
                 }
-                catch (ArithmeticException e) {
+                catch (ArithmeticException ignored) {
                 }
             }
             else {
@@ -144,7 +145,7 @@ public class OffsetAccelerationTest
                     double tau = oa.vToTau(0);
                     fail("Should have thrown an ArithmeticException");
                 }
-                catch (ArithmeticException e) {
+                catch (ArithmeticException ignored) {
                 }
             }
             else {
@@ -233,7 +234,7 @@ public class OffsetAccelerationTest
                     double tau = oa.dToTau(0);
                     assertEquals(oa.tToTau(-14), tau, EPSILON);
                 }
-                catch (ArithmeticException e) {
+                catch (ArithmeticException ignored) {
                 }
             }
             else {

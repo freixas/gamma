@@ -29,7 +29,7 @@ import java.util.List;
  */
 public class FunctionHCode extends ArgInfoHCode
 {
-    private static final ArgInfo argInfo;
+    static private final ArgInfo argInfo;
 
     static {
         ArrayList<ArgInfo.Type> argTypes = new ArrayList<>();
@@ -87,8 +87,7 @@ public class FunctionHCode extends ArgInfoHCode
         // Execute a generic Function
 
         else if (function instanceof GenericFunction genericFunction) {
-            LinkedList<Object> funcDataCopy = new LinkedList<>();
-            funcDataCopy.addAll(funcData);
+            LinkedList<Object> funcDataCopy = new LinkedList<>(funcData);
             genericFunction.execute(engine, funcDataCopy);
             data.clear();
             data.addAll(funcDataCopy);

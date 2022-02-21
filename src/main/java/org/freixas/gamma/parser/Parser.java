@@ -62,6 +62,11 @@ public final class Parser
      */
     private record Op(String operator, boolean isLeftAssoc, boolean isBinary, int precedence)
     {
+        // Binary and unary operators are placed in separate tables
+
+        static HashMap<String, Op> binary = new HashMap<>();
+        static HashMap<String, Op> unary = new HashMap<>();
+
         static {
             new Op("<-", true, true, 8);
             new Op("->", true, true, 8);
@@ -95,11 +100,6 @@ public final class Parser
             new Op("(", false, true, 21);
             new Op("FUNC", true, true, 1000); // Used for function names
         }
-
-        // Binary and unary operators are placed in separate tables
-
-        static HashMap<String, Op> binary = new HashMap<>();
-        static HashMap<String, Op> unary = new HashMap<>();
 
         /**
          * Create an operator.

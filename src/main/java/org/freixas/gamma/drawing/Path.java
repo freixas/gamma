@@ -30,7 +30,7 @@ import javafx.scene.shape.FillRule;
  */
 public class Path
 {
-    public static void draw(Context context, PathStruct struct, StyleStruct styles)
+    static public void draw(Context context, PathStruct struct, StyleStruct styles)
     {
         // Quick test to see if we need to bother with this path
 
@@ -95,7 +95,7 @@ public class Path
         gc.restore();
     }
 
-    public static void setupFillGc(Context context, StyleStruct styles)
+    static public void setupFillGc(Context context, StyleStruct styles)
     {
         GraphicsContext gc = context.gc;
 
