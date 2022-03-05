@@ -1,13 +1,14 @@
-// Test arrow heads on boosted events
-//
+// ************************************************************
+// *
+// * BOOST EVENTS WITH A VARIETY OF ARROWHEADS
+// *
+// ************************************************************
+
 // Moving from the center out, the first pair of blue/red lines should
 // have arrows at the start (signaled by the star).
 // The second pairs should have arrows at the end.
 // The third pairs should have arrows at both ends;
 // The fourth pairs should have no arrows.
-//
-// Further test can be done by enabling the frame statement or
-// animating it
 
 stylesheet "
   .a { color: red; }

@@ -72,7 +72,7 @@ public class Path
 
        // Add arrow heads
 
-       if (struct.stroke && !struct.closed && styles.arrow != StyleProperties.Arrow.END) {
+       if (struct.stroke && !struct.closed && styles.arrow != StyleProperties.Arrow.NONE) {
            int size = path.size();
            if (size > 1) {
                if (styles.arrow == StyleProperties.Arrow.END || styles.arrow == StyleProperties.Arrow.BOTH) {

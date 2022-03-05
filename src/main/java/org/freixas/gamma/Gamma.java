@@ -141,8 +141,8 @@ public final class Gamma extends Application
         else {
             RUNTIME_LOCATION = runtimeLocation.getParentFile().getParentFile();
             String location = RUNTIME_LOCATION.getAbsolutePath();
-            HELP_LOCATION = new File(location + "/help");
-            SAMPLE_SCRIPTS_LOCATION = new File(location + "/sample_scripts");
+            HELP_LOCATION = new File(location + "/app/help");
+            SAMPLE_SCRIPTS_LOCATION = new File(location + "/app/sample_scripts");
         }
 
         // Process the command line options

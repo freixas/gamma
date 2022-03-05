@@ -13,6 +13,7 @@
         <div id="main">
             <div id="nav">
               <ol>
+                <li><a href="#comments">Comments</a></li>
                 <li><a href="#stylesheets">Stylesheets</a></li>
                 <li><a href="#rules">Rules</a></li>
                 <li><a href="#selectors">Selectors</a></li>
@@ -39,6 +40,13 @@
             </div>
             <div id="content">
                 <p class="note">See <a href="syntax.html">Syntax Notation</a> for information about the syntax notation used here.</p>
+                <h1><a id="comments"></a>Comments</h1>
+                <p>Stylesheets can contain two types of comments:</p>
+                <ul>
+                  <li>The character sequence &quot;//&quot; begins a comment that continue to the end of the line. Every character (including the &quot;//&quot;) is removed before parsing the script.</li>
+                  <li>The character sequence &quot;/*&quot; begins a comment that continues until the character sequence &quot;*/&quot; is found. Every character in the region (including the &quot;/*&quot; and &quot;*/&quot;) is removed before parsing the script.</li>
+                </ul>
+                
                 <h1><a id="stylesheets"></a>Stylesheets</h1>
                 <p><a href="statements.html#command-statements">Commands</a> control <em>what</em> is drawn; stylesheets control <em>how</em> it is drawn—the &quot;look.&quot;</p>
                 <p>The stylesheet system is feature rich, allowing control of just about every aspect of the diagram's design, but it is not immediately essential to creating a diagram. Consider using the <a href="quick-start.html#stylesheet-quick-start">Stylesheet Quick Start</a> at first.</p>

@@ -18,6 +18,7 @@
                 <exclude>org.openjfx:javafx-web</exclude>
                 <exclude>org.openjfx:javafx-graphics</exclude>
                 <exclude>org.openjfx:javafx-base</exclude>
+
             </excludes>
         </dependencySet>
     </dependencySets>
@@ -54,12 +55,13 @@
                 <exclude>*.dwt</exclude>
             </excludes>
         </fileSet>
-        <!--<fileSet>
-            <directory>${project.build.directory}</directory>
+        <fileSet>
+            <directory>${project.build.directory}/dependency</directory>
             <outputDirectory>/lib</outputDirectory>
             <includes>
-                <include>*.jar</include>
+                <include>gamma.jar</include>
+                <include>commons-cli.jar</include>
             </includes>
-        </fileSet>-->
+        </fileSet>
     </fileSets>
 </assembly>

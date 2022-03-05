@@ -17,11 +17,11 @@
 package org.freixas.gamma.value;
 
 import org.freixas.gamma.ProgrammingException;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.ListIterator;
 
 /**
  * This class contains lists of properties.
@@ -61,6 +61,7 @@ public class PropertyList implements PropertyElement, ExecutionMutable
         }
     }
 
+    @SuppressWarnings("unused")
     public boolean hasProperty(String name)
     {
         return index.containsKey(name);
@@ -79,6 +80,7 @@ public class PropertyList implements PropertyElement, ExecutionMutable
      * @param name The name of the property to get.
      * @return The property's value.
      */
+    @SuppressWarnings("unused")
     public Object getProperty(String name)
     {
         Integer i = index.get(name);

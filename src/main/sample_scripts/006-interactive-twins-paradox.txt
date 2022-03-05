@@ -39,7 +39,7 @@ else {
 }
 
 // ****************************************
-// General options: axes, grids
+// * General options: axes, grids
 // ****************************************
 
 // Transform time from a spatial to a time dimension
@@ -77,6 +77,10 @@ choice view  = 1
 	  "Alice's viewpoint/Bob's simultaneity"
   label "Viewpoint";
 
+// ****************************************
+// * Main program
+// ****************************************
+
 // Simulate from start to end of travel
 
 bobStartTime = 0;
@@ -89,7 +93,7 @@ startTime = bobStartTime;
 endTime   = bobEndTime;
 
 travelTime = endTime - startTime;
-tripDuration = 10;			// Seconds
+tripDuration = 10;			        // Seconds
 totalDuration = tripDuration + 5;	// Seconds
 tripFrames = tripDuration * 30;		// Animation frames
 totalFrames = totalDuration * 30;	// Animation frames

@@ -4,7 +4,7 @@
 // *
 // ************************************************************
 
-// Set up styling
+// Set up the stylesheet
 
 stylesheet "
   worldline.moving   { color: #8404; }
@@ -20,9 +20,9 @@ stylesheet "
 
 display origin: (25, 25), scale: 25;
 
-////////////////////////////////////////
-// SETUP
-////////////////////////////////////////
+// ************************************************************
+// * SETUP
+// ************************************************************
 
 // Set the velocity desired for this demonstration
 
@@ -34,9 +34,9 @@ animation reps: 50, speed: 1;
 
 length = 1;
 
-////////////////////////////////////////
-// CALCULATIONS
-////////////////////////////////////////
+// ************************************************************
+// * CALCULATIONS
+// ************************************************************
 
 // The middle of the structure will pass through the origin at time 0
 
@@ -79,9 +79,9 @@ time1FrontToBack = (-length, tToTau(time1Front.t, front)) <- front;
 
 time1BackToFront = (+length, tToTau(time1Back.t, back))   <- back;
 
-////////////////////////////////////////
-// DRAWING
-////////////////////////////////////////
+// ************************************************************
+// * DRAWING
+// ************************************************************
 
 // Draw the rest axes
 
@@ -107,9 +107,9 @@ path [path time1Back,  time1BackToFront], class: "moving-length";
 
 path [path time1Front, time1Back], class: "rest-length";
 
-////////////////////////////////////////
-// DRAWING
-////////////////////////////////////////
+// ************************************************************
+// * ANNOTATIONS
+// ************************************************************
 
 // Annotate the rest frame length
 

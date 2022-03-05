@@ -1,3 +1,15 @@
+// ************************************************************
+// *
+// * INTERACTIVE EXAMPLE OF SOME COMMANDS
+// *
+// ************************************************************
+
+// ************************************************************
+// * SETUP
+// ************************************************************
+
+// Define the stylesheet
+
 stylesheet "
   axes {
     font-family: 'Georgia';
@@ -25,8 +37,9 @@ stylesheet "
     text-padding: 0;
     text-anchor: MC;
   }
-
 ";
+
+// Set up the various controls
 
 toggle axis1 = true label "Observer 1";
 range  axis1Velocity = 0 from -.9 to .9 label "Observer 1's velocity";
@@ -73,51 +86,66 @@ toggle addLabel = false label "Add a label";
 range labelRot = 0 from 0 to 360 label "Label rotation";
 
 // ************************************************************
+// * EXECUTION
+// ************************************************************
+
+// Define the observers
 
 obs1 = [observer velocity axis1Velocity];
 obs2 = [observer velocity axis2Velocity];
 obs3 = [observer velocity 0 time 0, acceleration 1 time 2, acceleration -1 time 2, acceleration 0];
 
+// Display the various grids
 
 if (grid1) grid obs1;
 if (grid2) grid obs2, style: "color: #FCC";
 if (hypergrid) hypergrid ;
 
+// Display the various axes
+
 if (axis2) axes obs2, xLabel: xAxis2Label, tLabel: tAxis2Label,  style: "color: red" + axisArrows;
 if (axis1) axes obs1, xLabel: xAxis1Label,  tLabel: tAxis1Label, style: axisArrows;
 if (showObs3) worldline obs3;
+
+// Add events
 
 if (addEvents) {
     eLabel1 = "";
     eLabel2 = "";
     eLabel3 = "";
     if (addEventLabels) {
-	eLabel1 = "(10, 20)";
-	eLabel2 = "(50, 40)";
-	eLabel3 = "(-25, -10)";
+        eLabel1 = "(10, 20)";
+        eLabel2 = "(50, 40)";
+        eLabel3 = "(-25, -10)";
     }
     if (!boostEvents) {
-	event (10, 20),   text: eLabel1, style: "color: blue; event-shape: circle";
-	event (50, 40),   text: eLabel2, style: "color: green; event-shape: diamond";
-	event (-25, -10), text: eLabel3, style: "color: magenta; event-shape: star";
+        event (10, 20),   text: eLabel1, style: "color: blue; event-shape: circle";
+        event (50, 40),   text: eLabel2, style: "color: green; event-shape: diamond";
+        event (-25, -10), text: eLabel3, style: "color: magenta; event-shape: star";
     }
     else {
-	event (10, 20),   text: eLabel1, boostTo: obs2, style: "color: blue; event-shape: circle";
-	event (50, 40),   text: eLabel2, boostTo: obs2, style: "color: green; event-shape: diamond";
-	event (-25, -10), text: eLabel3, boostTo: obs2, style: "color: magenta; event-shape: star";
+        event (10, 20),   text: eLabel1, boostTo: obs2, style: "color: blue; event-shape: circle";
+        event (50, 40),   text: eLabel2, boostTo: obs2, style: "color: green; event-shape: diamond";
+        event (-25, -10), text: eLabel3, boostTo: obs2, style: "color: magenta; event-shape: star";
     }
 }
+
+// Add lines
 
 if (lightLines) {
   line [line angle  45 through (0,0)], style: "color: #ED0";
   line [line angle -45 through (0,0)], style: "color: #ED0";
 }
 
+// Add a path
+
 if (showPath) {
     path = [path (10, 10), (10, 20), (20, 20), (20, 10)];
     path path closed: pathClosed, stroke: strokePath, fill: fillPath;
 }
 
+// Add a label
+
 if (addLabel) {
-    label (0, 0), text: "Label", style: "text-rotation: " + labelRot;
+    label (0, 0), text: "Label", rotation: labelRot;
 }

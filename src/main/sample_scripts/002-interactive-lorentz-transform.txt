@@ -4,6 +4,8 @@
 // *
 // ************************************************************
 
+// Create the stylesheet
+
 stylesheet "
   .bob {
     color: black;
@@ -30,7 +32,11 @@ stylesheet "
   }
 ";
 
+// Set up the diagram display
+
 display scale: 2;
+
+// Add observers and controls for velocity and the event location
 
 range aliceV = .5 from 0 to .9 label "Velocity";
 bob =   [observer velocity 0];
