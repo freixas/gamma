@@ -14,7 +14,6 @@
 --win-upgrade-uuid ${windows.upgrade.uuid}
 --description "${project.description}"
 --copyright "(c) ${project.inceptionYear} ${windows.vendor}"
---verbose
 --win-dir-chooser
 --win-menu
 --win-shortcut
