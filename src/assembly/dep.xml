@@ -2,14 +2,17 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.0.0 http://maven.apache.org/xsd/assembly-2.0.0.xsd">
     <id>bin</id>
+
     <formats>
-        <format>dir</format>
+        <format>tar.gz</format>
     </formats>
+
     <includeBaseDirectory>true</includeBaseDirectory>
+
     <dependencySets>
         <dependencySet>
             <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
-            <outputDirectory>/lib</outputDirectory>
+            <outputDirectory>/app</outputDirectory>
             <excludes>
                 <exclude>org.openjfx:javafx-controls</exclude>
                 <exclude>org.openjfx:javafx-fxml</exclude>
@@ -18,11 +21,13 @@
                 <exclude>org.openjfx:javafx-web</exclude>
                 <exclude>org.openjfx:javafx-graphics</exclude>
                 <exclude>org.openjfx:javafx-base</exclude>
-
+                <exclude>org.jetbrains</exclude>
             </excludes>
         </dependencySet>
     </dependencySets>
+
     <fileSets>
+
         <fileSet>
             <directory>${project.basedir}</directory>
             <outputDirectory>/</outputDirectory>
@@ -32,36 +37,42 @@
                 <include>NOTICE*</include>
             </includes>
         </fileSet>
+
+        <fileSet>
+            <directory>${project.basedir}/src/main/scripts</directory>
+            <outputDirectory>/</outputDirectory>
+            <includes>
+                <include>gamma.*</include>
+            </includes>
+            <fileMode>0755</fileMode>
+            <directoryMode>0755</directoryMode>
+        </fileSet>
+
         <fileSet>
             <directory>${project.basedir}/src/main/sample_scripts</directory>
-            <outputDirectory>/sample_scripts</outputDirectory>
+            <outputDirectory>/app/sample_scripts</outputDirectory>
             <includes>
                 <include>*.txt</include>
                 <include>*.css</include>
             </includes>
         </fileSet>
+
         <fileSet>
             <directory>${project.basedir}/src/main/icons</directory>
-            <outputDirectory>/icons</outputDirectory>
+            <outputDirectory>/app/icons</outputDirectory>
             <includes>
                 <include>gamma*</include>
             </includes>
         </fileSet>
+
         <fileSet>
             <directory>${project.basedir}/src/main/help</directory>
-            <outputDirectory>/help</outputDirectory>
+            <outputDirectory>/app/help</outputDirectory>
             <excludes>
                 <exclude>templates</exclude>
                 <exclude>*.dwt</exclude>
             </excludes>
         </fileSet>
-        <fileSet>
-            <directory>${project.build.directory}/dependency</directory>
-            <outputDirectory>/lib</outputDirectory>
-            <includes>
-                <include>gamma.jar</include>
-                <include>commons-cli.jar</include>
-            </includes>
-        </fileSet>
+
     </fileSets>
 </assembly>

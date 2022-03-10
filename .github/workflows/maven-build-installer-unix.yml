@@ -20,12 +20,9 @@ jobs:
         distribution: 'temurin'
         cache: 'maven'
     - name: Build with Maven
-      run: mvn -B clean install --file pom.xml
-    - name: Update Automatic Release
-      uses: marvinpinto/action-automatic-releases@latest
+      run: mvn -B clean package
+    - uses: actions/upload-artifact@v3
       with:
-        repo_token: "${{ secrets.GITHUB_TOKEN}}"
-        automatic_release_tag: "Ubuntu-latest"
-        prerelease: true
-        title: "Ubuntu Development Build"
-        files: ./target/*.deb
+        name: Debian package
+        path: ./target/*.deb
+        if-no-files-found: error
