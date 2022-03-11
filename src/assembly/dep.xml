@@ -42,7 +42,7 @@
             <directory>${project.basedir}/src/main/scripts</directory>
             <outputDirectory>/</outputDirectory>
             <includes>
-                <include>gamma.*</include>
+                <include>gamma*</include>
             </includes>
             <fileMode>0755</fileMode>
             <directoryMode>0755</directoryMode>

@@ -17,11 +17,9 @@
 
 #!/usr/bin/env bash
 
-set -x
-
 SCRIPT_FILE="$(readlink -f "${BASH_SOURCE}")"
 SCRIPT_DIR="$(dirname "${SCRIPT_FILE}")"
-GAMMA_HOME="${SCRIPT_DIR}/app"
+APPDIR="${SCRIPT_DIR}/app"
 
 if [ -z "${JAVA_HOME+x}" ];
 then
@@ -44,12 +42,13 @@ JAVAFX_HOME="${JAVAFX_HOME%\\}"
 
 shift 1
 
-"${JAVA_HOME}/bin/java.exe" \
-  --module-path "${JAVAFX_HOME%}/lib" \
+"${JAVA_HOME}/bin/java" \
+  -p "$JAVAFX_HOME/lib" \
   --add-modules=javafx.controls,javafx.fxml,javafx.swing,javafx.web \
-  -classpath "${GAMMA_HOME}/gamma.jar;${GAMMA_HOME}/commons-cli.jar" \
+  -cp "$APPDIR/gamma.jar;$APPDIR/commons-cli.jar" \
   org.freixas.gamma.Gamma \
-  "$@"
+  "$@" &
+
 
 
 

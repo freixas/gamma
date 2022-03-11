@@ -7,10 +7,14 @@
 
     <name>Gamma</name>
     <description>A Minskowski spacetime diagram generator.</description>
+    <inceptionYear>2021</inceptionYear>
+
     <groupId>org.freixas.gamma</groupId>
     <artifactId>gamma</artifactId>
-    <version>0.1.1</version>
-    <inceptionYear>2021</inceptionYear>
+
+    <!-- *** VERSION *** -->
+
+    <version>0.1.2-alpha2</version>
 
     <developers>
         <developer>
@@ -21,20 +25,28 @@
     </developers>
 
     <properties>
-        <project.identifier>gamma</project.identifier>
+
+        <gamma.version>${formattedVersion.majorVersion}.${formattedVersion.minorVersion}.${formattedVersion.incrementalVersion}</gamma.version>
+        <gamma.fullversion>${project.version}</gamma.fullversion>
+
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
+
         <skipTests>true</skipTests>
 
-        <main-class>org.freixas.gamma.Gamma</main-class>
+        <project.identifier>gamma</project.identifier>
         <app.name>gamma</app.name>
-        <maven.build.timestamp.format>yy.ww.WWkkmm</maven.build.timestamp.format>
-        <app.version>${project.version}</app.version>
-        <jvm.modules>javafx.controls,javafx.fxml,javafx.swing,javafx.web</jvm.modules>
+        <app.version>${gamma.version}</app.version>
+        <windows.vendor>${project.name}</windows.vendor>
+
         <javafx.version>17.0.2</javafx.version>
+        <jvm.modules>javafx.controls,javafx.fxml,javafx.swing,javafx.web</jvm.modules>
+        <main-class>org.freixas.gamma.Gamma</main-class>
+
         <windows.upgrade.uuid>16182549-0ebf-4817-b77a-0e2fe720122c</windows.upgrade.uuid>
-        <windows.vendor>Gamma</windows.vendor>
+
     </properties>
 
     <dependencies>
@@ -118,7 +130,114 @@
             </resource>
         </resources>
 
+        <!--
+        Some of the plugins that come from the Maven super-pom are out of date.
+        Replace them with the latest versions.
+        -->
+
+        <pluginManagement>
+            <plugins>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.0.0-M5</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>3.0.0-M1</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>3.0.0-M2</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-site-plugin</artifactId>
+                    <version>3.11.0</version>
+                </plugin>
+
+            </plugins>
+        </pluginManagement>
+
         <plugins>
+
+            <!--
+            This is used just to manage the two forms of the version number. One
+            form meets Windows packaging version requirements, the longer form
+            is what I prefer.
+            -->
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <id>parse-version</id>
+                        <goals>
+                            <goal>parse-version</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!--
+            The enforcer plugin makes sure we are building with the correct
+            versions of Maven amd Java.
+            -->
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>enforce-versions</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>3.8.4</version>
+                                </requireMavenVersion>
+                                <requireJavaVersion>
+                                    <version>17.0.2</version>
+                                </requireJavaVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!--
+            The versions plugin can be used to check for the latest versions
+            of the dependencies or plugins:
+            versions:display-dependency-updates
+            versions:display-plugin-updates
+            -->
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <version>2.9.0</version>
+            </plugin>
+
+            <!-- Clean the build -->
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>3.1.0</version>
+            </plugin>
+
+            <!-- Compile control -->
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -132,6 +251,8 @@
                 </configuration>
             </plugin>
 
+            <!-- Support for JavaFX -->
+
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>
@@ -140,6 +261,8 @@
                     <mainClass>org.freixas.gamma/${main-class}</mainClass>
                 </configuration>
             </plugin>
+
+            <!-- Create JAR files -->
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -151,11 +274,38 @@
                 </configuration>
             </plugin>
 
+            <!--
+            The assembly plugin is used to build a tar.gz file containing
+            a universally installable version of the app.
+            !-->
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-clean-plugin</artifactId>
-                <version>3.1.0</version>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <finalName>${project.artifactId}-${gamma.fullversion}</finalName>
+                    <appendAssemblyId>false</appendAssemblyId>
+                    <descriptors>
+                        <descriptor>src/assembly/dep.xml</descriptor>
+                    </descriptors>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
+
+            <!--
+            The plugins below are used to build installers. The resources
+            plugin does for the installer what the assembly module's dep.xml
+            does for the assembly module.
+            -->
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -214,87 +364,49 @@
                 </executions>
             </plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>3.0.0-M5</version>
-            </plugin>
-
-            <plugin>
-                <!--
-                In addition to the installer builds, we also create a pure Java
-                build (Gamma app only) stored in a ZIP file.
-                !-->
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.3.0</version>
-                <configuration>
-                    <descriptors>
-                        <descriptor>src/assembly/dep.xml</descriptor>
-                    </descriptors>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>make-assembly</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.0.0</version>
-                <executions>
-                    <execution>
-                        <id>enforce-versions</id>
-                        <goals>
-                            <goal>enforce</goal>
-                        </goals>
-                        <configuration>
-                            <rules>
-                                <requireMavenVersion>
-                                    <version>3.8.4</version>
-                                </requireMavenVersion>
-                                <requireJavaVersion>
-                                    <version>17.0.2</version>
-                                </requireJavaVersion>
-                            </rules>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+            <!--
+            In addition to copying the resources (for an installer), we need to
+            copy the dependencies. We exclude some dependencies that aren't
+            needed by the final app and some dependencies that are provided by
+            the package builder.
+            -->
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <version>3.2.0</version>
                 <executions>
+
                     <execution>
-                        <!-- This copies all of the jar files declared by the Maven build into a single directory.
-                        This makes it easy to assemble the final installer package -->
                         <id>copy-dependencies</id>
                         <phase>package</phase>
+
                         <goals>
                             <goal>copy-dependencies</goal>
                         </goals>
+
                         <configuration>
                             <stripVersion>true</stripVersion>
-                            <!-- The JavaFX libraries are bundled into the custom JVM, so we don't want to duplicate
-                            them in the bundled app and installer. This command skips all of the JavaFX by groupId. -->
                             <excludeGroupIds>
                                 org.openjfx,junit,org.hamcrest,org.jetbrains
                             </excludeGroupIds>
                         </configuration>
+
                     </execution>
+
                 </executions>
             </plugin>
 
+            <!--
+            See https://github.com/wiverson/jtoolprovider-plugin
+            This plugin takes the pieces assembled by the resources and
+            dependency plugins and runs them through jlink and jpackage.
+            jpackage actually builds the final installable file using an
+            external tool, using information in the src/packaging folder.
+            -->
+
             <plugin>
-                <!-- https://github.com/wiverson/jtoolprovider-plugin -->
+                <!--  -->
                 <groupId>io.github.wiverson</groupId>
                 <artifactId>jtoolprovider-plugin</artifactId>
                 <version>1.0.34</version>
