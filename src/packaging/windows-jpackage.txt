@@ -1,21 +1,22 @@
 --type msi
---name ${app.name}
---win-menu
---win-menu-group ${project.name}
---vendor ${windows.vendor}
---icon "${project.basedir}/src/main/icons/gamma.ico"
---dest "${project.build.directory}"
---main-jar ${project.build.finalName}.jar
---main-class ${main-class}
---input "${project.build.directory}/dependency"
 --app-version ${app.version}
---runtime-image "${project.build.directory}/jvm-image"
---temp "${project.build.directory}/installer-work"
---win-upgrade-uuid ${windows.upgrade.uuid}
---description "${project.description}"
 --copyright "(c) ${project.inceptionYear} ${windows.vendor}"
+--description "${project.description}"
+--icon "${project.basedir}/src/main/icons/gamma.ico"
+--name ${app.name}
+--dest "${project.build.directory}"
+--temp "${project.build.directory}/installer-work"
+--vendor ${windows.vendor}
+--main-class ${main-class}
+--main-jar ${project.build.finalName}.jar
+--install-dir ${windows.vendor}
+--runtime-image "${project.build.directory}/jvm-image"
+--input "${project.build.directory}/dependency"
 --win-dir-chooser
 --win-menu
+--win-menu-group ${project.name}
 --win-shortcut
---install-dir ${windows.vendor}
+--win-shortcut-prompt
+--win-upgrade-uuid ${windows.upgrade.uuid}
+
 

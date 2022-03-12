@@ -1,12 +1,17 @@
---name ${app.name}
---icon "${project.basedir}//src/main/icons/gamma.png"
---dest "${project.build.directory}"
---main-jar ${project.build.finalName}.jar
---main-class ${main-class}
---input "${project.build.directory}/dependency"
 --app-version ${app.version}
---runtime-image "${project.build.directory}/jvm-image"
+--copyright "(c) ${project.inceptionYear} ${windows.vendor}"
+--description "${project.description}"
+--icon "${project.basedir}/src/main/icons/gamma.png"
+--name ${app.name}
+--dest "${project.build.directory}"
 --temp "${project.build.directory}/installer-work"
+--vendor ${windows.vendor}
+--main-class ${main-class}
+--main-jar ${project.build.finalName}.jar
+--install-dir ${app.name}
+--runtime-image "${project.build.directory}/jvm-image"
+--input "${project.build.directory}/dependency"
+--linux-package-name ${app.name}
 --linux-deb-maintainer gamma@freixas.org
---linux-menu-group menu-group-name ${windows.vendor}
---linux-package-name ${windows.vendor}
+--linux-menu-group Science;Physics
+--linux-shortcut
