@@ -10,6 +10,7 @@
 --main-class ${main-class}
 --main-jar ${project.build.finalName}.jar
 --install-dir ${windows.vendor}
+--license-file "${project.basedir}/LICENSE.txt"
 --runtime-image "${project.build.directory}/jvm-image"
 --input "${project.build.directory}/dependency"
 --win-dir-chooser

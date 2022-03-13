@@ -65,19 +65,6 @@ public final class Gamma extends Application
      */
     static public final File USER_DATA_HOME = new JFileChooser().getFileSystemView().getDefaultDirectory();
 
-    // Detect various platform types
-
-    static public final boolean IS_WINDOWS;
-    static public final boolean IS_MAC;
-    static public final boolean IS_LINUX;
-
-    static {
-        final String osName = System.getProperty("os.name").toLowerCase();
-        IS_WINDOWS = osName.contains("win");
-        IS_MAC = osName.contains("mac");
-        IS_LINUX = osName.contains("nix") || osName.contains("nux") || osName.contains("aix");
-    }
-
     /**
      * The location of the jar file. We locate other files relative to this location.
      */

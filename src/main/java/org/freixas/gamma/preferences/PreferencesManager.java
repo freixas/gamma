@@ -33,10 +33,6 @@ public class PreferencesManager
     static private final String BASE_IMAGES_DIRECTORY = new File(Gamma.USER_DATA_HOME, "Gamma/Images").toString();
     static private final String BASE_VIDEOS_DIRECTORY = new File(Gamma.USER_DATA_HOME, "Gamma/Videos").toString();
 
-    static private final String WINDOWS_DEFAULT_EDITOR_COMMAND = "notepad \"$F$\"";
-    static private final String MAC_DEFAULT_EDITOR_COMMAND = "open -t \"$F$\"";
-    static private final String LINUX_DEFAULT_EDITOR_COMMAND = "open \"$F$\"";
-
     static private final int IMAGE_FORMAT = ExportDiagramDialog.ImageType.PNG.getValue();
     static private final float IMAGE_COMPRESSION = (float)95.0;
     static private final boolean IMAGE_PROGRESSIVE = false;
@@ -113,12 +109,7 @@ public class PreferencesManager
 
     static public String getEditorCommand()
     {
-        String defaultEditorCommand = "";
-        if (Gamma.IS_WINDOWS) { defaultEditorCommand = WINDOWS_DEFAULT_EDITOR_COMMAND; }
-        else if (Gamma.IS_MAC) { defaultEditorCommand = MAC_DEFAULT_EDITOR_COMMAND; }
-        else if (Gamma.IS_LINUX) { defaultEditorCommand = LINUX_DEFAULT_EDITOR_COMMAND; }
-
-        return userPreferences.get("EDITOR_COMMAND", defaultEditorCommand);
+        return userPreferences.get("EDITOR_COMMAND", "");
     }
 
     static public void setEditorCommand(String editorCommand)

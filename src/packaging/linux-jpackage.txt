@@ -8,10 +8,12 @@
 --vendor ${windows.vendor}
 --main-class ${main-class}
 --main-jar ${project.build.finalName}.jar
---install-dir /opt/${app.name}
+--install-dir /opt
+--license-file "${project.basedir}/LICENSE.txt"
 --runtime-image "${project.build.directory}/jvm-image"
 --input "${project.build.directory}/dependency"
 --linux-package-name ${app.name}
 --linux-deb-maintainer gamma@freixas.org
 --linux-menu-group Science;Physics
+--linux-rpm-license-type GPLv3
 --linux-shortcut

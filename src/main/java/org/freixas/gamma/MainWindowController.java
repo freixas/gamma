@@ -243,17 +243,7 @@ public final class MainWindowController implements Initializable
     @FXML
     private void helpQuickStart(ActionEvent ignoredEvent)
     {
-        try {
-            File helpFile = new File(Gamma.HELP_LOCATION.getAbsolutePath() + "/quick-start.html");
-            Desktop.getDesktop().browse(helpFile.toURI());
-        }
-        catch (IOException e) {
-            mainWindow.showTextAreaAlert(
-                Alert.AlertType.ERROR, "Help Error", "Help Error",
-                "Error when trying to view help:\n\n" + e.getLocalizedMessage() + "\n\n" +
-                    "Look in the installation folder for help/quick-start.html and open it in your browser.",
-                true);
-        }
+        Platform.browseHelp("quick-start.html", mainWindow);
     }
 
     /**
@@ -264,17 +254,7 @@ public final class MainWindowController implements Initializable
     @FXML
     private void helpMenuContents(ActionEvent ignoredEvent)
     {
-        try {
-            File helpFile = new File(Gamma.HELP_LOCATION.getAbsolutePath() + "/index.html");
-            Desktop.getDesktop().browse(helpFile.toURI());
-        }
-        catch (IOException e) {
-            mainWindow.showTextAreaAlert(
-                Alert.AlertType.ERROR, "Help Error", "Help Error",
-                "Error when trying to view help:\n\n" + e.getLocalizedMessage() + "\n\n" +
-                    "Look in the installation folder for help/index.html and open it in your browser.",
-                true);
-        }
+        Platform.browseHelp("index.html", mainWindow);
     }
 
     /**

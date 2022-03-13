@@ -292,6 +292,8 @@ public final class MainWindow extends Stage
 
         // If we have a non-null script
 
+        boolean isNewScript = false;
+
         if (script != null) {
 
             // Update the title bar
@@ -300,7 +302,7 @@ public final class MainWindow extends Stage
 
             // Decide if we have a new script file
 
-            boolean isNewScript = !script.equals(this.script);
+            isNewScript = !script.equals(this.script);
 
             // Determine if we must create a new watcher. It's possible to call setScript()
             // with the same set of files
@@ -325,27 +327,6 @@ public final class MainWindow extends Stage
                     diagramEngine = null;
                 }
             }
-
-            // Did we change the file? If so, try to open the editor on it
-
-            if (isNewScript) {
-                String editorCommand = PreferencesManager.getEditorCommand();
-                if (editorCommand.length() > 0) {
-                    editorCommand = editorCommand.replace("$F$", script.toString());
-                    try {
-                        Runtime.getRuntime().exec(editorCommand);
-                    }
-                    catch (IOException e) {
-                        showTextAreaAlert(
-                                Alert.AlertType.ERROR, "Editor Command Error", "Editor Command Error",
-                                "Error when trying to execute this editor command:\n\n" + editorCommand +"\n\n" +
-                                        "Error is:\n\n" +
-                                        e.getLocalizedMessage(),
-                                true);
-                    }
-                }
-            }
-
         }
 
         // We don't really support going from a non-null file to a null file, but just in case...
@@ -362,6 +343,27 @@ public final class MainWindow extends Stage
 
         this.script = script;
         if (script != null) setDefaultDirectory(Gamma.FileType.SCRIPT, script);
+
+        // Did we change the file? If so, try to open the editor on it
+
+        if (isNewScript) {
+            String editorCommand = PreferencesManager.getEditorCommand();
+            if (editorCommand.length() > 0) {
+                editorCommand = editorCommand.replace("$F$", script.toString());
+                try {
+                    Runtime.getRuntime().exec(editorCommand);
+                }
+                catch (IOException | SecurityException | NullPointerException | IllegalArgumentException e) {
+                    showTextAreaAlert(
+                        Alert.AlertType.ERROR,
+                        "Editor Command Error", "Editor Command Error",
+                        "Error when trying to execute this editor command:\n\n" + editorCommand +"\n\n" +
+                            "The reported error is:\n\n" +
+                            e.getLocalizedMessage(),
+                        true);
+                }
+            }
+        }
     }
 
     /**
