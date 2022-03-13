@@ -26,7 +26,7 @@
 
     <properties>
 
-        <gamma.version>${formattedVersion.majorVersion}.${formattedVersion.minorVersion}.${formattedVersion.incrementalVersion}</gamma.version>
+        <gamma.version>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}</gamma.version>
         <gamma.fullversion>${project.version}</gamma.fullversion>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
