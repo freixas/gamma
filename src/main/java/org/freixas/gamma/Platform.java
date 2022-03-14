@@ -53,7 +53,7 @@ public class Platform
 
             // We were unable to use Desktop, try open
 
-            open(helpFile.toString(), mainWindow);
+            open(helpFile.toString());
         }
         catch (Exception e) {
             mainWindow.showTextAreaAlert(
@@ -71,23 +71,45 @@ public class Platform
      * Open the given file using the default application used to open it.
      *
      * @param name The name of the file (preferably, a full path).
-     * @param mainWindow The parent window for error dialogs.
      *
      * @throws IOException If the command fails.
      */
-    static public void open(String name, MainWindow mainWindow) throws IOException
+    static public void open(String name) throws IOException
     {
-        String openCommand = "";
+        String[] openCommand = { };
         if (IS_WINDOWS) {
-            openCommand = "start \"\" /b ";
+            openCommand = new String[] { "start", "\"\",", "/b", name};
         }
         else if (IS_MAC) {
-            openCommand = "open ";
+            openCommand = new String[] { "open", name};
         }
         else if (IS_LINUX) {
-            openCommand = "xdg-open ";
+            openCommand = new String[] { "xdg-open", name};
         }
-        Runtime.getRuntime().exec(openCommand + '"' + name + '"');
+        Runtime.getRuntime().exec(openCommand);
+    }
+
+    /**
+     * Run a DOS or shell command.
+     *
+     * @param cmd The name of the command to execute.
+     *
+     * @throws IOException If the command fails.
+     */
+    static public void cmd(String cmd) throws IOException
+    {
+        if (IS_WINDOWS) {
+            Runtime.getRuntime().exec(cmd);
+        }
+        else if (IS_MAC) {
+            String[] execCommand = new String[] { "bash", "-c", cmd};
+            Runtime.getRuntime().exec(execCommand);
+        }
+        else if (IS_LINUX) {
+            String[] execCommand = new String[] { "bash", "-c", cmd};
+            Runtime.getRuntime().exec(execCommand);
+        }
+
     }
 
 }

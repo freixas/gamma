@@ -351,9 +351,9 @@ public final class MainWindow extends Stage
             if (editorCommand.length() > 0) {
                 editorCommand = editorCommand.replace("$F$", script.toString());
                 try {
-                    Runtime.getRuntime().exec(editorCommand);
+                    Platform.cmd(editorCommand);
                 }
-                catch (IOException | SecurityException | NullPointerException | IllegalArgumentException e) {
+                catch (Exception e) {
                     showTextAreaAlert(
                         Alert.AlertType.ERROR,
                         "Editor Command Error", "Editor Command Error",
