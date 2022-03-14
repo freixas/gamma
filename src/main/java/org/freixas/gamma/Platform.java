@@ -43,7 +43,7 @@ public class Platform
     {
         try {
             File helpFile = new File(Gamma.HELP_LOCATION.getAbsolutePath() + "/" + name);
-            if (Desktop.isDesktopSupported()) {
+            if (Desktop.isDesktopSupported() && !IS_LINUX) {
                 Desktop desktop = Desktop.getDesktop();
                 if (desktop.isSupported(Desktop.Action.BROWSE)) {
                     Desktop.getDesktop().browse(helpFile.toURI());
