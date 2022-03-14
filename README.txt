@@ -23,7 +23,7 @@ WINDOWS 7-10
 
 DEBIAN-BASED LINUX DISTRIBUTIONS
 
-* Download and run sudo dpkg -i gamma-<version>.deb. Once installed, you can
+* Download and run sudo dpkg -i gamma_<version>_amd64.deb. Once installed, you can
   run it from a desktop icon.
 
 OTHER SYSTEMS
