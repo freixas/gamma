@@ -7,6 +7,7 @@
 <?import javafx.scene.control.DialogPane?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -45,7 +46,10 @@
                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="NEVER" />
                </rowConstraints>
                <children>
-                  <CheckBox fx:id="greetings" maxHeight="-Infinity" maxWidth="-Infinity" mnemonicParsing="false" selected="true" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.hgrow="NEVER" GridPane.valignment="CENTER" GridPane.vgrow="NEVER" />
+                  <CheckBox fx:id="greetings" maxHeight="-Infinity" maxWidth="-Infinity" mnemonicParsing="false" selected="true" GridPane.columnIndex="1" GridPane.halignment="LEFT" GridPane.hgrow="NEVER" GridPane.valignment="CENTER" GridPane.vgrow="NEVER">
+                     <tooltip>
+                        <Tooltip text="Enable or disable the welcome dialog." />
+                     </tooltip></CheckBox>
                   <Label maxWidth="1.7976931348623157E308" text="Display Welcome dialog" GridPane.hgrow="NEVER">
                      <opaqueInsets>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
@@ -60,6 +64,9 @@
                      <opaqueInsets>
                         <Insets />
                      </opaqueInsets>
+                     <tooltip>
+                        <Tooltip text="The default location in which to look for scripts." />
+                     </tooltip>
                   </TextField>
                   <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#selectScriptsDirectory" text="Browse" GridPane.columnIndex="2" GridPane.rowIndex="1">
                      <opaqueInsets>
@@ -75,6 +82,9 @@
                      <opaqueInsets>
                         <Insets />
                      </opaqueInsets>
+                     <tooltip>
+                        <Tooltip text="The default location in which to save images." />
+                     </tooltip>
                   </TextField>
                   <Button layoutX="370.0" layoutY="118.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#selectImagesDirectory" text="Browse" GridPane.columnIndex="2" GridPane.rowIndex="2">
                      <opaqueInsets>
@@ -90,6 +100,9 @@
                      <opaqueInsets>
                         <Insets />
                      </opaqueInsets>
+                     <tooltip>
+                        <Tooltip text="The default location in which to save videos (not yet implemented)." />
+                     </tooltip>
                   </TextField>
                   <Button layoutX="370.0" layoutY="202.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#selectVideosDirectory" text="Browse" GridPane.columnIndex="2" GridPane.rowIndex="3">
                      <opaqueInsets>
@@ -105,6 +118,9 @@
                      <opaqueInsets>
                         <Insets />
                      </opaqueInsets>
+                     <tooltip>
+                        <Tooltip text="The location of the default user stylesheet." />
+                     </tooltip>
                   </TextField>
                   <Button layoutX="370.0" layoutY="104.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#selectStylesheetFile" text="Browse" GridPane.columnIndex="2" GridPane.rowIndex="4">
                      <opaqueInsets>
@@ -120,6 +136,9 @@
                      <opaqueInsets>
                         <Insets />
                      </opaqueInsets>
+                     <tooltip>
+                        <Tooltip text="The command used to open scripts in an editor. Use $F$ in place of the file name." />
+                     </tooltip>
                   </TextField>
                </children>
             </GridPane>

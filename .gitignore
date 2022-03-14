@@ -23,6 +23,7 @@ target/
 *.iws
 *.ipr
 .idea/
+.run/
 
 # OS
 .DS_Store
