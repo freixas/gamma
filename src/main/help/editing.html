@@ -18,13 +18,18 @@
     <ol>
       <li><a href="#editing-a-script">Editing a Script</a></li>
     </ol>
-    <!-- InstanceEndEditable --> </div>
+  <!-- InstanceEndEditable --> </div>
   <div id="content"> <!-- InstanceBeginEditable name="content" -->
     <h1><a id="editing-a-script"></a>Editing a Script </h1>
     <p>You  edit a script using any text editor. Each time the script file—or any dependent file (such as a stylesheet or include file)—is saved, it will be automatically reloaded and executed in Gamma.</p>
     <p><span class="menu-item">File / New</span> and <span class="menu-item">File / Open</span> simply associate file with a window. The application monitors the associated file for changes.</p>
     <p>If you enter an editor command in the Preferences dialog, the application will run the command when a file is first associated with the window. If the editor command is empty, the attempt won't be made. </p>
-    <p>The editor file replaces any instances of $F$ with the full file name and path of the script file. On Windows, for example, you could enter <span class="code">notepad &quot;$F$&quot;</span> for the command (the quotes are in case there are any spaces in the file name or path.</p>
+    <p>The editor file replaces any instances of <span class="code">$F$ </span>with the full file name and path of the script file. Some examples:</p>
+    <ul>
+      <li>On Windows, use <span class="code">notepad &quot;$F$&quot;</span> (opens in notepad)</li>
+      <li>On a Mac, use <span class="code">open -t &quot;$F&quot;</span> (opens in your default text editor)</li>
+      <li>On Linux, use <span class="code">xdg-open &quot;$F$&quot;</span> (opens in your default text editor)</li>
+    </ul>
     <p>You don't need to set  an editor command. You can manually open the file in any text editor. As long as you associate it with a Gamma window, the program will monitor the file for changes.</p>
     <!-- InstanceEndEditable --> </div>
 </div>
