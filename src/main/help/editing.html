@@ -1,37 +1,33 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"><!-- InstanceBegin template="/Templates/gamma-help.dwt" codeOutsideHTMLIsLocked="false" -->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<!-- InstanceBegin template="/Templates/gamma-help.dwt" codeOutsideHTMLIsLocked="false" -->
 <head>
-    <meta charset="utf-8" />
-    <link rel="stylesheet" href="styles/help.css" type="text/css" />
-    <!-- InstanceBeginEditable name="doctitle" -->
-    <title>Help - Editing</title>
-    <!-- InstanceEndEditable -->
+<meta charset="utf-8" />
+<link rel="stylesheet" href="styles/help.css" type="text/css" />
+<!-- InstanceBeginEditable name="doctitle" -->
+<title>Help - Editing</title>
+<!-- InstanceEndEditable -->
 </head>
 
 <body>
-    <div id ="header">
-      <div id="main-page"><a href="index.html">Return to Top</a></div>
-      <!-- InstanceBeginEditable name="Header" -->
-            Help - Editing
-
-            <!-- InstanceEndEditable --> </div>
-    <div id="main">
-      <div id="nav"> 
-          <!-- InstanceBeginEditable name="Nav" -->
-                <ol>
-                    <li><a href="#editing-a-script">Editing a Script</a></li>
-                </ol>
-                <!-- InstanceEndEditable --> 
-      </div>
-      <div id="content"> 
-          <!-- InstanceBeginEditable name="content" -->
-                <h1><a id="editing-a-script"></a>Editing a Script </h1>
-                <p>You  edit a script using any text editor. Each time the script file—or any dependent file (such as a stylesheet or include file)—is saved, it will be reloaded and executed.</p>
-                <p><span class="menu-item">File / New</span> and <span class="menu-item">File / Open</span> simply associate file with a window. The application monitors the associated file for changes.</p>
-                <p>If you entered an editor command in the Preferences dialog, the application will run the command when a file is first associated with the window. If the editor command is empty, the attempt won't be made. </p>
-                <p>It is not necessary to have an editor command. You can manually open the file in any text editor. As long as it is associated with a window, the program will monitor the file for changes.</p>
-                <!-- InstanceEndEditable --> 
-      </div>
-    </div>
+<div id ="header">
+  <div id="main-page"><a href="index.html">Return to Top</a></div>
+  <!-- InstanceBeginEditable name="Header" --> Help - Editing <!-- InstanceEndEditable --> </div>
+<div id="main">
+  <div id="nav"> <!-- InstanceBeginEditable name="Nav" -->
+    <ol>
+      <li><a href="#editing-a-script">Editing a Script</a></li>
+    </ol>
+    <!-- InstanceEndEditable --> </div>
+  <div id="content"> <!-- InstanceBeginEditable name="content" -->
+    <h1><a id="editing-a-script"></a>Editing a Script </h1>
+    <p>You  edit a script using any text editor. Each time the script file—or any dependent file (such as a stylesheet or include file)—is saved, it will be automatically reloaded and executed in Gamma.</p>
+    <p><span class="menu-item">File / New</span> and <span class="menu-item">File / Open</span> simply associate file with a window. The application monitors the associated file for changes.</p>
+    <p>If you enter an editor command in the Preferences dialog, the application will run the command when a file is first associated with the window. If the editor command is empty, the attempt won't be made. </p>
+    <p>The editor file replaces any instances of $F$ with the full file name and path of the script file. On Windows, for example, you could enter <span class="code">notepad &quot;$F$&quot;</span> for the command (the quotes are in case there are any spaces in the file name or path.</p>
+    <p>You don't need to set  an editor command. You can manually open the file in any text editor. As long as you associate it with a Gamma window, the program will monitor the file for changes.</p>
+    <!-- InstanceEndEditable --> </div>
+</div>
 </body>
-<!-- InstanceEnd --></html>
+<!-- InstanceEnd -->
+</html>
