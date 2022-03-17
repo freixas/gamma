@@ -22,10 +22,10 @@ target/
 *.iml
 *.iws
 *.ipr
-/**/.idea/*.iws
-/**/.idea/workspace.xml
-/**/.idea/tasks.xml
-/**/.run/*
+**/.idea/*.iws
+**/.idea/workspace.xml
+**/.idea/tasks.xml
+**/.run/*.xml
 
 # OS
 .DS_Store
