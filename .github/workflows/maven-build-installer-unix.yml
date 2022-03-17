@@ -1,5 +1,4 @@
-# This workflow will build a Java project with Maven
-# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+# Use Maven to build a Debian installer for Gamma
 
 name: Build Unix Installer
 
@@ -21,6 +20,6 @@ jobs:
       run: mvn -B clean package
     - uses: actions/upload-artifact@v3
       with:
-        name: Debian package
+        name: Debian X64 Package
         path: ./target/*.deb
         if-no-files-found: error

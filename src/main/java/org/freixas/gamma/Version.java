@@ -20,6 +20,8 @@ package org.freixas.gamma;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Get the version number associated with this instance of the application. If
@@ -38,25 +40,42 @@ public class Version
     /**
      * Gamma's version number.
      */
-    static String VERSION;
+    static public String VERSION;
+    static public int MAJOR_VERSION = 0;
+    static public int MINOR_VERSION = 0;
+    static public int BUILD_NUMBER = 0;
+    static public String VERSION_QUALIFIER = "development";
+
+    static Pattern versionPattern = Pattern.compile("^(\\d*)\\.(\\d*)\\.(\\d*)(-(.*))$");
 
     static {
         InputStream resourceAsStream = Version.class.getResourceAsStream(
             "/META-INF/maven/org.freixas.gamma/gamma/pom.properties"
         );
         Properties properties = new Properties();
-        VERSION = "Development version";
         try {
             if (resourceAsStream != null) {
                 properties.load(resourceAsStream);
                 VERSION = properties.getProperty("version");
+
+                Matcher matcher = versionPattern.matcher(VERSION);
+                if (matcher.matches()) {
+                    MAJOR_VERSION = Integer.parseInt(matcher.group(1));
+                    MINOR_VERSION = Integer.parseInt(matcher.group(2));
+                    BUILD_NUMBER = Integer.parseInt(matcher.group(3));
+                    VERSION_QUALIFIER = matcher.group(5);
+
+                    VERSION = MAJOR_VERSION + "." + MINOR_VERSION + (VERSION_QUALIFIER.length() > 0 ? "-" + VERSION_QUALIFIER : "");
+                }
+            }
+            else {
+                VERSION = MAJOR_VERSION + "." + MINOR_VERSION + (VERSION_QUALIFIER.length() > 0 ? "-" + VERSION_QUALIFIER : "");
             }
         }
 
-        // If we get any error trying to read the resource, the version
-        // defaults to "Development"
-
-        catch (IOException ignored) { }
+        catch (IOException ignored) {
+            VERSION = MAJOR_VERSION + "." + MINOR_VERSION + (VERSION_QUALIFIER.length() > 0 ? "-" + VERSION_QUALIFIER : "");
+        }
     }
 
 }
