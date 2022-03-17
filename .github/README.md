@@ -1,4 +1,4 @@
-#![Gamma Symbol][../src/main/icons/gamma-icon-48x48.png] Gamma - A Minkowski Spacetime Diagram Generator
+# Gamma ![Gamma Symbol](../src/main/icons/gamma-icon-32x32.png) - A Minkowski Spacetime Diagram Generator 
 
 Gamma is a  tool you can use to draw a wide variety of 2D Minkwoski spacetime diagrams.
 In addition to the usual static diagrams, you can also create animated diagrams and
