@@ -1,6 +1,6 @@
 # Use Maven to build a MacOS 11 x64 installer for Gamma
 
-name: Build Unix Installer
+name: Build MacOS Installer
 
 on: workflow_dispatch
 
