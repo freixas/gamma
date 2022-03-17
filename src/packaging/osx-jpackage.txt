@@ -2,6 +2,7 @@
 --app-version ${app.version}
 --copyright "(c) ${project.inceptionYear} ${windows.vendor}"
 --description "${project.description}"
+--icon "${project.basedir}/src/main/icons/gamma.icns"
 --name ${app.name}
 --dest "${project.build.directory}"
 --temp "${project.build.directory}/installer-work"
