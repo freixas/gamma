@@ -81,7 +81,7 @@ There are currently three installers:
 - A [DMG package](https://github.com/freixas/gamma/releases/download/1.0.0-alpha3/gamma-1.0.0.dmg) for x64-based MacOS 11 systems (might work on MacOS 10.5)
 
 For other systems (x32-based systems, Macs with M1, other Linux distributions), 
-there is a universal tar.gz file which should work as long as you can find
+there is a universal [tar.gz file](https://github.com/freixas/gamma/releases/download/1.0.0-alpha3/gamma-1.0.0-alpha3.tar.gz) which should work as long as you can find
 suitable Java and JavaFX packages. 
 
 ### Installation Instructions
