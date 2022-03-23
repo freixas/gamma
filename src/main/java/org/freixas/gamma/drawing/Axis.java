@@ -34,13 +34,27 @@ import javafx.scene.transform.Affine;
 import org.freixas.gamma.value.LineSegment;
 
 /**
+ * Draw an axis.
  *
  * @author Antonio Freixas
  */
 public class Axis
 {
+    /**
+     * The minimum number of screen units between ticks.
+     */
     static final double IDEAL_TICK_SPACING = 20.0;
 
+    /**
+     * Draw an axis.
+     *
+     * @param context The drawing context.
+     * @param struct The axes properties
+     * @param axisStruct The axis type (x or t) and label.
+     * @param tickScale A pre-calculated value for how to scale the tick units
+     * for this axis vs. an axis associated with a velocity of 0.
+     * @param styles The style properties.
+     */
     @SuppressWarnings("ConstantConditions")
     static public void draw(Context context, AxesStruct struct,
                             AxesStruct.AxisStruct axisStruct, double tickScale,
@@ -58,6 +72,8 @@ public class Axis
         Color color;
         double lineThickness;
         StyleProperties.LineStyle lineStyle;
+
+        // Get the styles for drawing the axis line
 
         if (isXAxis) {
             color = styles.xColor;
@@ -77,7 +93,7 @@ public class Axis
         org.freixas.gamma.value.Line line = new ConcreteLine(axisStruct.axisType, struct.frame);
 
         // *********************************************
-        // *** Find out the current invScale.           ***
+        // *** Find out the current invScale.        ***
         // *********************************************
 
         // We multiply by this invScale to convert a from screen units to
@@ -172,6 +188,8 @@ public class Axis
 
         if ((isXAxis && styles.xTicks) || (!isXAxis && styles.tTicks)) {
 
+            // Get the styles for drawing the tick marks
+
             Color divColor ;
             Color majorDivColor;
             double divLineThickness;
@@ -196,7 +214,12 @@ public class Axis
                 majorDivLineStyle = styles.tMajorDivLineStyle;
             }
 
+            // Set up the gc
+
             Line.setupLineGc(context, divColor, divLineThickness, divLineStyle);
+
+            // Create a flag that tells us if major tick marks are drawn in a
+            // different style than minor tick marks
 
             boolean majorIsDifferent =
                 !divColor.equals(majorDivColor) || divLineThickness != majorDivLineThickness ||
@@ -255,6 +278,9 @@ public class Axis
             drawBothAxes = struct.x && struct.t;
 
             for (x = firstTick, tickCount = tickNumber; x <= maxDistance; x += tickSpacing, tickCount++) {
+
+                // We don't place a tick at 0 unless we are drawing only one axis
+
                 if (tickCount != 0 || !drawBothAxes) {
 
                     // Major tick
@@ -288,6 +314,8 @@ public class Axis
         String labelText;
         boolean drawTickLabels;
 
+        // Get the styles for drawing the tick and axis labels
+
         if (isXAxis) {
             labelText = struct.xLabel;
             drawTickLabels = styles.xTicks && styles.xTickLabels;
@@ -298,8 +326,9 @@ public class Axis
         }
         boolean drawLabels = labelText != null && labelText.length() > 0;
 
+        // If we don't have tick labels or axis labels, we're done
 
-        if (!drawTickLabels && ! drawLabels) {
+        if (!drawTickLabels && !drawLabels) {
             gc.restore();
             return;
         }
@@ -346,6 +375,8 @@ public class Axis
 
         if (drawTickLabels) {
 
+            // Set up the tick styles
+
             if (isXAxis) {
                 textColor = styles.xTextColor;
                 font = styles.xTickFont;
@@ -366,6 +397,11 @@ public class Axis
             double pad = halfHeight + 2.0;
 
             format = getTickFormat(firstTick, maxDistance, tickSpacing);
+
+            // Decide how best to anchor the text. The anchor point depends
+            // on whether the velocity is positive or negative, whether we are
+            // drawing the x or t axis, and the angle at which the label is
+            // rotated
 
             if (v >= 0.0) {
                 if (isXAxis) {
@@ -446,6 +482,9 @@ public class Axis
             styles.textPaddingRight = pad;
 
             for (x = firstTick, tickCount = tickNumber; x <= maxDistance; x += tickSpacing, tickCount++) {
+
+                // We don't label the 0 point unless we are drawing just one axis
+
                 if (tickCount != 0 || !drawBothAxes) {
                     if (tickCount % printEvery == 0) {
                         double tickValue = (x - origin.x) / tickScale;
@@ -468,6 +507,8 @@ public class Axis
 
         Bounds bounds= context.getCanvasBounds();
         LineSegment segment = null;
+
+        // Get the styles for drawing the axis arrowheads and the axis label
 
         if (styles.arrow != StyleProperties.Arrow.NONE || drawLabels) {
             segment = line.intersect(bounds);
@@ -495,6 +536,9 @@ public class Axis
                 p1.t = p2.t;
                 p2.t = temp;
             }
+
+            // Draw the arrowheads at one or both sides
+
             if (styles.arrow == StyleProperties.Arrow.START ||
                 styles.arrow == StyleProperties.Arrow.BOTH) {
                 Arrow.draw(context, p1, angle < 0 ? angle : 180 + angle, styles);
@@ -554,7 +598,7 @@ public class Axis
             textColor = styles.textColor;
             font = styles.font;
 
-           // Disable padding--we're going to precisely place the label
+            // Disable padding--we're going to precisely place the label
             // ourselves
 
             styles.textPaddingTop =
@@ -886,6 +930,14 @@ public class Axis
         }
     }
 
+//    /**
+//     * Draw a bounding box. This is used for debugging.
+//     *
+//     * @param context The drawing context.
+//     * @param bounds The bounding box to draw.
+//     * @param transform The transform to apply to the box.
+//     * @param color The color of the box.
+//     */
 //    static private void debugDrawBounds(Context context, Bounds bounds, Affine transform, Color color)
 //    {
 //        Point2D p1 = transform.transform(bounds.min.x, bounds.min.t);

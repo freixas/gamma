@@ -34,18 +34,52 @@ import javafx.scene.transform.NonInvertibleTransformException;
  */
 public class Context
 {
+    /**
+     * The associated LCode engine.
+     */
     public final LCodeEngine engine;
+
+    /**
+     * The canvas on which to draw.
+     */
     public final Canvas canvas;
+
+    /**
+     * The graphics context.
+     */
     public final GraphicsContext gc;
 
+    /**
+     * The inverse scale, used to convert screen units to world units.
+     */
     public double invScale;
+
+    /**
+     * The bounding box for the canvas (the viewport).
+     */
     public Bounds bounds;
 
+    // **********************************************************************
+    // *
+    // * Constructors
+    // *
+    // **********************************************************************
+
+    /**
+     * Create a drawing context.
+     *
+     * @param engine The LCode engine.
+     * @param canvas The canvas on which to draw.
+     */
     public Context(LCodeEngine engine, Canvas canvas)
     {
         this.engine = engine;
         this.canvas = canvas;
         this.gc = canvas.getGraphicsContext2D();
+
+        // We'll get the current inverse scale and canvas bounds. Unless
+        // a method changes the scaling or rotates the transform, these values
+        // can be used and don't need to be re-calculated
 
         this.invScale = getCurrentInvScale();
         this.bounds = getCurrentCanvasBounds();

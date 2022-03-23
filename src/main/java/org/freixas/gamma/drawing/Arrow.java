@@ -24,6 +24,7 @@ import javafx.scene.shape.StrokeLineJoin;
 import javafx.scene.transform.Affine;
 
 /**
+ * Draw arrowheads.
  *
  * @author Antonio Freixas
  */
@@ -32,6 +33,14 @@ public class Arrow
     public final static double ARROW_WIDTH = 10;
     public final static double ARROW_HEIGHT = 8;
 
+    /**
+     * Draw an arrowhead.
+     *
+     * @param context The drawing context.
+     * @param location The coordinate of the tip of the arrow.
+     * @param angle The arrowhead angle in degrees.
+     * @param styles The style properties.
+     */
     static public void draw(Context context, Coordinate location, double angle,
                             StyleStruct styles)
     {
@@ -62,6 +71,7 @@ public class Arrow
         Bounds arrowBounds =
             new Bounds(minX, minT, location.x, maxT);
         Bounds intersect = arrowBounds.intersect(bounds);
+
         if (intersect != null) {
 
             // Set up the line styles
