@@ -151,7 +151,7 @@ public abstract class Function extends ExecutorContext
     static final FunctionalTwoArg<Line, Bounds, BoundedLine> setBounds = (engine, line, bounds) -> new BoundedLine(line, bounds);
     // CLEAR_BOUNDS
     static final FunctionalOneArg<Line, Line> clearBounds = (engine, line) -> {
-        if (line == null) throw new ExecutionException("ckearBounds() has a null line");
+        if (line == null) throw new ExecutionException("clearBounds() has a null line");
 
         if (line instanceof ConcreteLine concreteLine) {
             return concreteLine;
@@ -165,7 +165,7 @@ public abstract class Function extends ExecutorContext
     static final FunctionalTwoArg<Observer, Interval, IntervalObserver> setInterval = (engine, observer, interval) -> new IntervalObserver(observer, interval);
     // CLEAR_INTERVAL
     static final FunctionalOneArg<Observer, Observer> clearInterval = (engine, observer) -> {
-        if (observer == null) throw new ExecutionException("ckearInterval() has a null observer");
+        if (observer == null) throw new ExecutionException("clearInterval() has a null observer");
 
         if (observer instanceof ConcreteObserver concreteObserver) {
             return concreteObserver;
@@ -320,62 +320,62 @@ public abstract class Function extends ExecutorContext
     static final HashMap<Type, LambdaFunction> map = new HashMap<>();
 
     static {
-        map.put(Type.DTOT,          dToT);
-        map.put(Type.DTOTAU,        dToTau);
-        map.put(Type.DTOV,          dToV);
-        map.put(Type.DTOX,          dToX);
+        map.put(Type.DTOT,              dToT);
+        map.put(Type.DTOTAU,            dToTau);
+        map.put(Type.DTOV,              dToV);
+        map.put(Type.DTOX,              dToX);
 
-        map.put(Type.TTOD,          tToD);
-        map.put(Type.TTOTAU,        tToTau);
-        map.put(Type.TTOV,          tToV);
-        map.put(Type.TTOX,          tToX);
+        map.put(Type.TTOD,              tToD);
+        map.put(Type.TTOTAU,            tToTau);
+        map.put(Type.TTOV,              tToV);
+        map.put(Type.TTOX,              tToX);
 
-        map.put(Type.TAUTOD,        tauToD);
-        map.put(Type.TAUTOT,        tauToT);
-        map.put(Type.TAUTOV,        tauToV);
-        map.put(Type.TAUTOX,        tauToX);
+        map.put(Type.TAUTOD,            tauToD);
+        map.put(Type.TAUTOT,            tauToT);
+        map.put(Type.TAUTOV,            tauToV);
+        map.put(Type.TAUTOX,            tauToX);
 
-        map.put(Type.VTOD,          vToD);
-        map.put(Type.VTOT,          vToT);
-        map.put(Type.VTOTAU,        vToTau);
-        map.put(Type.VTOX,          vToX);
+        map.put(Type.VTOD,              vToD);
+        map.put(Type.VTOT,              vToT);
+        map.put(Type.VTOTAU,            vToTau);
+        map.put(Type.VTOX,              vToX);
 
-        map.put(Type.GAMMATOV,      gammaToV);
+        map.put(Type.GAMMATOV,          gammaToV);
 
-        map.put(Type.SET_BOUNDS,    setBounds);
-        map.put(Type.CLEAR_BOUNDS,  clearBounds);
-        map.put(Type.SET_INTERVAL,   setInterval);
-        map.put(Type.CLEAR_INTERVAL, clearInterval);
+        map.put(Type.SET_BOUNDS,        setBounds);
+        map.put(Type.CLEAR_BOUNDS,      clearBounds);
+        map.put(Type.SET_INTERVAL,      setInterval);
+        map.put(Type.CLEAR_INTERVAL,    clearInterval);
 
-        map.put(Type.TO_STRING,     toString);
+        map.put(Type.TO_STRING,         toString);
 
-        map.put(Type.ABS,           abs);
-        map.put(Type.ACOS,          acos);
-        map.put(Type.ACOSH,         acosh);
-        map.put(Type.ASIN,          asin);
-        map.put(Type.ASINH,         asinh);
-        map.put(Type.ATAN,          atan);
-        map.put(Type.ATAN2,         atan2);
-        map.put(Type.ATANH,         atanh);
-        map.put(Type.CEIL,          ceil);
-        map.put(Type.COS,           cos);
-        map.put(Type.COSH,          cosh);
-        map.put(Type.E,             e);
-        map.put(Type.EXP,           exp);
-        map.put(Type.FLOOR,         floor);
-        map.put(Type.LOG,           log);
-        map.put(Type.LOG10,         log10);
-        map.put(Type.MAX,           max);
-        map.put(Type.MIN,           min);
-        map.put(Type.PI,            pi);
-        map.put(Type.RANDOM,        random);
-        map.put(Type.ROUND,         round);
-        map.put(Type.SIGN,          sign);
-        map.put(Type.SIN,           sin);
-        map.put(Type.SINH,          sinh);
-        map.put(Type.SQRT,          sqrt);
-        map.put(Type.TAN,           tan);
-        map.put(Type.TANH,          tanh);
+        map.put(Type.ABS,               abs);
+        map.put(Type.ACOS,              acos);
+        map.put(Type.ACOSH,             acosh);
+        map.put(Type.ASIN,              asin);
+        map.put(Type.ASINH,             asinh);
+        map.put(Type.ATAN,              atan);
+        map.put(Type.ATAN2,             atan2);
+        map.put(Type.ATANH,             atanh);
+        map.put(Type.CEIL,              ceil);
+        map.put(Type.COS,               cos);
+        map.put(Type.COSH,              cosh);
+        map.put(Type.E,                 e);
+        map.put(Type.EXP,               exp);
+        map.put(Type.FLOOR,             floor);
+        map.put(Type.LOG,               log);
+        map.put(Type.LOG10,             log10);
+        map.put(Type.MAX,               max);
+        map.put(Type.MIN,               min);
+        map.put(Type.PI,                pi);
+        map.put(Type.RANDOM,            random);
+        map.put(Type.ROUND,             round);
+        map.put(Type.SIGN,              sign);
+        map.put(Type.SIN,               sin);
+        map.put(Type.SINH,              sinh);
+        map.put(Type.SQRT,              sqrt);
+        map.put(Type.TAN,               tan);
+        map.put(Type.TANH,              tanh);
     }
 
     // All functions, generic and otherwise
@@ -408,41 +408,45 @@ public abstract class Function extends ExecutorContext
         functions.put("vToTau",     new GenericFunction(Type.VTOTAU));
         functions.put("vToX",       new GenericFunction(Type.VTOX));
 
-        functions.put("setBounds",   new GenericFunction(Type.SET_BOUNDS));
-        functions.put("clearBounds", new GenericFunction(Type.CLEAR_BOUNDS));
-        functions.put("setInterval",   new GenericFunction(Type.SET_INTERVAL));
-        functions.put("clearInterval", new GenericFunction(Type.CLEAR_INTERVAL));
+        functions.put("gammaToV",          new GenericFunction(Type.GAMMATOV));
+
+        functions.put("toRelativeAngle",   new toRelativeAngleFunction());
+
+        functions.put("setBounds",          new GenericFunction(Type.SET_BOUNDS));
+        functions.put("clearBounds",        new GenericFunction(Type.CLEAR_BOUNDS));
+        functions.put("setInterval",        new GenericFunction(Type.SET_INTERVAL));
+        functions.put("clearInterval",      new GenericFunction(Type.CLEAR_INTERVAL));
 
         functions.put("intersect",  new intersectFunction());
         functions.put("toString",   new GenericFunction(Type.TO_STRING));
 
-	functions.put("abs",	    new GenericFunction(Type.ABS));
-	functions.put("acos",	    new GenericFunction(Type.ACOS));
-	functions.put("acosh",	    new GenericFunction(Type.ACOSH));
-	functions.put("asin",	    new GenericFunction(Type.ASIN));
-	functions.put("asinh",	    new GenericFunction(Type.ASINH));
-	functions.put("atan",	    new GenericFunction(Type.ATAN));
-	functions.put("atan2",	    new GenericFunction(Type.ATAN2));
-	functions.put("atanh",	    new GenericFunction(Type.ATANH));
-	functions.put("ceil",	    new GenericFunction(Type.CEIL));
-	functions.put("cos",	    new GenericFunction(Type.COS));
-	functions.put("cosh",       new GenericFunction(Type.COSH));
-	functions.put("e",	    new GenericFunction(Type.E));
-	functions.put("exp",	    new GenericFunction(Type.EXP));
-	functions.put("floor",	    new GenericFunction(Type.FLOOR));
-	functions.put("log",	    new GenericFunction(Type.LOG));
-	functions.put("log10",	    new GenericFunction(Type.LOG10));
-	functions.put("max",	    new GenericFunction(Type.MAX));
-	functions.put("min",	    new GenericFunction(Type.MIN));
-	functions.put("pi",	    new GenericFunction(Type.PI));
-	functions.put("random",	    new GenericFunction(Type.RANDOM));
-	functions.put("round",	    new GenericFunction(Type.ROUND));
-	functions.put("sign",	    new GenericFunction(Type.SIGN));
-	functions.put("sin",	    new GenericFunction(Type.SIN));
-	functions.put("sinh",       new GenericFunction(Type.SINH));
-	functions.put("sqrt",	    new GenericFunction(Type.SQRT));
-	functions.put("tan",	    new GenericFunction(Type.TAN));
-	functions.put("tanh",       new GenericFunction(Type.TANH));
+        functions.put("abs",	    new GenericFunction(Type.ABS));
+        functions.put("acos",	    new GenericFunction(Type.ACOS));
+        functions.put("acosh",	    new GenericFunction(Type.ACOSH));
+        functions.put("asin",	    new GenericFunction(Type.ASIN));
+        functions.put("asinh",	    new GenericFunction(Type.ASINH));
+        functions.put("atan",	    new GenericFunction(Type.ATAN));
+        functions.put("atan2",	    new GenericFunction(Type.ATAN2));
+        functions.put("atanh",	    new GenericFunction(Type.ATANH));
+        functions.put("ceil",	    new GenericFunction(Type.CEIL));
+        functions.put("cos",	    new GenericFunction(Type.COS));
+        functions.put("cosh",       new GenericFunction(Type.COSH));
+        functions.put("e",	        new GenericFunction(Type.E));
+        functions.put("exp",	    new GenericFunction(Type.EXP));
+        functions.put("floor",	    new GenericFunction(Type.FLOOR));
+        functions.put("log",	    new GenericFunction(Type.LOG));
+        functions.put("log10",	    new GenericFunction(Type.LOG10));
+        functions.put("max",	    new GenericFunction(Type.MAX));
+        functions.put("min",	    new GenericFunction(Type.MIN));
+        functions.put("pi",	        new GenericFunction(Type.PI));
+        functions.put("random",	    new GenericFunction(Type.RANDOM));
+        functions.put("round",	    new GenericFunction(Type.ROUND));
+        functions.put("sign",	    new GenericFunction(Type.SIGN));
+        functions.put("sin",	    new GenericFunction(Type.SIN));
+        functions.put("sinh",       new GenericFunction(Type.SINH));
+        functions.put("sqrt",	    new GenericFunction(Type.SQRT));
+        functions.put("tan",	    new GenericFunction(Type.TAN));
+        functions.put("tanh",       new GenericFunction(Type.TANH));
     }
 
     /**
