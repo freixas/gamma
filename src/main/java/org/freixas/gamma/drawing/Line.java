@@ -138,7 +138,7 @@ public class Line
     }
 
     /**
-     * Draw a line segment.Don't save, restore or set up the graphics context.
+     * Draw a line segment. Don't save, restore or set up the graphics context.
      *
      * @param context The drawing context.
      * @param segment The line segment to draw.
