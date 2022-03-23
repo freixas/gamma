@@ -14,7 +14,7 @@
 
     <!-- *** VERSION *** -->
 
-    <version>1.0.0-alpha3</version>
+    <version>1.0.1-alpha4</version>
 
     <developers>
         <developer>
@@ -205,7 +205,7 @@
                         <configuration>
                             <rules>
                                 <requireMavenVersion>
-                                    <version>3.8.4</version>
+                                    <version>3.8.5</version>
                                 </requireMavenVersion>
                                 <requireJavaVersion>
                                     <version>17.0.2</version>
