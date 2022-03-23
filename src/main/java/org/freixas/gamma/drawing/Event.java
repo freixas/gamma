@@ -25,14 +25,21 @@ import org.freixas.gamma.value.Coordinate;
 import org.freixas.gamma.value.HyperbolicSegment;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.FillRule;
+import org.freixas.gamma.value.LineSegment;
 
 /**
+ * Draw events.
  *
  * @author Antonio Freixas
  */
 public class Event
 {
+    /**
+     * The diameter scaling use to map the event diameter for diamond shapes
+     */
     static private final double DIAMOND_DIAMETER_SCALE = Math.sqrt(2);
+
+    // Pre-calculate the path of a star shape
 
     static private final double[] pathX = new double[5];
     static private final double[] pathY = new double[5];
@@ -58,6 +65,13 @@ public class Event
         }
     }
 
+    /**
+     * Draw an event
+     *
+     * @param context The drawing context.
+     * @param struct The event properties.
+     * @param styles The style properties.
+     */
     static public void draw(Context context, EventStruct struct, StyleStruct styles)
     {
         GraphicsContext gc = context.gc;
@@ -66,15 +80,25 @@ public class Event
 
         gc.save();
 
+        // Get the event diameter
+
         double diameter = styles.eventDiameter;
+
+        // Scale the diameter and get half the distance. We'll use the half
+        // distance to center the event shape on the event location
 
         diameter *= context.invScale;
         double halfDiameter = diameter / 2.0;
+
+        // Set up the gc
 
         gc.setStroke(styles.color);
         gc.setFill(styles.color);
 
         Coordinate location = struct.location;
+
+        // Draw the event, using the event shape to define the drawing
+        // algorithm we use
 
         switch(styles.eventShape) {
             case CIRCLE -> gc.fillOval(location.x - halfDiameter, location.t - halfDiameter, diameter, diameter);
@@ -106,6 +130,9 @@ public class Event
             }
         }
 
+        // If the event has some associated text, draw it as well. We'll treat
+        // it as though the text came from the label command
+
         String text = struct.text;
 
         if (text.length() > 0) {
@@ -121,37 +148,63 @@ public class Event
         gc.restore();
         gc.save();
 
-        // Draw a hyperbola from this event to a designated boostTo Frame
+        // Events can be boosted, so we may also need to draw the boost line and
+        // some arrow heads. If it's boosted, draw a hyperbola from this event
+        // to the designated boostTo Frame
 
         // Set up the line styles
 
         Line.setupLineGc(context, styles);
 
         if (struct.boostTo != null) {
-            if (struct.boostX) {
-                HyperbolicSegment segment = struct.segment.intersect(context.bounds);
+
+            if (styles.arrow == StyleProperties.Arrow.START || styles.arrow == StyleProperties.Arrow.BOTH) {
+                Arrow.draw(context, location, struct.angleAtStart, styles);
+            }
+            if (styles.arrow == StyleProperties.Arrow.END || styles.arrow == StyleProperties.Arrow.BOTH) {
+                Arrow.draw(context, struct.endPoint, struct.angleAtEnd, styles);
+            }
+
+            // Draw a straight boost line
+
+            if (struct.segment instanceof LineSegment lineSegment) {
+                LineSegment segment;
+
+                segment = lineSegment.intersect(context.bounds);
+
+                // Draw the line segment minus the arrows (which have already
+                // been taken care of)
+
                 if (segment != null) {
-                    Hyperbola.drawRaw(context, segment);
-                    if (styles.arrow == StyleProperties.Arrow.START || styles.arrow == StyleProperties.Arrow.BOTH) {
-                        Arrow.draw(context, location, struct.angleAtStart, styles);
-                    }
-                    if (styles.arrow == StyleProperties.Arrow.END || styles.arrow == StyleProperties.Arrow.BOTH) {
-                        Arrow.draw(context, struct.endPoint, struct.angleAtEnd, styles);
-                    }
+                    StyleProperties.Arrow savedArrow = styles.arrow;
+                    styles.arrow = StyleProperties.Arrow.NONE;
+                    Line.drawRaw(context, segment, styles);
+                    styles.arrow = savedArrow;
                 }
             }
-            else {
-                gc.rotate(90);
-                gc.scale(1, -1);
-                HyperbolicSegment segment = struct.segment.intersect(context.getCurrentCanvasBounds());
+
+            // Draw a hyperbolic boost line
+
+            else if (struct.segment instanceof HyperbolicSegment hyperbolicSegment) {
+
+                // The hyperbolas of the boost line depend on which region the
+                // event lies. Draw the worldline of a beam of light passing through
+                // (0,0). If an event is in the left or right quadrants, then
+                // boostX is true. If an event is in the top or bottom, quadrants,
+                // boostX is false
+
+                HyperbolicSegment segment;
+
+                if (struct.boostX) {
+                    segment = hyperbolicSegment.intersect(context.bounds);
+                }
+                else {
+                    gc.rotate(90);
+                    gc.scale(1, -1);
+                    segment = hyperbolicSegment.intersect(context.getCurrentCanvasBounds());
+                }
                 if (segment != null) {
                     Hyperbola.drawRaw(context, segment);
-                }
-                if (styles.arrow == StyleProperties.Arrow.START || styles.arrow == StyleProperties.Arrow.BOTH) {
-                    Arrow.draw(context, location, struct.angleAtStart, styles);
-                }
-                if (styles.arrow == StyleProperties.Arrow.END || styles.arrow == StyleProperties.Arrow.BOTH) {
-                    Arrow.draw(context, struct.endPoint, struct.angleAtEnd, styles);
                 }
             }
         }
