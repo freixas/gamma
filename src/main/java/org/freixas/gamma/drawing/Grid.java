@@ -28,13 +28,24 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
 /**
+ * Draw grids.
  *
  * @author Antonio Freixas
  */
 public class Grid
 {
+    /**
+     * The minimum number of screen units between grid lines.
+     */
     static public final double MIN_GRID_SIZE = 20;
 
+    /**
+     * Draw the grid.
+     *
+     * @param context The drawing context.
+     * @param struct The grid properties.
+     * @param styles The style properties.
+     */
     static public void draw(Context context, GridStruct struct, StyleStruct styles)
     {
         GraphicsContext gc = context.gc;

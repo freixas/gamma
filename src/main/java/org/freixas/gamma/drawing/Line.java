@@ -28,6 +28,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.StrokeLineCap;
 
 /**
+ * Draw lines or line segments.
  *
  * @author Antonio Freixas
  */
@@ -38,8 +39,8 @@ public class Line
      * Draw a line.
      *
      * @param context The drawing context.
-     * @param struct The line command structure.
-     * @param styles The styles to use.
+     * @param struct The line properties
+     * @param styles The style properties.
      */
     static public void draw(Context context, LineStruct struct, StyleStruct styles)
     {
@@ -92,6 +93,11 @@ public class Line
         styles.arrow = arrowStyle;
     }
 
+    /**
+     * Suppress the start arrow.
+     *
+     * @param styles The style properties.
+     */
     static private void suppressStartArrow(StyleStruct styles)
     {
         if (styles.arrow == StyleProperties.Arrow.START) {
@@ -102,6 +108,11 @@ public class Line
         }
     }
 
+    /**
+     * Suppress the end arrow.
+     *
+     * @param styles The style properties.
+     */
     static private void suppressEndArrow(StyleStruct styles)
     {
         if (styles.arrow == StyleProperties.Arrow.END) {
@@ -176,10 +187,10 @@ public class Line
     /**
      * Set up the graphics context for drawing a line. We only set up the
      * things that can be handled by the graphics context: color, line thickness,
-     * and line style.
+     * and line style, all of which come from the style properties.
      *
-     * @param context The context.
-     * @param styles The styles structure.
+     * @param context The drawing context.
+     * @param styles The style properties.
      */
     static public void setupLineGc(Context context, StyleStruct styles)
     {
@@ -187,11 +198,11 @@ public class Line
     }
 
     /**
-     * Set up the graphics context for drawing a line.We only set up the things
+     * Set up the graphics context for drawing a line. We only set up the things
      * that can be handled by the graphics context: color, line thickness, and
      * line style.
      *
-     * @param context The context.
+     * @param context The drawing context.
      * @param color The line color.
      * @param lineThickness The line thickness.
      * @param lineStyle The line style.

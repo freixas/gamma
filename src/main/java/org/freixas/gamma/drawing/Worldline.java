@@ -27,11 +27,19 @@ import org.freixas.gamma.value.*;
 import java.util.ArrayList;
 
 /**
+ * Draw a worldline.
  *
  * @author Antonio Freixas
  */
 public class Worldline
 {
+    /**
+     * Draw a worldline.
+     *
+     * @param context The drawing context.
+     * @param struct The worldline properties.
+     * @param styles The style properties.
+     */
     static public void draw(Context context, WorldlineStruct struct, StyleStruct styles)
     {
         GraphicsContext gc = context.gc;
@@ -47,6 +55,8 @@ public class Worldline
         Line.setupLineGc(context, styles);
 
         org.freixas.gamma.value.Observer observer = struct.observer;
+
+        // A concrete observer is not bounded (it's infinite)
 
         if (observer instanceof ConcreteObserver concreteObserver) {
             ArrayList<WorldlineSegment>segments = concreteObserver.getSegments();
@@ -87,6 +97,9 @@ public class Worldline
                 }
             }
         }
+
+        // An interval observer is bounded along the t axis
+
         else if (observer instanceof IntervalObserver intervalObserver) {
             WorldlineEndpoint min = intervalObserver.getMin();
             WorldlineEndpoint max = intervalObserver.getMax();
@@ -163,6 +176,17 @@ public class Worldline
         gc.restore();
     }
 
+    /**
+     * Get the angles at the start or end of an interval observer. These are
+     * used to draw arrowheads.
+     *
+     * @param min The point on the worldline with the smallest t value.
+     * @param max The point on the worldline with the largest t value.
+     *
+     * @return An array containing the angles to use for the arrowheads. The first
+     * value corresponds to the angle for the arrowhead at the smallest t value
+     * of the worldline.
+     */
     static private double[] getAngles(WorldlineEndpoint min, WorldlineEndpoint max)
     {
         double angleAtStart, angleAtEnd;
@@ -174,6 +198,10 @@ public class Worldline
 
         double signStart = Util.sign(vStart);
         double signEnd   = Util.sign(vEnd  );
+
+        // We need to make sure the arrowheads point in the right direction.
+        // This depends on whether we are at the start or end and whether the
+        // velocity is positive or negative
 
         if (signStart < 0) {
             if (Util.fuzzyZero(vStart)) {

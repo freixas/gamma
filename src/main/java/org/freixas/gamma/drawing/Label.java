@@ -31,6 +31,7 @@ import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
 
 /**
+ * Draw a label.
  *
  * @author Antonio Freixas
  */
@@ -38,11 +39,27 @@ public class Label
 {
     static private javafx.scene.text.Text textNode = null;
 
+    /**
+     *  Draw a label.
+     *
+     * @param context The drawing context.
+     * @param struct The label properties.
+     * @param styles The style properties.
+     */
     static public void draw(Context context, LabelStruct struct, StyleStruct styles)
     {
         draw(context, struct, styles.textColor, styles.font, styles);
     }
 
+    /**
+     *  Draw a label.
+     *
+     * @param context The drawing context.
+     * @param struct The label properties.
+     * @param color The label color (overrides the textColor style).
+     * @param font The font (overrides the font style).
+     * @param styles The style properties.
+     */
     static public void draw(Context context, LabelStruct struct, Color color, Font font, StyleStruct styles)
     {
         // NOTE: + angle is counterclockwise. - angle is clockwise
@@ -56,8 +73,8 @@ public class Label
 
             gc.setFont(font);
 
-            // Set the drawing position
-            // These need to be inverted from their logical settings
+            // Set the text anchor. The T and B values need to be inverted
+            // since we have inverted the screen units in the y direction
 
             char vAlign = styles.textAnchor.toString().charAt(0);
             char hAlign = styles.textAnchor.toString().charAt(1);
@@ -144,6 +161,15 @@ public class Label
         }
     }
 
+    /**
+     * Given a text string and a font, determine the bounds of the text
+     * in screen units.
+     *
+     * @param text The text string.
+     * @param font The font.
+     *
+     * @return The bounds of the text string in screen units.
+     */
     static public Bounds getTextBounds(String text, Font font)
     {
         if (textNode == null) {

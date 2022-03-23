@@ -22,6 +22,7 @@ import org.freixas.gamma.value.HyperbolicSegment;
 import javafx.scene.canvas.GraphicsContext;
 
 /**
+ * Draw a hyperbolic segment.
  *
  * @author Antonio Freixas
  */

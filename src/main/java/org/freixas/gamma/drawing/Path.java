@@ -25,11 +25,19 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.FillRule;
 
 /**
+ * Draw a path.
  *
  * @author Antonio Freixas
  */
 public class Path
 {
+    /**
+     * Draw a path.
+     *
+     * @param context The drawing context.
+     * @param struct The path properties.
+     * @param styles The style properties.
+     */
     static public void draw(Context context, PathStruct struct, StyleStruct styles)
     {
         // Quick test to see if we need to bother with this path
@@ -56,14 +64,21 @@ public class Path
                 gc.lineTo(coord.x, coord.t);
             }
         }
+
+        // If the user wanted a closed path, close it
+
         if (struct.closed) {
             gc.closePath();
         }
+
+        // If the user wanted a filled path, fill it
 
         if (struct.fill) {
             setupFillGc(context, styles);
             gc.fill();
         }
+
+        // If the user wanted the path stroked, stroke it
 
         if (struct.stroke) {
             Line.setupLineGc(context, styles);
@@ -95,6 +110,13 @@ public class Path
         gc.restore();
     }
 
+    /**
+     * Set up the graphic context for drawing fills. We set the background
+     * color from the style properties. The fill rule is EVEN_ODD.
+     *
+     * @param context The drawing context.
+     * @param styles The style properties.
+     */
     static public void setupFillGc(Context context, StyleStruct styles)
     {
         GraphicsContext gc = context.gc;
