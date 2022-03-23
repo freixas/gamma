@@ -315,7 +315,7 @@
                     <tbody>
                         <tr>
                             <td>gamma( <span class="non-terminal">expr</span> )</td>
-                            <td>The gamma value for the given value. The value can be a float (velocity) and frame or an observer promoted to a frame (at tau = 0)..</td>
+                            <td>The gamma value for the given value. The value can be a float (velocity) and frame or an observer promoted to a frame (at tau = 0).</td>
                         </tr>
                         <tr>
                             <td>gammaToV( <span class="non-terminal">float</span> )</td>
@@ -343,6 +343,10 @@
                         <tr>
                             <td>toVAngle( <span class="non-terminal">float</span> )</td>
                             <td>The angle of the x axis of an inertial frame with the given velocity. The angle is in degrees from -90° (exclusive) to -45° (exclusive) or from +45 (exclusive) to +90° (inclusive).</td>
+                        </tr>
+                        <tr>
+                          <td>toRelativeAngle ( <span class="non-terminal">float </span>, <span class="non-terminal">expr</span> )</td>
+                          <td>The first value is an angle in degrees relative to the rest frame. The second value can be a float (velocity) and frame or an observer promoted to a frame (at tau = 0). The function returns the equivalent angle  in the frame specified by the second argument. The angle is in the range -180, exclusive, to 180, inclusive. Note that if toRelativeAngle(angle1, v) = angle2, then toRelativeAngle(angle2, -v) = angle1.</td>
                         </tr>
                     </tbody>
                 </table>
