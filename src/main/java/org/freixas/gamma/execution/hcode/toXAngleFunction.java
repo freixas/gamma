@@ -56,7 +56,7 @@ public class toXAngleFunction extends ArgInfoFunction
             return Relativity.vToXAngle(frame.getV());
         }
         else {
-            throw new ExecutionException("toXAngle requires a velocity or a frame");
+            throw new ExecutionException("toXAngle requires a velocity, frame, or observer");
         }
     }
 
