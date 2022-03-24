@@ -49,6 +49,12 @@ public class FileWatcher extends Thread
     private final AtomicBoolean stop = new AtomicBoolean(false);
     private final boolean newFile;
 
+    // **********************************************************************
+    // *
+    // * Constructor
+    // *
+    // **********************************************************************
+
     /**
      *  Create a file watcher.
      *
@@ -67,21 +73,11 @@ public class FileWatcher extends Thread
         this.newFile = newFile;
     }
 
-    /**
-     * Determine if the give file list is the same as the existing file
-     * list.
-     *
-     * @param file The main script file.
-     * @param dependentFiles A list of dependent files.
-     *
-     * @return True if the files are the same.
-     */
-    public boolean hasSameFiles(File file, ArrayList<File> dependentFiles)
-    {
-        if (this.file == null || file == null) return false;
-        if (this.dependentFiles == null || dependentFiles == null) return false;
-        return this.file.equals(file) && this.dependentFiles.equals(dependentFiles);
-    }
+    // **********************************************************************
+    // *
+    // * Getter
+    // *
+    // **********************************************************************
 
     /**
      * Get the list of exceptions. While the list is thread-safe for atomic
@@ -102,6 +98,34 @@ public class FileWatcher extends Thread
         return list;
     }
 
+    // **********************************************************************
+    // *
+    // * Informational
+    // *
+    // **********************************************************************
+
+    /**
+     * Determine if the give file list is the same as the existing file
+     * list.
+     *
+     * @param file The main script file.
+     * @param dependentFiles A list of dependent files.
+     *
+     * @return True if the files are the same.
+     */
+    public boolean hasSameFiles(File file, ArrayList<File> dependentFiles)
+    {
+        if (this.file == null || file == null) return false;
+        if (this.dependentFiles == null || dependentFiles == null) return false;
+        return this.file.equals(file) && this.dependentFiles.equals(dependentFiles);
+    }
+
+    // **********************************************************************
+    // *
+    // * Thread control
+    // *
+    // **********************************************************************
+
     /**
      * True if this thread is no longer running.
      *
@@ -118,24 +142,6 @@ public class FileWatcher extends Thread
     public void stopThread()
     {
         stop.set(true);
-    }
-
-    /**
-     * If the script file or any dependent file is modified, read it, parse it
-     * and pass the results on to the GUI thread.
-     */
-    private void doOnChange()
-    {
-        try {
-            String script = Files.readString(file.toPath());
-            Parser parser = new Parser(file, script);
-            parser.parse();
-            Platform.runLater(new ScriptParseCompleteHandler(window, parser));
-        } catch (Exception e) {
-            list.add(e);
-            // e.printStackTrace();
-            Platform.runLater(new ScriptParseErrorHandler(window, list));
-        }
     }
 
     @Override
@@ -285,6 +291,30 @@ public class FileWatcher extends Thread
             }
         } catch (Exception e) {
             list.add(e);
+            Platform.runLater(new ScriptParseErrorHandler(window, list));
+        }
+    }
+
+    // **********************************************************************
+    // *
+    // * Private
+    // *
+    // **********************************************************************
+
+    /**
+     * If the script file or any dependent file is modified, read it, parse it
+     * and pass the results on to the GUI thread.
+     */
+    private void doOnChange()
+    {
+        try {
+            String script = Files.readString(file.toPath());
+            Parser parser = new Parser(file, script);
+            parser.parse();
+            Platform.runLater(new ScriptParseCompleteHandler(window, parser));
+        } catch (Exception e) {
+            list.add(e);
+            // e.printStackTrace();
             Platform.runLater(new ScriptParseErrorHandler(window, list));
         }
     }

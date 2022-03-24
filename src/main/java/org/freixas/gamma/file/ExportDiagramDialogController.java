@@ -86,9 +86,11 @@ public class ExportDiagramDialogController implements Initializable
     private double lastYMM;
 
 
-    /**
-     * Initializes the controller class.
-     */
+    // **********************************************************************
+    // *
+    // * Initialize
+    // *
+    // **********************************************************************
 
     @Override
     public void initialize(URL url, ResourceBundle rb)
@@ -184,6 +186,39 @@ public class ExportDiagramDialogController implements Initializable
     }
 
     /**
+     * Enable or disable settings based on whether JPG is chosen as the image
+     * format.
+     *
+     * @param enableJPG True if JPG is the image format.
+     */
+    private void setJPGState(boolean enableJPG)
+    {
+        compression.setDisable(!enableJPG);
+        progressive.setDisable(!enableJPG);
+    }
+
+    /**
+     * Enable or disable settings based on whether GIF is chosen as the image
+     * format.
+     *
+     * @param enableGIF True if GIF is the image format.
+     */
+    private void setGIFState(boolean enableGIF)
+    {
+        xInches.setDisable(enableGIF);
+        yInches.setDisable(enableGIF);
+        xMM.setDisable(enableGIF);
+        yMM.setDisable(enableGIF);
+        ppi.setDisable(enableGIF);
+    }
+
+    // **********************************************************************
+    // *
+    // * Getters
+    // *
+    // **********************************************************************
+
+    /**
      * Get the dimensions of the image in pixels.
      *
      * @return The dimensions of the image in pixels.
@@ -225,32 +260,11 @@ public class ExportDiagramDialogController implements Initializable
         }
     }
 
-    /**
-     * Enable or disable settings based on whether JPG is chosen as the image
-     * format.
-     *
-     * @param enableJPG True if JPG is the image format.
-     */
-    private void setJPGState(boolean enableJPG)
-    {
-        compression.setDisable(!enableJPG);
-        progressive.setDisable(!enableJPG);
-    }
-
-    /**
-     * Enable or disable settings based on whether GIF is chosen as the image
-     * format.
-     *
-     * @param enableGIF True if GIF is the image format.
-     */
-    private void setGIFState(boolean enableGIF)
-    {
-        xInches.setDisable(enableGIF);
-        yInches.setDisable(enableGIF);
-        xMM.setDisable(enableGIF);
-        yMM.setDisable(enableGIF);
-        ppi.setDisable(enableGIF);
-    }
+    // **********************************************************************
+    // *
+    // * Handlers
+    // *
+    // **********************************************************************
 
     /**
      * Handle events for the xPixels field.

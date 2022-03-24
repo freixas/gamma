@@ -33,6 +33,11 @@ public class ScriptParseErrorHandler implements Runnable
     private final MainWindow window;
     private final List<Exception> list;
 
+    // **********************************************************************
+    // *
+    // * Constructor
+    // *
+    // **********************************************************************
 
     /**
      * Create the handler.
@@ -45,6 +50,12 @@ public class ScriptParseErrorHandler implements Runnable
         this.window = window;
         this.list = list;
     }
+
+    // **********************************************************************
+    // *
+    // * Run
+    // *
+    // **********************************************************************
 
     @Override
     public void run()
@@ -69,7 +80,5 @@ public class ScriptParseErrorHandler implements Runnable
             }
             list.clear();
         }
-
-
     }
 }

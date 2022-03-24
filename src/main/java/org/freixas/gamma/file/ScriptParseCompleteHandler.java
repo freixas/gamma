@@ -32,6 +32,12 @@ public class ScriptParseCompleteHandler implements Runnable
     private final MainWindow window;
     private final Parser parser;
 
+    // **********************************************************************
+    // *
+    // * Constructor
+    // *
+    // **********************************************************************
+
     /**
      * Create the handler.
      *
@@ -43,6 +49,12 @@ public class ScriptParseCompleteHandler implements Runnable
         this.window = window;
         this.parser = parser;
     }
+
+    // **********************************************************************
+    // *
+    // * Run
+    // *
+    // **********************************************************************
 
     @Override
     public void run()
