@@ -16,11 +16,11 @@
  */
 package org.freixas.gamma.file;
 
-import org.freixas.gamma.MainWindow;
-import java.util.List;
-import java.util.ListIterator;
 import javafx.scene.control.Alert.AlertType;
+import org.freixas.gamma.MainWindow;
 import org.freixas.gamma.parser.ParseException;
+
+import java.util.List;
 
 /**
  * This class handles errors that occur while reading or parsing the script
@@ -34,6 +34,12 @@ public class ScriptParseErrorHandler implements Runnable
     private final List<Exception> list;
 
 
+    /**
+     * Create the handler.
+     *
+     * @param window The window associated with the parsed script.
+     * @param list The list of errors.
+     */
     public ScriptParseErrorHandler(MainWindow window, List<Exception> list)
     {
         this.window = window;
@@ -43,21 +49,17 @@ public class ScriptParseErrorHandler implements Runnable
     @Override
     public void run()
     {
-        // Iterations throug the list must be in a synchronized block
+        // Iterations through the list must be in a synchronized block
         // List<Exception> list = fileWatcher.getExceptionList();
         // synchronized (list) {
         //     Iterator iter = list.iterator();
         //     ... etc. ...
         // }
         //
-        // Single operations are OK.
-
-        StringBuilder str = new StringBuilder();
+        // Atomic operations are OK.
 
         synchronized (list) {
-            ListIterator<Exception> iter = list.listIterator();
-            while (iter.hasNext()) {
-                Exception e = iter.next();
+            for (Exception e : list) {
                 if (e instanceof ParseException parseException) {
                     window.showParseException(parseException);
                 }

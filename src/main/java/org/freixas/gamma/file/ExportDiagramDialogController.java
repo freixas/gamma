@@ -34,7 +34,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.control.ToggleGroup;
 /**
- * FXML Controller class
+ * FXML Controller for Export Diagrams.
  *
  * @author Antonio Freixas
  */
@@ -74,17 +74,16 @@ public class ExportDiagramDialogController implements Initializable
 
     private double aspectRatio;
 
-    private int xValue;
-    private int yValue;
+    private int width;
+    private int height;
     private int ppiValue;
 
-    private int lastXPixels;
-    private int lastYPixels;
+    private int lastWidth;
+    private int lastHeight;
     private double lastXInches;
     private double lastYInches;
     private double lastXMM;
     private double lastYMM;
-    private int lastPPI;
 
 
     /**
@@ -92,7 +91,6 @@ public class ExportDiagramDialogController implements Initializable
      */
 
     @Override
-    @SuppressWarnings("unchecked")
     public void initialize(URL url, ResourceBundle rb)
     {
         dialogPane.setExpandableContent(null);
@@ -108,17 +106,13 @@ public class ExportDiagramDialogController implements Initializable
 
         radioButtons[ExportDiagramDialog.ImageType.JPG.getValue()]
             .selectedProperty()
-            .addListener((obj, oldValue, value) -> {
-                setJPGState(value);
-            });
+            .addListener((obj, oldValue, value) -> setJPGState(value));
 
         setGIFState(imageFormat == ExportDiagramDialog.ImageType.GIF.getValue());
 
         radioButtons[ExportDiagramDialog.ImageType.GIF.getValue()]
             .selectedProperty()
-            .addListener((obj, oldValue, value) -> {
-                setGIFState(value);
-            });
+            .addListener((obj, oldValue, value) -> setGIFState(value));
 
         UnaryOperator<TextFormatter.Change> integerFormatter =
             change -> {
@@ -138,13 +132,13 @@ public class ExportDiagramDialogController implements Initializable
                 return change;
             };
 
-        xPixels.setTextFormatter(new TextFormatter<>((UnaryOperator)integerFormatter));
-        yPixels.setTextFormatter(new TextFormatter<>((UnaryOperator)integerFormatter));
-        xInches.setTextFormatter(new TextFormatter<>((UnaryOperator)doubleFormatter));
-        yInches.setTextFormatter(new TextFormatter<>((UnaryOperator)doubleFormatter));
-        xMM.setTextFormatter(new TextFormatter<>((UnaryOperator)doubleFormatter));
-        yMM.setTextFormatter(new TextFormatter<>((UnaryOperator)doubleFormatter));
-        ppi.setTextFormatter(new TextFormatter<>((UnaryOperator)integerFormatter));
+        xPixels.setTextFormatter(new TextFormatter<Integer>(integerFormatter));
+        yPixels.setTextFormatter(new TextFormatter<Integer>(integerFormatter));
+        xInches.setTextFormatter(new TextFormatter<Double>(doubleFormatter));
+        yInches.setTextFormatter(new TextFormatter<Double>(doubleFormatter));
+        xMM.setTextFormatter(new TextFormatter<Double>(doubleFormatter));
+        yMM.setTextFormatter(new TextFormatter<Double>(doubleFormatter));
+        ppi.setTextFormatter(new TextFormatter<Integer>(integerFormatter));
 
         xPixels.focusedProperty().addListener( (obj, oldValue, newValue) -> {
             if (!newValue) handleXPixels(null);
@@ -169,30 +163,49 @@ public class ExportDiagramDialogController implements Initializable
         });
     }
 
-    public void setupDimensions(int x, int y)
+    /**
+     * In the dialog, display the initial dimensions of the exported image
+     * using a variety of units (pixels, inches, mm).
+     *
+     * @param width The screen pixel width.
+     * @param height The screen pixel height.
+     */
+    public void setupDimensions(int width, int height)
     {
-        xValue = x;
-        yValue = y;
+        this.width = width;
+        this.height = height;
         ppiValue = PreferencesManager.getImagePPI();
 
-        aspectRatio = (double)x / (double)y;
+        aspectRatio = (double)width / (double)height;
 
-        setSizes(x, y);
+        setSizes(width, height);
 
         ppi.setText(Integer.toString(ppiValue));
     }
 
+    /**
+     * Get the dimensions of the image in pixels.
+     *
+     * @return The dimensions of the image in pixels.
+     */
     public int[] getDimensions()
     {
-        int[] dimensions = { xValue, yValue };
-        return dimensions;
+        return new int[] { width, height };
     }
 
+    /**
+     * Get the PPI of the image.
+     *
+     * @return The PPI of the image.
+     */
     public int getPPI()
     {
         return ppiValue;
     }
 
+    /**
+     * Save the current settings as a future default.
+     */
     public void saveSettings()
     {
         RadioButton[] radioButtons = { gif, jpg, png, tiff };
@@ -203,8 +216,8 @@ public class ExportDiagramDialogController implements Initializable
             }
         }
 
-        Double compressionValue = compression.getValue();
-        PreferencesManager.setImageCompression(compressionValue.floatValue());
+        double compressionValue = compression.getValue();
+        PreferencesManager.setImageCompression((float) compressionValue);
 
         PreferencesManager.setImageProgressive(progressive.isSelected());
         if (!radioButtons[ExportDiagramDialog.ImageType.GIF.getValue()].isSelected()) {
@@ -212,12 +225,24 @@ public class ExportDiagramDialogController implements Initializable
         }
     }
 
+    /**
+     * Enable or disable settings based on whether JPG is chosen as the image
+     * format.
+     *
+     * @param enableJPG True if JPG is the image format.
+     */
     private void setJPGState(boolean enableJPG)
     {
         compression.setDisable(!enableJPG);
         progressive.setDisable(!enableJPG);
     }
 
+    /**
+     * Enable or disable settings based on whether GIF is chosen as the image
+     * format.
+     *
+     * @param enableGIF True if GIF is the image format.
+     */
     private void setGIFState(boolean enableGIF)
     {
         xInches.setDisable(enableGIF);
@@ -227,93 +252,166 @@ public class ExportDiagramDialogController implements Initializable
         ppi.setDisable(enableGIF);
     }
 
+    /**
+     * Handle events for the xPixels field.
+     *
+     * @param event The event to handle.
+     */
     @FXML
     private void handleXPixels(ActionEvent event)
     {
-        int x = getIntField(xPixels, lastXPixels);
-        setSizeX(x);
+        int x = getIntField(xPixels, lastWidth);
+        setWidth(x);
     }
 
+    /**
+     * Handle events for the yPixels field.
+     *
+     * @param event The event to handle.
+     */
     @FXML
     private void handleYPixels(ActionEvent event)
     {
-        int y = getIntField(yPixels, lastYPixels);
-        setSizeY(y);
+        int y = getIntField(yPixels, lastHeight);
+        setHeight(y);
     }
 
+    /**
+     * Handle events for the xInches field.
+     *
+     * @param event The event to handle.
+     */
     @FXML
     private void handleXInches(ActionEvent event)
     {
         double xI = getDoubleField(xInches, lastXInches);
         int x = Math.max(1, Util.toInt(Math.round(xI * ppiValue)));
-        setSizeX(x);
+        setWidth(x);
     }
 
+    /**
+     * Handle events for the yInches field.
+     *
+     * @param event The event to handle.
+     */
     @FXML
     private void handleYInches(ActionEvent event)
     {
         double yI = getDoubleField(xInches, lastYInches);
         int y = Math.max(1, Util.toInt(Math.round(yI * ppiValue)));
-        setSizeY(y);
+        setHeight(y);
     }
 
+    /**
+     * Handle events for the xMM field.
+     *
+     * @param event The event to handle.
+     */
     @FXML
     private void handleXMM(ActionEvent event)
     {
         double xM = getDoubleField(xMM, lastXMM) / 25.4;
         int x = Math.max(1, Util.toInt(Math.round(xM * ppiValue)));
-        setSizeX(x);
+        setWidth(x);
     }
 
+    /**
+     * Handle events for the yMM field.
+     *
+     * @param event The event to handle.
+     */
     @FXML
     private void handleYMM(ActionEvent event)
     {
         double yM = getDoubleField(yMM, lastYMM) / 25.4;
         int y = Math.max(1, Util.toInt(Math.round(yM * ppiValue)));
-        setSizeY(y);
+        setHeight(y);
     }
 
+    /**
+     * Handle events for the PPI field.
+     *
+     * @param event The event to handle.
+     */
     @FXML
     private void handlePPI(ActionEvent event)
     {
-        ppiValue = Math.max(1, Integer.valueOf(ppi.getText()));
-        lastPPI = ppiValue;
-        setSizes(xValue, yValue);
+        ppiValue = Math.max(1, Integer.parseInt(ppi.getText()));
+        setSizes(width, height);
     }
 
+    /**
+     * Get the value of a text field that should hold an integer.
+     *
+     * @param field The text field whose value we want.
+     * @param lastValue The last valid value for the field.
+     *
+     * @return The integer value of the field. If the field is blank, we use
+     * the last valid value; otherwise, we get whatever integer value the string
+     * converts to, but not less than 1.
+     */
     private int getIntField(TextField field, int lastValue)
     {
         if (field.getText().length() == 0) return lastValue;
-        return Math.max(1, Integer.valueOf(field.getText()));
+        return Math.max(1, Integer.parseInt(field.getText()));
     }
 
+    /**
+     * Get the value of a text field that should hold a double.
+     *
+     * @param field The text field whose value we want.
+     * @param lastValue The last valid value for the field.
+     *
+     * @return The double value of the field. If the field is blank, we use
+     * the last valid value; otherwise, we get whatever double value the string
+     * converts to, but not less than 1.
+     */
     private double getDoubleField(TextField field, double lastValue)
     {
         if (field.getText().length() == 0) return lastValue;
-        return Math.max(1, Double.valueOf(field.getText()));
+        return Math.max(1, Double.parseDouble(field.getText()));
     }
 
-    private void setSizeX(int x)
+    /**
+     * Given a width in pixels, find the corresponding height, and then set
+     * all the other equivalent sizes.
+     *
+     * @param width A width in pixels.
+     */
+    private void setWidth(int width)
     {
-        int y = Util.toInt(Math.round(x / aspectRatio));
-        setSizes(x, y);
+        int height = Util.toInt(Math.round(width / aspectRatio));
+        setSizes(width, height);
     }
 
-    private void setSizeY(int y)
+    /**
+     * Given a height in pixels, find the corresponding width, and then set
+     * all the other equivalent sizes.
+     *
+     * @param height A height in pixels.
+     */
+    private void setHeight(int height)
     {
-        int x = Util.toInt(Math.round(y * aspectRatio));
-        setSizes(x, y);
+        int x = Util.toInt(Math.round(height * aspectRatio));
+        setSizes(x, height);
     }
 
-    private void setSizes(int x, int y)
+    /**
+     * Given a width and height in pixels, set the equivalent sizes in inches
+     * and mm using the PPI to calculate.
+     *
+     * @param width The width in pixels.
+     * @param height The height in pixels.
+     */
+    private void setSizes(int width, int height)
     {
-        xValue = x;
-        yValue = y;
+        this.width = width;
+        this.height = height;
 
-        xPixels.setText(Integer.toString(x));
-        yPixels.setText(Integer.toString(y));
-        double xI = (double)x /(double)ppiValue;
-        double yI = (double)y /(double)ppiValue;
+        xPixels.setText(Integer.toString(width));
+        yPixels.setText(Integer.toString(height));
+        double xI = (double)width /(double)ppiValue;
+        double yI = (double)height /(double)ppiValue;
         double xM = xI * 25.4;
         double yM = yI * 25.5;
         xInches.setText((Util.toString(xI, 2)));
@@ -321,8 +419,8 @@ public class ExportDiagramDialogController implements Initializable
         xMM.setText((Util.toString(xM, 2)));
         yMM.setText((Util.toString(yM, 2)));
 
-        lastXPixels = x;
-        lastYPixels = y;
+        lastWidth = width;
+        lastHeight = height;
         lastXInches = xI;
         lastYInches = yI;
         lastXMM = xM;

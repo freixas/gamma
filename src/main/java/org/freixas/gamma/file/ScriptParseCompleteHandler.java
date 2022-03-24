@@ -32,6 +32,12 @@ public class ScriptParseCompleteHandler implements Runnable
     private final MainWindow window;
     private final Parser parser;
 
+    /**
+     * Create the handler.
+     *
+     * @param window The window associated with the parsed script.
+     * @param parser The parser used to parse the script.
+     */
     public ScriptParseCompleteHandler(MainWindow window, Parser parser)
     {
         this.window = window;
@@ -49,7 +55,7 @@ public class ScriptParseCompleteHandler implements Runnable
         ArrayList<File> dependentFiles = parser.getDependentFiles();
         window.setScript(file, dependentFiles);
 
-        // The parser has finished. Start up the diagrame engine.
+        // The parser has finished. Start up the diagram engine.
 
         DiagramEngine dEngine =
             new DiagramEngine(

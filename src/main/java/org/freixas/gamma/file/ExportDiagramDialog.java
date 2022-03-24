@@ -57,6 +57,7 @@ import javax.imageio.stream.ImageOutputStream;
 import org.w3c.dom.Element;
 
 /**
+ * Export diagrams in GIF, JPG, PNG, or TIFF formats.
  *
  * @author Antonio Freixas
  */
@@ -77,10 +78,7 @@ public class ExportDiagramDialog extends Dialog<ButtonType>
     static final String[] formatNames = { "gif", "jpg", "png", "tiff" };
 
     private final MainWindow window;
-    private final DialogPane dialogPane;
     private final ExportDiagramDialogController controller;
-
-    private Screen screen;
 
     // **********************************************************************
     // *
@@ -90,6 +88,8 @@ public class ExportDiagramDialog extends Dialog<ButtonType>
 
     /**
      * Create an export images dialog.
+     *
+     * @param window The main window associated with this dialog.
      */
     public ExportDiagramDialog(MainWindow window) throws Exception
     {
@@ -99,8 +99,8 @@ public class ExportDiagramDialog extends Dialog<ButtonType>
 
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(getClass().getResource("/ExportDiagramDialog.fxml"));
-        dialogPane = loader.load();
-        controller = (ExportDiagramDialogController)loader.getController();
+        DialogPane dialogPane = loader.load();
+        controller = loader.getController();
         setDialogPane(dialogPane);
 
         initOwner(window);
@@ -110,13 +110,23 @@ public class ExportDiagramDialog extends Dialog<ButtonType>
         setTitle("Export Diagram");
     }
 
+    // **********************************************************************
+    // *
+    // * Show
+    // *
+    // **********************************************************************
+
+    /**
+     * Show the dialog. This method displays the dialog, manages the user's
+     * selections, and executes the export.
+     */
     public void showDialog()
     {
         // Get the real pixel size of the canvas
 
         Canvas canvas = window.getCanvas();
 
-        screen = window.getScreen();
+        Screen screen = window.getScreen();
 
         int width = Util.toInt(canvas.getWidth() * screen.getOutputScaleX());
         int height = Util.toInt(canvas.getHeight() * screen.getOutputScaleY());
@@ -127,10 +137,20 @@ public class ExportDiagramDialog extends Dialog<ButtonType>
 
         showAndWait()
             .filter(response -> response == ButtonType.NEXT)
-            .ifPresent(response -> saveSettingsAndExport(window));
+            .ifPresent(response -> saveSettingsAndExport());
     }
 
-    private void saveSettingsAndExport(MainWindow window) {
+    // **********************************************************************
+    // *
+    // * Private methods
+    // *
+    // **********************************************************************
+
+    /**
+     * Collect all the settings and export the image. We save some settings
+     * to use as default the next time around.
+     */
+    private void saveSettingsAndExport() {
         controller.saveSettings();
 
         FileChooser fileChooser = new FileChooser();
@@ -151,12 +171,18 @@ public class ExportDiagramDialog extends Dialog<ButtonType>
         File selectedFile = fileChooser.showSaveDialog(window);
 
         if (selectedFile != null) {
-            export(window, imageFormat, selectedFile);
+            export(imageFormat, selectedFile);
         }
     }
 
+    /**
+     *  Export the image.
+     *
+     * @param imageFormat The desired image format.
+     * @param exportFile The file to export to.
+     */
     @SuppressWarnings("null")
-    private void export(MainWindow window, int imageFormat, File exportFile)
+    private void export(int imageFormat, File exportFile)
     {
         // Capture the canvas
 
@@ -183,6 +209,13 @@ public class ExportDiagramDialog extends Dialog<ButtonType>
         ImageWriter writer = null;
         if (iter.hasNext()) {
              writer = iter.next();
+        }
+        if (writer == null) {
+            window.showTextAreaAlert(
+                AlertType.ERROR, "Format Unavailable", "Format Unavailable",
+                "The format you selected in not available on this system",
+                true);
+            return;
         }
 
         // Add parameters if needed
@@ -230,9 +263,9 @@ public class ExportDiagramDialog extends Dialog<ButtonType>
             int ppi = controller.getPPI();
             switch (imageFormat) {
                 case 0 -> { }
-                case 1 -> { metadata = setJPGPPI(metadata, ppi); }
-                case 2 -> { metadata = setPNGPPI(metadata, ppi); }
-                case 3 -> { metadata = setTIFFPPI(metadata, ppi); }
+                case 1 -> setJPGPPI(metadata, ppi);
+                case 2 -> setPNGPPI(metadata, ppi);
+                case 3 -> metadata = setTIFFPPI(metadata, ppi);
             }
 
             writer.write(null, new IIOImage(bufferedImage, null, metadata), param);
@@ -254,23 +287,37 @@ public class ExportDiagramDialog extends Dialog<ButtonType>
         window.setDefaultDirectory(Gamma.FileType.IMAGE, exportFile);
     }
 
-    private IIOMetadata setJPGPPI(IIOMetadata metadata, int dpi) throws IIOInvalidTreeException
+    /**
+     * Set some metadata for JPG images.
+     *
+     * @param metadata The metadata structure to write to.
+     * @param ppi The PPI of the image.
+     *
+     * @throws IIOInvalidTreeException if the IIO tree is invalid.
+     */
+    private void setJPGPPI(IIOMetadata metadata, int ppi) throws IIOInvalidTreeException
     {
         Element tree = (Element)metadata.getAsTree("javax_imageio_jpeg_image_1.0");
         Element jfif = (Element)tree.getElementsByTagName("app0JFIF").item(0);
-        jfif.setAttribute("Xdensity", Integer.toString(dpi));
-        jfif.setAttribute("Ydensity", Integer.toString(dpi));
+        jfif.setAttribute("Xdensity", Integer.toString(ppi));
+        jfif.setAttribute("Ydensity", Integer.toString(ppi));
         jfif.setAttribute("resUnits", "1"); // density is dots per inch
         metadata.mergeTree("javax_imageio_jpeg_image_1.0", tree);
-
-        return metadata;
     }
 
-    private IIOMetadata setPNGPPI(IIOMetadata metadata, int dpi) throws IIOInvalidTreeException
+    /**
+     *  Set some metadata for PNG images.
+     *
+     * @param metadata The metadata structure to write to.
+     * @param ppi The PPI of the image.
+     *
+     * @throws IIOInvalidTreeException if the IIO tree is invalid.
+     */
+    private void setPNGPPI(IIOMetadata metadata, int ppi) throws IIOInvalidTreeException
     {
         // for PNG, it's dots per mm
 
-        double dotsPerMilli = dpi / 25.4;
+        double dotsPerMilli = ppi / 25.4;
 
         IIOMetadataNode horiz = new IIOMetadataNode("HorizontalPixelSize");
         horiz.setAttribute("value", Double.toString(dotsPerMilli));
@@ -286,11 +333,18 @@ public class ExportDiagramDialog extends Dialog<ButtonType>
         root.appendChild(dim);
 
         metadata.mergeTree("javax_imageio_1.0", root);
-
-        return metadata;
     }
 
-    private IIOMetadata setTIFFPPI(IIOMetadata metadata, int dpi) throws IIOInvalidTreeException
+    /**
+     *  Set some metadata for TIFF images.
+     *
+     * @param metadata The metadata structure to write to.
+     * @param ppi The PPI of the image.
+     *
+     * @return The revised metadata.
+     * @throws IIOInvalidTreeException if the IIO tree is invalid.
+     */
+    private IIOMetadata setTIFFPPI(IIOMetadata metadata, int ppi) throws IIOInvalidTreeException
     {
         // Convert default metadata to TIFF metadata
 
@@ -304,8 +358,8 @@ public class ExportDiagramDialog extends Dialog<ButtonType>
 
         // Create {X,Y} resolution fields
 
-        TIFFField fieldXRes = new TIFFField(tagXRes, TIFFTag.TIFF_RATIONAL, 1, new long[][] { { dpi, 1 } });
-        TIFFField fieldYRes = new TIFFField(tagYRes, TIFFTag.TIFF_RATIONAL, 1, new long[][] { { dpi, 1 } });
+        TIFFField fieldXRes = new TIFFField(tagXRes, TIFFTag.TIFF_RATIONAL, 1, new long[][] { { ppi, 1 } });
+        TIFFField fieldYRes = new TIFFField(tagYRes, TIFFTag.TIFF_RATIONAL, 1, new long[][] { { ppi, 1 } });
 
         // Add {X,Y} resolution fields to TIFFDirectory
 
@@ -316,7 +370,7 @@ public class ExportDiagramDialog extends Dialog<ButtonType>
 
         dir.addTIFFField(new TIFFField(base.getTag(BaselineTIFFTagSet.TAG_RESOLUTION_UNIT), BaselineTIFFTagSet.RESOLUTION_UNIT_INCH));
 
-        // Return TIFF metadata so it can be picked up by the IIOImage
+        // Return TIFF metadata so that it can be picked up by the IIOImage
 
         return dir.getAsMetadata();
     }
