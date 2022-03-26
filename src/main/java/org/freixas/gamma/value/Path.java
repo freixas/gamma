@@ -17,10 +17,11 @@
 package org.freixas.gamma.value;
 
 import org.freixas.gamma.execution.HCodeEngine;
+
 import java.util.ArrayList;
-import java.util.Iterator;
 
 /**
+ * This class represents a path object.
  *
  * @author Antonio Freixas
  */
@@ -29,6 +30,17 @@ public class Path implements ExecutionImmutable, Displayable
     private final ArrayList<Coordinate> coords;
     private final Bounds bounds;
 
+    // **********************************************************************
+    // *
+    // * Constructor
+    // *
+    // **********************************************************************
+
+    /**
+     * Create a path.
+     *
+     * @param coords The coordinates that make up the path.
+     */
     public Path(ArrayList<Coordinate> coords)
     {
         double minX = Double.POSITIVE_INFINITY;
@@ -37,9 +49,7 @@ public class Path implements ExecutionImmutable, Displayable
         double maxT = Double.NEGATIVE_INFINITY;
 
         this.coords = new ArrayList<>();
-        for (int i = 0; i < coords.size(); i++) {
-            Coordinate coord = coords.get(i);
-
+        for (Coordinate coord : coords) {
             if (coord.x < minX) minX = coord.x;
             if (coord.x > maxX) maxX = coord.x;
             if (coord.t < minT) minT = coord.t;
@@ -50,6 +60,12 @@ public class Path implements ExecutionImmutable, Displayable
 
         this.bounds = new Bounds(minX, minT, maxX, maxT);
     }
+
+    // **********************************************************************
+    // *
+    // * Getters
+    // *
+    // **********************************************************************
 
     public Coordinate get(int index)
     {
@@ -66,15 +82,27 @@ public class Path implements ExecutionImmutable, Displayable
         return new Bounds(bounds);
     }
 
+    // **********************************************************************
+    // *
+    // * Drawing frame support
+    // *
+    // **********************************************************************
+
     public Path relativeTo(Frame prime)
     {
         ArrayList<Coordinate> newCoords = new ArrayList<>();
 
-        for (int i = 0; i < coords.size(); i++) {
-            newCoords.add(prime.toFrame(coords.get(i)));
+        for (Coordinate coord : coords) {
+            newCoords.add(prime.toFrame(coord));
         }
         return new Path(newCoords);
     }
+
+    // **********************************************************************
+    // *
+    // * Display support
+    // *
+    // **********************************************************************
 
     @Override
     public String toDisplayableString(HCodeEngine engine)

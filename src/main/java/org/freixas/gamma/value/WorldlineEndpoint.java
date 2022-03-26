@@ -32,6 +32,21 @@ public class WorldlineEndpoint implements ExecutionImmutable
     public final double tau;
     public final double d;
 
+    // **********************************************************************
+    // *
+    // * Constructors
+    // *
+    // **********************************************************************
+
+    /**
+     *  Create a worldline endpoint.
+     *
+     * @param v The velocity at this point
+     * @param x The x coordinate relative to the rest frame.
+     * @param t The t coordinate relative to the rest frame.
+     * @param tau The tau value at this point.
+     * @param d The distance value at this point.
+     */
     WorldlineEndpoint(double v, double x, double t, double tau, double d)
     {
         this.v = v;
@@ -41,6 +56,11 @@ public class WorldlineEndpoint implements ExecutionImmutable
         this.d = d;
     }
 
+    /**
+     * Copy constructor.
+     *
+     * @param other The worldline endpoint to copy.
+     */
     WorldlineEndpoint(WorldlineEndpoint other)
     {
         this.v = other.v;
@@ -65,6 +85,12 @@ public class WorldlineEndpoint implements ExecutionImmutable
         this.tau = curve.tToTau(t);
         this.d = curve.tToD(t);
     }
+
+    // **********************************************************************
+    // *
+    // * Standard methods: toString, clone hashCode, equals
+    // *
+    // **********************************************************************
 
     @Override
     public String toString()

@@ -2740,6 +2740,7 @@ public final class Parser
         }
 
         // Should never be reached
+
         return null;
     }
 

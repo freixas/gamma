@@ -29,11 +29,14 @@ import javafx.scene.transform.Affine;
  */
 public class Bounds implements ExecutionMutable, Displayable
 {
-    @SuppressWarnings("unused")
-    static public Bounds INFINITE_BOUNDS = new Bounds(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
-
     public Coordinate min;
     public Coordinate max;
+
+    // **********************************************************************
+    // *
+    // * Constructors
+    // *
+    // **********************************************************************
 
     public Bounds(double x1, double t1, double x2, double t2)
     {
@@ -73,54 +76,11 @@ public class Bounds implements ExecutionMutable, Displayable
         }
     }
 
-    /**
-     * Set this bounding box to a new set of corners. The values given can be
-     * for any two opposing corners. The corners are sorted so that the min corner
-     * is bottom left and the max corner is upper right.
-     *
-     * @param x1 The x coordinate of the first corner.
-     * @param t1 The t coordinate of the first corner.
-     * @param x2 The x coordinate of the second corner.
-     * @param t2 The t coordinate of the second corner.
-     */
-    public void setTo(double x1, double t1, double x2, double t2)
-    {
-        min.setTo(Math.min(x1, x2), Math.min(t1, t2));
-        max.setTo(Math.max(x1, x2), Math.max(t1, t2));
-    }
-
-    /**
-     * Set this bounding box to a new set of corners. The values given can be
-     * for any two opposing corners. The corners are sort so that the min corner
-     * is bottom left and the max corner is upper right.
-     *
-     * @param a The first corner.
-     * @param b The second corner.
-     */
-    public void setTo(Coordinate a, Coordinate b)
-    {
-        setTo(a.x, a.t, b.x, b.t);
-    }
-
-    /**
-     * Set this bounding box to match another.
-     *
-     * @param other The other bounds to copy.
-     */
-    public void setTo(Bounds other)
-    {
-        // There's no need to sort as the other bounds will already
-        // be sorted
-
-        min.setTo(other.min);
-        max.setTo(other.max);
-    }
-
-    @Override
-    public Bounds createCopy()
-    {
-        return new Bounds(this);
-    }
+    // **********************************************************************
+    // *
+    // * Getters
+    // *
+    // **********************************************************************
 
     /**
      * Get the coordinate for the bottom left corner of the bounds.
@@ -161,6 +121,74 @@ public class Bounds implements ExecutionMutable, Displayable
     {
         return max.t - min.t;
     }
+
+    // **********************************************************************
+    // *
+    // * Modify
+    // *
+    // **********************************************************************
+
+    /**
+     * Set this bounding box to a new set of corners. The values given can be
+     * for any two opposing corners. The corners are sorted so that the min corner
+     * is bottom left and the max corner is upper right.
+     *
+     * @param x1 The x coordinate of the first corner.
+     * @param t1 The t coordinate of the first corner.
+     * @param x2 The x coordinate of the second corner.
+     * @param t2 The t coordinate of the second corner.
+     */
+    public void setTo(double x1, double t1, double x2, double t2)
+    {
+        min.setTo(Math.min(x1, x2), Math.min(t1, t2));
+        max.setTo(Math.max(x1, x2), Math.max(t1, t2));
+    }
+
+    /**
+     * Set this bounding box to a new set of corners. The values given can be
+     * for any two opposing corners. The corners are sort so that the min corner
+     * is bottom left and the max corner is upper right.
+     *
+     * @param a The first corner.
+     * @param b The second corner.
+     */
+    @SuppressWarnings("unused")
+    public void setTo(Coordinate a, Coordinate b)
+    {
+        setTo(a.x, a.t, b.x, b.t);
+    }
+
+    /**
+     * Set this bounding box to match another.
+     *
+     * @param other The other bounds to copy.
+     */
+    public void setTo(Bounds other)
+    {
+        // There's no need to sort as the other bounds will already
+        // be sorted
+
+        min.setTo(other.min);
+        max.setTo(other.max);
+    }
+
+    // **********************************************************************
+    // *
+    // * ExecutionMutable Support
+    // *
+    // **********************************************************************
+
+    @Override
+    public Bounds createCopy()
+    {
+        return new Bounds(this);
+    }
+
+    // **********************************************************************
+    // *
+    // * Out Codes
+    // *
+    // **********************************************************************
 
     /**
      * Return a code that identifies which area a point lies within.
@@ -203,6 +231,12 @@ public class Bounds implements ExecutionMutable, Displayable
 
 	return code;
     }
+
+    // **********************************************************************
+    // *
+    // * Inside/Outside
+    // *
+    // **********************************************************************
 
     /**
      * Returns true if the given point is inside this bounding box.
@@ -257,6 +291,12 @@ public class Bounds implements ExecutionMutable, Displayable
 	int outCode1 = computeOutCode(segment.getPoint2());
 	return (outCode0 & outCode1) != 0;
     }
+
+    // **********************************************************************
+    // *
+    // * Intersections
+    // *
+    // **********************************************************************
 
     /**
      * Returns true if the given bounding box intersects with this one.
@@ -421,6 +461,12 @@ public class Bounds implements ExecutionMutable, Displayable
 	return null;
     }
 
+    // **********************************************************************
+    // *
+    // * Transformations
+    // *
+    // **********************************************************************
+
     /**
      * Transform the bounding box to get a new bounding box. The new
      * box is the bounding box of the transformed box.
@@ -444,11 +490,23 @@ public class Bounds implements ExecutionMutable, Displayable
             Math.max(Math.max(p1.getY(), p2.getY()), Math.max(p3.getY(), p4.getY())));
     }
 
+    // **********************************************************************
+    // *
+    // * Display support
+    // *
+    // **********************************************************************
+
     @Override
     public String toDisplayableString(HCodeEngine engine)
     {
         return "[ Bounds from " + min.toDisplayableString(engine) + " to " + max.toDisplayableString(engine) + " ]";
     }
+
+    // **********************************************************************
+    // *
+    // * Standard methods: toString, clone hashCode, equals
+    // *
+    // **********************************************************************
 
     @Override
     public String toString()

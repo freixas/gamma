@@ -28,10 +28,13 @@ import org.freixas.gamma.execution.HCodeEngine;
 public interface Displayable
 {
     /**
-     * Convert this value to
-     * @param engine
-     * @return
+     * Convert this value to a string suitable to display to the end user.
+     *
+     * @param engine The h-code engine.
+     *
+     * @return The value of the implementing class in a string form suitable for
+     * display.
      */
-    public String toDisplayableString(HCodeEngine engine);
+    String toDisplayableString(HCodeEngine engine);
 
 }

@@ -33,6 +33,12 @@ public class PropertyList implements PropertyElement, ExecutionMutable
     private final ArrayList<Property> properties;
     private final HashMap<String, Integer> index;
 
+    // **********************************************************************
+    // *
+    // * Constructor
+    // *
+    // **********************************************************************
+
     /**
      * Create an empty property list.
      */
@@ -42,24 +48,11 @@ public class PropertyList implements PropertyElement, ExecutionMutable
         this.index = new HashMap<>();
     }
 
-    @Override
-    public PropertyList createCopy()
-    {
-        try {
-            Class<?> cls = this.getClass();
-            Constructor<?> constructor = cls.getConstructor();
-            PropertyList newPropertyList = (PropertyList)constructor.newInstance();
-
-            for (int i = 0; i < size(); i++) {
-                PropertyElement element = getProperty(i);
-                newPropertyList.add((PropertyElement)ExecutionMutableSupport.copy(element));
-            }
-            return newPropertyList;
-        }
-        catch (IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException e) {
-            throw new ProgrammingException("PropertyList.createCopy()", e);
-        }
-    }
+    // **********************************************************************
+    // *
+    // * Getters/Setters
+    // *
+    // **********************************************************************
 
     @SuppressWarnings("unused")
     public boolean hasProperty(String name)
@@ -141,6 +134,31 @@ public class PropertyList implements PropertyElement, ExecutionMutable
     public int size()
     {
         return properties.size();
+    }
+
+    // **********************************************************************
+    // *
+    // * ExecutionMutable Support
+    // *
+    // **********************************************************************
+
+    @Override
+    public PropertyList createCopy()
+    {
+        try {
+            Class<?> cls = this.getClass();
+            Constructor<?> constructor = cls.getConstructor();
+            PropertyList newPropertyList = (PropertyList)constructor.newInstance();
+
+            for (int i = 0; i < size(); i++) {
+                PropertyElement element = getProperty(i);
+                newPropertyList.add((PropertyElement)ExecutionMutableSupport.copy(element));
+            }
+            return newPropertyList;
+        }
+        catch (IllegalAccessException | IllegalArgumentException | InstantiationException | NoSuchMethodException | SecurityException | InvocationTargetException e) {
+            throw new ProgrammingException("PropertyList.createCopy()", e);
+        }
     }
 
 }

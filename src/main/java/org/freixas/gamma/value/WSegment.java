@@ -19,8 +19,9 @@ package org.freixas.gamma.value;
 import org.freixas.gamma.math.Relativity;
 
 /**
- * This is a worldline segment definition structure. It is used to
- * create worldline segments in a worldline.
+ * This is a worldline segment definition structure. A WSegment stores the
+ * information provided by a script writer to define a segment. A WorldlineSegment,
+ * uses this information to create the actual segment.
  *
  * @author Antonio Freixas
  */
@@ -30,6 +31,12 @@ public class WSegment implements ExecutionImmutable
     private final double a;
     private final WorldlineSegment.LimitType type;
     private final double delta;
+
+    // **********************************************************************
+    // *
+    // * Constructor
+    // *
+    // **********************************************************************
 
     /**
      * Create a worldline segment based on information from the parser.This worldline is incompletely defined.
@@ -48,25 +55,59 @@ public class WSegment implements ExecutionImmutable
         this.delta = delta;
     }
 
+    // **********************************************************************
+    // *
+    // * Getter
+    // *
+    // **********************************************************************
+
+    /**
+     * Get the initial velocity of the segment. This could be NaN.
+     *
+     * @return The initial velocity of the segment.
+     */
     public double getV()
     {
         return v;
     }
 
+    /**
+     * Get the segment's acceleration.
+     *
+     * @return The segment's acceleration.
+     */
     public double getA()
     {
         return a;
     }
 
+    /**
+     * Get the limit type, which tells us how to calculate the end of the
+     * segment.
+     *
+     * @return The limit type.
+     */
     public WorldlineSegment.LimitType getType()
     {
         return type;
     }
 
-    public double getDelta()
+    /**
+     * Typically, the limit is a delta value: a certain amount of time, tau, or
+     * distance, but it can be an absolute value, such as a specific velocity.
+     *
+     * @return The limit value.
+     */
+    public double getLimit()
     {
         return delta;
     }
+
+    // **********************************************************************
+    // *
+    // * Drawing Frame Support
+    // *
+    // **********************************************************************
 
     /**
      * Create a new version of this WSegment that is relative to the given

@@ -22,6 +22,10 @@ import org.freixas.gamma.math.Util;
 import javafx.geometry.Point2D;
 
 /**
+ * A coordinate is an (x, t) pair that defines a position in Cartesian space.
+ * Because coordinates get used so much, they are mutable. We can change one
+ * coordinate to another without the expense of object creation. The x and t
+ * method variables can also be read and written directly.
  *
  * @author Antonio Freixas
  */
@@ -32,11 +36,33 @@ public class Coordinate extends ObjectContainer implements ExecutionMutable, Dis
     public double x;
     public double t;
 
+    // **********************************************************************
+    // *
+    // * Constructors
+    // *
+    // **********************************************************************
+
+    /**
+     * Create a new coordinate.
+     *
+     * @param x The x value.
+     * @param t The t value.
+     */
     public Coordinate(double x, double t)
     {
         super(propertyNames);
         this.x = x;
         this.t = t;
+    }
+
+    /**
+     * Convert a JavaFX coordinate to a Gamma coordinate.
+     *
+     * @param point The JavaFX coordinate.
+     */
+    public Coordinate(Point2D point)
+    {
+        this(point.getX(), point.getY());
     }
 
     /**
@@ -49,10 +75,11 @@ public class Coordinate extends ObjectContainer implements ExecutionMutable, Dis
         this(other.x, other.t);
     }
 
-    public Coordinate(Point2D point)
-    {
-        this(point.getX(), point.getY());
-    }
+    // **********************************************************************
+    // *
+    // * Modify
+    // *
+    // **********************************************************************
 
     /**
      * Set this coordinate equal to another coordinate.
@@ -77,11 +104,23 @@ public class Coordinate extends ObjectContainer implements ExecutionMutable, Dis
         this.t = other.t;
     }
 
+    // **********************************************************************
+    // *
+    // * ExecutionMutable Support
+    // *
+    // **********************************************************************
+
     @Override
     public Coordinate createCopy()
     {
         return new Coordinate(this);
     }
+
+    // **********************************************************************
+    // *
+    // * Math
+    // *
+    // **********************************************************************
 
     /**
      * Add a coordinate to this one.
@@ -110,6 +149,24 @@ public class Coordinate extends ObjectContainer implements ExecutionMutable, Dis
         this.t -= other.t;
         return this;
     }
+
+    /**
+     * Determien if two coordinates are equal.
+     *
+     * @param other The other coordinate to compare with.
+     *
+     * @return True if they are equal.
+     */
+    public boolean fuzzyEQ(Coordinate other)
+    {
+        return Util.fuzzyEQ(this.x, other.x) && Util.fuzzyEQ(this.t, other.t);
+    }
+
+    // **********************************************************************
+    // *
+    // * ObjectContainer Support
+    // *
+    // **********************************************************************
 
     @Override
     public Object getProperty(String name)
@@ -140,11 +197,23 @@ public class Coordinate extends ObjectContainer implements ExecutionMutable, Dis
         }
     }
 
+    // **********************************************************************
+    // *
+    // * Display Support
+    // *
+    // **********************************************************************
+
     @Override
     public String toDisplayableString(HCodeEngine engine)
     {
         return "(" + engine.toDisplayableString(x) + ", " + engine.toDisplayableString(t) + ")";
     }
+
+    // **********************************************************************
+    // *
+    // * Standard methods: toString, clone hashCode, equals
+    // *
+    // **********************************************************************
 
     @Override
     public String toString()
@@ -159,11 +228,6 @@ public class Coordinate extends ObjectContainer implements ExecutionMutable, Dis
         hash = 13 * hash + (int)(Double.doubleToLongBits(this.x) ^ (Double.doubleToLongBits(this.x) >>> 32));
         hash = 13 * hash + (int)(Double.doubleToLongBits(this.t) ^ (Double.doubleToLongBits(this.t) >>> 32));
         return hash;
-    }
-
-    public boolean fuzzyEQ(Coordinate other)
-    {
-        return Util.fuzzyEQ(this.x, other.x) && Util.fuzzyEQ(this.t, other.t);
     }
 
     @Override

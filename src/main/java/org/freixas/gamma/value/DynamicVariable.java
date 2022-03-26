@@ -18,6 +18,12 @@
 package org.freixas.gamma.value;
 
 /**
+ * Dynamic variables are variables whose values are set by Gamma in response to
+ * a change in an animation frame or a change in a GUI control.
+ * <p>
+ * Dynanmic variables are defined by the script writer and are created the first
+ * time the variable is encountered. Their values can survive the re-execution
+ * of a script.
  *
  * @author Antonio Freixas
  */

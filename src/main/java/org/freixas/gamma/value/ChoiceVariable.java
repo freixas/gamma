@@ -22,12 +22,13 @@ import org.freixas.gamma.execution.ExecutionException;
 import org.freixas.gamma.math.Util;
 
 /**
+ * Choice variables allow an end user to set the value of a variable using
+ * a choice box.
  *
  * @author Antonio Freixas
  */
 public class ChoiceVariable extends DisplayVariable
 {
-    private final DisplayVariable.Type type;
     private final int initialValue;
     private final String[] choices;
     private final String label;
@@ -36,9 +37,24 @@ public class ChoiceVariable extends DisplayVariable
 
     private final DiagramEngine diagramEngine;
 
+    // **********************************************************************
+    // *
+    // * Constructors
+    // *
+    // **********************************************************************
+
+    /**
+     * Create a new choice variable.
+     *
+     * @param diagramEngine The associated diagram engine.
+     * @param initialValue The variable's initial value.
+     * @param choices The choices presented to the end user.
+     * @param label The label for the choice variable.
+     * @param restart If true, restart an animation and recalculate any animation
+     * variables.
+     */
     public ChoiceVariable(DiagramEngine diagramEngine, double initialValue, String[] choices, String label, boolean restart)
     {
-        this.type = DisplayVariable.Type.BOOLEAN;
         this.initialValue = Util.toInt(initialValue);
         this.choices = choices;
         this.label = label;
@@ -52,50 +68,59 @@ public class ChoiceVariable extends DisplayVariable
         this.diagramEngine = diagramEngine;
     }
 
-    @Override
-    public DisplayVariable.Type getType()
-    {
-        return type;
-    }
+    // **********************************************************************
+    // *
+    // * Getters/Setters
+    // *
+    // **********************************************************************
 
+    /**
+     * Get the initial value.
+     *
+     * @return The initial value.
+     */
+    @SuppressWarnings("unused")
     public int getInitialValue()
     {
         return initialValue;
     }
 
+    /**
+     * Get the list of choices.
+     *
+     * @return The list of choices.
+     */
     public String[] getChoices()
     {
         return choices;
     }
 
-    @Override
-    public String getLabel()
-    {
-        return label;
-    }
-
+    /**
+     * Return true if a choice change should restart the animation.
+     *
+     * @return True if a choice change should restart the animation.
+     */
     public boolean isRestart()
     {
         return restart;
     }
 
-    @Override
-    public void setCurrentValue(double value)
-    {
-        setIntCurrentValue(Util.toInt(value));
-    }
-
-    @Override
-    public double getCurrentValue()
-    {
-        return currentValue;
-    }
-
+    /**
+     * Get the current value as an integer.
+     *
+     * @return The current value as an integer.
+     */
     public int getIntCurrentValue()
     {
         return currentValue;
     }
 
+    /**
+     * Set the current value using an integer. This will cause the diagram to be
+     * redrawn.
+     *
+     * @param value the value to set.
+     */
     public void setIntCurrentValue(int value)
     {
         if (value != currentValue) {
@@ -105,6 +130,36 @@ public class ChoiceVariable extends DisplayVariable
             currentValue = value;
             diagramEngine.updateForDisplayVariable(restart);
         }
+    }
+
+    // **********************************************************************
+    // *
+    // * DisplayVariable Support
+    // *
+    // **********************************************************************
+
+    @Override
+    public String getLabel()
+    {
+        return label;
+    }
+
+    @Override
+    public void setCurrentValue(double value)
+    {
+        setIntCurrentValue(Util.toInt(value));
+    }
+
+    // **********************************************************************
+    // *
+    // * DynamicVariable Support
+    // *
+    // **********************************************************************
+
+    @Override
+    public double getCurrentValue()
+    {
+        return currentValue;
     }
 
 }

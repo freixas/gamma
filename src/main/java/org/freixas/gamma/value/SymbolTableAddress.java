@@ -32,11 +32,29 @@ public class SymbolTableAddress extends Address implements ExecutionImmutable
     private final SymbolTable table;
     private final String name;
 
+    // **********************************************************************
+    // *
+    // * Constructor
+    // *
+    // **********************************************************************
+
+    /**
+     * Create a symbol table address.
+     *
+     * @param table The symbol table.
+     * @param name The name of the variable.
+     */
     public SymbolTableAddress(SymbolTable table, String name)
     {
         this.table = table;
         this.name = name;
     }
+
+    // **********************************************************************
+    // *
+    // * Getter
+    // *
+    // **********************************************************************
 
     /**
      * Get the name of the symbol for which this object is an address.
@@ -47,6 +65,12 @@ public class SymbolTableAddress extends Address implements ExecutionImmutable
     {
         return name;
     }
+
+    // **********************************************************************
+    // *
+    // * Address Support
+    // *
+    // **********************************************************************
 
     @Override
     public boolean exists()

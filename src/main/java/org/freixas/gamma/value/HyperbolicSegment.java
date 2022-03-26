@@ -22,8 +22,6 @@ import org.freixas.gamma.math.Util;
 
 /**
  * This is a hyperbolic segment between two points.
- * <p>
- * This is a mutable object.
  *
  * @author Antonio Freixas
  */
@@ -34,6 +32,12 @@ public class HyperbolicSegment extends CurveSegment implements ExecutionImmutabl
     private final WorldlineEndpoint max;
     private final OffsetAcceleration curve;
     private final Bounds bounds;
+
+    // **********************************************************************
+    // *
+    // * Constructors
+    // *
+    // **********************************************************************
 
     /**
      * Create a hyperbolic segment. The acceleration cannot be 0.
@@ -101,11 +105,162 @@ public class HyperbolicSegment extends CurveSegment implements ExecutionImmutabl
         this.bounds = other.bounds;
     }
 
+    // **********************************************************************
+    // *
+    // * Getters
+    // *
+    // **********************************************************************
+
+    /**
+     * Get the acceleration.
+     *
+     * @return The acceleration.
+     */
+    public double getA()
+    {
+        return a;
+    }
+
+    /**
+     * Get the minimum endpoint, the one that occurs earlier in time.
+     *
+     * @return The minimum endpoint.
+     */
+    public WorldlineEndpoint getMin()
+    {
+        return min;
+    }
+
+    /**
+     * Get the maximum endpoint, the one that occurs later in time.
+     *
+     * @return The minimum endpoint.
+     */
+   public WorldlineEndpoint getMax()
+    {
+        return max;
+    }
+
+    /**
+     * Get the OffsetAcceleration curve along which this hyperbolic segment
+     * lies.
+     *
+     * @return The OffsetAcceleration curve along which this hyperbolic segment
+     * lies.
+     */
+    public OffsetAcceleration getCurve()
+    {
+        return curve;
+    }
+
+    // **********************************************************************
+    // *
+    // * CurveSegment Support
+    // *
+    // **********************************************************************
+
     @Override
     public Bounds getBounds()
     {
         return new Bounds(bounds);
     }
+
+    // **********************************************************************
+    // *
+    // * Intersection
+    // *
+    // **********************************************************************
+
+    /**
+     * Intersect this hyperbolic segment with a bounding box. This method
+     * returns a hyperbolic segment that lies at least partly within the bounds
+     * or null if there is no intersection.
+     *
+     * @param bounds The bounds to intersect with.
+     *
+     * @return The hyperbolic segment that lies at least partly within the
+     * bounding box or null if there is no intersection.
+     */
+    public HyperbolicSegment intersect(Bounds bounds)
+    {
+        // Intersect the bounds with the segment along the time axis
+
+        if (min.t > bounds.max.t) {
+            return null;
+        }
+        double minT = Math.max(min.t, bounds.min.t);
+
+        if (max.t < bounds.min.t) {
+            return null;
+        }
+        double maxT = Math.min(max.t, bounds.max.t);
+
+        // Find the x values corresponding to the t intersections
+
+        double minX = curve.tToX(minT);
+        double maxX = curve.tToX(maxT);
+
+        // We can use the min and max coordinates to form a new bounding box
+        // for the segment. Intersect these bounds with the ones we were
+        // originally given. Even though we know the t coordinates lie within
+        // the bounds, we don't know that the x coordinates do (the segment
+        // might be to the left or right of the bounding box). If there is no
+        // intersection, we're done
+
+        Bounds intersection = getBounds(minX, minT, maxX, maxT, curve).intersect(bounds);
+        if (intersection == null) return null;
+
+        // Now we'll create a new hyperbolic segment based on the left and
+        // right sides of the intersection.
+
+        minT = intersection.min.t;
+        maxT = intersection.max.t;
+
+        // If the segment's minimum x is outside the intersection, find its
+        // corresponding t value (if it is inside, we leave the t value alone)
+
+        if (minX < intersection.min.x) {
+            minT = xToTWithin(intersection.min.x, minT, maxT, false);
+        }
+        else if (minX > intersection.max.x) {
+            minT = xToTWithin(intersection.max.x, minT, maxT, false);
+        }
+
+        // Do the same for the max x
+
+        if (maxX < intersection.min.x) {
+            maxT = xToTWithin(intersection.min.x, minT, maxT, true);
+        }
+        else if (maxX > intersection.max.x) {
+            maxT = xToTWithin(intersection.max.x, minT, maxT, true);
+        }
+
+        // We create one more HyperbolicSegment
+
+        return new HyperbolicSegment(a, minT, maxT, curve);
+    }
+
+    // **********************************************************************
+    // *
+    // * Display Support
+    // *
+    // **********************************************************************
+
+    @Override
+    public String toString()
+    {
+        return "HyperbolicSegment{" +
+               "\n  a=" + a +
+               "\n  min=" + min +
+               "\n  max=" + max +
+               "\n}";
+    }
+
+    // **********************************************************************
+    // *
+    // * Private
+    // *
+    // **********************************************************************
 
     /**
      * Get the bounding box for an offset acceleration curve with the given
@@ -154,135 +309,38 @@ public class HyperbolicSegment extends CurveSegment implements ExecutionImmutabl
     }
 
     /**
-     * Get the acceleration.
+     * Given a hyperbolic curve, when we convert an x coordinate to a t
+     * coordinate the x-to-t mapping can yield two solutions. This method
+     * looks at both options and picks the one that's within a given range.
      *
-     * @return The acceleration.
+     * @param x The x coordinate.
+     * @param min The minimum t coordinate allowed (inclusive).
+     * @param max The maxiumum t coordinate allowed (inclusive).
+     * @param later Prefer the t value later in time.
+     *
+     * @return The t coordinate that lies between the min and max values.
      */
-    public double getA()
-    {
-        return a;
-    }
-
-    /**
-     * Get the minimum endpoint, the one that occurs earlier in time.
-     *
-     * @return The minimum endpoint.
-     */
-    public WorldlineEndpoint getMin()
-    {
-        return min;
-    }
-
-    /**
-     * Get the maximum endpoint, the one that occurs later in time.
-     *
-     * @return The minimum endpoint.
-     */
-   public WorldlineEndpoint getMax()
-    {
-        return max;
-    }
-
-    /**
-     * Get the OffsetAcceleration curve along which this hyperbolic segment
-     * lies.
-     *
-     * @return The OffsetAcceleration curve along which this hyperbolic segment
-     * lies.
-     */
-    public OffsetAcceleration getCurve()
-    {
-        return curve;
-    }
-
-    /**
-     * Intersect this hyperbolic segment with a bounding box. This method
-     * returns a hyperbolic segment that lies at least partly within the bounds
-     * or null if there is no intersection.
-     *
-     * @param bounds The bounds to intersect with.
-     *
-     * @return The hyperbolic segment that lies at least partly within the
-     * bounding box or null if there is no intersection.
-     */
-    public HyperbolicSegment intersect(Bounds bounds)
-    {
-        // Intersect the bounds with the segment along the time axis
-
-        double minT;
-        if (min.t > bounds.max.t) {
-            return null;
-        }
-        else {
-            minT = Math.max(min.t, bounds.min.t);
-        }
-
-        double maxT;
-        if (max.t < bounds.min.t) {
-            return null;
-        }
-        else {
-            maxT = Math.min(max.t, bounds.max.t);
-        }
-
-        double minX = curve.tToX(minT);
-        double maxX = curve.tToX(maxT);
-
-        Bounds intersection = getBounds(minX, minT, maxX, maxT, curve).intersect(bounds);
-        if (intersection == null) return null;
-
-        // Now we'll create a new hyperbolic segment based on the left and
-        // right sides of the intersection.
-
-        minT = intersection.min.t;
-        maxT = intersection.max.t;
-
-        // If the segment's minimum x is outside the intersection, find its
-        // corresponding t value (if it is inside, we leave the t value alone)
-
-        if (minX < intersection.min.x) {
-            minT = xToTWithin(intersection.min.x, minT, maxT, false);
-        }
-        else if (minX > intersection.max.x) {
-            minT = xToTWithin(intersection.max.x, minT, maxT, false);
-        }
-
-        // Do the same for the max x
-
-        if (maxX < intersection.min.x) {
-            maxT = xToTWithin(intersection.min.x, minT, maxT, true);
-        }
-        else if (maxX > intersection.max.x) {
-            maxT = xToTWithin(intersection.max.x, minT, maxT, true);
-        }
-
-        // We create one more HyperbolicSegment
-
-        return new HyperbolicSegment(a, minT, maxT, curve);
-    }
-
     private double xToTWithin(double x, double min, double max, boolean later)
     {
+        // Get both possible t values
+
         double t1 = curve.xToT(x, false);
         double t2 = curve.xToT(x, true);
 
+        // If the earlier one lies outside the range, return the later one
+
         if (Util.fuzzyLT(t1, min) || Util.fuzzyGT(t1, max)) return t2;
+
+        // If the later one lies outside the range, return  the earlier one
+
         if (Util.fuzzyLT(t2, min) || Util.fuzzyGT(t2, max)) return t1;
+
+        // If both are inside the range, return the larger t value if later
+        // was true, otherwise return the smaller t value
 
         if (later) return Math.max(t1, t2);
         return Math.min(t1, t2);
 
     }
-
-    @Override
-    public String toString()
-    {
-        return "HyperbolicSegment{" +
-               "\n  a=" + a +
-               "\n  min=" + min +
-               "\n  max=" + max +
-               "\n}";
-    }
-
 
 }

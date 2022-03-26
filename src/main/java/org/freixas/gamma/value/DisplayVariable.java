@@ -24,19 +24,11 @@ package org.freixas.gamma.value;
  */
 abstract public class DisplayVariable extends DynamicVariable
 {
-    public enum Type
-    {
-        RANGE, BOOLEAN
-    }
-
-    private int displayOrder = -1;
-
     /**
-     * Get the type of this display variable.
-     *
-     * @return The type of this display variable.
+     * This allows the script writer to specify the order in which dynamic
+     * variables are presented to the end user
      */
-    abstract public Type getType();
+    private int displayOrder = -1;
 
     /**
      * Set the current value of this dynamic variable.

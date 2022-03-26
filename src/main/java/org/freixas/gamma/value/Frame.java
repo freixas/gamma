@@ -24,6 +24,8 @@ import org.freixas.gamma.math.Util;
 import java.util.Objects;
 
 /**
+ * A Frame is the internal representation of an inertial frame. It is composed
+ * of an origin and a velocity.
  *
  * @author Antonio Freixas
  */
@@ -38,6 +40,12 @@ public class Frame  extends ObjectContainer implements ExecutionMutable, Display
 
     private Coordinate origin;
     private double v;
+
+    // **********************************************************************
+    // *
+    // * Constructors
+    // *
+    // **********************************************************************
 
     /**
      * Create a frame from the instantaneous moving frame (IMF) of some point on
@@ -118,6 +126,13 @@ public class Frame  extends ObjectContainer implements ExecutionMutable, Display
             t - signTheta * Math.sin(Math.toRadians(theta)) * distanceToOrigin);
     }
 
+    public Frame(Coordinate origin, double v)
+    {
+        super(PROPERTY_NAMES);
+        this.origin = origin;
+        this.v = v;
+    }
+
     /**
      * Copy constructor.
      *
@@ -135,18 +150,23 @@ public class Frame  extends ObjectContainer implements ExecutionMutable, Display
         }
     }
 
-    public Frame(Coordinate origin, double v)
-    {
-        super(PROPERTY_NAMES);
-        this.origin = origin;
-        this.v = v;
-    }
+    // **********************************************************************
+    // *
+    // * ExecutionMutable Support
+    // *
+    // **********************************************************************
 
     @Override
     public Frame createCopy()
     {
         return new Frame(this);
     }
+
+    // **********************************************************************
+    // *
+    // * Observer to Frame
+    // *
+    // **********************************************************************
 
     /**
      * This method promotes an Observer to a Frame, if the object is not
@@ -155,7 +175,7 @@ public class Frame  extends ObjectContainer implements ExecutionMutable, Display
      * @param obj The object presumed to be either a Frame or Observer.
      *
      * @return A Frame, either the original object or the promoted Observer.
-     * If the object is neither a Frame or Observer, this method returns null.
+     * If the object is neither a Frame nor Observer, this method returns null.
      */
     static public Frame promote(Object obj)
     {
@@ -163,6 +183,12 @@ public class Frame  extends ObjectContainer implements ExecutionMutable, Display
         if (obj instanceof Observer observer) return new Frame(observer);
         return null;
     }
+
+    // **********************************************************************
+    // *
+    // * ObjectContainer Support
+    // *
+    // **********************************************************************
 
     @Override
     public Object getProperty(String name)
@@ -202,7 +228,13 @@ public class Frame  extends ObjectContainer implements ExecutionMutable, Display
         }
     }
 
-     /**
+    // **********************************************************************
+    // *
+    // * Getters
+    // *
+    // **********************************************************************
+
+    /**
      * Get the frame's velocity.
      *
      * @return The frame's velocity.
@@ -221,6 +253,12 @@ public class Frame  extends ObjectContainer implements ExecutionMutable, Display
     {
         return new Coordinate(origin);
     }
+
+    // **********************************************************************
+    // *
+    // * Transformations
+    // *
+    // **********************************************************************
 
     /**
      * Convert a coordinate relative to this frame to one relative to the rest
@@ -279,6 +317,12 @@ public class Frame  extends ObjectContainer implements ExecutionMutable, Display
         return Relativity.toPrimeFrame(x - origin.x, t - origin.t, v);
     }
 
+    // **********************************************************************
+    // *
+    // * Drawing frame support
+    // *
+    // **********************************************************************
+
     /**
      * Create a new version of this frame that is relative to the given frame
      * rather than relative to the rest frame.
@@ -290,6 +334,24 @@ public class Frame  extends ObjectContainer implements ExecutionMutable, Display
     {
         return new Frame(prime.toFrame(origin), Relativity.vPrime(v, prime.getV()));
     }
+
+    // **********************************************************************
+    // *
+    // * Display Support
+    // *
+    // **********************************************************************
+
+    @Override
+    public String toDisplayableString(HCodeEngine engine)
+    {
+        return "[ Frame velocity " + engine.toDisplayableString(v) + ", origin " + origin.toDisplayableString(engine) + " ]";
+    }
+
+    // **********************************************************************
+    // *
+    // * Standard methods: toString, clone hashCode, equals
+    // *
+    // **********************************************************************
 
     @Override
     public int hashCode()
@@ -317,12 +379,6 @@ public class Frame  extends ObjectContainer implements ExecutionMutable, Display
             return false;
         }
         return Objects.equals(this.origin, other.origin);
-    }
-
-    @Override
-    public String toDisplayableString(HCodeEngine engine)
-    {
-        return "[ Frame velocity " + engine.toDisplayableString(v) + ", origin " + origin.toDisplayableString(engine) + " ]";
     }
 
 }

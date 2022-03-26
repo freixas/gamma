@@ -147,6 +147,12 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
     private boolean constantTau;
     private boolean constantDistance;
 
+    // **********************************************************************
+    // *
+    // * Constructors
+    // *
+    // **********************************************************************
+
     /**
      * Create a new WorldlineSegment.
      *
@@ -276,8 +282,6 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
         // now, assume we're not
 
         isLastSegment = false;
-
-
     }
 
     /**
@@ -361,27 +365,64 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
         this.constantDistance = other.constantDistance;
     }
 
+    // **********************************************************************
+    // *
+    // * ExecutionMutable Support
+    // *
+    // **********************************************************************
+
     @Override
     public WorldlineSegment createCopy()
     {
         return new WorldlineSegment(this);
     }
 
+    // **********************************************************************
+    // *
+    // * Getters/Setters
+    // *
+    // **********************************************************************
+
+    /**
+     * Get the associated offset acceleration curve.
+     *
+     * @return The associated offset acceleration curve.
+     */
     public OffsetAcceleration getCurve()
     {
         return curve;
     }
 
+    /**
+     * Get the segment curve. This could be a line, line segment, or
+     * hyperbolic segment.
+     *
+     * @return The segment curve.
+     */
     public CurveSegment getCurveSegment()
     {
         return curveSegment;
     }
 
+    /**
+     * Get the original minimum endpoint, the one first calculated. The
+     * minimum is sometimes altered to be -infinity, and we will need the
+     * original value for drawing frame support.
+     *
+     * @return The original minimum endpoint.
+     */
     public WorldlineEndpoint getOriginalMin()
     {
         return originalMin;
     }
 
+    /**
+     * Get the original maximum endpoint, the one first calculated. The
+     * maximum is sometimes altered to be +infinity, and we will need the
+     * original value for drawing frame support.
+     *
+     * @return The original minimum endpoint.
+     */
     public WorldlineEndpoint getOriginalMax()
     {
         return originalMax;

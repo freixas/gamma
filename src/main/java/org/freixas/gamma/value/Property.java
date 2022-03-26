@@ -19,6 +19,7 @@ package org.freixas.gamma.value;
 import org.freixas.gamma.execution.ExecutionException;
 
 /**
+ * This class holds a command property, which is a name paired with a value.
  *
  * @author Antonio Freixas
  */
@@ -27,12 +28,30 @@ public class Property implements PropertyElement, ExecutionImmutable
     private final String name;
     private final Object value;
 
+    // **********************************************************************
+    // *
+    // * Constructor
+    // *
+    // **********************************************************************
+
+    /**
+     * Create a property.
+     *
+     * @param name The property's name.
+     * @param value The property's value.
+     */
     public Property(String name, Object value)
     {
         this.name = name;
         if (value == null) throw new ExecutionException("The property's value is null");
         this.value = value;
     }
+
+    // **********************************************************************
+    // *
+    // * Getters
+    // *
+    // **********************************************************************
 
     public String getName()
     {

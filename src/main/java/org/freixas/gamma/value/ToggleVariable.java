@@ -20,12 +20,13 @@ import org.freixas.gamma.execution.DiagramEngine;
 import org.freixas.gamma.math.Util;
 
 /**
+ * Toggle variables allow an end user to set the value of a variable using
+ * a toggle.
  *
  * @author Antonio Freixas
  */
 public class ToggleVariable extends DisplayVariable
 {
-    private final DisplayVariable.Type type;
     private final boolean initialValue;
     private final String label;
     private final boolean restart;
@@ -33,9 +34,14 @@ public class ToggleVariable extends DisplayVariable
 
     private final DiagramEngine diagramEngine;
 
+    // **********************************************************************
+    // *
+    // * Constructor
+    // *
+    // **********************************************************************
+
     public ToggleVariable(DiagramEngine diagramEngine, double initialValue, String label, boolean restart)
     {
-        this.type = DisplayVariable.Type.BOOLEAN;
         this.initialValue = !Util.fuzzyZero(initialValue);
         this.label = label;
         this.restart = restart;
@@ -44,26 +50,65 @@ public class ToggleVariable extends DisplayVariable
         this.diagramEngine = diagramEngine;
     }
 
-    @Override
-    public DisplayVariable.Type getType()
-    {
-        return type;
-    }
+    // **********************************************************************
+    // *
+    // * Getter/Setter
+    // *
+    // **********************************************************************
 
+    /**
+     * Get the initial value.
+     *
+     * @return The initial value.
+     */
     public boolean getInitialValue()
     {
         return initialValue;
     }
 
+    /**
+     * Determine whether changes to the toggle's value restart an animation.
+     *
+     * @return True if changes to the toggle's value restart an animation.
+     */
+    public boolean isRestart()
+    {
+        return restart;
+    }
+
+    /**
+     * Get the current value as a boolean.
+     *
+     * @return The current value as a boolean.
+     */
+    public boolean getBooleanCurrentValue()
+    {
+        return currentValue;
+    }
+
+    /**
+     * Set the current value as a boolean.
+     *
+     * @param value The value to set the toggle to.
+     */
+    public void setBooleanCurrentValue(boolean value)
+    {
+        if (value != currentValue) {
+            currentValue = value;
+            diagramEngine.updateForDisplayVariable(restart);
+        }
+    }
+
+    // **********************************************************************
+    // *
+    // * DisplayVariable Support
+    // *
+    // **********************************************************************
+
     @Override
     public String getLabel()
     {
         return label;
-    }
-
-    public boolean isRestart()
-    {
-        return restart;
     }
 
     @Override
@@ -72,23 +117,16 @@ public class ToggleVariable extends DisplayVariable
         setBooleanCurrentValue(!Util.fuzzyZero(value));
     }
 
+    // **********************************************************************
+    // *
+    // * DynamicVariable Support
+    // *
+    // **********************************************************************
+
     @Override
     public double getCurrentValue()
     {
         return currentValue ? 1.0 : 0.0;
-    }
-
-    public boolean getBooleanCurrentValue()
-    {
-        return currentValue;
-    }
-
-    public void setBooleanCurrentValue(boolean value)
-    {
-        if (value != currentValue) {
-            currentValue = value;
-            diagramEngine.updateForDisplayVariable(restart);
-        }
     }
 
 }

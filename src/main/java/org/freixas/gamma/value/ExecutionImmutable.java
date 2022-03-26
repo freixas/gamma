@@ -21,7 +21,7 @@ package org.freixas.gamma.value;
  * data portion of an HCodeProgram, but cannot be changed during execution of
  * the program. It can be changed between executions of the same program.
  * <p>
- * Object properties must either be final or ExecutionImmutable.
+ * Object properties must either be final or themselves ExecutionImmutable.
  *
  * @author Antonio Freixas
  */

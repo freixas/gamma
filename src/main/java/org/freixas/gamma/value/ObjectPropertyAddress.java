@@ -30,11 +30,29 @@ public class ObjectPropertyAddress extends Address implements ExecutionImmutable
     private final ObjectContainer container;
     private final String name;
 
+    // **********************************************************
+    // *
+    // * Constructor
+    // *
+    // **********************************************************
+
+    /**
+     * Create an object property address.
+     *
+     * @param container The object containing the property.
+     * @param name The name of the property.
+     */
     public ObjectPropertyAddress(ObjectContainer container, String name)
     {
         this.container = container;
         this.name = name;
     }
+
+    // **********************************************************
+    // *
+    // * Getters
+    // *
+    // **********************************************************
 
     /**
      * Get the name of the symbol for which this object is an address.
@@ -45,6 +63,12 @@ public class ObjectPropertyAddress extends Address implements ExecutionImmutable
     {
         return name;
     }
+
+    // **********************************************************
+    // *
+    // * Address support
+    // *
+    // **********************************************************
 
     @Override
     public boolean exists()

@@ -31,6 +31,33 @@ public abstract class Address implements ExecutionImmutable
      */
     public abstract boolean exists();
 
+    // **********************************************************************
+    // *
+    // * Getter/Setter
+    // *
+    // **********************************************************************
+
+    /**
+     * Return the object referenced by this address. If the object doesn't
+     * exist, return null.
+     *
+     * @return The object referenced by this address.
+     */
+    public abstract Object getValue();
+
+    /**
+     * Set the value of the object referenced by this address.
+     *
+     * @param value The value of the object referenced by this address.
+     */
+    public abstract void setValue(Object value);
+
+    // **********************************************************************
+    // *
+    // * Informational
+    // *
+    // **********************************************************************
+
     /**
      * Return true if the object referenced by this address is exactly of the
      * same type as the given object.
@@ -52,18 +79,4 @@ public abstract class Address implements ExecutionImmutable
         return obj.getClass() == value.getClass();
     }
 
-    /**
-     * Return the object referenced by this address. If the object doesn't
-     * exist, return null.
-     *
-     * @return The object referenced by this address.
-     */
-    public abstract Object getValue();
-
-    /**
-     * Set the value of the object referenced by this address.
-     *
-     * @param value The value of the object referenced by this address.
-     */
-    public abstract void setValue(Object value);
 }

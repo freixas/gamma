@@ -17,47 +17,43 @@
 package org.freixas.gamma.value;
 
 import org.freixas.gamma.ProgrammingException;
-import org.freixas.gamma.execution.ExecutionException;
 import org.freixas.gamma.execution.HCodeEngine;
 import org.freixas.gamma.math.Relativity;
 import org.freixas.gamma.math.Util;
 
 /**
- * A line is defined by an angle (in degrees) and a point through which the line
- * crosses. A line can be created using other methods, but all are converted to
- * an angle and a point.
- * <p>
- * The angle is between -90 (exclusive) and 90 (inclusive) degrees. Lines
- * between 0 and 90 degrees (inclusive) can be thought of as being drawn with
- * increasing x and t coordinates. Lines between 0 and -90 degrees (exclusive)
- * can be thought of as drawn with decreasing x and increasing t coordinates.
- * <p>
- * Lines are generally infinite, but can be capped off on one or both ends. If
- * capped off on one end, the line starts or ends on the point. If capped off on
- * both ends, the line effectively becomes a single point.
- * <p>
- *
+ * A concrete line is the main implementation of a line. It is usually infinite,
+ * but can be capped off on one or both ends. If capped off on one end, the line
+ * starts or ends on the point. If capped off on both ends, the line effectively
+ * becomes a single point.
  *
  * @author Antonio Freixas
  */
 public class ConcreteLine extends Line
 {
-    class UnsortedBounds
+    // **********************************************************************
+    // *
+    // * Nested Classes
+    // *
+    // **********************************************************************
+
+    /**
+     * Lines have starting and ending points, These define the bounds, but the
+     * bounds might be lower-left and upper-right, or lower-right and upper-left.
+     * Because of this, we can't use a normal Bounds object to store the line
+     * bounds.
+     *
+     * @param min The coordinate with the smallest t value.
+     * @param max The coordinate with the largest t value.
+     */
+    record UnsortedBounds(Coordinate min, Coordinate max)
     {
-        public final Coordinate min;
-        public final Coordinate max;
-
-        public UnsortedBounds(Coordinate min, Coordinate max)
-        {
-            this.min = min;
-            this.max = max;
-        }
-
         @Override
         public String toString()
         {
             return "UnsortedBounds{" + "from " + min + " to " + max + '}';
         }
+
     }
 
     private final double angle;
@@ -169,25 +165,6 @@ public class ConcreteLine extends Line
     }
 
     /**
-     * Copy constructor.
-     *
-     * @param other The other line to copy.
-     */
-    public ConcreteLine(ConcreteLine other)
-    {
-	this.angle = other.angle;
-	this.coord = other.coord;
-	this.slope = other.slope;
-	this.mXOrigin = other.mXOrigin;
-	this.t1MinusMX1 = other.t1MinusMX1;
-
-	this.isInfiniteMinus = other.isInfiniteMinus;
-	this.isInfinitePlus = other.isInfinitePlus;
-        this.unsortedBounds = other.unsortedBounds;
-        this.bounds = other.bounds;
-    }
-
-    /**
      * Create a new line based on another line. The new line can be capped
      * off differently from the original line.
      *
@@ -234,50 +211,22 @@ public class ConcreteLine extends Line
     }
 
     /**
-     * A private method used to calculate the bounds of the line for
-     * the constructors. These need to be unsorted.
+     * Copy constructor.
      *
-     * @return The bounds of the line.
+     * @param other The other line to copy.
      */
-    private UnsortedBounds getUnsortedBounds()
+    public ConcreteLine(ConcreteLine other)
     {
-        double minX, minT, maxX, maxT;
+        this.angle = other.angle;
+        this.coord = other.coord;
+        this.slope = other.slope;
+        this.mXOrigin = other.mXOrigin;
+        this.t1MinusMX1 = other.t1MinusMX1;
 
-        minT = Double.NEGATIVE_INFINITY;
-        maxT = Double.POSITIVE_INFINITY;
-
-        // Vertical line
-
-        if (Util.fuzzyEQ(angle, 90.0)) {
-            minX = maxX = coord.x;
-        }
-
-        // Horizontal line
-
-        else if (Util.fuzzyZero(angle)) {
-            minT = maxT = coord.t;
-            minX = Double.NEGATIVE_INFINITY;
-            maxX = Double.POSITIVE_INFINITY;
-        }
-
-        // Slope from 0 to 90 degrees (exclusive)
-
-        else if (angle >= 0) {
-            minX = Double.NEGATIVE_INFINITY;
-            maxX = Double.POSITIVE_INFINITY;
-        }
-
-        // Slope from 0 to -90 degrees (exclusive)
-
-        else {
-            minX = Double.POSITIVE_INFINITY;
-            maxX = Double.NEGATIVE_INFINITY;
-        }
-
-        if (!isInfiniteMinus) { minX = coord.x; minT = coord.t; }
-        if (!isInfinitePlus) { maxX = coord.x; maxT = coord.t; }
-
-        return new UnsortedBounds(new Coordinate(minX, minT), new Coordinate(maxX, maxT));
+        this.isInfiniteMinus = other.isInfiniteMinus;
+        this.isInfinitePlus = other.isInfinitePlus;
+        this.unsortedBounds = other.unsortedBounds;
+        this.bounds = other.bounds;
     }
 
     // **********************************************************************
@@ -543,7 +492,7 @@ public class ConcreteLine extends Line
             Double.isInfinite(extBounds.min.t) ||
             Double.isInfinite(extBounds.max.x) ||
             Double.isInfinite(extBounds.max.t)) {
-            throw new ProgrammingException("Line.interesect(): received a bounding box with an infinite coordinate");
+            throw new ProgrammingException("Line.intersect(): received a bounding box with an infinite coordinate");
         }
 
         // Intersect with our bounding box (which will have corners at
@@ -611,7 +560,7 @@ public class ConcreteLine extends Line
             return intersect(extBounds);
         }
 
-        // If the intersected bounding box is the same as the lines's bounding
+        // If the intersected bounding box is the same as the line's bounding
         // box, we return the line
 
         if (extBounds.min.x == bounds.min.x &&
@@ -627,7 +576,7 @@ public class ConcreteLine extends Line
             if (Double.isFinite(extBounds.min.t) && Double.isFinite(extBounds.max.t)) {
                 return new LineSegment(coord.x, extBounds.min.t, coord.x, extBounds.max.t);
             }
-            Double t;
+            double t;
             if (Double.isFinite(extBounds.min.t)) {
                 t = extBounds.min.t;
             }
@@ -647,7 +596,7 @@ public class ConcreteLine extends Line
             if (Double.isFinite(extBounds.min.x) && Double.isFinite(extBounds.max.x)) {
                 return new LineSegment(extBounds.min.x, coord.t, extBounds.max.x, coord.t);
             }
-            Double x;
+            double x;
             if (Double.isFinite(extBounds.min.x)) {
                 x = extBounds.min.x;
             }
@@ -765,7 +714,60 @@ public class ConcreteLine extends Line
 
     // **********************************************************************
     // *
-    // * Display support
+    // * Private
+    // *
+    // **********************************************************************
+
+    /**
+     * A private method used to calculate the bounds of the line for
+     * the constructors. These need to be unsorted.
+     *
+     * @return The bounds of the line.
+     */
+    private UnsortedBounds getUnsortedBounds()
+    {
+        double minX, minT, maxX, maxT;
+
+        minT = Double.NEGATIVE_INFINITY;
+        maxT = Double.POSITIVE_INFINITY;
+
+        // Vertical line
+
+        if (Util.fuzzyEQ(angle, 90.0)) {
+            minX = maxX = coord.x;
+        }
+
+        // Horizontal line
+
+        else if (Util.fuzzyZero(angle)) {
+            minT = maxT = coord.t;
+            minX = Double.NEGATIVE_INFINITY;
+            maxX = Double.POSITIVE_INFINITY;
+        }
+
+        // Slope from 0 to 90 degrees (exclusive)
+
+        else if (angle >= 0) {
+            minX = Double.NEGATIVE_INFINITY;
+            maxX = Double.POSITIVE_INFINITY;
+        }
+
+        // Slope from 0 to -90 degrees (exclusive)
+
+        else {
+            minX = Double.POSITIVE_INFINITY;
+            maxX = Double.NEGATIVE_INFINITY;
+        }
+
+        if (!isInfiniteMinus) { minX = coord.x; minT = coord.t; }
+        if (!isInfinitePlus) { maxX = coord.x; maxT = coord.t; }
+
+        return new UnsortedBounds(new Coordinate(minX, minT), new Coordinate(maxX, maxT));
+    }
+
+    // **********************************************************************
+    // *
+    // * Display Support
     // *
     // **********************************************************************
 
@@ -774,6 +776,12 @@ public class ConcreteLine extends Line
     {
         return "[ Line " + engine.toDisplayableString(angle) + " degrees through " + coord.toDisplayableString(engine) + " ]";
     }
+
+    // **********************************************************************
+    // *
+    // * Standard methods: toString, clone hashCode, equals
+    // *
+    // **********************************************************************
 
     @Override
     public String toString()

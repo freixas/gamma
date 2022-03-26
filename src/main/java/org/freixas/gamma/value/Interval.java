@@ -34,6 +34,22 @@ public class Interval implements ExecutionImmutable, Displayable
     private final double min;
     private final double max;
 
+    // **********************************************************************
+    // *
+    // * Constructors
+    // *
+    // **********************************************************************
+
+    /**
+     * Create an interval. The interval can be based on time, tau, or distance
+     * ranges. While the names are "min" and "max", the values are sorted so
+     * that the minimum is set to the smaller value and the max is set of the
+     * larger value.
+     *
+     * @param type The interval time.
+     * @param min The minimum value.
+     * @param max The maximum value.
+     */
     public Interval(Type type, double min, double max)
     {
         this.type = type;
@@ -52,6 +68,12 @@ public class Interval implements ExecutionImmutable, Displayable
         this.min = other.min;
         this.max = other.max;
     }
+
+    // **********************************************************************
+    // *
+    // * Getters
+    // *
+    // **********************************************************************
 
     /**
      * Get the interval type.
@@ -95,7 +117,7 @@ public class Interval implements ExecutionImmutable, Displayable
 
     // **********************************************************************
     // *
-    // * Display support
+    // * Display Support
     // *
     // **********************************************************************
 

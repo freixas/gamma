@@ -22,13 +22,12 @@ import org.freixas.gamma.execution.HCodeEngine;
 import org.freixas.gamma.math.OffsetAcceleration;
 import org.freixas.gamma.math.Relativity;
 import org.freixas.gamma.math.Util;
+
 import java.util.ArrayList;
-import java.util.ListIterator;
 
 /**
- * An observer has an initial origin, tau and distance. The observer then
- * travels through as series of periods of constant velocity or constant
- * acceleration.
+ * An interval observer is an observer whose worldline is limited to a range
+ * specific by time, tau, or distance.
  *
  * @author Antonio Freixas
  */
@@ -46,6 +45,12 @@ public class IntervalObserver extends Observer
     // *
     // **********************************************************************
 
+    /**
+     *  Crete an interval observer given another observer and an interval.
+     *
+     * @param observer The observer to use.
+     * @param interval The interval to apply to the observer.
+     */
     public IntervalObserver(Observer observer, Interval interval)
     {
         if (observer == null) throw new ExecutionException("setInterval() has a null observer");
@@ -63,7 +68,7 @@ public class IntervalObserver extends Observer
 
         // The interval is never used except in the constructor and for display
 
-	this.interval = interval;
+	    this.interval = interval;
 
         double minT = 0;
         double maxT = 0;
@@ -98,11 +103,21 @@ public class IntervalObserver extends Observer
             this.observer.tToD(maxT));
     }
 
+    /**
+     * This constructor is used internally when we know the endpoints of the
+     * interval observer. The interval is recorded only for reference.
+     *
+     * @param observer The observer to use.
+     * @param interval The interval to apply to the observer (not used except
+     * for reference)
+     * @param min The minimum value of the observer's worldline.
+     * @param max The maximum value of the observer's worldline.
+     */
     private IntervalObserver(Observer observer, Interval interval,
                               WorldlineEndpoint min, WorldlineEndpoint max)
     {
         if (observer == null) {
-            throw new ProgrammingException("BoundedLine: Trying to attach an interval to a null observer");
+            throw new ProgrammingException("IntervalObserver: Trying to attach an interval to a null observer");
         }
 
         if (observer instanceof IntervalObserver intervalObserver) {
@@ -112,12 +127,12 @@ public class IntervalObserver extends Observer
             this.observer = concreteObserver;
         }
         else {
-            throw new ProgrammingException("IntervalLine: line is not a interval or concrete line");
+            throw new ProgrammingException("IntervalObserver: observer is not a interval observer or concrete observer");
         }
 
         // The interval is never used except in the constructor and for display
 
-	this.interval = interval;
+        this.interval = interval;
 
         this.min = min;
         this.max = max;
@@ -213,9 +228,7 @@ public class IntervalObserver extends Observer
     @Override
     public double vToX(double v)
     {
-        ListIterator<WorldlineSegment> iter = observer.getSegments().listIterator();
-        while (iter.hasNext()) {
-            WorldlineSegment segment = iter.next();
+        for (WorldlineSegment segment : observer.getSegments()) {
             int inRange = inRange(segment);
             if (inRange == 1) break;
             if (inRange == 0) {
@@ -241,9 +254,7 @@ public class IntervalObserver extends Observer
     @Override
     public double vToD(double v)
     {
-        ListIterator<WorldlineSegment> iter = observer.getSegments().listIterator();
-        while (iter.hasNext()) {
-            WorldlineSegment segment = iter.next();
+        for (WorldlineSegment segment : observer.getSegments()) {
             int inRange = inRange(segment);
             if (inRange == 1) break;
             if (inRange == 0) {
@@ -269,9 +280,7 @@ public class IntervalObserver extends Observer
     @Override
     public double vToT(double v)
     {
-        ListIterator<WorldlineSegment> iter = observer.getSegments().listIterator();
-        while (iter.hasNext()) {
-            WorldlineSegment segment = iter.next();
+        for (WorldlineSegment segment : observer.getSegments()) {
             int inRange = inRange(segment);
             if (inRange == 1) break;
             if (inRange == 0) {
@@ -281,8 +290,10 @@ public class IntervalObserver extends Observer
 
                 WorldlineEndpoint sMin = segment.getMin();
                 WorldlineEndpoint sMax = segment.getMax();
-                if (Util.fuzzyLT(sMin.v, sMax.v) && (Util.fuzzyLT(v, sMax.v) || Util.fuzzyGT(v, sMax.v))) return Double.NaN;
-                if (Util.fuzzyGT(sMin.v, sMax.v) && (Util.fuzzyLT(v, sMax.v) || Util.fuzzyGT(v, sMin.v))) return Double.NaN;
+                if (Util.fuzzyLT(sMin.v, sMax.v) && (Util.fuzzyLT(v, sMax.v) || Util.fuzzyGT(v, sMax.v)))
+                    return Double.NaN;
+                if (Util.fuzzyGT(sMin.v, sMax.v) && (Util.fuzzyLT(v, sMax.v) || Util.fuzzyGT(v, sMin.v)))
+                    return Double.NaN;
                 if (Util.fuzzyEQ(sMin.v, sMax.v)) return min.t;
 
                 double t = segment.vToT(v);
@@ -302,9 +313,7 @@ public class IntervalObserver extends Observer
     @Override
     public double vToTau(double v)
     {
-        ListIterator<WorldlineSegment> iter = observer.getSegments().listIterator();
-        while (iter.hasNext()) {
-            WorldlineSegment segment = iter.next();
+        for (WorldlineSegment segment : observer.getSegments()) {
             int inRange = inRange(segment);
             if (inRange == 1) break;
             if (inRange == 0) {
@@ -314,8 +323,10 @@ public class IntervalObserver extends Observer
 
                 WorldlineEndpoint sMin = segment.getMin();
                 WorldlineEndpoint sMax = segment.getMax();
-                if (Util.fuzzyLT(sMin.v, sMax.v) && (Util.fuzzyLT(v, sMax.v) || Util.fuzzyGT(v, sMax.v))) return Double.NaN;
-                if (Util.fuzzyGT(sMin.v, sMax.v) && (Util.fuzzyLT(v, sMax.v) || Util.fuzzyGT(v, sMin.v))) return Double.NaN;
+                if (Util.fuzzyLT(sMin.v, sMax.v) && (Util.fuzzyLT(v, sMax.v) || Util.fuzzyGT(v, sMax.v)))
+                    return Double.NaN;
+                if (Util.fuzzyGT(sMin.v, sMax.v) && (Util.fuzzyLT(v, sMax.v) || Util.fuzzyGT(v, sMin.v)))
+                    return Double.NaN;
                 if (Util.fuzzyEQ(sMin.v, sMax.v)) return min.tau;
 
                 double tau = segment.vToTau(v);
@@ -341,9 +352,7 @@ public class IntervalObserver extends Observer
     @Override
     public double dToV(double d)
     {
-        ListIterator<WorldlineSegment> iter = observer.getSegments().listIterator();
-        while (iter.hasNext()) {
-            WorldlineSegment segment = iter.next();
+        for (WorldlineSegment segment : observer.getSegments()) {
             int inRange = inRange(segment);
             if (inRange == 1) break;
             if (inRange == 0) {
@@ -367,9 +376,7 @@ public class IntervalObserver extends Observer
     @Override
     public double dToX(double d)
     {
-        ListIterator<WorldlineSegment> iter = observer.getSegments().listIterator();
-        while (iter.hasNext()) {
-            WorldlineSegment segment = iter.next();
+        for (WorldlineSegment segment : observer.getSegments()) {
             int inRange = inRange(segment);
             if (inRange == 1) break;
             if (inRange == 0) {
@@ -392,9 +399,7 @@ public class IntervalObserver extends Observer
     @Override
     public double dToT(double d)
     {
-        ListIterator<WorldlineSegment> iter = observer.getSegments().listIterator();
-        while (iter.hasNext()) {
-            WorldlineSegment segment = iter.next();
+        for (WorldlineSegment segment : observer.getSegments()) {
             int inRange = inRange(segment);
             if (inRange == 1) break;
             if (inRange == 0) {
@@ -402,8 +407,8 @@ public class IntervalObserver extends Observer
                 // If the distance doesn't change, get the correct T value
 
                 WorldlineEndpoint sMin = segment.getMin();
-                WorldlineEndpoint sMax = segment.getMax();
-                if (Util.fuzzyLT(d, sMin.d) || Util.fuzzyGT(d, sMin.d)) return Double.NaN;
+                if (Util.fuzzyLT(d, sMin.d) || Util.fuzzyGT(d, sMin.d))
+                    return Double.NaN;
                 if (Util.fuzzyEQ(sMin.d, sMin.d)) return min.t;
 
                 double t = segment.dToT(d);
@@ -422,9 +427,7 @@ public class IntervalObserver extends Observer
     @Override
     public double dToTau(double d)
     {
-        ListIterator<WorldlineSegment> iter = observer.getSegments().listIterator();
-        while (iter.hasNext()) {
-            WorldlineSegment segment = iter.next();
+        for (WorldlineSegment segment : observer.getSegments()) {
             int inRange = inRange(segment);
             if (inRange == 1) break;
             if (inRange == 0) {
@@ -432,8 +435,8 @@ public class IntervalObserver extends Observer
                 // If the distance doesn't change, get the correct T value
 
                 WorldlineEndpoint sMin = segment.getMin();
-                WorldlineEndpoint sMax = segment.getMax();
-                if (Util.fuzzyLT(d, sMin.d) || Util.fuzzyGT(d, sMin.d)) return Double.NaN;
+                if (Util.fuzzyLT(d, sMin.d) || Util.fuzzyGT(d, sMin.d))
+                    return Double.NaN;
                 if (Util.fuzzyEQ(sMin.d, sMin.d)) return min.tau;
 
                 double tau = segment.dToTau(d);
@@ -458,9 +461,7 @@ public class IntervalObserver extends Observer
     @Override
     public double tToV(double t)
     {
-        ListIterator<WorldlineSegment> iter = observer.getSegments().listIterator();
-        while (iter.hasNext()) {
-            WorldlineSegment segment = iter.next();
+        for (WorldlineSegment segment : observer.getSegments()) {
             int inRange = inRange(segment);
             if (inRange == 1) break;
             if (inRange == 0) {
@@ -480,9 +481,7 @@ public class IntervalObserver extends Observer
     @Override
     public double tToX(double t)
     {
-        ListIterator<WorldlineSegment> iter = observer.getSegments().listIterator();
-        while (iter.hasNext()) {
-            WorldlineSegment segment = iter.next();
+        for (WorldlineSegment segment : observer.getSegments()) {
             int inRange = inRange(segment);
             if (inRange == 1) break;
             if (inRange == 0) {
@@ -502,9 +501,7 @@ public class IntervalObserver extends Observer
     @Override
     public double tToD(double t)
     {
-        ListIterator<WorldlineSegment> iter = observer.getSegments().listIterator();
-        while (iter.hasNext()) {
-            WorldlineSegment segment = iter.next();
+        for (WorldlineSegment segment : observer.getSegments()) {
             int inRange = inRange(segment);
             if (inRange == 1) break;
             if (inRange == 0) {
@@ -525,9 +522,7 @@ public class IntervalObserver extends Observer
     @Override
     public double tToTau(double t)
     {
-        ListIterator<WorldlineSegment> iter = observer.getSegments().listIterator();
-        while (iter.hasNext()) {
-            WorldlineSegment segment = iter.next();
+        for (WorldlineSegment segment : observer.getSegments()) {
             int inRange = inRange(segment);
             if (inRange == 1) break;
             if (inRange == 0) {
@@ -553,9 +548,7 @@ public class IntervalObserver extends Observer
     @Override
     public double tauToV(double tau)
     {
-        ListIterator<WorldlineSegment> iter = observer.getSegments().listIterator();
-        while (iter.hasNext()) {
-            WorldlineSegment segment = iter.next();
+        for (WorldlineSegment segment : observer.getSegments()) {
             int inRange = inRange(segment);
             if (inRange == 1) break;
             if (inRange == 0) {
@@ -575,9 +568,7 @@ public class IntervalObserver extends Observer
     @Override
     public double tauToX(double tau)
     {
-        ListIterator<WorldlineSegment> iter = observer.getSegments().listIterator();
-        while (iter.hasNext()) {
-            WorldlineSegment segment = iter.next();
+        for (WorldlineSegment segment : observer.getSegments()) {
             int inRange = inRange(segment);
             if (inRange == 1) break;
             if (inRange == 0) {
@@ -599,9 +590,7 @@ public class IntervalObserver extends Observer
     @Override
     public double tauToD(double tau)
     {
-        ListIterator<WorldlineSegment> iter = observer.getSegments().listIterator();
-        while (iter.hasNext()) {
-            WorldlineSegment segment = iter.next();
+        for (WorldlineSegment segment : observer.getSegments()) {
             int inRange = inRange(segment);
             if (inRange == 1) break;
             if (inRange == 0) {
@@ -621,9 +610,7 @@ public class IntervalObserver extends Observer
     @Override
     public double tauToT(double tau)
     {
-        ListIterator<WorldlineSegment> iter = observer.getSegments().listIterator();
-        while (iter.hasNext()) {
-            WorldlineSegment segment = iter.next();
+        for (WorldlineSegment segment : observer.getSegments()) {
             int inRange = inRange(segment);
             if (inRange == 1) break;
             if (inRange == 0) {
@@ -652,9 +639,7 @@ public class IntervalObserver extends Observer
     @Override
     public Coordinate intersect(Line line)
     {
-        ListIterator<WorldlineSegment> iter = observer.getSegments().listIterator();
-        while (iter.hasNext()) {
-            WorldlineSegment segment = iter.next();
+        for (WorldlineSegment segment : observer.getSegments()) {
             int inRange = inRange(segment);
             if (inRange == 1) break;
             if (inRange == 0) {
@@ -672,7 +657,8 @@ public class IntervalObserver extends Observer
                     // Find out if this intersection occurs within the bounds of this
                     // segment and within our interval
 
-                    if (curveSegment.getBounds().inside(intersection) && inRange(intersection)) return intersection;
+                    if (curveSegment.getBounds().inside(intersection) && inRange(intersection))
+                        return intersection;
                 }
             }
         }
@@ -682,7 +668,7 @@ public class IntervalObserver extends Observer
     /**
      * Find the intersection of this worldline with another. We check segments
      * one at a time from earliest to latest. We check our first segment against
-     * all of the other worldline's segments, then our second segment, etc. We
+     * all the other worldline's segments, then our second segment, etc. We
      * return the first intersection with the earliest time coordinate. If there
      * is no intersection with any segment, we return null.
      *
@@ -696,12 +682,8 @@ public class IntervalObserver extends Observer
             return intervalObserver.intersect(this);
         }
         else if (other instanceof ConcreteObserver otherObserver) {
-            ListIterator<WorldlineSegment> iter = otherObserver.getSegments().listIterator();
-            while (iter.hasNext()) {
-                WorldlineSegment segment1 = iter.next();
-                ListIterator<WorldlineSegment> iter2 = observer.getSegments().listIterator();
-                while (iter2.hasNext()) {
-                    WorldlineSegment segment2 = iter2.next();
+            for (WorldlineSegment segment1 : otherObserver.getSegments()) {
+                for (WorldlineSegment segment2 : observer.getSegments()) {
                     Coordinate coord = segment1.intersect(segment2);
                     if (coord != null) return coord;
                 }

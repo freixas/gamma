@@ -16,15 +16,16 @@
  */
 package org.freixas.gamma.value;
 
-import org.freixas.gamma.ProgrammingException;
-import org.freixas.gamma.execution.ExecutionException;
 import org.freixas.gamma.execution.HCodeEngine;
 import org.freixas.gamma.math.Relativity;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.ListIterator;
 
 /**
+ * A concrete observer  is the main implementation of an observer. The observer's
+ * worldline is infinite.
  *
  * @author Antonio Freixas
  */
@@ -37,6 +38,20 @@ public class ConcreteObserver extends Observer
     private final ArrayList<WorldlineSegment> segments;
     private transient WorldlineSegment lastSegment = null;
 
+    // **********************************************************************
+    // *
+    // * Constructors
+    // *
+    // **********************************************************************
+
+    /**
+     *  Create a concrete observer. This constructor defines the origin of
+     *  the observer's worldline (which is at an arbitrary point) and the tau
+     *  and distance values at the origin.
+     *
+     * @param initializer This defines the origin, and the tau and distance
+     * values at the origin.
+     */
     public ConcreteObserver(WInitializer initializer)
     {
         this.origin = initializer.getOrigin();
@@ -46,6 +61,18 @@ public class ConcreteObserver extends Observer
         this.segments = new ArrayList<>();
     }
 
+    /**
+     *  Create a concrete observer. This constructor defines the origin of
+     *  the observer's worldline (which is at an arbitrary point) and the tau
+     *  and distance values at the origin. It also adds a series of segments
+     *  that begin at the origin and continue toward positive time. Each segment
+     *  has an initial velocity and a constant acceleration as well as a limit
+     *  that defines how long the segment is.
+     *
+     * @param initializer This defines the origin, and the tau and distance
+     * values at the origin.
+     * @param wSegments The segments to add.
+     */
     public ConcreteObserver(WInitializer initializer, ArrayList<WSegment> wSegments)
     {
         this.origin = initializer.getOrigin();
@@ -72,7 +99,7 @@ public class ConcreteObserver extends Observer
             if (iter.hasNext()) {
                 addSegment(
                         wSegment.getType(),
-                        wSegment.getDelta(),
+                        wSegment.getLimit(),
                         a,
                         wSegment.getV());
             }
@@ -90,6 +117,7 @@ public class ConcreteObserver extends Observer
      *
      * @param other The other ConcreteObserver to copy.
      */
+    @SuppressWarnings("unused")
     public ConcreteObserver(ConcreteObserver other)
     {
         this.origin = new Coordinate(other.origin);
@@ -100,7 +128,13 @@ public class ConcreteObserver extends Observer
         ExecutionMutableSupport.copy(other.segments, this.segments);
     }
 
-    private WorldlineSegment addSegment(WorldlineSegment.LimitType type, double delta, double a, double v)
+    // **********************************************************************
+    // *
+    // * Segments
+    // *
+    // **********************************************************************
+
+    private void addSegment(WorldlineSegment.LimitType type, double delta, double a, double v)
     {
         WorldlineSegment segment;
 
@@ -122,11 +156,9 @@ public class ConcreteObserver extends Observer
 
         segments.add(segment);
         lastSegment = segment;
-
-        return segment;
     }
 
-    private WorldlineSegment addFinalSegment(double a, double v)
+    private void addFinalSegment(double a, double v)
     {
         WorldlineSegment segment;
         if (segments.size() < 1) {
@@ -144,8 +176,6 @@ public class ConcreteObserver extends Observer
 
         segments.add(segment);
         lastSegment = segment;
-
-        return segment;
     }
 
     // **********************************************************************
@@ -230,9 +260,8 @@ public class ConcreteObserver extends Observer
     @Override
     public double vToX(double v)
     {
-        ListIterator<WorldlineSegment> iter = segments.listIterator();
-        while (iter.hasNext()) {
-            double x = iter.next().vToX(v);
+        for (WorldlineSegment segment : segments) {
+            double x = segment.vToX(v);
             if (!Double.isNaN(x)) return x;
         }
         return Double.NaN;
@@ -248,9 +277,8 @@ public class ConcreteObserver extends Observer
     @Override
     public double vToD(double v)
     {
-        ListIterator<WorldlineSegment> iter = segments.listIterator();
-        while (iter.hasNext()) {
-            double d = iter.next().vToD(v);
+        for (WorldlineSegment segment : segments) {
+            double d = segment.vToD(v);
             if (!Double.isNaN(d)) return d;
         }
         return Double.NaN;
@@ -266,9 +294,8 @@ public class ConcreteObserver extends Observer
     @Override
     public double vToT(double v)
     {
-        ListIterator<WorldlineSegment> iter = segments.listIterator();
-        while (iter.hasNext()) {
-            double t = iter.next().vToT(v);
+        for (WorldlineSegment segment : segments) {
+            double t = segment.vToT(v);
             if (!Double.isNaN(t)) return t;
         }
         return Double.NaN;
@@ -284,9 +311,8 @@ public class ConcreteObserver extends Observer
     @Override
     public double vToTau(double v)
     {
-        ListIterator<WorldlineSegment> iter = segments.listIterator();
-        while (iter.hasNext()) {
-            double tau = iter.next().vToTau(v);
+        for (WorldlineSegment segment : segments) {
+            double tau = segment.vToTau(v);
             if (!Double.isNaN(tau)) return tau;
         }
         return Double.NaN;
@@ -307,9 +333,8 @@ public class ConcreteObserver extends Observer
     @Override
     public double dToV(double d)
     {
-        ListIterator<WorldlineSegment> iter = segments.listIterator();
-        while (iter.hasNext()) {
-            double v = iter.next().dToV(d);
+        for (WorldlineSegment segment : segments) {
+            double v = segment.dToV(d);
             if (!Double.isNaN(v)) return v;
         }
         return Double.NaN;
@@ -324,9 +349,8 @@ public class ConcreteObserver extends Observer
     @Override
     public double dToX(double d)
     {
-        ListIterator<WorldlineSegment> iter = segments.listIterator();
-        while (iter.hasNext()) {
-            double x = iter.next().dToX(d);
+        for (WorldlineSegment segment : segments) {
+            double x = segment.dToX(d);
             if (!Double.isNaN(x)) return x;
         }
         return Double.NaN;
@@ -341,9 +365,8 @@ public class ConcreteObserver extends Observer
     @Override
     public double dToT(double d)
     {
-        ListIterator<WorldlineSegment> iter = segments.listIterator();
-        while (iter.hasNext()) {
-            double t = iter.next().dToT(d);
+        for (WorldlineSegment segment : segments) {
+            double t = segment.dToT(d);
             if (!Double.isNaN(t)) return t;
         }
         return Double.NaN;
@@ -358,9 +381,8 @@ public class ConcreteObserver extends Observer
     @Override
     public double dToTau(double d)
     {
-        ListIterator<WorldlineSegment> iter = segments.listIterator();
-        while (iter.hasNext()) {
-            double tau = iter.next().dToTau(d);
+        for (WorldlineSegment segment : segments) {
+            double tau = segment.dToTau(d);
             if (!Double.isNaN(tau)) return tau;
         }
         return Double.NaN;
@@ -381,9 +403,8 @@ public class ConcreteObserver extends Observer
     @Override
     public double tToV(double t)
     {
-        ListIterator<WorldlineSegment> iter = segments.listIterator();
-        while (iter.hasNext()) {
-            double v = iter.next().tToV(t);
+        for (WorldlineSegment segment : segments) {
+            double v = segment.tToV(t);
             if (!Double.isNaN(v)) return v;
         }
         return Double.NaN;
@@ -398,9 +419,8 @@ public class ConcreteObserver extends Observer
     @Override
     public double tToX(double t)
     {
-        ListIterator<WorldlineSegment> iter = segments.listIterator();
-        while (iter.hasNext()) {
-            double x = iter.next().tToX(t);
+        for (WorldlineSegment segment : segments) {
+            double x = segment.tToX(t);
             if (!Double.isNaN(x)) return x;
         }
         return Double.NaN;
@@ -415,9 +435,8 @@ public class ConcreteObserver extends Observer
     @Override
     public double tToD(double t)
     {
-        ListIterator<WorldlineSegment> iter = segments.listIterator();
-        while (iter.hasNext()) {
-            double d = iter.next().tToD(t);
+        for (WorldlineSegment segment : segments) {
+            double d = segment.tToD(t);
             if (!Double.isNaN(d)) return d;
         }
         return Double.NaN;
@@ -432,9 +451,8 @@ public class ConcreteObserver extends Observer
     @Override
     public double tToTau(double t)
     {
-        ListIterator<WorldlineSegment> iter = segments.listIterator();
-        while (iter.hasNext()) {
-            double tau = iter.next().tToTau(t);
+        for (WorldlineSegment segment : segments) {
+            double tau = segment.tToTau(t);
             if (!Double.isNaN(tau)) return tau;
         }
         return Double.NaN;
@@ -455,9 +473,8 @@ public class ConcreteObserver extends Observer
     @Override
     public double tauToV(double tau)
     {
-        ListIterator<WorldlineSegment> iter = segments.listIterator();
-        while (iter.hasNext()) {
-            double v = iter.next().tauToV(tau);
+        for (WorldlineSegment segment : segments) {
+            double v = segment.tauToV(tau);
             if (!Double.isNaN(v)) return v;
         }
         return Double.NaN;
@@ -472,9 +489,8 @@ public class ConcreteObserver extends Observer
     @Override
     public double tauToX(double tau)
     {
-        ListIterator<WorldlineSegment> iter = segments.listIterator();
-        while (iter.hasNext()) {
-            double x = iter.next().tauToX(tau);
+        for (WorldlineSegment segment : segments) {
+            double x = segment.tauToX(tau);
             if (!Double.isNaN(x)) return x;
         }
         return Double.NaN;
@@ -491,9 +507,8 @@ public class ConcreteObserver extends Observer
     @Override
     public double tauToD(double tau)
     {
-        ListIterator<WorldlineSegment> iter = segments.listIterator();
-        while (iter.hasNext()) {
-            double d = iter.next().tauToD(tau);
+        for (WorldlineSegment segment : segments) {
+            double d = segment.tauToD(tau);
             if (!Double.isNaN(d)) return d;
         }
         return Double.NaN;
@@ -508,9 +523,8 @@ public class ConcreteObserver extends Observer
     @Override
     public double tauToT(double tau)
     {
-        ListIterator<WorldlineSegment> iter = segments.listIterator();
-        while (iter.hasNext()) {
-            double t = iter.next().tauToT(tau);
+        for (WorldlineSegment segment : segments) {
+            double t = segment.tauToT(tau);
             if (!Double.isNaN(t)) return t;
         }
         return Double.NaN;
@@ -534,9 +548,8 @@ public class ConcreteObserver extends Observer
     @Override
     public Coordinate intersect(Line line)
     {
-        ListIterator<WorldlineSegment> iter = segments.listIterator();
-        while (iter.hasNext()) {
-            Coordinate coord = iter.next().intersect(line);
+        for (WorldlineSegment segment : segments) {
+            Coordinate coord = segment.intersect(line);
             if (coord != null) return coord;
         }
         return null;
@@ -545,7 +558,7 @@ public class ConcreteObserver extends Observer
     /**
      * Find the intersection of this worldline with another. We check segments
      * one at a time from earliest to latest. We check our first segment against
-     * all of the other worldline's segments, then our second segment, etc. We
+     * all the other worldline's segments, then our second segment, etc. We
      * return the first intersection with the earliest time coordinate. If there
      * is no intersection with any segment, we return null.
      *
@@ -559,12 +572,8 @@ public class ConcreteObserver extends Observer
             return intervalObserver.intersect(this);
         }
         else if (other instanceof ConcreteObserver concreteObserver) {
-            ListIterator<WorldlineSegment> iter = segments.listIterator();
-            while (iter.hasNext()) {
-                WorldlineSegment segment1 = iter.next();
-                ListIterator<WorldlineSegment> iter2 = concreteObserver.segments.listIterator();
-                while (iter2.hasNext()) {
-                    WorldlineSegment segment2 = iter2.next();
+            for (WorldlineSegment segment1 : segments) {
+                for (WorldlineSegment segment2 : concreteObserver.segments) {
                     Coordinate coord = segment1.intersect(segment2);
                     if (coord != null) return coord;
                 }
@@ -599,28 +608,33 @@ public class ConcreteObserver extends Observer
         return str.toString();
     }
 
+    // **********************************************************************
+    // *
+    // * Standard methods: toString, clone hashCode, equals
+    // *
+    // **********************************************************************
+
     @Override
     public String toString()
     {
-        String str =
-            "[ Observer " +
-            "Origin          : " + origin + "\n" +
-            "Initial tau     : " + tauInit + "\n" +
-            "Initial distance: " + dInit + "\n";
+        StringBuilder str =
+            new StringBuilder("[ Observer " +
+                "Origin          : " + origin + "\n" +
+                "Initial tau     : " + tauInit + "\n" +
+                "Initial distance: " + dInit + "\n");
 
         if (segments.size() > 0) {
-            str += "Segments:";
+            str.append("Segments:");
 
             for (int i = 0; i < segments.size(); i++) {
-                str +=
-                    "\n  " + i + ": " + segments.get(i).toString().replaceAll("(?m)^", "  ");
+                str.append("\n  ").append(i).append(": ").append(segments.get(i).toString().replaceAll("(?m)^", "  "));
             }
         }
         else {
-            str += "No segments";
+            str.append("No segments");
         }
-        str = str + "]";
-        return str;
+        str.append("]");
+        return str.toString();
     }
 
 }

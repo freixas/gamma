@@ -20,12 +20,13 @@ import org.freixas.gamma.execution.DiagramEngine;
 import org.freixas.gamma.execution.ExecutionException;
 
 /**
+ * Range variables allow an end user to set the value of a variable using
+ * a slider.
  *
  * @author Antonio Freixas
  */
 public class RangeVariable extends DisplayVariable
 {
-    private final DisplayVariable.Type type;
     private final double initialValue;
     private final double minValue;
     private final double maxValue;
@@ -34,12 +35,28 @@ public class RangeVariable extends DisplayVariable
 
     private final DiagramEngine diagramEngine;
 
+    // **********************************************************************
+    // *
+    // * Constructor
+    // *
+    // **********************************************************************
+
+    /**
+     * Create a range variable. The minimum value of the range should always be
+     * less than the maximum value. "minValue" and "maxValue" are sorted to
+     * ensure this.
+     *
+     * @param diagramEngine The associated diagram engine.
+     * @param initialValue The initial value of the variable.
+     * @param minValue The minimum value of the range.
+     * @param maxValue The maximum value of the range.
+     * @param label The label for the range variable.
+     */
     public RangeVariable(DiagramEngine diagramEngine, double initialValue, double minValue, double maxValue, String label)
     {
         if (initialValue < minValue || initialValue > maxValue) {
             throw new ExecutionException("The initial value for a display variable must lie within its range.");
         }
-        this.type = DisplayVariable.Type.RANGE;
         this.initialValue = initialValue;
 
         // Sort the min/max values
@@ -58,37 +75,52 @@ public class RangeVariable extends DisplayVariable
         this.diagramEngine = diagramEngine;
     }
 
-    @Override
-    public DisplayVariable.Type getType()
-    {
-        return type;
-    }
+    // **********************************************************************
+    // *
+    // * Getter/Setter
+    // *
+    // **********************************************************************
 
+    /**
+     * Get the initial value.
+     *
+     * @return The initial value.
+     */
     public double getInitialValue()
     {
         return initialValue;
     }
 
+    /**
+     * Get the minimum value of the range.
+     *
+     * @return The minimum value of the range.
+     */
     public double getMinValue()
     {
         return minValue;
     }
 
+    /**
+     * Get the maximum value of the range.
+     *
+     * @return The maximum value of the range.
+     */
     public double getMaxValue()
     {
         return maxValue;
     }
 
+    // **********************************************************************
+    // *
+    // * DisplayVariable Support
+    // *
+    // **********************************************************************
+
     @Override
     public String getLabel()
     {
         return label;
-    }
-
-    @Override
-    public double getCurrentValue()
-    {
-        return this.currentValue;
     }
 
     @Override
@@ -98,6 +130,18 @@ public class RangeVariable extends DisplayVariable
             this.currentValue = value;
             diagramEngine.updateForDisplayVariable(false);
         }
+    }
+
+    // **********************************************************************
+    // *
+    // * DynamicVariable Support
+    // *
+    // **********************************************************************
+
+    @Override
+    public double getCurrentValue()
+    {
+        return this.currentValue;
     }
 
 }

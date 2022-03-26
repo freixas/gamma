@@ -17,6 +17,7 @@
 package org.freixas.gamma.value;
 
 /**
+ * This class is used to store information about an animation variable.
  *
  * @author Antonio Freixas
  */
@@ -27,6 +28,21 @@ public class AnimationVariable extends DynamicVariable implements ExecutionImmut
     private final double stepSize;
     private double currentValue;
 
+    // **********************************************************************
+    // *
+    // * Constructor
+    // *
+    // **********************************************************************
+
+    /**
+     * Create an animation variable.
+     *
+     * @param initialValue The variable's initial value.
+     * @param finalValue The variable's final value. This can be NaN if there
+     * is no limit.
+     * @param stepSize The step size by which the animation variable should
+     * change on each frame.
+     */
     public AnimationVariable(double initialValue, double finalValue,
                              double stepSize)
     {
@@ -36,30 +52,56 @@ public class AnimationVariable extends DynamicVariable implements ExecutionImmut
         this.currentValue = initialValue;
     }
 
+    // **********************************************************************
+    // *
+    // * Getters/Setters
+    // *
+    // **********************************************************************
+
+    /**
+     * Get the initial value.
+     *
+     * @return The initial value.
+     */
     public double getInitialValue()
     {
         return initialValue;
     }
 
+    /**
+     * Get the final value. This could be NaN.
+     *
+     * @return The final value.
+     */
     public double getFinalValue()
     {
         return finalValue;
     }
 
+    /**
+     * Get the step size value.
+     *
+     * @return The step size value.
+     */
     public double getStepSize()
     {
         return stepSize;
-    }
-
-    public void setCurrentValue(int frame)
-    {
-        currentValue = initialValue + ((frame - 1) * stepSize);
     }
 
     @Override
     public double getCurrentValue()
     {
         return this.currentValue;
+    }
+
+    /**
+     * Set the current value based on the frame number of the animation.
+     *
+     * @param frame The frame number.
+     */
+    public void setCurrentValue(int frame)
+    {
+        currentValue = initialValue + ((frame - 1) * stepSize);
     }
 
 }

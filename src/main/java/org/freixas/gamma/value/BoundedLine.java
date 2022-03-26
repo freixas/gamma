@@ -21,20 +21,34 @@ import org.freixas.gamma.execution.ExecutionException;
 import org.freixas.gamma.execution.HCodeEngine;
 
 /**
- * A line is defined by an angle (in degrees) and a point through which
- * the line crosses.
+ * A line is defined by an angle (in degrees) and a point through which the line
+ * crosses. A line can be created using other methods, but all are converted to
+ * an angle and a point.
  * <p>
- * A line can be created using other methods, but all are converted to an
- * angle and a point.
+ * The angle is between -90 (exclusive) and 90 (inclusive) degrees. Lines
+ * between 0 and 90 degrees (inclusive) can be thought of as being drawn with
+ * increasing x and t coordinates. Lines between 0 and -90 degrees (exclusive)
+ * can be thought of as drawn with decreasing x and increasing t coordinates.
+ * <p>
+ * A BoundedLine combines a ConcreteLine with a Bounds. When the Bounds are
+ * applied to the ConcreteLine, the result is a ConcreteLine or a LineSegment.
+ * If a ConcreteLine lies outside the Bounds, then it will never draw, nor will
+ * it intersect any other line.
  *
  * @author Antonio Freixas
  */
 public class BoundedLine extends Line
 {
-    private final ConcreteLine line;
-    private final CurveSegment segment;
-    private final Bounds originalBounds;
-    private final Bounds bounds;
+    private final ConcreteLine line;            // The embedded ConcreteLine
+    private final CurveSegment segment;         // The intersection with the bounds
+    private final Bounds originalBounds;        // The bounds provided
+    private final Bounds bounds;                // The bounds calculated after the intersection
+
+    // **********************************************************************
+    // *
+    // * Constructors
+    // *
+    // **********************************************************************
 
     /**
      * Attach a bounding box to a line. The bounded line references the
@@ -86,20 +100,7 @@ public class BoundedLine extends Line
     }
 
     /**
-     * Copy constructor.
-     *
-     * @param other The other line to copy.
-     */
-    public BoundedLine(BoundedLine other)
-    {
-        this.line = other.line;
-        this.segment = other.segment;
-        this.originalBounds = other.originalBounds;
-        this.bounds = new Bounds(other.bounds);
-    }
-
-    /**
-     * Create a new line offset from an existing line.
+     * Create a new bounded line offset from an existing line.
      *
      * @param other The line on which to base the new line.
      * @param offset The offset to use. The offset is subtracted so that a
@@ -122,23 +123,17 @@ public class BoundedLine extends Line
     }
 
     /**
-     * This is a special constructor used by the relativeTo() method.
+     * Copy constructor.
      *
-     * @param line The line to attach to.
-     * @param bounds The bounding box to attach.
-     * @param segment The bounded segment.
+     * @param other The other line to copy.
      */
-    private BoundedLine(ConcreteLine line, Bounds bounds, CurveSegment segment)
+    @SuppressWarnings("unused")
+    public BoundedLine(BoundedLine other)
     {
-        this.line = line;
-        this.originalBounds = new Bounds(bounds);
-        this.segment = segment;
-        if (segment != null) {
-            this.bounds = segment.getBounds();
-        }
-        else {
-            this.bounds = null;
-        }
+        this.line = other.line;
+        this.segment = other.segment;
+        this.originalBounds = other.originalBounds;
+        this.bounds = new Bounds(other.bounds);
     }
 
     // **********************************************************************
@@ -252,9 +247,10 @@ public class BoundedLine extends Line
     @Override
     public BoundedLine relativeTo(Frame prime)
     {
-        // Convert the original line to the new frame, although I don't think
-        // it gets used (the relativeTo() call is just before the execution of
-        // the l-code, while the original line might only be used in the h-code
+        // Convert the original (concrete) line to the new frame, although I
+        // don't think it gets used (the relativeTo() call is just before the
+        // execution of the l-code, while the original line might only be used
+        // in the h-code
 
         ConcreteLine newLine = line.relativeTo(prime);
 
@@ -283,6 +279,26 @@ public class BoundedLine extends Line
         }
 
         return new BoundedLine(newLine, originalBounds, newSegment);
+    }
+
+    /**
+     * This is a special constructor used by the relativeTo() method.
+     *
+     * @param line The line to attach to.
+     * @param bounds The bounding box to attach.
+     * @param segment The bounded segment.
+     */
+    private BoundedLine(ConcreteLine line, Bounds bounds, CurveSegment segment)
+    {
+        this.line = line;
+        this.originalBounds = new Bounds(bounds);
+        this.segment = segment;
+        if (segment != null) {
+            this.bounds = segment.getBounds();
+        }
+        else {
+            this.bounds = null;
+        }
     }
 
     // **********************************************************************
@@ -335,6 +351,12 @@ public class BoundedLine extends Line
     {
         return "[ Bounded Line " + line.toDisplayableString(engine) + " bounds " + originalBounds.toDisplayableString(engine) + " ]";
     }
+
+    // **********************************************************************
+    // *
+    // * Standard methods: toString, clone hashCode, equals
+    // *
+    // **********************************************************************
 
     @Override
     public String toString()

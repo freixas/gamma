@@ -21,6 +21,8 @@ import org.freixas.gamma.ProgrammingException;
 import java.util.Collection;
 
 /**
+ * This class provides functionality used to support the ExecutionMutable
+ * interface.
  *
  * @author Antonio Freixas
  */

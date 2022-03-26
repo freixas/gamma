@@ -76,7 +76,7 @@ public class HCodeEngine
 
         // Get the stylesheet so that it contains
         //
-        // - The fatory default stylesheet
+        // - The factory default stylesheet
         // - The user's default stylesheet, if any
         // - The stylesheet given
 
@@ -274,7 +274,7 @@ public class HCodeEngine
         }
 
         // We only enable stylesheet caching on the first execution. If the user
-        // writes an aninmated script where the style property changes
+        // writes an animated script where the style property changes
         // with each execution, we might put a lot of stuff into the cache that
         // will never be used
 
@@ -333,7 +333,7 @@ public class HCodeEngine
 
     public void throwGammaException(Throwable e) throws GammaRuntimeException
     {
-        // We might get a nest GammaRuntimeException
+        // We might get a GammaRuntimeException
 
         if (e instanceof GammaRuntimeException gammaException) {
             throw gammaException;
