@@ -4,7 +4,7 @@
 // *
 // ************************************************************
 
-stylesheet external "006-interactive-twins-paradox.css";
+stylesheet external "css/006-interactive-twins-paradox.css";
 
 choice model = 1 choices "No acceleration", "1g acceleration" label "Acceleration" restart;
 
@@ -16,26 +16,32 @@ animation ;
 
 // Twins Paradox Without/With Acceleration
 
-bob = [observer ];
+if (!defined(bob)) {
+    static bob = [observer ];
+}
 
 // choice model = 1 choices "No acceleration", "1g acceleration" label "Acceleration" restart;
+if (!defined(alice1)) {
+    static alice1 = [observer
+                    velocity    0 distance 0,
+                    velocity  0.8 distance 4,
+                    velocity -0.8 distance 4,
+                    velocity    0];
 
+    static alice2 = [observer
+                    velocity      0 distance 0,
+                    acceleration  1 distance 1,
+                    acceleration  0 distance 2,
+                    acceleration -1 distance 2,
+                    acceleration  0 distance 2,
+                    acceleration  1 distance 1,
+                    velocity      0];
+}
 if (model == 1) {
-    alice = [observer
-		    velocity    0 distance 0,
-		    velocity  0.8 distance 4,
-		    velocity -0.8 distance 4,
-		    velocity    0];
+    alice = alice1;
 }
 else {
-    alice = [observer
-		    velocity      0 distance 0,
-		    acceleration  1 distance 1,
-		    acceleration  0 distance 2,
-		    acceleration -1 distance 2,
-		    acceleration  0 distance 2,
-		    acceleration  1 distance 1,
-		    velocity      0];
+    alice = alice2;
 }
 
 // ****************************************
@@ -74,7 +80,7 @@ choice view  = 1
   choices "Bob's viewpoint and simultaneity",
           "Alice's viewpoint and simultaneity",
           "Bob's viewpoint/Alice's simultaneity",
-	  "Alice's viewpoint/Bob's simultaneity"
+          "Alice's viewpoint/Bob's simultaneity"
   label "Viewpoint";
 
 // ****************************************
@@ -93,10 +99,10 @@ startTime = bobStartTime;
 endTime   = bobEndTime;
 
 travelTime = endTime - startTime;
-tripDuration = 10;			        // Seconds
-totalDuration = tripDuration + 5;	// Seconds
-tripFrames = tripDuration * 30;		// Animation frames
-totalFrames = totalDuration * 30;	// Animation frames
+tripDuration = 10;                      // Seconds
+totalDuration = tripDuration + 5;       // Seconds
+tripFrames = tripDuration * 30;         // Animation frames
+totalFrames = totalDuration * 30;       // Animation frames
 
 animate count = 0 to totalFrames step 1;
 
@@ -122,10 +128,10 @@ aliceSimul = [line axis x aliceFrame offset tau];
 
 // Determine all the intersections with the lines of simultaneity
 
-bobPosBobSimul =   intersect(bobSimul,   bob);
+bobPosBobSimul   = intersect(bobSimul,   bob);
 alicePosBobSimul = intersect(bobSimul, alice);
 
-bobPosAliceSimul =   intersect(aliceSimul, bob);
+bobPosAliceSimul   = intersect(aliceSimul, bob);
 alicePosAliceSimul = intersect(aliceSimul, alice);
 
 // Draw the grids requested
@@ -142,10 +148,10 @@ if (aliceAxes) axes frame: aliceFrame, class: "alice";
 
 if (viewSimultaneity) {
     if (view == 1 || view == 4) {
-	line bobSimul,   class: "simul, bob";
+        line bobSimul,   class: "simul, bob";
     }
     else {
-	line aliceSimul, class: "simul, alice";
+        line aliceSimul, class: "simul, alice";
     }
 }
 
@@ -164,36 +170,36 @@ else {
 
 if (timeDisplay) {
     if (view == 1 || view == 4) {
-	lightToBob   = [line angle -45 through bobPosBobSimul];
-	lightToAlice = [line angle 45 through alicePosBobSimul];
+        lightToBob   = [line angle -45 through bobPosBobSimul];
+        lightToAlice = [line angle 45 through alicePosBobSimul];
 
-	if (debug) {
-	    line lightToAlice, class: "light";
-	    line lightToBob,   class: "light";
-	}
-	bobsSeenTime   = intersect(lightToAlice, bob).t;
-	alicesSeenTime = tToTau(intersect(lightToBob, alice).t, alice);
+        if (debug) {
+            line lightToAlice, class: "light";
+            line lightToBob,   class: "light";
+        }
+        bobsSeenTime   = intersect(lightToAlice, bob).t;
+        alicesSeenTime = tToTau(intersect(lightToBob, alice).t, alice);
 
-	label bobPosBobSimul,   text: bobPosBobSimul.t,                  class: "bob,   calculatedTime";
-	label bobPosBobSimul,   text: bobsSeenTime,                      class: "bob,   seenTime";
-	label alicePosBobSimul, text: tToTau(alicePosBobSimul.t, alice), class: "alice, calculatedTime";
-	label alicePosBobSimul, text: alicesSeenTime,                    class: "alice, seenTime";
+        label bobPosBobSimul,   text: bobPosBobSimul.t,                  class: "bob,   calculatedTime";
+        label bobPosBobSimul,   text: bobsSeenTime,                      class: "bob,   seenTime";
+        label alicePosBobSimul, text: tToTau(alicePosBobSimul.t, alice), class: "alice, calculatedTime";
+        label alicePosBobSimul, text: alicesSeenTime,                    class: "alice, seenTime";
     }
     else {
-	lightToBob =   [line angle -45 through bobPosAliceSimul];
-	lightToAlice = [line angle 45 through alicePosAliceSimul];
+        lightToBob =   [line angle -45 through bobPosAliceSimul];
+        lightToAlice = [line angle 45 through alicePosAliceSimul];
 
-	if (debug) {
-	    line lightToAlice, class: "light";
-	    line lightToBob,   class: "light";
-	}
-	bobsSeenTime   = intersect(lightToAlice, bob).t;
-	alicesSeenTime = tToTau(intersect(lightToBob, alice).t, alice);
+        if (debug) {
+            line lightToAlice, class: "light";
+            line lightToBob,   class: "light";
+        }
+        bobsSeenTime   = intersect(lightToAlice, bob).t;
+        alicesSeenTime = tToTau(intersect(lightToBob, alice).t, alice);
 
-	label bobPosAliceSimul,   text: bobPosAliceSimul.t,                  class: "bob,   calculatedTime";
-	label bobPosAliceSimul,   text: bobsSeenTime,                        class: "bob,   seenTime";
-	label alicePosAliceSimul, text: tToTau(alicePosAliceSimul.t, alice), class: "alice, calculatedTime";
-	label alicePosAliceSimul, text: alicesSeenTime,                      class: "alice, seenTime";
+        label bobPosAliceSimul,   text: bobPosAliceSimul.t,                  class: "bob,   calculatedTime";
+        label bobPosAliceSimul,   text: bobsSeenTime,                        class: "bob,   seenTime";
+        label alicePosAliceSimul, text: tToTau(alicePosAliceSimul.t, alice), class: "alice, calculatedTime";
+        label alicePosAliceSimul, text: alicesSeenTime,                      class: "alice, seenTime";
     }
 }
 
@@ -206,12 +212,12 @@ aliceWAlice = setInterval(alice, [interval time 0 to alicePosAliceSimul.t]);
 
 if (worldlines) {
     if (view == 1 || view == 4) {
-	worldline bobWBob,     class: "bob";
-	worldline aliceWBob,   class: "alice";
+        worldline bobWBob,     class: "bob";
+        worldline aliceWBob,   class: "alice";
     }
     else {
-	worldline bobWAlice,   class: "bob";
-	worldline aliceWAlice, class: "alice";
+        worldline bobWAlice,   class: "bob";
+        worldline aliceWAlice, class: "alice";
     }
 }
 

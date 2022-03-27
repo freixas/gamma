@@ -16,6 +16,7 @@
                     <li><a href="#literals">Literals</a></li>
                     <li><a href="#variables">Variables</a>
                         <ol>
+                            <li><a href="#static-variables">Static Variables</a>
                             <li><a href="#dynamic-variables">Dynamic Variables</a>
                                 <ol>
                                     <li><a href="#animation-variables">Animation Variables</a></li>
@@ -44,6 +45,7 @@
                             <li><a href="#intersection-functions">Intersection Functions</a></li>
                             <li><a href="#math-functions">Math Functions</a></li>
                             <li><a href="#string-functions">String Functions</a></li>
+                            <li><a href="#definition-functions">Definition Functions</a></li>
                         </ol>
                     </li>
                     <li><a href="#expressions">Expressions</a></li>
@@ -51,18 +53,23 @@
             </div>
             <div id="content">
                 <h1><a id="literals"></a>Literals</h1>
-                <p>A <span class="definition">literal</span> is a entity whose value is expressed in the characters that represent it. For example, <span class="code">24</span> is the literal representation of the value 24, <span class="code">&quot;abc&quot;</span> is the literal representation of the character string 123, and <span class="code">[observer velocity 0.5]</span> is the literal representation of an observer with a specific worldline.</p>
+                <p>A <span class="definition">literal</span> is an entity whose value is expressed in the characters that represent it. For example, <span class="code">24</span> is the literal representation of the value 24, <span class="code">&quot;abc&quot;</span> is the literal representation of the character string 123, and <span class="code">[observer velocity 0.5]</span> is the literal representation of an observer with a specific worldline.</p>
                 <p>Literal values are covered in the section on <a href="values.html">values</a>.</p>
                 <h1><a id="variables"></a>Variables</h1>
                 <p>Variables are named entities that can be thought of as an address to a value. A value can be stored or fetched using the variable's name. Variables receive values through <a href="statements.html#assignment-statements">assignment statements</a> and they can be used in expressions anywhere that a literal is allowed.</p>
                 <p>A variable starts with an alphabetic character. This character can be followed by any number of letters, digits, or underscores.</p>
-                <p>Variables are created when they are first assigned a value. The type of  a variable is the same as the type of the value assigned to it. This type could change in a future assignment.</p>
+                <p>Variables are created when they are first assigned a value. The type of variable is the same as the type of the value assigned to it. This type could change in a future assignment.</p>
+                <h2><a id="static-variables"></a>Static Variables</h2>
+                <p>When a script is first loaded, there are no variables defined; variables are created as they are assigned their first value. Under some circumstances (for example, animation) a script may be re-executed without being re-loaded. For most variables, there is no difference between the first execution (when the script is loaded) and any subsequent execution—the script begins with a clean slate.</p>
+                <p>Static variables are one exception; once created, they retain their values across script executions (but not across script loads). Once a variable is marked as static, it remains static and can be used like any other variable.</p>
+                <p>To initialize a static variable only once requires knowing if it exists. The <span class="literal">defined()</span> function allows you to find out without generating an error if the variable doesn't yet exist.</p>
                 <h2><a id="dynamic-variables"></a>Dynamic Variables</h2>
-                <p>Dynamic variables are variables that are initialized when the script is first executed. If the script is re-executed because an animation is running or because an end user manipulated a control, the initialization is ignored and the value is set externally.</p>
+                <p>Dynamic variables are another type of variable that persists across multiple executions. You initialize these just once using a special assignment statement. This assignment statement is ignored when a script is re-executed, so the <span class="literal">defined()</span> function is not needed. Any further attempt to assign a dynamic variable a value within the same execution will produce an error.</p>
+                <p>Each time a script is re-executed, Gamma may change the value of a dynamic variable based on the variable's type and the way you defined it.  </p>
                 <h3><a id="animation-variables"></a>Animation Variables</h3>
-                <p>Animation variables's values are controlled by the animation engine. The value is incremented or decremented based on the animation frame.</p>
+                <p>Animation variables' values are controlled by the animation engine. Their values are incremented or decremented based on the animation frame.</p>
                 <h3><a id="display-variables"></a>Display Variables</h3>
-                <p>Display variables's values are set by user interface controls manipulated by the end user.    </p>
+                <p>Display variables' values are set by user interface controls manipulated by the end user. Any change to a control causes the script to re-execute. The display variable will receive the control's new value.</p>
                 <h2><a id="arrays"></a>Arrays</h2>
                 <p>Array variables are variables immediately followed by an expression enclosed in brackets. </p>
                 <p>If the expression evaluates to a float, it is rounded towards 0 to an integer. The integer is converted to a string, prefixed with a dollar sign, and appended to the variable's name. </p>
@@ -89,7 +96,7 @@
                 <p>Some operators only work on certain data types. We'll highlight a few here:</p>
                 <ul>
                     <li>For the + operator, if both values are floats, the result is a float. If one  value is a string, the other value can be anything. The value will be converted to its string representation and concatenated on to the string. For example, (2,5) + &quot; event 1&quot; becomes  the string &quot;(2, 5) event 1&quot;.</li>
-                    <li>The &quot;&lt;-&quot; and &quot;-&gt;&quot; perform Lorentz transformations. (2, 5) &lt;- frame1 transforms the coordinate (2, 5) relatve to inertial frame &quot;frame1&quot; to the rest frame. The &quot;-&gt;&quot; goes the other way: (2, 5) -&gt; frame1 transforms rest coordinate (2, 5) to the &quot;frame1&quot; inertial frame.</li>
+                    <li>The &quot;&lt;-&quot; and &quot;-&gt;&quot; perform Lorentz transformations. (2, 5) &lt;- frame1 transforms the coordinate (2, 5) relative to inertial frame &quot;frame1&quot; to the rest frame. The &quot;-&gt;&quot; goes the other way: (2, 5) -&gt; frame1 transforms rest coordinate (2, 5) to the &quot;frame1&quot; inertial frame.</li>
                 </ul>
                 <h2><a id="list-of-operators"></a>List of Operators    </h2>
                 <table id="table-9" class="operator-table">
@@ -266,7 +273,7 @@
                             <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Float</span></p></td>
                             <td class="Body-Style"><p class="Table-Contents"><span class="non-terminal">Float</span></p></td>
                             <td class="Body-Style"><p class="Table-Contents">&nbsp;</p></td>
-                            <td class="Description"><p class="Table-Description">1 if both values are true. If the first value is fase, the result is 0 without evaluating the second value. A value is true if it is a float and non-zero and non-null or if it is anything else and not null; otherwise, it is false.</p></td>
+                            <td class="Description"><p class="Table-Description">1 if both values are true. If the first value is false, the result is 0 without evaluating the second value. A value is true if it is a float and non-zero and non-null or if it is anything else and not null; otherwise, it is false.</p></td>
                         </tr>
                         <tr class="Row-Column-23">
                             <td class="Body-Style"><p class="Table-Contents"><span class="literal">||</span></p></td>
@@ -298,7 +305,7 @@
                     </tbody>
                 </table>
                 <h1><a id="functions"></a>Functions</h1>
-                <p>In Gamma, functions return single values, although that value can be a multi-valued object. The following functions are available:</p>
+                <p>In Gamma, functions return single values, although that value can be a multivalued object. The following functions are available:</p>
                 <h2><a id="lorentz-transformation-functions"></a>Lorentz Transformation Functions</h2>
                 <p>Note that the Lorentz transformation are performed using the <span class="literal">-&gt;</span> and <span class="literal">&lt;-</span> operators.</p>
                 <table class="function-table">
@@ -338,11 +345,11 @@
                     <tbody>
                         <tr>
                             <td>toXAngle( <span class="non-terminal">float</span> )</td>
-                            <td>The angle of the x axis of an inertial frame with the given velocity. The angle is in degrees from -45° (inclusive) to +45° (inclusive).</td>
+                            <td>The angle of the x-axis of an inertial frame with the given velocity. The angle is in degrees from -45° (inclusive) to +45° (inclusive).</td>
                         </tr>
                         <tr>
                             <td>toVAngle( <span class="non-terminal">float</span> )</td>
-                            <td>The angle of the x axis of an inertial frame with the given velocity. The angle is in degrees from -90° (exclusive) to -45° (exclusive) or from +45 (exclusive) to +90° (inclusive).</td>
+                            <td>The angle of the x-axis of an inertial frame with the given velocity. The angle is in degrees from -90° (exclusive) to -45° (exclusive) or from +45 (exclusive) to +90° (inclusive).</td>
                         </tr>
                         <tr>
                           <td>toRelativeAngle ( <span class="non-terminal">float </span>, <span class="non-terminal">expr</span> )</td>
@@ -656,9 +663,27 @@
                         </tr>
                     </tbody>
                 </table>
+                <h2><a id="definition-functions"></a>Definition Functions</h2>
+                <table class="function-table">
+                    <colgroup>
+                        <col class="column1" />
+                        <col class="column2" />
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <td>Function</td>
+                            <td>Returns</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>defined( <span class="non-terminal">variable</span> )</td>
+                            <td>Returns 1.0 if the variable has been defined and 0.0 if not.</td>
+                        </tr>
+                    </tbody>
+                </table>
                 <h1><a id="expressions"></a>Expressions</h1>
-                <p>Expressions use operatos and grouping (parentheses) to combine literals, variables, functions so as to create new values.</p>
-                <p>&nbsp;</p>
+                <p>Expressions use operators and grouping (parentheses) to combine literals, variables, functions to create new values.</p>
             </div>
         </div>
     </body>

@@ -132,15 +132,22 @@ if (addEvents) {
 
 // Add lines
 
+if (!defined(line45)) {
+    line45  = [line angle  45 through (0,0)];
+    lineM45 = [line angle -45 through (0,0)];
+}
+
 if (lightLines) {
-  line [line angle  45 through (0,0)], style: "color: #ED0";
-  line [line angle -45 through (0,0)], style: "color: #ED0";
+  line line45, style: "color: #ED0";
+  line lineM45, style: "color: #ED0";
 }
 
 // Add a path
 
+if (!defined(path)) {
+    static path = [path (10, 10), (10, 20), (20, 20), (20, 10)];
+}
 if (showPath) {
-    path = [path (10, 10), (10, 20), (20, 20), (20, 10)];
     path path closed: pathClosed, stroke: strokePath, fill: fillPath;
 }
 

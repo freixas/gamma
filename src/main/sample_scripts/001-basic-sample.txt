@@ -29,7 +29,7 @@ axes;
 worldline obs1 style: "color: blue";
 worldline obs2 style: "color: red";
 
-// We can't intersect two observer's worldline,s but we can intersect
+// We can't intersect two observers's worldlines, but we can intersect
 // a line with an observer
 
 obs1Line = [line axis t obs1 offset 0];

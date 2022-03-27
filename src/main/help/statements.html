@@ -31,6 +31,7 @@
                     <li><a href="#assignment-statements">Assignment Statements</a>
                         <ol>
                             <li><a href="#normal">Normal</a></li>
+                            <li><a href="#static">static</a></li>
                             <li><a href="#animate">animate</a></li>
                             <li><a href="#toggle">toggle</a></li>
                             <li><a href="#choice">choice</a></li>
@@ -53,7 +54,7 @@
                         <ol>
                             <li><a href="#control-commands">Control Commands</a>
                                 <ol>
-                                    <li><a href="#animate">animate</a></li>
+                                    <li><a href="#animation">animation</a></li>
                                     <li><a href="#display">display</a></li>
                                     <li><a href="#frame">frame</a></li>
                                 </ol>
@@ -95,7 +96,7 @@
                 <p>An include statement includes the text from another file into this one. The effect is as though those characters had been entered in place of the include statement.</p>
                 <p>The string is a filename. It can be a relative filename, in which case it's relative to the script file's location, or it can be an absolute filename.</p>
                 <h2><a id="stylesheet"></a>stylesheet</h2>
-                <p><span class="literal">stylesheet externa</span>l* <span class="non-terminal">string</span></p>
+                <p><span class="literal">stylesheet external</span>l* <span class="non-terminal">string</span></p>
                 <p>The stylesheet statement adds a stylesheet to the diagram (see <a href="stylesheets.html">Stylesheets</a>). If <span class="literal">external</span> is used, the stylesheet comes from a file and the string is the file's name.  It can be a relative filename, in which case it's relative to the script file's location, or it can be an absolute filename.</p>
                 <p>If <span class="literal">external</span> is omitted, the entire stylesheet must be contained in the string. Since stylesheets can have values that are strings, you will need to be careful with how the internal strings are specified.</p>
                 <h2><a id="set"></a>set</h2>
@@ -118,8 +119,21 @@
                 <p><span class="non-terminal">leftVariable</span> <span class="literal">=</span> <span class="non-terminal">expr</span><br />
                     <span class="non-terminal">leftVariable</span> → <span class="non-terminal">name</span> | <span class="non-terminal">leftVariable</span> <span class="non-terminal">.</span> <span class="non-terminal">name</span></p>
                 <p>This is the normal form. The expression can evaluate to any type of value: a float, a string, or any object. The variable takes on the type of the value.</p>
-                <p>The period (&quot;.&quot;) used to dereference an object allows you to set the value of an object's field. In this case, the value must match whatever types are allowed by the object's field. For example, a frame object has two fields: v and origin. The former accepts a float while the latter accepts a coordinate.<br />
-                </p>
+                <p>The period (&quot;.&quot;) used to dereference an object allows you to set the value of an object's field. In this case, the value must match whatever types are allowed by the object's field. For example, a frame object has two fields: v and origin. The former accepts a float while the latter accepts a coordinate.</p>
+                <h2><a id="static">static</a></h2>
+                <p><span class="literal">static</span> <span class="non-terminal">variable</span> = <span class="non-terminal">expr</span></p>
+                <p>When a script is first loaded, there are no variables defined; variables are created as they are assigned their first value. Under some circumstances (for example, animation) a script may be re-executed without being re-loaded. For most variables, there is no difference between the first execution (when the script is loaded) and any subsequent execution—the script begins with a clean slate.</p>
+                <p>Static variables are one exception; once created, they retain their values across script executions (but not across script loads). Once a variable is marked as static, it remains static and can be used like any other variable.</p>
+                <p>To initialize a static variable only when it's undefined, use the <span class="literal">defined()</span> function in a pattern like this:</p>
+                <p class="code">if (!defined(a)) {</p>
+                <p class="code">    static a = log(5);</p>
+                <p class="code">}</p>
+                <p class>You don't need to limit yourself to assigning a value only once. Nor do you need to mark a variable as static more than once (but it won't hurt if you do). This example shows how a static variable can function as a frame counter in an animation.</p>
+                <p class="code">if (!defined(counter)) {</p>
+                <p class="code">  <span class="code">static counter = 0;</span></p>
+                <p class="code">}</p>
+                <p class="code">counter = counter + 1;</p>
+                <p>This counter would  ignore such things as  animation cycles and repetitions—it would increment with each re-execution of the script, no matter what caused the script to re-execute.</p>
                 <h2><a id="animate"></a>animate</h2>
                 <p><span class="literal">animate</span> <span class="non-terminal">leftVariable</span><span class="literal"> =</span> <span class="non-terminal">float</span> ( <span class="literal">to</span> <span class="non-terminal">float</span> )? <span class="literal">step</span> <span class="non-terminal">float</span></p>
                 <p>The animate assignment creates an animation variable. When an animation runs, the script is executed once for each animation frame; the assignment, however, is ignored all but the first time. From then on, the value of the variable is controlled by the animation engine.              </p>
@@ -159,11 +173,11 @@
                 <p>The variable is assigned the first value. It is then tested to see if it is greater than the second value (or less than, if the step value is negative). If the number passes the test, the statement is executed. The number is then incremented (or decremented) by the step value and the sequence repeats from the test.</p>
                 <h2><a id="break"></a>break</h2>
                 <p class="literal">break</p>
-                <p>The break statement causes an enclosing while or for loop to exit. A break statement outside of any loop generates an error.</p>
+                <p>The break statement causes an enclosing while or for loop to exit. A break statement outside any loop generates an error.</p>
 
                 <h2><a id="continue"></a>continue</h2>
                 <p class="literal">continue</p>
-                <p>The continue statement returns an enclosing while or for statement to return to its conditional test. In the case of the for statement, the loop variable is incremented (or decremented if the step value is negative) before tesing. A continue statement outside of any loop generates an error.</p>
+                <p>The continue statement returns an enclosing while or for statement to return to its conditional test. In the case of the for statement, the loop variable is incremented (or decremented if the step value is negative) before testing. A continue statement outside any loop generates an error.</p>
                 <h1><a id="command-statements"></a>Command Statements</h1>
                 <p>Command statements are things that either control how the diagram is drawn or draw something on the diagram. The have a common syntax:</p>
                 <p><span class="non-terminal">command</span> ( <span class="non-terminal">name</span> <span class="literal">:</span> <span class="non-terminal">expr</span> ( <span class="literal">,</span> <span class="non-terminal">name</span> <span class="literal">:</span> <span class="non-terminal">expr</span> )* )?</p>
@@ -212,10 +226,10 @@
                                 &quot;&quot;
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="description">
                                 The id for this command.
@@ -232,10 +246,10 @@
                                 &quot;&quot;
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="description">
                                 The stylesheet classes for this command. Each class name in the string should be separated by a comma.
@@ -252,10 +266,10 @@
                                 &quot;&quot;
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="description">
                                 A set of styles. The braces around the styles are not needed. Within the string, multiple styles should be separated by semicolons.
@@ -310,10 +324,10 @@
                                 false
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="description">
                                 If <span class="literal">cycle</span> is false, one repetition of the animation is completed once the first animation variable with a limit exceeds its limit. If <span class="literal">cycle</span> is true,  one repetition of the animation is completed once the first animation variable with a limit exceeds its limit and the frames are executed in reverse order.
@@ -445,10 +459,10 @@
                                 &quot;pixels&quot;
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="description">
                                 The units for width and height. Valid values are "pixels", "inches", or "mm". The size of the image on the display will be correct for the units chosen only on the monitor on which the image is created. If moved to another monitor, the operating system may choose to retain the physical size at the expense of the pixel size.
@@ -466,10 +480,10 @@
                                 (50, 50)
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="description">
                                 The location of the origin of the default observer on the diagram. The display width is divided into 100 units such that 0 represents the left side of the diagram and 100 represents the right. The display height is also divided into 100 units where 0 is the bottom and 100 is the top of the diagram. Values are not limited to being from 0 to 100, though—the origin can be off-screen.
@@ -489,10 +503,10 @@
                                 &gt;0
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="description">
-                                Unscaled coordinates (i.e. pixels) are scaled by this factor to produce scaled coordinates. The scale is defined by taking the lesser of the diagram width or height. A scale of 1 means that this distance is exactly 100 units, a scale of 2 would be 50 units, a scale of .5 would be 200 units and so on.
+                                Unscaled coordinates (i.e. pixels) are scaled by this factor to produce scaled coordinates. The scale is defined by taking the smaller of the diagram width or height. A scale of 1 means that this distance is exactly 100 units, a scale of 2 would be 50 units, a scale of .5 would be 200 units and so on.
                             </td>
                         </tr>
                     </tbody>
@@ -541,10 +555,10 @@
                                 The rest frame
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="description">
                                 The inertial frame from whose perspective the diagram will be drawn.
@@ -600,10 +614,10 @@
                                 The rest frame
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="description">
                                 The frame that defines the axes.
@@ -620,10 +634,10 @@
                                 false
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="description">
                                 Draw only the positive axes; otherwise, draw the full axes.
@@ -640,13 +654,13 @@
                                 true
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="description">
-                                Draw the x axis.
+                                Draw the x-axis.
                             </td>
                         </tr>
                         <tr>
@@ -660,10 +674,10 @@
                                 true
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="description">
                                 Draw the t axis.
@@ -680,13 +694,13 @@
                                 ““
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="description">
-                                The label for the x axis.
+                                The label for the x-axis.
                             </td>
                         </tr>
                         <tr>
@@ -700,10 +714,10 @@
                                 ““
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="description">
                                 The label for the t axis.
@@ -753,13 +767,13 @@
                                 <span class="non-terminal">coord</span>
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="description">
                                 The event location.
@@ -776,10 +790,10 @@
                                 ""
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="description">
                                 A label for the text.
@@ -796,10 +810,10 @@
                                 0.0
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="description">
                                 The rotation of the text in degrees around the anchor point. Positive rotation values rotate counter-clockwise. 0 is horizontal.
@@ -816,10 +830,10 @@
                                 false
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="description">
                                 If true, the rotation angle changes with the drawing frame. If false, it's frame-independent.
@@ -836,13 +850,13 @@
                                 none
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="description">
-                                The frame to boost to. The location is boosted to this frame and a hyperbolic line joins the two positions. If boostTo is omitted, the selected event shape is drawn. If a frame is supplied, a hyperbolic line connnects the location relative to the default frame and the location relative to the boost frame.
+                                The frame to boost to. The location is boosted to this frame and a hyperbolic line joins the two positions. If boostTo is omitted, the selected event shape is drawn. If a frame is supplied, a hyperbolic line connects the location relative to the default frame and the location relative to the boost frame.
                             </td>
                         </tr>
                     </tbody>
@@ -892,10 +906,10 @@
                                 The rest frame
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="description">
                                 The frame that defines the axes.
@@ -912,10 +926,10 @@
                                 true
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="description">
                                 Draw the lines parallel to the <span class="non-terminal">x</span> axis.
@@ -932,10 +946,10 @@
                                 true
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="description">
                                 Draw the lines parallel to the <span class="non-terminal">t</span> axis.
@@ -988,13 +1002,13 @@
                                 <span class="non-terminal">coord</span>
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="description">
                                 The position to draw the text at.
@@ -1011,10 +1025,10 @@
                                 <span class="non-terminal">""</span>
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="description">
                                 The text to draw.
@@ -1031,10 +1045,10 @@
                                 0.0
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="description">
                                 The rotation of the text in degrees around the anchor point. Positive rotation values rotate counter-clockwise.
@@ -1051,10 +1065,10 @@
                                 false
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="description">
                                 If true, the rotation angle changes with the drawing frame. If false, it's frame-independent.
@@ -1104,13 +1118,13 @@
                                 <span class="non-terminal">line</span>
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="description">
                                 The line to draw.
@@ -1221,13 +1235,13 @@
                                 <span class="non-terminal">observer</span>
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="body-style">&nbsp;
-                                
+
                             </td>
                             <td class="description">
                                 The observer whose worldline will be drawn.

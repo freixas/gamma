@@ -15,7 +15,7 @@ stylesheet "
   path.contr-length  { line-style: dotted; color: #840; }
   .annotation        { arrow: both; font-size: 20; }
   .annotation1       { text-padding:  5; text-anchor: TC; color: #080; }
-  .annoation2        { text-padding: 10; text-anchor: BC; color: #840; }
+  .annotation2       { text-padding: 10; text-anchor: BC; color: #840; }
 ";
 
 display origin: (25, 25), scale: 25;

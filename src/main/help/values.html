@@ -56,7 +56,7 @@
             </ul>
           <h1><a id="objects"></a>Objects </h1>
           <p>An <span class="definition">object</span> is an entity comprised of multiple values. Specific object types are required for certain operations.</p>
-          <p>Object values are called <span class="definition">fields</span>. Currently, only two objects have accessible fields, coordinates and frames. These fields can be accessed or set using the dereferencing operator &quot;.&quot;.          </p>
+          <p>Object values are called <span class="definition">fields</span>. Currently, only two objects have accessible fields, coordinates and frames. These fields can be accessed or set using the de-referencing operator &quot;.&quot;.          </p>
           <p>Except for coordinates, all objects begin and end with brackets. The beginning bracket is followed by the object name. The rest of the object definition depends on the object.</p>
           <h2><a id="bounds"></a>Bounds</h2>
           <p><span class="literal">[ bounds</span> <span class="non-terminal">coordinate coordinate</span> <span class="literal">]</span></p>
@@ -72,12 +72,12 @@
             <span class="literal">[ frame</span> <span class="literal">observer</span><span class="non-terminal"> observer</span> ( <span class="literal">at</span> ( <span class="literal">time</span> <span class="non-terminal">float</span> | <span class="literal">tau</span> <span class="non-terminal">float</span> | <span class="literal">distance</span> <span class="non-terminal">float</span> | <span class="literal">velocity</span> <span class="non-terminal">float</span> ) )? ) <span class="literal">]</span><br>
           </p>
           <p>A <span class="definition">frame</span> is an inertial frame of reference. In Gamma, inertial frames are identified by both a velocity and an origin. This is the first form shown above. If the velocity is omitted, it is 0. If the origin is omitted, it is (0, 0).</p>
-          <p>An inertial frame can also be identified by selecting a unique point on an observer's wordline. This is the second form. There are several options for the identifying the worldline point. Time and tau (observer's time) will always yield a unique point. Distance and velocity may not be unique; in this case, the first matching point is used. The frame selection always creates a frame; worldlines are infinite and, in this case, worldline intervals are ignored.</p>
+          <p>An inertial frame can also be identified by selecting a unique point on an observer's worldline. This is the second form. There are several options for the identifying the worldline point. Time and tau (observer's time) will always yield a unique point. Distance and velocity may not be unique; in this case, the first matching point is used. The frame selection always creates a frame; worldlines are infinite and, in this case, worldline intervals are ignored.</p>
           <p>Frames have two fields: v and origin. These can be accessed or modified directly (for example, <span class="code">vel = f.v;</span> or <span class="code">f.origin = (10, 10);</span>).<br>
           </p>
           <h2><a id="interval"></a>Interval</h2>
           <p><span class="literal">[  interval</span> ( <span class="literal">time</span> | <span class="literal">tau</span> | <span class="literal">distance</span> ) <span class="non-terminal">float</span> <span class="literal">to</span> <span class="non-terminal">float</span> <span class="literal">]</span></p>
-          <p><span class="definition">Intervals</span> are used to limit wordlines and are applied using the setInterval() function. Intervals are used (rather than bounds) to guarantee that the resulting worldline path is continuous.          </p>
+          <p><span class="definition">Intervals</span> are used to limit worldlines and are applied using the setInterval() function. Intervals are used (rather than bounds) to guarantee that the resulting worldline path is continuous.          </p>
           <p>When drawing a worldline with an interval, only the segment that falls within the interval is drawn. For intersections, the intersection must fall within the interval.</p>
           <h2><a id="line"></a>Line</h2>
           <p><span class="literal">[ line  axis</span> ( <span class="literal">x</span> | <span class="literal">t</span> ) <span class="non-terminal">frame</span> ( <span class="literal">offset</span> <span class="non-terminal">float</span> )? ) <span class="literal">]</span><br>
@@ -93,7 +93,7 @@
           <h2><a id="observer"></a>Observer</h2>
           <p><span class="literal">[ observer</span> <span class="non-terminal">worldlineList</span>? <span class="literal">]</span></p>
           <p><span class="definition">Observers</span> are the most complex of the objects in Gamma, so we'll go through their definition one step at a time. An observer is an object moving through spacetime. If the worldlineList is omitted, the observer created is equivalent to [observer origin(0, 0) distance 0 tau 0, velocity 0].</p>
-          <p><span class="non-terminal">worldlineList</span> → <span class="non-terminal">worldlineInitializer</span> | <span class="non-terminal">worldlineSegmentList</span> | ( <span class="non-terminal">worldlineInitializer</span> <span class="literal">,</span> <span class="non-terminal">wordlineSegmentList</span> )</p>
+          <p><span class="non-terminal">worldlineList</span> → <span class="non-terminal">worldlineInitializer</span> | <span class="non-terminal">worldlineSegmentList</span> | ( <span class="non-terminal">worldlineInitializer</span> <span class="literal">,</span> <span class="non-terminal">worldlineSegmentList</span> )</p>
           <p>The observer begins with an  initializer, a list of worldline segments, or both.</p>
           <p><span class="non-terminal">worldlineInitializer</span> → ( <span class="literal">origin</span> <span class="non-terminal">coordinate</span> | <span class="literal">distance</span> <span class="non-terminal">float</span> | <span class="literal">tau</span> <span class="non-terminal">expr</span> )*</p>
           <p>The initializer identifies a point that we will consider the worldline's origin. All parts are optional and the entire initializer can be omitted.</p>

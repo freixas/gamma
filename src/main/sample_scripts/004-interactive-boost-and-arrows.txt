@@ -13,6 +13,9 @@
 stylesheet "
   .a { color: red; }
   .b { color: blue; }
+  .c { color: green; }
+  axes.a { color: cyan; }
+  axes.b { color: magenta; }
   .arrow-none  { arrow: none; }
   .arrow-start { arrow: start; }
   .arrow-end   { arrow: end; }
@@ -24,6 +27,7 @@ display scale: 2;
 
 range v1 = 0 from 0 to +.9 label "+Red/-Blue Velocity";
 range v2 = 0 from -.9 to +.9 label "Viewing Frame Velocity";
+range offset = 0 from -20 to 20 label "Point Offset";
 
 a = [observer velocity -v1];
 b = [observer velocity +v1];
@@ -39,25 +43,54 @@ d3 = 15;
 d4 = 20;
 
 p = d1;
-event ( p,     0), boostTo: a, class: "a, arrow-start";
-event (-p,     0), boostTo: a, class: "a, arrow-start";
-event ( p - 1, 0), boostTo: b ,class: "b, arrow-start";
-event (-p - 1, 0), boostTo: b, class: "b, arrow-start";
+event ( p,     offset), boostTo: a, class: "a, arrow-start";
+event (-p,     offset), boostTo: a, class: "a, arrow-start";
+event ( p - 1, offset), boostTo: b ,class: "b, arrow-start";
+event (-p - 1, offset), boostTo: b, class: "b, arrow-start";
 
 p = d2;
-event ( p,     0), boostTo: a, class: "a, arrow-end";
-event (-p,     0), boostTo: a, class: "a, arrow-end";
-event ( p - 1, 0), boostTo: b ,class: "b, arrow-end";
-event (-p - 1, 0), boostTo: b, class: "b, arrow-end";
+event ( p,     offset), boostTo: a, class: "a, arrow-end";
+event (-p,     offset), boostTo: a, class: "a, arrow-end";
+event ( p - 1, offset), boostTo: b ,class: "b, arrow-end";
+event (-p - 1, offset), boostTo: b, class: "b, arrow-end";
 
 p = d3;
-event ( p,     0), boostTo: a, class: "a, arrow-both";
-event (-p,     0), boostTo: a, class: "a, arrow-both";
-event ( p - 1, 0), boostTo: b ,class: "b, arrow-both";
-event (-p - 1, 0), boostTo: b, class: "b, arrow-both";
+event ( p,     offset), boostTo: a, class: "a, arrow-both";
+event (-p,     offset), boostTo: a, class: "a, arrow-both";
+event ( p - 1, offset), boostTo: b ,class: "b, arrow-both";
+event (-p - 1, offset), boostTo: b, class: "b, arrow-both";
 
 p = d4;
-event ( p,     0), boostTo: a, class: "a, arrow-none";
-event (-p,     0), boostTo: a, class: "a, arrow-none";
-event ( p - 1, 0), boostTo: b ,class: "b, arrow-none";
-event (-p - 1, 0), boostTo: b, class: "b, arrow-none";
+event ( p,     offset), boostTo: a, class: "a, arrow-none";
+event (-p,     offset), boostTo: a, class: "a, arrow-none";
+event ( p - 1, offset), boostTo: b ,class: "b, arrow-none";
+event (-p - 1, offset), boostTo: b, class: "b, arrow-none";
+
+p = d1;
+event (offset,  p    ), boostTo: a, class: "a, arrow-start";
+event (offset, -p    ), boostTo: a, class: "a, arrow-start";
+event (offset,  p - 1), boostTo: b ,class: "b, arrow-start";
+event (offset, -p - 1), boostTo: b, class: "b, arrow-start";
+
+p = d2;
+event (offset,  p    ), boostTo: a, class: "a, arrow-end";
+event (offset, -p    ), boostTo: a, class: "a, arrow-end";
+event (offset,  p - 1), boostTo: b ,class: "b, arrow-end";
+event (offset, -p - 1), boostTo: b, class: "b, arrow-end";
+
+p = d3;
+event (offset,  p    ), boostTo: a, class: "a, arrow-both";
+event (offset, -p    ), boostTo: a, class: "a, arrow-both";
+event (offset,  p - 1), boostTo: b ,class: "b, arrow-both";
+event (offset, -p - 1), boostTo: b, class: "b, arrow-both";
+
+p = d4;
+event (offset,  p    ), boostTo: a, class: "a, arrow-none";
+event (offset, -p    ), boostTo: a, class: "a, arrow-none";
+event (offset,  p - 1), boostTo: b ,class: "b, arrow-none";
+event (offset, -p - 1), boostTo: b, class: "b, arrow-none";
+
+event ( offset,  offset), boostTo: a, class: "c, arrow-start";
+event (-offset,  offset), boostTo: a, class: "c, arrow-end";
+event ( offset, -offset), boostTo: a, class: "c, arrow-both";
+event (-offset, -offset), boostTo: a, class: "c, arrow-none";
