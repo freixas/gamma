@@ -30,7 +30,7 @@ import org.freixas.gamma.value.Observer;
 import java.util.HashMap;
 
 /**
- * A Function is a construct similar to an HCode. It is used by the
+ * A Function is a construct similar to an h-code. It is used by the
  * FunctionHCode to implement various functions.
  *
  * @author Antonio Freixas

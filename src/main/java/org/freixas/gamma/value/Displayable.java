@@ -20,7 +20,7 @@ import org.freixas.gamma.execution.HCodeEngine;
 
 /**
  * This interfaces signals that this object can be displayed to the user.
- * Double values should call the HCodeEngine's toString(Double) method to
+ * Double values should call the h-code engine's toString(Double) method to
  * convert the double to a string.
  *
  * @author Antonio Freixas

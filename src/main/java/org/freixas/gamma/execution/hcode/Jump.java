@@ -18,7 +18,7 @@
 package org.freixas.gamma.execution.hcode;
 
 /**
- * This interface identifies the various Jump HCodes.
+ * This interface identifies the various Jump h-codes.
  *
  * @author Antonio Freixas
  */
@@ -29,21 +29,21 @@ public interface Jump
      *
      * @return The label associated with this jump instruction.
      */
-    public int getId();
+    int getId();
 
     /**
      * Get the location to jump to.
      *
      * @return The location to jump to.
      */
-    public int getJumpLocation();
+    int getJumpLocation();
 
     /**
      * Set the location to jump to.
      *
      * @param location The location to jump to.
      */
-    public void setJumpLocation(int location);
+    void setJumpLocation(int location);
 
 
 }

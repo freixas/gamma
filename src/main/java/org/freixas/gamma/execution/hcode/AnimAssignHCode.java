@@ -74,7 +74,7 @@ public class AnimAssignHCode extends ArgInfoHCode
         // Make sure this is a symbol table address
 
         if (!(address instanceof SymbolTableAddress)) {
-            throw new ExecutionException("An animation variable cannot be assigned to an object");
+            throw new ExecutionException("An animation variable cannot be assigned to a field");
         }
 
         // Check to see if this animation variable has already been defined.
@@ -85,11 +85,11 @@ public class AnimAssignHCode extends ArgInfoHCode
 
         // Set the value in the regular symbol table
 
-        address.setValue(initialValue);
+        String name = ((SymbolTableAddress)address).getName();
+        engine.getSymbolTable().directPut(name, initialValue);
 
         // Set the value in the animation symbol table
 
-        String name = ((SymbolTableAddress)address).getName();
         AnimationVariable var = new AnimationVariable(initialValue, finalValue, stepSize);
         engine.getDynamicSymbolTable().put(name, var);
     }

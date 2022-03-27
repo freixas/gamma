@@ -26,11 +26,11 @@ import java.util.List;
 
 /**
  * The HCodeProgram receives the h-code produced by the parser and transforms
- * it into separate HCode and data stacks. A master copy of the data can be
+ * it into separate h-code and data stacks. A master copy of the data can be
  * saved if the program will be executed multiple times.
  * <p>
  * One of the main tasks of the HCodeProgram is to fetch the data corresponding
- * to a given HCode.
+ * to a given h-code.
  *
  * @author Antonio Freixas
  */
@@ -94,14 +94,14 @@ public class HCodeProgram
     }
 
     /**
-     * Get the set of data corresponding to the given HCode. This is not an
-     * arbitrary HCode, but the next HCode in the current execution of the
+     * Get the set of data corresponding to the given h-code. This is not an
+     * arbitrary h-code, but the next h-code in the current execution of the
      * program.
      *
      * @param hCode The h-code whose data we want.
      *
      * @return A list of the matching data. While this list contains only the
-     * data for the current HCode, changes to the returned data affect the
+     * data for the current h-code, changes to the returned data affect the
      * data stack. The data should be cleared when done and a result, if any,
      * should be pushed onto the list.
      */
@@ -130,7 +130,7 @@ public class HCodeProgram
 
     /**
      * Returns true if the data stack is empty, which should occur only after
-     * the last HCode executes.
+     * the last h-code executes.
      *
      * @return True if the data stack is empty.
      */

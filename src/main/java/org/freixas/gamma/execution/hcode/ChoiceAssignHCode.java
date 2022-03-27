@@ -68,7 +68,7 @@ public class ChoiceAssignHCode extends ArgInfoHCode
         // Make sure this is a symbol table address
 
         if (!(address instanceof SymbolTableAddress)) {
-            throw new ExecutionException("A display variable cannot be assigned to an object");
+            throw new ExecutionException("A display variable cannot be assigned to a field");
         }
 
         // Check to see if this display variable has already been defined.
@@ -81,15 +81,16 @@ public class ChoiceAssignHCode extends ArgInfoHCode
 
         String label = engine.toDisplayableString(object);
 
-        // Set the value in the regular symbol table
+        // Create an entry in the regular symbol table just so we know if it
+        // is redefined within the same execution
 
-        address.setValue(initialValue);
+        String name = ((SymbolTableAddress)address).getName();
+        engine.getSymbolTable().directPut(name, initialValue);
 
         // Set the value in the animation symbol table
 
         String[] stringArray = { };
 
-        String name = ((SymbolTableAddress)address).getName();
         ChoiceVariable var =
             new ChoiceVariable(
                 engine.getMainWindow().getDiagramEngine(),

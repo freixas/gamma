@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * An HCode is a high-level instruction for an imaginary machine which we
+ * An h-code is a high-level instruction for an imaginary machine which we
  * emulate using the HCodeEngine.
  *
  * @author Antonio Freixas
@@ -37,7 +37,7 @@ public abstract class HCode extends ExecutorContext
     public enum Type
     {
         PRINT,
-        DYNAMIC_NAME, FETCH, FETCH_PROP, FETCH_ADDRESS, FETCH_PROP_ADDRESS,
+        DYNAMIC_NAME, FETCH, FETCH_PROP, FETCH_ADDRESS, FETCH_PROP_ADDRESS, DEFINED,
         NOT, TO_BOOLEAN, OR, AND,
         EQ, NE, LT, GT, LE, GE,
         UNARY_MINUS, UNARY_PLUS, SUB, MULT, DIV, REMAINDER, EXP, LORENTZ, INV_LORENTZ,
@@ -106,6 +106,11 @@ public abstract class HCode extends ExecutorContext
         }
 
         return new ObjectPropertyAddress((ObjectContainer)value, propName);
+    };
+    // DEFINED
+    static final FunctionalOneArg<String, Double> defined = (engine, symbol) -> {
+        SymbolTable table = engine.getSymbolTable();
+        return table.contains(symbol) ? 1.0 : 0.0;
     };
 
     // ****************************************
@@ -238,13 +243,11 @@ public abstract class HCode extends ExecutorContext
     static final FunctionalTwoArg<String, Object, Property> property = (engine, name, value) -> new Property(name, value);
     // PROPERTY_LIST
     static final VariableArg<PropertyList> propertyList = (engine, data) -> {
-        int numOfProperties = data.length;
         PropertyList properties = new PropertyList();
-        for (int i = 0; i < numOfProperties; i++) {
-            if (!(data[i] instanceof PropertyElement)) {
+        for (Object datum : data) {
+            if (!(datum instanceof PropertyElement element)) {
                 throw new ExecutionException("One of the elements in the list of properties is not a property");
             }
-            PropertyElement element = (PropertyElement)data[i];
             properties.add(element);
         }
         return properties;
@@ -340,6 +343,7 @@ public abstract class HCode extends ExecutorContext
         map.put(Type.FETCH_PROP, fetchProp);
         map.put(Type.FETCH_ADDRESS, fetchAddress);
         map.put(Type.FETCH_PROP_ADDRESS, fetchPropAddress);
+        map.put(Type.DEFINED, defined);
 
         map.put(Type.NOT, not);
         map.put(Type.TO_BOOLEAN, toBoolean);
@@ -353,7 +357,6 @@ public abstract class HCode extends ExecutorContext
         map.put(Type.LE, le);
         map.put(Type.GE, ge);
 
-        map.put(Type.NOT, not);
         map.put(Type.UNARY_MINUS, unaryMinus);
         map.put(Type.UNARY_PLUS, unaryPlus);
         map.put(Type.SUB, sub);

@@ -75,7 +75,7 @@ public class FunctionHCode extends ArgInfoHCode
 
             Object result = argInfoFunction.execute(engine, funcData);
 
-            // Remove all of the function hcode
+            // Remove all of the function h-code
 
             data.clear();
 

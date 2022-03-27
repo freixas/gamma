@@ -469,7 +469,7 @@ public class AnimationEngine
                 dynamicSymbolTable.remove(name);
             }
 
-            // Execute the hcode once to add in any new/changes animation variables
+            // Execute the h-code once to add in any new/changes animation variables
 
             hCodeEngine.execute();
         }
@@ -563,7 +563,7 @@ public class AnimationEngine
             }
         }
 
-        // Execute the HCode and LCode again
+        // Execute the h-code and l-code again
 
         hCodeEngine.execute();
 

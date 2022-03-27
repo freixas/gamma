@@ -16,20 +16,20 @@
  */
 package org.freixas.gamma.execution;
 
+import javafx.scene.control.Alert;
+import org.freixas.gamma.GammaRuntimeException;
 import org.freixas.gamma.MainWindow;
 import org.freixas.gamma.ProgrammingException;
 import org.freixas.gamma.css.value.Stylesheet;
 import org.freixas.gamma.execution.hcode.SetStatement;
+
 import java.util.LinkedList;
-import java.util.Set;
-import javafx.scene.control.Alert;
-import org.freixas.gamma.GammaRuntimeException;
 
 /**
  * The Diagram Engine controls the overall execution of a user's program,
  * including animation.
  * <p>
- * The diagram engine starts with an hcode program produced by the parser. The
+ * The diagram engine starts with a h-code program produced by the parser. The
  * diagram engine's job finishes when a non-animated diagram is drawn or when
  * an animation ends or is terminated by the user.
  *
@@ -42,9 +42,6 @@ public class DiagramEngine
     private final boolean isAnimated;
     private final SetStatement setStatement;
     private final Stylesheet stylesheet;
-
-    private DynamicSymbolTable dynamicSymbolTable;
-    private Set<String> symbolNames;
 
     private AnimationEngine animationEngine;
     private HCodeEngine hCodeEngine;

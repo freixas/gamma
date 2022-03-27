@@ -301,6 +301,7 @@ public final class Parser
      *
      * @return True if the "animation" command was seen.
      */
+    @SuppressWarnings("unused")
     public boolean hasDisplayVariables()
     {
         return displayVariableIsPresent;
@@ -592,6 +593,7 @@ public final class Parser
                 case "stylesheet" -> parseStylesheetStatement();
                 case "set" -> parseSetStatement();
                 case "print" -> codes.addAll(parsePrintStatement());
+                case "static" -> codes.addAll(parseStaticAssignmentStatement());
                 case "animate" -> codes.addAll(parseAnimationAssignmentStatement());
                 case "range" -> codes.addAll(parseRangeAssignmentStatement());
                 case "toggle" -> codes.addAll(parseToggleAssignmentStatement());
@@ -1302,6 +1304,35 @@ public final class Parser
     }
 
     /**
+     * Parse a static assignment statement.
+     *
+     * @return A list of h-codes.
+     * @throws ParseException When a syntax error occurs.
+     */
+    private LinkedList<Object> parseStaticAssignmentStatement() throws ParseException
+    {
+        Token<?> toToken = null;
+
+        // We start knowing that the current token is "static". The next
+        // item must be a variable, not a left variable
+
+        nextToken();
+        LinkedList<Object> codes = new LinkedList<>(parseVariable());
+        codes.add(new GenericHCode(HCode.Type.FETCH_ADDRESS));
+        nextToken();
+
+        if (!isDelimiter() || getChar() != '=') {
+            throwParseException("Expected '='");
+        }
+
+        nextToken();
+        codes.addAll(parseExpr());
+        codes.add(new StaticAssignHCode());
+
+        return codes;
+    }
+
+    /**
      * Parse an animation assignment statement.
      *
      * @return A list of h-codes.
@@ -1311,10 +1342,13 @@ public final class Parser
     {
         Token<?> toToken = null;
 
-        // We start knowing that the current token is "animate"
+        // We start knowing that the current token is "animate". The next
+        // item must be a variable, not a left variable
 
         nextToken();
-        LinkedList<Object> codes = new LinkedList<>(parseLeftVariable());
+        LinkedList<Object> codes = new LinkedList<>(parseVariable());
+        codes.add(new GenericHCode(HCode.Type.FETCH_ADDRESS));
+        nextToken();
 
         if (!isDelimiter() || getChar() != '=') {
             throwParseException("Expected '='");
@@ -1366,10 +1400,13 @@ public final class Parser
      */
     private LinkedList<Object> parseRangeAssignmentStatement() throws ParseException
     {
-        // We start knowing that the current token is "range"
+        // We start knowing that the current token is "range". The next
+        // item must be a variable, not a left variable
 
         nextToken();
-        LinkedList<Object> codes = new LinkedList<>(parseLeftVariable());
+        LinkedList<Object> codes = new LinkedList<>(parseVariable());
+        codes.add(new GenericHCode(HCode.Type.FETCH_ADDRESS));
+        nextToken();
 
         if (!isDelimiter() || getChar() != '=') {
             throwParseException("Expected '='");
@@ -1416,11 +1453,13 @@ public final class Parser
      */
     private LinkedList<Object> parseToggleAssignmentStatement() throws ParseException
     {
-
-        // We start knowing that the current token is "toggle"
+        // We start knowing that the current token is "toggle". The next
+        // item must be a variable, not a left variable
 
         nextToken();
-        LinkedList<Object> codes = new LinkedList<>(parseLeftVariable());
+        LinkedList<Object> codes = new LinkedList<>(parseVariable());
+        codes.add(new GenericHCode(HCode.Type.FETCH_ADDRESS));
+        nextToken();
 
         if (!isDelimiter() || getChar() != '=') {
             throwParseException("Expected '='");
@@ -1459,10 +1498,13 @@ public final class Parser
      */
     private LinkedList<Object> parseChoiceAssignmentStatement() throws ParseException
     {
-        // We start knowing that the current token is "choice"
+        // We start knowing that the current token is "choice". The next
+        // item must be a variable, not a left variable
 
         nextToken();
-        LinkedList<Object> codes = new LinkedList<>(parseLeftVariable());
+        LinkedList<Object> codes = new LinkedList<>(parseVariable());
+        codes.add(new GenericHCode(HCode.Type.FETCH_ADDRESS));
+        nextToken();
 
         if (!isDelimiter() || getChar() != '=') {
             throwParseException("Expected '='");
@@ -1672,7 +1714,7 @@ public final class Parser
     }
 
     /**
-     * Parse a variable that is to the left of the "=" in an assignment
+     * Parse a variable that is to the right of the "=" in an assignment
      * statement. This is either a plain variable or an array variable.
      *
      * @return A list of h-codes.
@@ -2400,10 +2442,16 @@ public final class Parser
         while (true) {
 
             // If we find a function name, push it on the operator stack.
-            // Function names are always followed by a '('.
+            // Function names are always followed by a '('. There's an exception
+            // for the "defined" function, which gets special treatment
 
             if (isName() && peek.isDelimiter() && peek.getChar() == '(') {
-                ops.push(new OpToken<>(curToken, Op.find("FUNC", true)));
+                if (getString().equals("defined")) {
+                    codes.addAll(parseDefinedFunction());
+                }
+                else {
+                    ops.push(new OpToken<>(curToken, Op.find("FUNC", true)));
+                }
             }
 
             // If we have a variable, push it on the codes stack
@@ -2670,6 +2718,44 @@ public final class Parser
                 break;
             }
         }
+        return codes;
+    }
+
+    /**
+     * Parse the "defined" function.
+     *
+     * @return A list of h-codes.
+     * @throws ParseException When a syntax error occurs.
+     */
+    private LinkedList<Object> parseDefinedFunction() throws ParseException
+    {
+        LinkedList<Object> codes = new LinkedList<>();
+
+        // We start knowing that the current token points
+        // to "defined" and that the next token is "("
+
+        nextToken();
+        nextToken();
+
+        // There should be a variable at this point
+
+        if (!isName()) {
+            throwParseException("Expected a variable name inside the 'defined' function");
+        }
+        //noinspection CollectionAddAllCanBeReplacedWithConstructor
+        codes.addAll(parseVariable());
+        nextToken();
+
+        // This should be followed by a ')'
+
+        if (!isDelimiter() || getChar() != ')') {
+            throwParseException("Expected a ')'");
+        }
+
+        codes.add(new GenericHCode(HCode.Type.DEFINED));
+
+        // We leave the ")" token to be discarded by the calling method
+
         return codes;
     }
 

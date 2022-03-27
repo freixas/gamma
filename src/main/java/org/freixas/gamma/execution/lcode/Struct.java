@@ -182,10 +182,10 @@ public abstract class Struct
      * <p>
      * This method should not be used for creating the style structure,
      * StyleStruct. The style structure should be a copy of the the master style
-     * structure, which is held by the hcode engine and then initialized from
+     * structure, which is held by the h-code engine and then initialized from
      * the property list using initializeStruct. *
      *
-     * @param engine The hcode engine.
+     * @param engine The h-code engine.
      * @param cmdName The name of the command.
      * @param list The property list used to initialize the structure.
      *
@@ -219,7 +219,7 @@ public abstract class Struct
      * Initialize a structure, one that is a subclass of Struct, using values in
      * the property list.
      *
-     * @param engine The hcode engine.
+     * @param engine The h-code engine.
      * @param cmdStruct The structure to initialize.
      * @param cmdName The name of the command.
      * @param list The property list used to initialize the structure.

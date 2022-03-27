@@ -48,21 +48,22 @@ public class AssignHCode extends ArgInfoHCode
     @SuppressWarnings("null")
     public void execute(HCodeEngine engine, List<Object> data)
     {
+
         Address address = (Address)data.get(0);
-        Object arg2 = data.get(1);
+        Object value =    data.get(1);
         data.clear();
 
         // If it's a property value, it must exist and the type of the property
         // and the value must be the same.
 
         if (address instanceof ObjectPropertyAddress) {
-            if (!address.exists() || !address.typeMatches(arg2)) {
+            if (!address.exists() || !address.typeMatches(value)) {
                 throw new ExecutionException("Variable does not exist or is of the wrong type");
             }
         }
 
         // Otherwise, this is a symbol table address. We need to make sure we
-        // are not assigning to an animation variable
+        // are not assigning to a dynamic variable
 
         else if (address.exists()) {
             String name = ((SymbolTableAddress)address).getName();
@@ -73,7 +74,7 @@ public class AssignHCode extends ArgInfoHCode
 
         // Set the symbol pointed to by the address to the given value
 
-        address.setValue(arg2);
+        address.setValue(value);
     }
 
     @Override
