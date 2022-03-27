@@ -21,11 +21,11 @@ import org.freixas.gamma.execution.HCodeEngine;
 import java.util.List;
 
 /**
- * An ArgInfoHCode is an HCode which uses an ArgInfo structure to provide
+ * An ArgInfoHCode is an h-code which uses an ArgInfo structure to provide
  * information about its parameters. This class must be sub-classed, with one
- * class per HCode instruction.
+ * class per h-code instruction.
  * <p>
- * For HCodes with simple requirements, use a GenericHCode.
+ * For h-codes with simple requirements, use a GenericHCode.
  *
  * @author Antonio Freixas
  */
@@ -44,7 +44,7 @@ abstract public class ArgInfoHCode extends HCode
     }
 
     /**
-     * Execute the HCode.
+     * Execute the h-code.
      *
      * @param engine The HCode engine.
      * @param data The arguments for this h-code instruction.

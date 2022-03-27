@@ -23,7 +23,7 @@ import javafx.beans.property.Property;
 
 /**
  * The ArgInfo class is used to provide information about the arguments of
- * an HCode or Function and to type-check those arguments.
+ * an h-code or function and to type-check those arguments.
  *
  * @author Antonio Freixas
  */
@@ -41,7 +41,7 @@ public class ArgInfo
     private final int numberOfReturnedValues;
 
     /**
-     * Define the valid arguments for an HCode instruction or a Function.
+     * Define the valid arguments for an h-code instruction or a Function.
      * <p>
      * This constructor sets the number of returned values to 1.
      *
@@ -57,7 +57,7 @@ public class ArgInfo
     }
 
     /**
-     * Define the valid arguments for an HCode instruction or a Function.
+     * Define the valid arguments for an h-code instruction or a Function.
      *
      * @param numberOfArgs The number of arguments. If -1, then the number is
      * variable.
@@ -65,7 +65,7 @@ public class ArgInfo
      * are matched 1-to-1. If the number of arguments is variable, the last type
      * on the list is repeatedly applied to any remaining arguments.
      * @param numberOfReturnedValues The number of values returned by the
-     * associated HCode or Function.
+     * associated h-code or function.
      */
     public ArgInfo(int numberOfArgs, List<Type> argTypes, int numberOfReturnedValues)
     {
@@ -75,11 +75,11 @@ public class ArgInfo
     }
 
     /**
-     * Return the number of arguments required by an HCode instruction or
+     * Return the number of arguments required by an h-code instruction or
      * Function. A value of -1 means that we get the number of arguments from
      * the data stack.
      *
-     * @return The number of arguments required by an HCode instruction or
+     * @return The number of arguments required by an h-code instruction or
      * Function.
      */
     public int getNumberOfArgs()

@@ -20,13 +20,13 @@ import org.freixas.gamma.ProgrammingException;
 import org.freixas.gamma.execution.HCodeEngine;
 
 /**
- * A GenericHCode can stand in for many individual HCode classes.
+ * A GenericHCode can stand in for many individual h-code classes.
  * <p>
- * To create a generic HCode, create a static lambda for the code, using one of
+ * To create a generic h-code, create a static lambda for the code, using one of
  * the several LambdaFunction interfaces provided. Add the lambda to the hash
  * map with a given key.
  * <p>
- * In the Parser, when the HCode is added, create a GenericHcode with the key
+ * In the Parser, when the h-code is added, create a GenericHcode with the key
  * name in the constructor.
  *
  * @author Antonio Freixas
@@ -38,9 +38,9 @@ public class GenericHCode extends HCode
     private final HCode.Type type;
 
     /**
-     * Create a generic HCode.
+     * Create a generic h-code.
      *
-     * @param type The type used to locate the HCode's lambda function.
+     * @param type The type used to locate the h-code's lambda function.
      */
     public GenericHCode(HCode.Type type)
     {
@@ -57,7 +57,7 @@ public class GenericHCode extends HCode
     }
 
     /**
-     * Execute the generic HCode.
+     * Execute the generic h-code.
      *
      * @param engine The HCodeEngine.
      */

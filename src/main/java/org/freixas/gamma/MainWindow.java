@@ -683,7 +683,7 @@ public final class MainWindow extends Stage
     }
 
     /**
-     * Add text to the HCode's Print dialog text area.
+     * Add text to the h-code's Print dialog text area.
      *
      * @param str The text to add. A newline is added to the string.
      */
@@ -704,7 +704,7 @@ public final class MainWindow extends Stage
     }
 
     /**
-     * Clear the HCode's Print dialog text area.
+     * Clear the h-code's Print dialog text area.
      */
 
     public void clearScriptPrintDialog()

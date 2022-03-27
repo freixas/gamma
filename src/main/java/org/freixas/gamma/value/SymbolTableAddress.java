@@ -20,10 +20,6 @@ import org.freixas.gamma.execution.SymbolTable;
 
 /**
  * This class provides indirect access to a value in the symbol table.
- * <p>
- * This class is marked ExecutionImmutable because it is only created during
- * execution, not during parsing. If we do any code optimization, this may no
- * longer be true.
  *
  * @author Antonio Freixas
  */
@@ -75,7 +71,7 @@ public class SymbolTableAddress extends Address implements ExecutionImmutable
     @Override
     public boolean exists()
     {
-        return table.contains(name);
+        return table.directContains(name);
     }
 
     @Override

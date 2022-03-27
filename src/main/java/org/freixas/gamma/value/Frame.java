@@ -193,7 +193,7 @@ public class Frame  extends ObjectContainer implements ExecutionMutable, Display
     @Override
     public Object getProperty(String name)
     {
-        // The HCode that handles object properties will complain if an invalid
+        // The h-code that handles object properties will complain if an invalid
         // property name is used, so we don't need to re-check here
 
         switch (name) {
@@ -206,7 +206,7 @@ public class Frame  extends ObjectContainer implements ExecutionMutable, Display
     @Override
     public void setProperty(String name, Object value)
     {
-        // The HCode that handles object properties will complain if an invalid
+        // The h-code that handles object properties will complain if an invalid
         // property name is used, so we don't need to re-check here
 
         switch (name) {

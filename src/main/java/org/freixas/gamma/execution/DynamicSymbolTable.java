@@ -17,22 +17,25 @@
 package org.freixas.gamma.execution;
 
 import org.freixas.gamma.MainWindow;
+import org.freixas.gamma.ProgrammingException;
 import org.freixas.gamma.value.DisplayVariable;
 import org.freixas.gamma.value.DynamicVariable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.ListIterator;
-import java.util.Set;
+
+import java.util.*;
 
 /**
- * Dynamic variables are stored in this table and in the regular Symbol
- * table. The are placed in the regular symbol table just to make sure they
- * aren't assigned to twice.
+ * A symbol table is used to store values associated with and accessed through
+ * symbols (variable names).
+ * <p>
+ * This is the dynamic symbol table. It contains variables that persist through
+ * multiple re-executions of a script. The initial value is set by the script
+ * writer, but after that, they are set by the program (through the animation
+ * engine or through GUI controls manipulated by the end user).
  *
  * @author Antonio Freixas
  */
-public class DynamicSymbolTable extends SymbolTable
+
+public class DynamicSymbolTable extends BaseSymbolTable
 {
     private int lastOrderNumber;
     private boolean hasDisplayVariables;
@@ -45,16 +48,24 @@ public class DynamicSymbolTable extends SymbolTable
     }
 
     @Override
-    public Object get(String symbol)
+    public Object get(String name)
     {
-        Object var = directGet(symbol);
+        Object var = super.get(name);
         if (var == null) return null;
         return ((DynamicVariable)var).getCurrentValue();
     }
 
-    public DynamicVariable getDynamicVariable(String symbol)
+    /**
+     * Get a dynamic variable. This is an object that contains more than just
+     * the symbol's value.
+     *
+     * @param name The name of the dynamic variable to get.
+     *
+     * @return The dynamic variable.
+     */
+    public DynamicVariable getDynamicVariable(String name)
     {
-        Object var = directGet(symbol);
+        Object var = super.get(name);
         if (var == null) return null;
         return (DynamicVariable)var;
     }
@@ -62,28 +73,32 @@ public class DynamicSymbolTable extends SymbolTable
     /**
      * Set the value of a symbol. If the symbol doesn't exist, create it.
      * <p>
-     * The dynamic symbol table exist through multiple executions of a script.
-     * The first time a dynamic symbol is created, it is placed in the dynamic
-     * symbol table and is assigned the given value. In later executions, the
-     * symbol if left alone. The symbol's value is changed by changing the
-     * dynamic variable in some other manner.
+     * The value should always be a DynamicVariable.
      *
-     * @param symbol The name of the symbol.
+     * @param name The name of the symbol.
      * @param value The symbol's value.
      */
     @Override
-    public void put(String symbol, Object value)
+    public void put(String name, Object value)
     {
+        if (!(value instanceof DynamicVariable)) {
+            throw new ProgrammingException("DynamicSymbolTable.put(): Expected a DynamicVariable");
+        }
+
         // If the symbol is already here, then it means this is not the initial
         // execution of the script
 
-        if (contains(symbol)) return;
+        if (contains(name)) return;
+
+        // If the value is a display variable, note that we have display variables
+        // and set its display order
 
         if (value instanceof DisplayVariable displayVar) {
             hasDisplayVariables = true;
             displayVar.setDisplayOrder(++lastOrderNumber);
         }
-        super.put(symbol, value);
+
+        super.put(name, value);
     }
 
     /**
@@ -102,9 +117,8 @@ public class DynamicSymbolTable extends SymbolTable
 
         ArrayList<DisplayVariable> list = new ArrayList<>();
 
-        Iterator<String> iter = symbolNames.iterator();
-        while (iter.hasNext()) {
-            DynamicVariable dynamicVariable = getDynamicVariable(iter.next());
+        for (String symbolName : symbolNames) {
+            DynamicVariable dynamicVariable = getDynamicVariable(symbolName);
             if (dynamicVariable instanceof DisplayVariable var) {
                 list.add(var);
             }
@@ -114,13 +128,12 @@ public class DynamicSymbolTable extends SymbolTable
 
             // Now we need to sort the list into display order
 
-            Collections.sort(list, (first, second) -> first.getDisplayOrder() - second.getDisplayOrder());
+            list.sort(Comparator.comparingInt(DisplayVariable::getDisplayOrder));
 
             // Display the items
 
-            ListIterator<DisplayVariable> iter2 = list.listIterator();
-            while (iter2.hasNext()) {
-                window.addDisplayControl(iter2.next());
+            for (DisplayVariable displayVariable : list) {
+                window.addDisplayControl(displayVariable);
             }
         }
     }

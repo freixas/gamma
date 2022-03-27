@@ -34,7 +34,7 @@ public abstract class ArgInfoFunction extends Function
     /**
      * Execute the function.
      *
-     * @param engine The HCode engine.
+     * @param engine The h-code engine.
      * @param code The function arguments.
      * @return The function's output.
      */

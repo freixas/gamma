@@ -1,6 +1,9 @@
 # Compiled class file
 *.class
 
+# InDesign lock files
+*.idlk
+
 # Log file
 *.log
 

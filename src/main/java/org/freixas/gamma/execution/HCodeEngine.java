@@ -48,7 +48,13 @@ import org.freixas.gamma.parser.TokenContext;
  */
 public class HCodeEngine
 {
-    static private final Frame defFrame = new Frame(new ConcreteObserver(new WInitializer(new Coordinate(0.0, 0.0), 0.0, 0.0), new ArrayList<>()), Frame.AtType.TAU, 0);
+    static private final Frame defFrame =
+        new Frame(new ConcreteObserver(
+            new WInitializer(
+                new Coordinate(0.0, 0.0), 0.0, 0.0),
+            new ArrayList<>()),
+            Frame.AtType.TAU,
+            0);
 
     private final MainWindow window;
     private final SetStatement setStatement;
@@ -56,6 +62,7 @@ public class HCodeEngine
     private final HCodeProgram program;
     private int programCounter;
 
+    private final StaticSymbolTable staticSymbolTable;
     private final DynamicSymbolTable dynamicTable;
     private int precision;
 
@@ -86,7 +93,10 @@ public class HCodeEngine
         stylesheet.setCacheEnabled(true);
 
         this.program = program;
+
+        this.staticSymbolTable = new StaticSymbolTable(this);
         this.dynamicTable = new DynamicSymbolTable(this);
+
         this.lCodeEngine = null;
 
         this.hCodeExecutor = new HCodeExecutor(this);
@@ -155,6 +165,11 @@ public class HCodeEngine
     public SymbolTable getSymbolTable()
     {
         return table;
+    }
+
+    public StaticSymbolTable getStaticSymbolTable()
+    {
+        return staticSymbolTable;
     }
 
     public DynamicSymbolTable getDynamicSymbolTable()
@@ -282,7 +297,7 @@ public class HCodeEngine
 
         // Execute the lCodes
 
-        // Set up the lcode engine for this set of lcodes.
+        // Set up the l-code engine for this set of l-codes.
         // This handles the initial drawing and sets up observers to
         // handle redraws
 

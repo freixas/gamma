@@ -25,9 +25,9 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 /**
- * This class can be used to implement some HCodes and HCode Functions with just
+ * This class can be used to implement some h-codes and functions with just
  * a few lines of codes. Specifically, it makes it possible to avoid having to
- * create a new class for many HCodes and HCode Functions.
+ * create a new class for many h-codes and functions.
  * <p>
  * The HCode's or Function's code can be a lambda implementation of several
  * interfaces provided for this purpose. The interfaces all extend the
@@ -54,7 +54,7 @@ public abstract class Executor
      * Execute code that is implemented using the LambdaFunction interface.
      *
      * @param context The object type on which this executor operates.
-     * @param engine The HCode engine.
+     * @param engine The h-code engine.
      * @param func A LambdaFunction class typically created using a lamdba
      * expression.
      */
@@ -83,8 +83,7 @@ public abstract class Executor
 
         Object[] reflectionArgs;
         if (isVarArgs) {
-            Object[] varArgs = { engine, args.toArray() };
-            reflectionArgs = varArgs;
+            reflectionArgs = new Object[] { engine, args.toArray() };
         }
         else {
             args.add(0, engine);            // The engine is the first parameter
@@ -111,7 +110,7 @@ public abstract class Executor
      */
     private Method getMethod(LambdaFunction func, Class<?>[] params)
     {
-        Method method = null;
+        Method method;
         try {
             method = func.getClass().getMethod("execute", params);
         }
@@ -134,7 +133,6 @@ public abstract class Executor
      * @param args An array of arguments.
      * @return The Object returned by the Method (which may be null).
      */
-    @SuppressWarnings("unchecked")
     private Object executeImpl(Method method, HCodeEngine engine, LambdaFunction func, Object[] args)
     {
         Object result = null;

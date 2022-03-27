@@ -171,7 +171,7 @@ public class Coordinate extends ObjectContainer implements ExecutionMutable, Dis
     @Override
     public Object getProperty(String name)
     {
-        // The HCode that handles object properties will complain if an invalid
+        // The h-code that handles object properties will complain if an invalid
         // property name is used, so we don't need to re-check here
 
         switch (name) {
@@ -188,7 +188,7 @@ public class Coordinate extends ObjectContainer implements ExecutionMutable, Dis
             throw new ExecutionException("Coordinate properties 'x' and 't' must be floating point numbers");
         }
 
-        // The HCode that handles object properties will complain if an invalid
+        // The h-code that handles object properties will complain if an invalid
         // property name is used, so we don't need to re-check here
 
         switch (name) {

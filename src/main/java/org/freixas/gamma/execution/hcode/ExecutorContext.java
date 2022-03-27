@@ -23,18 +23,18 @@ package org.freixas.gamma.execution.hcode;
 public abstract class ExecutorContext
 {
     /**
-     * Get the number of arguments for this HCode. If the argument count
+     * Get the number of arguments for this h-code. If the argument count
      * is on the data stack, return -1.
      *
-     * @return The number of arguments for this HCode.
+     * @return The number of arguments for this h-code.
      */
     abstract public int getNumberOfArgs();
 
     /**
-     * Get the number of values returned by this HCode. The number will be
+     * Get the number of values returned by this h-code. The number will be
      * either 0 or 1.
      *
-     * @return The number of values returned by this HCode.
+     * @return The number of values returned by this h-code.
      */
     abstract public int getNumberOfReturnedValues();
 
