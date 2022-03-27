@@ -85,7 +85,7 @@
                 <p>To create the final set of styling values for a command, each style property is applied, starting from the top of the list.</p>
                 <h1><a id="style-properties"></a>Style Properties</h1>
                 <p>Some style properties are &quot;shorthands&quot; for others. Setting one property may also cause others to be set, which may further cascade to others. For example, the <span class="literal">color</span> property will set the <span class="literal">div-color</span> property, which will then set the <span class="literal">x-div-color</span>, <span class="literal">t-div-color</span>, and <span class="literal">major-div-color</span> properties, the last of which sets two more. Therefore, setting <span class="literal">major-div-color</span> before <span class="literal">color</span> will have no effect.</p>
-                <p>The style property tables that follow indicate the inheritance hierachy in the &quot;Default&quot; value column. </p>
+                <p>The style property tables that follow indicate the inheritance hierarchy in the &quot;Default&quot; value column. </p>
                 <h2><a id="color-hierarchies"></a>Color Hierarchies</h2>
                 <p>See the section on <a href="#color-values">Color Values</a> for the various ways a color value can be specified.</p>
                 <table id="table-1" class="command-table">
@@ -122,7 +122,7 @@
                             <td class="body-style"><span class="literal">color</span><span class="char-style-override-3"></span></td>
                             <td class="body-style">&#160;</td>
                             <td class="body-style">&#160;</td>
-                            <td class="description">The color for the x axis, x grid lines, and x hypergrid lines.</td>
+                            <td class="description">The color for the x-axis, x grid lines, and x hypergrid lines.</td>
                         </tr>
                         <tr class="Row-Column-6">
                             <td class="body-style"><span class="literal">t-color</span></td>
@@ -561,7 +561,7 @@
                             <td class="body-style">2.0</td>
                             <td class="body-style">0</td>
                             <td class="body-style">&#160;</td>
-                            <td class="description">Set the text padding. Find the bounding box of the text (from left to right and from highest ascender to lowest descender) and pad each side of the box with the given number of transparent pixels. (Note: may be changed to padding.)</td>
+                            <td class="description">Set the text padding. Find the bounding box of the text (from left to right and from the highest ascender to the lowest descender) and pad each side of the box with the given number of transparent pixels. (Note: may be changed to padding.)</td>
                         </tr>
                         <tr class="Row-Column-7">
                             <td class="body-style"><span class="literal">text-padding-top</span></td>
@@ -821,9 +821,9 @@
                     </tbody>
                 </table>
                 <h2><a id="color-values"></a>Color Values</h2>
-              <p>There are three ways to name colors: using hexidecimal values, color names, or color functions.</p>
+              <p>There are three ways to name colors: using hexadecimal values, color names, or color functions.</p>
                 <h3><a id="hexadecimal-colors"></a>Hexadecimal Colors</h3>
-                <p>Hexidecimal colors use one byte each (written in hexidecimal) for red, green, blue, and alpha values, for a total of 8 hexidecimal characters. The 8 characters are preceded with a &quot;#&quot;. </p>
+                <p>Hexadecimal colors use one byte each (written in hexadecimal) for red, green, blue, and alpha values, for a total of 8 hexadecimal characters. The 8 characters are preceded with a &quot;#&quot;. </p>
                 <p>If there are only three or four characters, each characters is doubled (e.g. &quot;#123&quot; becomes &quot;#112233&quot;). If there are now only six characters, FF is appended (an alpha value that means fully opaque).</p>
                 <h3><a id="color-names"></a>Color Names</h3>
                 <p>The following color names may be used wherever a color is required. The corresponding hex value is in parentheses: </p>

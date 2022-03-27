@@ -153,6 +153,7 @@ a:hover, a:active{
 }
 p.code {
   margin: 0;
+  white-space: pre-wrap;
 }
 
 .item-intro {

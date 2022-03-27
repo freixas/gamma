@@ -29,44 +29,47 @@ stylesheet "
   .thick { line-thickness: 3; }
 ";
 
+animation;
+
 // ****************************************
 // * SET UP THE OBSERVERS
 // ****************************************
 
-// Set up the obserers. We have a rest observer and a left and right spaceship
+// Set up the observers. We have a rest observer and a left and right spaceship
 
-leftShipStartX = 10;
-rightShipStartX = 20;
+if (!defined(restObserver)) {
+    static leftShipStartX = 10;
+    static rightShipStartX = 20;
 
-restObserver = [observer ];
-leftShip = [observer origin (leftShipStartX,0) velocity 0 time 0, acceleration 1];
-rightShip = [observer origin (rightShipStartX,0) velocity 0 time 0, acceleration 1];
+    static restObserver = [observer ];
+    static leftShip = [observer origin (leftShipStartX, 0) velocity 0 time 0, acceleration 1];
+    static rightShip = [observer origin (rightShipStartX, 0) velocity 0 time 0, acceleration 1];
 
-// Set up observers for points along the string
+    // Set up observers for points along the string
 
-for i = leftShipStartX to rightShipStartX step 1 {
-    thread[i] = [observer origin (i,0) velocity 0 time 0, acceleration 1];
+    for i = leftShipStartX to rightShipStartX step 1 {
+        static thread[i] = [observer origin (i,0) velocity 0 time 0, acceleration 1];
+    }
+
+    // ****************************************
+    // * SET UP THE ANIMATION
+    // ****************************************
+
+    // The thread is attached at time 0. If it doesn't break, it will be
+    // jettisoned at the following rest frame time. We will animate what
+    // happens during this time
+
+    static attachThreadTime = 0;
+    static detachThreadTime = 5;
+    animate t = attachThreadTime to detachThreadTime step .02;
+
+    // Set up an interval for the rest time during which the thread is
+    // attached and create new observers bounded by this interval
+
+    static threadAttachedInterval = [interval time 0 to detachThreadTime];
+    static threadAttachedLeft = setInterval(leftShip, threadAttachedInterval);
+    static threadAttachedRight = setInterval(rightShip, threadAttachedInterval);
 }
-
-// ****************************************
-// * SET UP THE ANIMATION
-// ****************************************
-
-// The thread is attached at time 0. If it doesn't break, it will be
-// jettisoned at the following rest frame time. We will animate what
-// happens during this time
-
-attachThreadTime = 0;
-detachThreadTime = 5;
-animation ;
-animate t = attachThreadTime to detachThreadTime step .02;
-
-// Set up an interval for the rest time during which the thread is
-// attached and create new observers bounded by this interval
-
-threadAttachedInterval = [interval time 0 to detachThreadTime];
-threadAttachedLeft = setInterval(leftShip, threadAttachedInterval);
-threadAttachedRight = setInterval(rightShip, threadAttachedInterval);
 
 // ****************************************
 // * SET UP THE USER INTERFACE
