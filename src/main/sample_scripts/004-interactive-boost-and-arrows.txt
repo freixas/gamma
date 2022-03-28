@@ -25,6 +25,8 @@ stylesheet "
 
 display scale: 2;
 
+if (!defined(defFrame)) defFrame = [observer ];
+
 range v1 = 0 from 0 to +.9 label "+Red/-Blue Velocity";
 range v2 = 0 from -.9 to +.9 label "Viewing Frame Velocity";
 range offset = 0 from -20 to 20 label "Point Offset";

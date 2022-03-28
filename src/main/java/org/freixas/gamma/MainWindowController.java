@@ -105,7 +105,7 @@ public final class MainWindowController implements Initializable
         File selectedFile;
         while ((selectedFile = fileChooser.showSaveDialog(mainWindow)) != null) {
             if (selectedFile.createNewFile()) {
-                mainWindow.setScript(selectedFile, null);
+                mainWindow.setScript(selectedFile, null, true);
                 return;
             }
             new Alert(Alert.AlertType.ERROR, "Use File/Open to open an existing script.").showAndWait();
@@ -128,7 +128,7 @@ public final class MainWindowController implements Initializable
 
         File selectedFile = fileChooser.showOpenDialog(mainWindow);
         if (selectedFile != null) {
-            mainWindow.setScript(selectedFile, null);
+            mainWindow.setScript(selectedFile, null, true);
         }
     }
 
@@ -230,7 +230,7 @@ public final class MainWindowController implements Initializable
 
         File selectedFile = fileChooser.showOpenDialog(mainWindow);
         if (selectedFile != null) {
-            mainWindow.setScript(selectedFile, null);
+            mainWindow.setScript(selectedFile, null, true);
         }
 
     }
