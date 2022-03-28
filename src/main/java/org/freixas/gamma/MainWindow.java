@@ -149,7 +149,7 @@ public final class MainWindow extends Stage
         setOnShown((WindowEvent t) -> {
             locateUIElements();
             setCloseState(Gamma.getWindowCount() > 1);
-            setScript(absoluteScript, new ArrayList<>());
+            setScript(absoluteScript, new ArrayList<>(), true);
             if (displayGreetingsDialog) {
                 try {
                     GreetingsDialog greetings = new GreetingsDialog(this);
@@ -279,8 +279,10 @@ public final class MainWindow extends Stage
      * is not null, setting the associated script is run.
      *
      * @param script The script file associated with this window.
+     * @param dependentFiles The files referenced by the script.
+     * @param open True if the file was just opened
      */
-    public void setScript(File script, ArrayList<File> dependentFiles)
+    public void setScript(File script, ArrayList<File> dependentFiles, boolean open)
     {
         boolean disable = script == null;
 
@@ -301,8 +303,10 @@ public final class MainWindow extends Stage
             setTitle("Gamma - " + script.getName());
 
             // Decide if we have a new script file
+            // If the file was just opened, it's always a new file, even if
+            // the user re-opens the same file
 
-            isNewScript = !script.equals(this.script);
+            isNewScript = !script.equals(this.script) || open;
 
             // Determine if we must create a new watcher. It's possible to call setScript()
             // with the same set of files

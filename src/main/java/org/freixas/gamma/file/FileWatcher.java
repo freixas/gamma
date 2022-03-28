@@ -115,9 +115,34 @@ public class FileWatcher extends Thread
      */
     public boolean hasSameFiles(File file, ArrayList<File> dependentFiles)
     {
-        if (this.file == null || file == null) return false;
-        if (this.dependentFiles == null || dependentFiles == null) return false;
-        return this.file.equals(file) && this.dependentFiles.equals(dependentFiles);
+        // We're going to do a very literal comparison. Some comparisons are
+        // unlikely to ever be needed
+
+        // We'll treat a null dependent list the same as an empty dependent list
+
+        boolean emptyExistingDependents = this.dependentFiles == null || this.dependentFiles.isEmpty();
+        boolean emptyNewDependents = dependentFiles == null || dependentFiles.isEmpty();
+
+        // Check if the main script files are the same:
+        // Either both are null or both are not null and are the same
+
+        if ((this.file == null && file == null) ||
+            (this.file != null && this.file.equals(file))) {
+
+            // Check if the dependent files are the same:
+            // Either both are null (or empty) or both are not null and
+            // contain the same files
+
+            //noinspection ConstantConditions
+            return
+                (emptyExistingDependents == emptyNewDependents) ||
+                (this.dependentFiles != null && this.dependentFiles.equals(dependentFiles));
+        }
+
+        // The main script files aren't the same, so we don't need to bother with
+        // the dependent files
+
+        return false;
     }
 
     // **********************************************************************

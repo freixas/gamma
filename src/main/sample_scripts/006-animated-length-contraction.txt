@@ -24,6 +24,8 @@ display origin: (25, 25), scale: 25;
 // * SETUP
 // ************************************************************
 
+if (!defined(defFrame)) defFrame = [observer ];
+
 // Set the velocity desired for this demonstration
 
 animate v = 0 to .99 step .01;
