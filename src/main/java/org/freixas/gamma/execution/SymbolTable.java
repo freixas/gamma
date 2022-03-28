@@ -41,16 +41,11 @@ import java.util.ArrayList;
  * we try to create one and it exists in the dynamic symbol table, we check this
  * table. If we find it here, we have an error. If we don't find it in either,
  * them we add it to both. We never use the value stored here.
- * <p>
- * This symbol table supports protected symbols, symbols whose values cannot be
- * changed and which cannot be removed.
  *
  * @author Antonio Freixas
  */
 public class SymbolTable extends BaseSymbolTable
 {
-    private final ArrayList<String> protectedSymbols;
-
     private final StaticSymbolTable staticSymbolTable;
     private final DynamicSymbolTable dynamicSymbolTable;
 
@@ -68,8 +63,6 @@ public class SymbolTable extends BaseSymbolTable
     public SymbolTable(HCodeEngine engine)
     {
         super(engine);
-        this.protectedSymbols = new ArrayList<>();
-
         this.staticSymbolTable = engine.getStaticSymbolTable();
         this.dynamicSymbolTable = engine.getDynamicSymbolTable();
     }
@@ -186,22 +179,9 @@ public class SymbolTable extends BaseSymbolTable
      */
     public void remove(String name)
     {
-        if (protectedSymbols.contains(name)) {
-            throw new ProgrammingException("SymbolTable.remove(): Trying to remove protected symbol '" + name + "'");
-        }
         staticSymbolTable.remove(name);
         dynamicSymbolTable.remove(name);
         super.remove(name);
     }
 
-    /**
-     * Set a variable so it cannot be assigned to. The variable must be added
-     * to the symbol table before making it protected, of course.
-     *
-     * @param symbol The variable to protect.
-     */
-    public void protect(String symbol)
-    {
-        protectedSymbols.add(symbol);
-    }
 }

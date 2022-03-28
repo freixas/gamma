@@ -104,34 +104,6 @@ public class HCodeEngine
         setPrecision(SetStatement.PrecisionType.DISPLAY);
     }
 
-    private void initializeSymbolTable(SymbolTable table)
-    {
-        // Add pre-defined variables
-
-        // Infinity values
-
-        table.put("inf", Double.POSITIVE_INFINITY);
-        table.protect("inf");
-
-        // Null
-
-        table.put("null", null);
-        table.protect("null");
-
-        // Add booleans
-
-        table.put("true", 1.0);
-        table.put("false", 0.0);
-
-        table.protect("true");
-        table.protect("false");
-
-        // Add the default frame
-
-        table.put("defFrame", new Frame(defFrame));
-        table.protect("defFrame");
-    }
-
     public MainWindow getMainWindow()
     {
         return window;
@@ -231,7 +203,6 @@ public class HCodeEngine
         }
 
         table = new SymbolTable(this);
-        initializeSymbolTable(table);
 
         LinkedList<Object> code = program.initialize();
         programCounter = 0;

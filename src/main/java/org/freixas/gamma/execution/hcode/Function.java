@@ -35,6 +35,7 @@ import java.util.HashMap;
  *
  * @author Antonio Freixas
  */
+@SuppressWarnings("StaticInitializerReferencesSubClass")
 public abstract class Function extends ExecutorContext
 {
     public enum Type
@@ -408,9 +409,9 @@ public abstract class Function extends ExecutorContext
         functions.put("vToTau",     new GenericFunction(Type.VTOTAU));
         functions.put("vToX",       new GenericFunction(Type.VTOX));
 
-        functions.put("gammaToV",          new GenericFunction(Type.GAMMATOV));
+        functions.put("gammaToV",   new GenericFunction(Type.GAMMATOV));
 
-        functions.put("toRelativeAngle",   new toRelativeAngleFunction());
+        functions.put("toRelativeAngle",    new toRelativeAngleFunction());
 
         functions.put("setBounds",          new GenericFunction(Type.SET_BOUNDS));
         functions.put("clearBounds",        new GenericFunction(Type.CLEAR_BOUNDS));
@@ -431,14 +432,12 @@ public abstract class Function extends ExecutorContext
         functions.put("ceil",	    new GenericFunction(Type.CEIL));
         functions.put("cos",	    new GenericFunction(Type.COS));
         functions.put("cosh",       new GenericFunction(Type.COSH));
-        functions.put("e",	        new GenericFunction(Type.E));
         functions.put("exp",	    new GenericFunction(Type.EXP));
         functions.put("floor",	    new GenericFunction(Type.FLOOR));
         functions.put("log",	    new GenericFunction(Type.LOG));
         functions.put("log10",	    new GenericFunction(Type.LOG10));
         functions.put("max",	    new GenericFunction(Type.MAX));
         functions.put("min",	    new GenericFunction(Type.MIN));
-        functions.put("pi",	        new GenericFunction(Type.PI));
         functions.put("random",	    new GenericFunction(Type.RANDOM));
         functions.put("round",	    new GenericFunction(Type.ROUND));
         functions.put("sign",	    new GenericFunction(Type.SIGN));

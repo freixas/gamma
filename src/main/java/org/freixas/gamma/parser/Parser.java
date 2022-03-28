@@ -224,6 +224,8 @@ public final class Parser
     // *
     // **********************************************************************
 
+    static private final String CONSTANT_ERROR_MSG = "You can't use a constant here";
+
     private final File file;                // The file associated with the script
     private final String script;            // The code to parse
     private ArrayList<Token<?>> tokens;     // The tokens from tokenizing the code
@@ -501,6 +503,16 @@ public final class Parser
                 isLeftVariable = isDelimiter() && getChar() == '=';
             }
             catch (ParseException e) {
+
+                // If we failed because we found a constant, then we should pass
+                // the error through
+
+                if (e.getLocalizedMessage().equals(CONSTANT_ERROR_MSG)) {
+                    throwParseException(e.getLocalizedMessage());
+                }
+
+                // Otherwise, we didn't find a left variable
+
                 isLeftVariable = false;
             }
 
@@ -755,7 +767,7 @@ public final class Parser
         if (!isName()) {
             throwParseException("Expected a variable");
         }
-        String loopVariable = curToken.getString();
+        String loopVariable = getString();
         nextToken();
 
         // Initial value
@@ -1311,8 +1323,6 @@ public final class Parser
      */
     private LinkedList<Object> parseStaticAssignmentStatement() throws ParseException
     {
-        Token<?> toToken = null;
-
         // We start knowing that the current token is "static". The next
         // item must be a variable, not a left variable
 
@@ -1728,7 +1738,13 @@ public final class Parser
 
         // Grab the variable name
 
-        String variable = curToken.getString();
+        String variable = getString();
+
+        // If we need a variable, we can't accept a constant
+
+        if (Constants.isConstant(variable)) {
+            throwParseException(CONSTANT_ERROR_MSG);
+        }
 
         // If it's followed immediately by a '[', it's an array variable
 
@@ -2385,7 +2401,7 @@ public final class Parser
 
                 // We have a property name
 
-                codes.add(curToken.getValue());
+                codes.add(getValue());
 
                 // Get the value
 
@@ -2457,20 +2473,38 @@ public final class Parser
             // If we have a variable, push it on the codes stack
 
             else if (isName()) {
-                codes.addAll(parseVariable());
-                if (lastToken == null || !lastToken.isOperator() || !lastToken.getString().equals(".")) {
-                    codes.add(new GenericHCode(HCode.Type.FETCH));
+
+                // Let's check to see if we have a constant. If so, replace it
+                // with its value
+
+                if (Constants.isConstant(getString())) {
+                    codes.add(Constants.get(getString()));
+                    if (peek.isDelimiter() && peek.getChar() == '[') {
+                        throwParseException("A constant cannot be used as an array");
+                    }
+                    if (peek.isOperator() && peek.getString().equals(".")) {
+                        throwParseException("You cannot dereference a constant");
+                    }
+                }
+
+                // If not, parse it like a normal variable
+
+                else {
+                    codes.addAll(parseVariable());
+                    if (lastToken == null || !lastToken.isOperator() || !lastToken.getString().equals(".")) {
+                        codes.add(new GenericHCode(HCode.Type.FETCH));
+                    }
                 }
             }
 
             // If we have a number, push it on the codes stack
 
             else if (isNumber()) {
-                codes.add(curToken.getValue());
+                codes.add(getValue());
             }
 
             else if (isString()) {
-                codes.add(curToken.getValue());
+                codes.add(getValue());
             }
 
             // If we have an object, push it on the codes stack
@@ -2891,6 +2925,7 @@ public final class Parser
     private double getNumber() { return curToken.getNumber(); }
     private char getChar() { return curToken.getChar(); }
     private String getString() { return curToken.getString(); }
+    private Object getValue() { return curToken.getValue(); }
 
     private void throwParseException(String message) throws ParseException
     {
