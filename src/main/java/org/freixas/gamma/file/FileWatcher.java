@@ -133,9 +133,8 @@ public class FileWatcher extends Thread
             // Either both are null (or empty) or both are not null and
             // contain the same files
 
-            //noinspection ConstantConditions
             return
-                (emptyExistingDependents == emptyNewDependents) ||
+                (emptyExistingDependents && emptyNewDependents) ||
                 (this.dependentFiles != null && this.dependentFiles.equals(dependentFiles));
         }
 
