@@ -31,6 +31,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.freixas.gamma.css.value.StyleException;
 import org.freixas.gamma.css.value.Stylesheet;
+import org.freixas.gamma.file.URLFile;
 import org.freixas.gamma.preferences.PreferencesManager;
 import java.io.IOException;
 import java.net.URLDecoder;
@@ -166,13 +167,13 @@ public final class Gamma extends Application
                 System.exit(0);
             }
 
-            File cssFile = null;
+            URLFile cssFile = null;
             if (line.hasOption("stylesheet")) {
-                cssFile = new File(line.getOptionValue("stylesheet"));
+                cssFile = new URLFile(line.getOptionValue("stylesheet"));
             }
             else {
                 String cssFileName = PreferencesManager.getDefaultStylesheet();
-                if (cssFileName.length() > 0) cssFile = new File(cssFileName);
+                if (cssFileName.length() > 0) cssFile = new URLFile(cssFileName);
             }
 
             if (cssFile != null) {
@@ -190,20 +191,11 @@ public final class Gamma extends Application
             String[] filenames = line.getArgs();
             if (filenames.length > 0) {
                 for (String filename : filenames) {
-                    File file = new File(filename);
-                    if (!file.exists()) {
-                        System.err.println("File '" + filename + "' does not exist.");
-                    }
-                    else if (!file.isFile()) {
-                        System.err.println("'" + filename + "' is not a file.");
-                    }
-                    else {
-                        newMainWindow(file, defaultDirectories);
-                    }
+                    newMainWindow(filename, false, defaultDirectories);
                 }
             }
             if (windowList.size() == 0) {
-                newMainWindow(null, defaultDirectories);
+                newMainWindow(null, false, defaultDirectories);
             }
         }
         catch (ParseException e) {
@@ -226,13 +218,14 @@ public final class Gamma extends Application
     /**
      * Create a new main window.
      *
-     * @param file The script file associated with the window (can be null).
+     * @param filename The name of the script associated with the window (can be null).
+     * @param isURL True if we know that the name should be interpreted as a URL.
      * @param defaultDirectories The default directories to use for file dialogs
      * in the new window, one for each type of file (SCRIPT, IMAGE, and VIDEO).
      *
      * @throws java.lang.Exception On any exception.
      */
-    static public void newMainWindow(File file, File[] defaultDirectories) throws Exception
+    static public void newMainWindow(String filename, boolean isURL, File[] defaultDirectories) throws Exception
     {
         // Go through all the existing windows and set the Close button's state
         // appropriately -- Close is available only if there is more than one window
@@ -241,7 +234,7 @@ public final class Gamma extends Application
             w.setCloseState(windowList.size() + 1 > 1);
         }
 
-        MainWindow window = new MainWindow(windowID, file, defaultDirectories);
+        MainWindow window = new MainWindow(windowID, filename, isURL, defaultDirectories);
 
         windowList.add(window);
         windowID++;

@@ -16,10 +16,10 @@
  */
 package org.freixas.gamma.parser;
 
-import java.io.File;
+import org.freixas.gamma.file.URLFile;
 
 public final class TokenContext {
-    private final File file;
+    private final URLFile URLFile;
     private final String code;
     private final int lineNumber;
     private final int charNumber;
@@ -29,7 +29,7 @@ public final class TokenContext {
     /**
      * Capture information about a token for use in reporting errors.
      *
-     * @param file The file from which the token came. May be null.
+     * @param URLFile The URLFile from which the token came. May be null.
      * @param code The entire code string containing the token.
      * @param lineNumber The line number of the line on which the token starts.
      * The first line is line 1.
@@ -42,9 +42,9 @@ public final class TokenContext {
      * relative to the entire code string. For a one-character token, this will
      * be the same as charStart.
      */
-    public TokenContext(File file, String code, int lineNumber, int charNumber, int charStart, int charEnd)
+    public TokenContext(URLFile URLFile, String code, int lineNumber, int charNumber, int charStart, int charEnd)
     {
-        this.file = file;
+        this.URLFile = URLFile;
         this.code = code;
         this.lineNumber = lineNumber;
         this.charNumber = charNumber;
@@ -63,8 +63,8 @@ public final class TokenContext {
      *
      * @return The file from which the token came. May be null.
      */
-    public File getFile() {
-        return file;
+    public URLFile getURLFile() {
+        return URLFile;
     }
 
     /**
@@ -146,7 +146,7 @@ public final class TokenContext {
     @Override
     public String toString() {
         return " {" +
-                "file=" + file.getName() +
+                "scriptURL=" + (URLFile.isFile() ? URLFile.getFile().getName() : URLFile.getURL().toString()) +
                 ", lineNumber=" + lineNumber +
                 ", charNumber=" + charNumber +
                 ", charStart=" + charStart +

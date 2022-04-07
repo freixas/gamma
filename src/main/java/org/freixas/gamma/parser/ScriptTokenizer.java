@@ -17,7 +17,8 @@
 package org.freixas.gamma.parser;
 
 
-import java.io.File;
+import org.freixas.gamma.file.URLFile;
+
 import java.util.ArrayList;
 
 /**
@@ -36,13 +37,13 @@ public final class ScriptTokenizer extends Tokenizer
     /**
      * Create a script tokenizer.
      *
-     * @param file The file from which the script was read. This file is
+     * @param URLFile The file from which the script was read. This file is
      * only used to store in a TokenContext. It could potentially be null.
      * @param code The code to tokenize.
      */
-    public ScriptTokenizer(File file, String code)
+    public ScriptTokenizer(URLFile URLFile, String code)
     {
-        super(file, code, "+-*/^.<>!&|%=", ";,:=[](){}");
+        super(URLFile, code, "+-*/^.<>!&|%=", ";,:=[](){}");
     }
 
     // **********************************************************************

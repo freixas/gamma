@@ -16,24 +16,23 @@
  */
 package org.freixas.gamma;
 
-import java.awt.Desktop;
-
+import javafx.scene.control.*;
 import org.freixas.gamma.file.ExportDiagramDialog;
+import org.freixas.gamma.file.URLFile;
 import org.freixas.gamma.preferences.PreferencesDialog;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Locale;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.print.PrinterJob;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 
@@ -50,6 +49,8 @@ public final class MainWindowController implements Initializable
     private MenuItem fileMenuNew;
     @FXML
     private MenuItem fileMenuOpen;
+    @FXML
+    private MenuItem fileMenuOpenURL;
     @FXML
     private MenuItem fileMenuExportDiagram;
     @FXML
@@ -105,7 +106,7 @@ public final class MainWindowController implements Initializable
         File selectedFile;
         while ((selectedFile = fileChooser.showSaveDialog(mainWindow)) != null) {
             if (selectedFile.createNewFile()) {
-                mainWindow.setScript(selectedFile, null, true);
+                mainWindow.setScript(new URLFile(selectedFile), null, true);
                 return;
             }
             new Alert(Alert.AlertType.ERROR, "Use File/Open to open an existing script.").showAndWait();
@@ -128,7 +129,37 @@ public final class MainWindowController implements Initializable
 
         File selectedFile = fileChooser.showOpenDialog(mainWindow);
         if (selectedFile != null) {
-            mainWindow.setScript(selectedFile, null, true);
+            mainWindow.setScript(new URLFile(selectedFile), null, true);
+        }
+    }
+
+    /**
+     * File / Open URL
+     * <p>
+     * Loads and parses content from a URL and associates it with the main window.
+     */
+    public void fileMenuOpenURL(ActionEvent ignoredEvent)
+    {
+        while (true) {
+            TextInputDialog dialog = new TextInputDialog();
+            URL resource = getClass().getResource("/AlertDialog.css");
+            if (resource != null) dialog.getDialogPane().getStylesheets().add(resource.toExternalForm());
+            dialog.setTitle("Open a URL");
+            dialog.setHeaderText("Enter a URL to open");
+            dialog.setContentText("URL:");
+            dialog.getEditor().setPrefColumnCount(40);
+            Optional<String> result = dialog.showAndWait();
+
+            if (result.isEmpty() || result.get().length() < 1) return;
+
+            String urlString = result.get();
+            try {
+                mainWindow.setScript(urlString, true);
+                return;
+            }
+            catch (MalformedURLException e) {
+                mainWindow.showTextAreaAlert(Alert.AlertType.ERROR, "Invalid URL", "Invalid URL", "The given URL '" + urlString + "' is invalid", true);
+            }
         }
     }
 
@@ -211,7 +242,7 @@ public final class MainWindowController implements Initializable
     @FXML
     private void windowMenuNewWindow(ActionEvent ignoredEvent) throws Exception
     {
-        Gamma.newMainWindow(null, mainWindow.getDirectoryDefaults());
+        Gamma.newMainWindow(null, false, mainWindow.getDirectoryDefaults());
     }
 
     /**
@@ -230,7 +261,7 @@ public final class MainWindowController implements Initializable
 
         File selectedFile = fileChooser.showOpenDialog(mainWindow);
         if (selectedFile != null) {
-            mainWindow.setScript(selectedFile, null, true);
+            mainWindow.setScript(new URLFile(selectedFile), null, true);
         }
 
     }

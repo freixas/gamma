@@ -16,24 +16,21 @@
  */
 package org.freixas.gamma.parser;
 
+import javafx.util.Pair;
 import org.freixas.gamma.ProgrammingException;
+import org.freixas.gamma.Version;
 import org.freixas.gamma.css.value.StyleException;
 import org.freixas.gamma.css.value.Stylesheet;
 import org.freixas.gamma.execution.ExecutionException;
 import org.freixas.gamma.execution.hcode.*;
-import org.freixas.gamma.value.Coordinate;
-import org.freixas.gamma.value.Frame;
-import org.freixas.gamma.value.Interval;
-import org.freixas.gamma.value.Line;
-import org.freixas.gamma.value.WorldlineSegment;
-import java.io.File;
+import org.freixas.gamma.file.URLFile;
+import org.freixas.gamma.value.*;
+
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Stack;
-import javafx.util.Pair;
 
 /**
  * This class handles parsing scripts.
@@ -226,12 +223,12 @@ public final class Parser
 
     static private final String CONSTANT_ERROR_MSG = "You can't use a constant here";
 
-    private final File file;                // The file associated with the script
+    private final URLFile URLFile;      // The file or URL associated with the script
     private final String script;            // The code to parse
     private ArrayList<Token<?>> tokens;     // The tokens from tokenizing the code
     private LinkedList<Object> hCodes;      // The h-codes produced by parsing
     private Stylesheet stylesheet;          // The final stylesheet
-    private ArrayList<File> dependentFiles; // A list of all dependent files
+    private ArrayList<URLFile> dependentFiles; // A list of all dependent files
 
     private boolean animationStatementIsPresent;    // True if an animation statement is found
     private boolean animationVariableIsPresent;     // True if an animation variable is present
@@ -251,13 +248,13 @@ public final class Parser
     /**
      * Create a parser.
      *
-     * @param file The file from which the code was read. This file is only
+     * @param URLFile The URLFile from which the code was read. This is only
      * used to store in a TokenContext. It could potentially be null.
      * @param script The script code.
      */
-    public Parser(File file, String script)
+    public Parser(URLFile URLFile, String script)
     {
-        this.file = file;
+        this.URLFile = URLFile;
         this.script = script;
         this.hCodes = new LinkedList<>();
     }
@@ -331,13 +328,13 @@ public final class Parser
     }
 
     /**
-     * Get the file associated with the script. It may be null.
+     * Get the URLFile associated with the script. It may be null.
      *
-     * @return The file associated with the script.
+     * @return The URLFile associated with the script.
      */
-    public File getFile()
+    public URLFile getScriptURL()
     {
-        return file;
+        return URLFile;
     }
 
     /**
@@ -346,7 +343,7 @@ public final class Parser
      *
      * @return A list of all the dependent files.
      */
-    public ArrayList<File> getDependentFiles()
+    public ArrayList<URLFile> getDependentFiles()
     {
         return dependentFiles;
     }
@@ -378,7 +375,7 @@ public final class Parser
 
         // Tokenize the script. We'll only deal with tokens
 
-        Tokenizer tokenizer = new ScriptTokenizer(file, script);
+        Tokenizer tokenizer = new ScriptTokenizer(URLFile, script);
         tokens = tokenizer.tokenize();
 
         // tokenPtr points to the current token. When we start, it points one
@@ -1076,28 +1073,20 @@ public final class Parser
         }
 
         try {
+
             // Try to read the file
 
             String name = getString();
-            File includeFile = new File(name);
-            if (!includeFile.isAbsolute()) {
-                includeFile = new File(file.getParent(), name);
-            }
-            if (!includeFile.exists()) {
-                throwParseException("File '" + includeFile +"' does not exist.");
-            }
-            if (includeFile.isDirectory()) {
-                throwParseException("File '" + includeFile +"' is a directory.");
-            }
-            String includeScript = Files.readString(includeFile.toPath());
+            URLFile dependentURL = URLFile.getDependentScriptURL(name);
+            String includeScript = dependentURL.readString();
 
             // Add it to the list of dependent files
 
-            dependentFiles.add(includeFile);
+            dependentFiles.add(dependentURL);
 
             // Tokenize it
 
-            Tokenizer tokenizer = new ScriptTokenizer(includeFile, includeScript);
+            Tokenizer tokenizer = new ScriptTokenizer(dependentURL, includeScript);
             ArrayList<Token<?>> includeTokens = tokenizer.tokenize();
 
             // tokenPtr points to the current token, the include file name.
@@ -1156,22 +1145,23 @@ public final class Parser
         }
 
         try {
-            File stylesheetFile;
             Stylesheet sheet;
 
             // If the stylesheet is external, read it and parse it into
             // a stylesheet
 
             if (isExternal) {
-                stylesheetFile = new File(css);
-                if (!stylesheetFile.isAbsolute()) {
-                    stylesheetFile = new File(file.getParent(), css);
-                }
-                dependentFiles.add(stylesheetFile);
-                sheet = Stylesheet.createStylesheet(stylesheetFile);
+
+                URLFile dependentURL = URLFile.getDependentScriptURL(css);
+                sheet = Stylesheet.createStylesheet(dependentURL);
+
+                // Add it to the list of dependent files
+
+                dependentFiles.add(dependentURL);
+
             }
             else {
-                sheet = Stylesheet.createStylesheet(file, css);
+                sheet = Stylesheet.createStylesheet(URLFile, css);
             }
 
             // Add the stylesheet to the master stylesheet
@@ -1202,6 +1192,7 @@ public final class Parser
         boolean foundUnits = false;
         boolean foundDisplayPrecision = false;
         boolean foundPrintPrecision = false;
+        boolean foundMinVersion = false;
 
         double units = SetStatement.DEFAULT_UNITS;
         double displayPrecision = SetStatement.DEFAULT_DISPLAY_PRECISION;
@@ -1209,7 +1200,7 @@ public final class Parser
 
         while (true) {
             if (!isName()) {
-                throwParseException("Expected 'units', 'displayPrecision', or 'printPrecision'");
+                throwParseException("Expected 'units', 'displayPrecision', 'printPrecision', or 'minVersion'");
             }
 
             // Look for units
@@ -1221,9 +1212,17 @@ public final class Parser
                         throwParseException("Units are set twice");
                     }
                     nextToken();
+
+                    if (!isDelimiter() || getChar() != ':') {
+                        throwParseException("Expected a ':'");
+                    }
+                    nextToken();
+
                     if (!isNumber()) {
                         throwParseException("Units must be set to a floating point number >= 0");
-                    }   units = getNumber();
+                    }
+
+                    units = getNumber();
                     nextToken();
                     foundUnits = true;
                 }
@@ -1233,9 +1232,17 @@ public final class Parser
                         throwParseException("Display precision is set twice");
                     }
                     nextToken();
+
+                    if (!isDelimiter() || getChar() != ':') {
+                        throwParseException("Expected a ':'");
+                    }
+                    nextToken();
+
                     if (!isNumber()) {
                         throwParseException("Display precision must be set to a floating point number >= 0");
-                    }   displayPrecision = getNumber();
+                    }
+
+                    displayPrecision = getNumber();
                     nextToken();
                     foundDisplayPrecision = true;
                 }
@@ -1245,14 +1252,53 @@ public final class Parser
                         throwParseException("Print precision is set twice");
                     }
                     nextToken();
+
+                    if (!isDelimiter() || getChar() != ':') {
+                        throwParseException("Expected a ':'");
+                    }
+                    nextToken();
+
                     if (!isNumber()) {
                         throwParseException("Print precision must be set to a floating point number >= 0");
-                    }   printPrecision = getNumber();
+                    }
+
+                    printPrecision = getNumber();
                     nextToken();
                     foundPrintPrecision = true;
                 }
 
-                default -> throwParseException("Expected 'units', 'displayPrecision', or 'printPrecision'");
+                case "minVersion" -> {
+                    if (foundMinVersion) {
+                        throwParseException("The minimum version is set twice");
+                    }
+                    nextToken();
+
+                    if (!isDelimiter() || getChar() != ':') {
+                        throwParseException("Expected a ':'");
+                    }
+                    nextToken();
+
+                    if (!isString()) {
+                        throwParseException("The minimum version must be set to a string");
+                    }
+
+                    String minVersion = getString();
+                    nextToken();
+                    foundMinVersion = true;
+
+                    if (!Version.isValidVersion(minVersion)) {
+                        throwParseException("'" + minVersion + "' is not a valid version number");
+                    }
+
+                    if (!Version.GE(minVersion)) {
+                        throwParseException(
+                            "This script requires version " + minVersion + " or later.\n" +
+                            "You can download the latest version from https://github.com/freixas/gamma/releases/latest");
+                    }
+
+                }
+
+                default -> throwParseException("Expected 'units', 'displayPrecision', 'printPrecision', or 'minVersion'");
             }
 
             // We need to find a comma before looking for other settings

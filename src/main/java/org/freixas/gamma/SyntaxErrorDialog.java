@@ -72,7 +72,7 @@ public final class SyntaxErrorDialog extends ScriptErrorDialog
         String html =
             HTML_PREFIX +
             "<p>" +
-            (context.getFile() != null ? "File <span class='file'>" + context.getFile().getPath() + "</span><br/>" : "") +
+            (context.getURLFile() != null ? "File <span class='file'>" + context.getURLFile().getPath() + "</span><br/>" : "") +
             "Line number: <span class='lineNumber'>" + context.getLineNumber() + "</span><br/>" +
             "</p>" +
             "<div class='program'><p>" +

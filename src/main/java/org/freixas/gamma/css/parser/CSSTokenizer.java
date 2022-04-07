@@ -16,6 +16,7 @@
  */
 package org.freixas.gamma.css.parser;
 
+import org.freixas.gamma.file.URLFile;
 import org.freixas.gamma.parser.TokenContext;
 import javafx.scene.paint.Color;
 import org.freixas.gamma.parser.ParseException;
@@ -45,7 +46,7 @@ public final class CSSTokenizer extends Tokenizer
      * only used to store in a TokenContext. It could potentially be null.
      * @param css The CSS code to tokenize.
      */
-    public CSSTokenizer(File file, String css)
+    public CSSTokenizer(org.freixas.gamma.file.URLFile file, String css)
     {
         super(file, css, "", "+,:;(){}");
     }

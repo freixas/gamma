@@ -4,7 +4,7 @@
 // *
 // ************************************************************
 
-set printPrecision 1;
+set printPrecision: 1;
 obs = [observer ];
 
 print ;

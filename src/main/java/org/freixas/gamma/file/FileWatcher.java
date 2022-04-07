@@ -43,7 +43,7 @@ import static java.nio.file.StandardWatchEventKinds.*;
 public class FileWatcher extends Thread
 {
     private final File file;
-    private final ArrayList<File> dependentFiles;
+    private final ArrayList<URLFile> dependentFiles;
     private final MainWindow window;
     private final List<Exception> list;
     private final AtomicBoolean stop = new AtomicBoolean(false);
@@ -64,7 +64,7 @@ public class FileWatcher extends Thread
      * @param newFile True if this is a new script file. If it is, it gets
      * parsed and displayed without waiting for a change.
      */
-    public FileWatcher(File file, ArrayList<File> dependentFiles, MainWindow window, boolean newFile)
+    public FileWatcher(File file, ArrayList<URLFile> dependentFiles, MainWindow window, boolean newFile)
     {
         this.file = file;
         this.dependentFiles = dependentFiles;
@@ -113,7 +113,7 @@ public class FileWatcher extends Thread
      *
      * @return True if the files are the same.
      */
-    public boolean hasSameFiles(File file, ArrayList<File> dependentFiles)
+    public boolean hasSameFiles(File file, ArrayList<URLFile> dependentFiles)
     {
         // We're going to do a very literal comparison. Some comparisons are
         // unlikely to ever be needed
@@ -205,26 +205,32 @@ public class FileWatcher extends Thread
             // Create a watch key for each unique parent of each dependent file
 
             if (dependentFiles != null) {
-                for (File dependentFile : dependentFiles) {
-                    Path dependentPath = dependentFile.toPath();
-                    Path dependentParent = dependentPath.getParent();
+                for (URLFile dependentFile : dependentFiles) {
 
-                    // If a watch key exists for the parent directory, just add
-                    // the new file to list of files associated with the key
+                    // Dependent files can be files or URLs.  We only monitor
+                    // changes in files
 
-                    if ((key = parentMap.get(dependentParent)) != null) {
-                        filenames = watchKeyMap.get(key);
-                        filenames.add(dependentPath.getFileName().toString());
-                    }
+                    if (dependentFile.isFile()) {
+                        Path dependentPath = dependentFile.getFile().toPath();
+                        Path dependentParent = dependentPath.getParent();
 
-                    // Otherwise, we need a new watch key
+                        // If a watch key exists for the parent directory, just add
+                        // the new file to list of files associated with the key
 
-                    else {
-                        key = dependentParent.register(watchService, ENTRY_CREATE, ENTRY_MODIFY, ENTRY_DELETE);
-                        parentMap.put(dependentParent, key);
-                        filenames = new ArrayList<>();
-                        filenames.add(dependentPath.getFileName().toString());
-                        watchKeyMap.put(key, filenames);
+                        if ((key = parentMap.get(dependentParent)) != null) {
+                            filenames = watchKeyMap.get(key);
+                            filenames.add(dependentPath.getFileName().toString());
+                        }
+
+                        // Otherwise, we need a new watch key
+
+                        else {
+                            key = dependentParent.register(watchService, ENTRY_CREATE, ENTRY_MODIFY, ENTRY_DELETE);
+                            parentMap.put(dependentParent, key);
+                            filenames = new ArrayList<>();
+                            filenames.add(dependentPath.getFileName().toString());
+                            watchKeyMap.put(key, filenames);
+                        }
                     }
                 }
             }
@@ -332,12 +338,17 @@ public class FileWatcher extends Thread
     private void doOnChange()
     {
         try {
-            String script = Files.readString(file.toPath());
-            Parser parser = new Parser(file, script);
+            URLFile URLFile = new URLFile(file);
+            String script = URLFile.readString();
+            Parser parser = new Parser(URLFile, script);
             parser.parse();
             Platform.runLater(new ScriptParseCompleteHandler(window, parser));
         } catch (Exception e) {
-            list.add(e);
+            Exception exception = e;
+            if (exception instanceof NoSuchFileException) {
+                exception = new Exception("File '" + file + "' does not exist.", exception);
+            }
+            list.add(exception);
             // e.printStackTrace();
             Platform.runLater(new ScriptParseErrorHandler(window, list));
         }

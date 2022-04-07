@@ -20,6 +20,8 @@ package org.freixas.gamma.parser;
 import org.freixas.gamma.css.parser.CSSTokenizer;
 import java.io.File;
 import java.util.ArrayList;
+
+import org.freixas.gamma.file.URLFile;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -111,7 +113,7 @@ grid.alice {
 .light {
   color: yellow;
 }""";
-        CSSTokenizer instance = new CSSTokenizer(new File("test"), css);
+        CSSTokenizer instance = new CSSTokenizer(new URLFile("test"), css);
         ArrayList<Token<?>> result = instance.tokenize();
 
     }
