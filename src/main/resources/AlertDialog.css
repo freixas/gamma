@@ -1,0 +1,53 @@
+/*
+ Gamma - A Minkowski Spacetime Diagram Generator
+ Copyright (C) 2021  by Antonio Freixas
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+/*
+    Created on : Jan 7, 2022, 5:37:54 AM
+    Author     : Antonio Freixas
+*/
+
+.alert.confirmation.dialog-pane,
+.alert.information.dialog-pane,
+.alert.error.dialog-pane,
+.alert.warning.dialog-pane,
+.text-input-dialog.dialog-pane,
+.choice-dialog.dialog-pane {
+    -fx-graphic: null;
+}
+
+.dialog-pane {
+    -fx-padding: 5px;
+}
+
+.dialog-pane:header .header-panel .label {
+    -fx-font-family: System;
+    -fx-font-size: 18px;
+    -fx-wrap-text: true;
+}
+
+.dialog-pane:header .header-panel {
+    -fx-background-color: -fx-background;
+    -fx-border-style: solid;
+    -fx-border-width: 0 0 2 0;
+    -fx-border-color: derive(-fx-background, -10%);
+}
+
+.dialog-pane > .alertLabel {
+   -fx-border-width: 0;
+   -fx-padding: 10px;
+   -fx-background-color: -fx-background;
+}

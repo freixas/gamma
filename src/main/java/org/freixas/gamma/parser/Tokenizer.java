@@ -17,6 +17,8 @@
 package org.freixas.gamma.parser;
 
 
+import org.freixas.gamma.file.URLFile;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -40,7 +42,7 @@ abstract public class Tokenizer
     static private final String HEX_DIGITS = "01234567890ABCDEFabcdef";
 
     protected ArrayList<Token<?>> list = null;      // Collect all tokens here
-    protected final File file;                      // The source file for the script
+    protected final URLFile URLFile;            // The source file for the script
     protected final String code;                    // The script code
 
     protected int cPtr;             // The pos of next char to read
@@ -64,15 +66,15 @@ abstract public class Tokenizer
     /**
      * Create a Tokenizer.
      *
-     * @param file The file from which the code was read. This file is only
-     *      * used to store in a TokenContext. It could potentially be null.
+     * @param file The URLFile from which the code was read. This is only
+     * used to store in a TokenContext. It could potentially be null.
      * @param code The code to tokenize.
      * @param operators The list of permitted operator characters.
      * @param delimiters This list of permitted delimiter characters.
      */
-    public Tokenizer(File file, String code, String operators, String delimiters)
+    public Tokenizer(URLFile file, String code, String operators, String delimiters)
     {
-        this.file = file;
+        this.URLFile = file;
 
         // Replace any line ending with a newline
         // \R also catches Form Feed and some other odd line separators
@@ -166,7 +168,7 @@ abstract public class Tokenizer
      */
     protected final TokenContext captureContext()
     {
-        return new TokenContext(file, code, lineNumber, charNumber, charPos, charPos);
+        return new TokenContext(URLFile, code, lineNumber, charNumber, charPos, charPos);
     }
 
     /**

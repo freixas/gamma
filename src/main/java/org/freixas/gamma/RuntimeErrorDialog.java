@@ -95,7 +95,7 @@ public final class RuntimeErrorDialog extends ScriptErrorDialog
             html =
                 HTML_PREFIX +
                 "<p>" +
-                (context.getFile() != null ? "File <span class='file'>" + context.getFile().getPath() + "</span><br/>" : "") +
+                (context.getURLFile() != null ? "File <span class='file'>" + context.getURLFile().getPath() + "</span><br/>" : "") +
                 "Line number: <span class='lineNumber'>" + context.getLineNumber() + "</span><br/>" +
                 "Character number: <span class='charNumber'>" + context.getCharNumber() + "</span><br/>" +
                 "</p>" +

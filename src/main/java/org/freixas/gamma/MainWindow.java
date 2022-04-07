@@ -31,22 +31,28 @@ import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.freixas.gamma.execution.DiagramEngine;
 import org.freixas.gamma.execution.ScriptPrintDialog;
 import org.freixas.gamma.file.FileWatcher;
+import org.freixas.gamma.file.URLFile;
 import org.freixas.gamma.parser.ParseException;
+import org.freixas.gamma.parser.Parser;
 import org.freixas.gamma.preferences.PreferencesManager;
 import org.freixas.gamma.value.ChoiceVariable;
 import org.freixas.gamma.value.DisplayVariable;
 import org.freixas.gamma.value.RangeVariable;
 import org.freixas.gamma.value.ToggleVariable;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 
 /**
@@ -66,7 +72,7 @@ public final class MainWindow extends Stage
     static private boolean displayGreetingsDialog = PreferencesManager.getDisplayGreetingMessage();
 
     private final int ID;                       // The window's ID
-    private File script;                        // The associated script
+    private URLFile script;                   // The associated script
     private final File[] directoryDefaults;     // The default dirs for each type of file
 
     // Various menu items
@@ -109,26 +115,22 @@ public final class MainWindow extends Stage
      * Create a main window.
      *
      * @param ID The ID assigned to this window.
-     * @param script The associated script file (may be null).
+     * @param name The name of the associated script file (may be null).
+     * @param isURL True if the name should be treated as a URL.
      * @param directoryDefaults The default directories to use when opening or
      * saving files.
      *
      * @throws Exception For any exception.
      */
 
-    public MainWindow(int ID, File script, File[] directoryDefaults) throws Exception
+    public MainWindow(int ID, String name, boolean isURL, File[] directoryDefaults) throws Exception
     {
-        // We can't fully deal with the file until the main window is
+        // We can't fully deal with the script until the main window is
         // instantiated.
 
         this.ID = ID;
         this.script = null;
         this.directoryDefaults = directoryDefaults;
-
-        // The script file must be an absolute file or else it gets messed
-        // up when it's turned into an absolute path in the FileWatcher
-
-        File absoluteScript = script!= null ? script.getAbsoluteFile() : null;
 
         // Load the view (FXML file) and controller. Get a reference to the controller.
 
@@ -149,14 +151,21 @@ public final class MainWindow extends Stage
         setOnShown((WindowEvent t) -> {
             locateUIElements();
             setCloseState(Gamma.getWindowCount() > 1);
-            setScript(absoluteScript, new ArrayList<>(), true);
+
+            try {
+                setScript(name, isURL);
+            }
+            catch (MalformedURLException e) {
+                showTextAreaAlert(Alert.AlertType.ERROR, "Invalid URL", "Invalid URL", "The URL given for the script is invalid: '" + name +"'", true);
+            }
+
             if (displayGreetingsDialog) {
                 try {
                     GreetingsDialog greetings = new GreetingsDialog(this);
                     greetings.show();
                     displayGreetingsDialog = false;
                 }
-                catch (Exception e) { /* e.printStackTrace(); */ }
+                catch (Exception ignored) { /* e.printStackTrace(); */ }
             }
         });
 
@@ -195,6 +204,7 @@ public final class MainWindow extends Stage
      *
      * @return The window ID.
      */
+    @SuppressWarnings("unused")
     public int getID()
     {
         return ID;
@@ -230,8 +240,8 @@ public final class MainWindow extends Stage
             // If we want the default directory to use for a script and we have
             // an associated file, use its parent directory
 
-            if (type == Gamma.FileType.SCRIPT && script != null) {
-                directoryDefaults[type.getValue()] = script.getParentFile();
+            if (type == Gamma.FileType.SCRIPT && script != null && script.isFile()) {
+                directoryDefaults[type.getValue()] = script.getFile().getParentFile();
             }
 
             // Otherwise, ask for the global default
@@ -260,17 +270,34 @@ public final class MainWindow extends Stage
     }
 
     /**
-     * Get the script file associated with this main window. The file can be
-     * null.
+     * Get the script associated with this main window. The script can be
+     * null if there is no associated script file or URL.
      *
-     * @return the script file associated with this main window.
+     * @return The script associated with this main window.
      */
-    public File getScript()
+    public URLFile getScript()
     {
         return script;
     }
 
     /**
+     * Set the script file associated with this main window by providing a name.
+     * The name can be the name of a URL or a file, or it can be null. URLs are
+     * identified either because the name contains "://" or because isURL is
+     * true.
+     *
+     * @param name The name of the script file.
+     * @param isURL True if the name should be interpreted as a URL.
+     *
+     * @throws MalformedURLException If the URL is not properly formed.
+     */
+    public void setScript(String name, boolean isURL) throws MalformedURLException
+    {
+        URLFile script = name == null ? null : new URLFile(name, isURL);
+        setScript(script, new ArrayList<>(), true);
+    }
+
+     /**
      * Set the script file associated with this main window. The file can be
      * null.
      * <p>
@@ -282,93 +309,139 @@ public final class MainWindow extends Stage
      * @param dependentFiles The files referenced by the script.
      * @param open True if the file was just opened
      */
-    public void setScript(File script, ArrayList<File> dependentFiles, boolean open)
+    public void setScript(@Nullable URLFile script, ArrayList<URLFile> dependentFiles, boolean open)
     {
-        boolean disable = script == null;
+        try {
+            boolean isNewScript;
+            boolean disable = script == null;
 
-        // Enable/disable various File Menu entries
+            // Enable/disable various File Menu entries
 
-        fileMenuExportDiagram.setDisable(disable);
-        fileMenuExportVideo.setDisable(disable);
-        fileMenuPrint.setDisable(disable);
-
-        // If we have a non-null script
-
-        boolean isNewScript = false;
-
-        if (script != null) {
+            fileMenuExportDiagram.setDisable(disable);
+            fileMenuExportVideo.setDisable(disable);
+            fileMenuPrint.setDisable(disable);
 
             // Update the title bar
 
-            setTitle("Gamma - " + script.getName());
+            setTitle("Gamma - " + (script != null ? script.toString() : ""));
 
-            // Decide if we have a new script file
-            // If the file was just opened, it's always a new file, even if
-            // the user re-opens the same file
+            // In case we ever decide to support disassociating a window from
+            // a script
 
-            isNewScript = !script.equals(this.script) || open;
-
-            // Determine if we must create a new watcher. It's possible to call setScript()
-            // with the same set of files
-
-            if (watcherThread == null || isNewScript || !watcher.hasSameFiles(script, dependentFiles)) {
-
-                // Stop any existing watcher
+            if (script == null) {
+                setTitle("Gamma");
 
                 if (watcherThread != null) {
                     watcher.stopThread();
                 }
 
-                // The final parameter tells the file watcher whether we have
-                // a new script file (requiring an immediate parse/display) or
-                // whether we are just updating the dependent files
+            }
 
-                watcher = new FileWatcher(script, dependentFiles, this, isNewScript);
-                watcherThread = new Thread(watcher);
-                watcherThread.start();
-                if (diagramEngine != null) {
-                    diagramEngine.close();
-                    diagramEngine = null;
+            // The URLFile is a file
+
+            else if (script.isFile()) {
+
+                // Decide if we have a new script file
+                // If the file was just opened, it's always a new file, even if
+                // the user re-opens the same file
+
+                File scriptFile = script.getFile();
+
+                isNewScript =
+                    open ||
+                        this.script == null ||
+                        !script.equals(this.script);
+
+                // Determine if we must create a new watcher. It's possible to call setScript()
+                // with the same set of files
+
+                if (watcherThread == null || isNewScript || !watcher.hasSameFiles(scriptFile, dependentFiles)) {
+
+                    // Stop any existing watcher
+
+                    if (watcherThread != null) {
+                        watcher.stopThread();
+                    }
+
+                    // The final parameter tells the file watcher whether we have
+                    // a new script file (requiring an immediate parse/display) or
+                    // whether we are just updating the dependent files
+
+                    watcher = new FileWatcher(scriptFile, dependentFiles, this, isNewScript);
+                    watcherThread = new Thread(watcher);
+                    watcherThread.start();
+                    if (diagramEngine != null) {
+                        diagramEngine.close();
+                        diagramEngine = null;
+                    }
+                }
+
+                // Save the new file and update the default directory for scripts
+
+                this.script = script;
+                setDefaultDirectory(Gamma.FileType.SCRIPT, scriptFile);
+
+                // Is this a new script? If so, try to open the editor on it
+
+                if (isNewScript) {
+
+                    // Check to make sure the file exists
+
+                    if (script.getFile().isFile()) {
+                        String editorCommand = PreferencesManager.getEditorCommand();
+                        if (editorCommand.length() > 0) {
+                            editorCommand = editorCommand.replace("$F$", script.toString());
+                            try {
+                                Platform.cmd(editorCommand);
+                            }
+                            catch (Exception e) {
+                                showTextAreaAlert(
+                                    Alert.AlertType.ERROR,
+                                    "Editor Command Error", "Editor Command Error",
+                                    "Error when trying to execute this editor command:\n\n" + editorCommand + "\n\n" +
+                                        "The reported error is:\n\n" +
+                                        e.getLocalizedMessage(),
+                                    true);
+                            }
+                        }
+                    }
                 }
             }
-        }
 
-        // We don't really support going from a non-null file to a null file, but just in case...
+            // The URLFile is a URL
 
-        else {
-            setTitle("Gamma");
+            else {
 
-            if (watcherThread != null) {
-                watcher.stopThread();
+                // Load the URL contents
+
+                String urlContents = script.readString();
+
+                // Set the associated script
+
+                this.script = script;
+
+                // Parse it
+
+                Parser parser = new Parser(this.script, urlContents);
+                parser.parse();
+
+                // Start up the diagram engine.
+
+                DiagramEngine dEngine =
+                    new DiagramEngine(
+                        this, parser.getHCodes(),
+                        parser.isAnimated(),
+                        parser.getSetStatement(), parser.getStylesheet());
+                dEngine.execute();
             }
         }
-
-        // Save the new file and update the default directory for scripts
-
-        this.script = script;
-        if (script != null) setDefaultDirectory(Gamma.FileType.SCRIPT, script);
-
-        // Did we change the file? If so, try to open the editor on it
-
-        if (isNewScript) {
-            String editorCommand = PreferencesManager.getEditorCommand();
-            if (editorCommand.length() > 0) {
-                editorCommand = editorCommand.replace("$F$", script.toString());
-                try {
-                    Platform.cmd(editorCommand);
-                }
-                catch (Exception e) {
-                    showTextAreaAlert(
-                        Alert.AlertType.ERROR,
-                        "Editor Command Error", "Editor Command Error",
-                        "Error when trying to execute this editor command:\n\n" + editorCommand +"\n\n" +
-                            "The reported error is:\n\n" +
-                            e.getLocalizedMessage(),
-                        true);
-                }
-            }
+        catch (ParseException e) {
+            showParseException(e);
         }
-    }
+        catch (IOException e) {
+            showTextAreaAlert(Alert.AlertType.ERROR,"URL Read Error", "URL Read Error", "Couldn't read " + script, true);
+        }
+     }
 
     /**
      * Get the screen on which this window was created.
@@ -668,16 +741,31 @@ public final class MainWindow extends Stage
                                   String header, String content, boolean block)
     {
         Alert alert = new Alert(type);
+        URL resource = getClass().getResource("/AlertDialog.css");
+        if (resource != null) alert.getDialogPane().getStylesheets().add(resource.toExternalForm());
         alert.setTitle(title);
 
-        TextArea area = new TextArea(content);
-        area.setWrapText(true);
-        area.setEditable(false);
+        String[] lines = content.split("\\R");
+        int maxLength = 0;
+        for (String line : lines) {
+            maxLength = Math.max(line.length(), maxLength);
+        }
 
-        alert.getDialogPane().setContent(area);
+        Label label = new Label(content);
+        label.getStyleClass().add("alertLabel");
+        label.setWrapText(true);
+
+        alert.getDialogPane().setContent(label);
         alert.getDialogPane().setHeaderText(header);
+        alert.getDialogPane().setPrefWidth(400);
         alert.setResizable(true);
 
+        alert.setOnShown(e -> {
+            Font font = label.getFont();
+            Bounds bounds = org.freixas.gamma.drawing.Label.getTextBounds(content, font);
+            double width = Math.max(400, Math.min(bounds.getWidth() + 40, 800));
+            alert.getDialogPane().setMinWidth(width);
+        });
         if (block) {
             alert.showAndWait();
         }

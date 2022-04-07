@@ -17,6 +17,7 @@
 package org.freixas.gamma.css.parser;
 
 import org.freixas.gamma.css.value.*;
+import org.freixas.gamma.file.URLFile;
 import org.freixas.gamma.parser.ParseException;
 import org.freixas.gamma.parser.Token;
 import org.freixas.gamma.parser.TokenContext;
@@ -31,7 +32,7 @@ import java.util.ArrayList;
  */
 public final class CSSParser
 {
-    private final File file;                // The file associated with the stylesheet
+    private final URLFile file;                // The file associated with the stylesheet
     private final String css;               // The code to parse
     private ArrayList<Token<?>> tokens;     // The tokens from tokenizing the code
 
@@ -49,7 +50,7 @@ public final class CSSParser
     // *
     // **********************************************************************
 
-    public CSSParser(File file, String css)
+    public CSSParser(URLFile file, String css)
     {
         this.file = file;
         this.css = css;

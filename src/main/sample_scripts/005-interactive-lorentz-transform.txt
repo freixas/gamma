@@ -81,7 +81,7 @@ event e, style: "color: #C00";
 label e, text: e,  class: "bob";
 label e, text: eP, class: "alice";
 
-set displayPrecision 2, printPrecision 2;
+set displayPrecision: 2, printPrecision: 2;
 
 toggle viewpoint = false label "Moving view";
 if (viewpoint) frame alice;

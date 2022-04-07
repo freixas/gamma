@@ -6,7 +6,7 @@
 
 // Set the display precision
 
-set displayPrecision 2;
+set displayPrecision: 2;
 
 // Create a constant-velocity observer
 

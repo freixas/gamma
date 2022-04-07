@@ -20,6 +20,7 @@ package org.freixas.gamma.css.value;
 import javafx.util.Pair;
 import org.freixas.gamma.css.parser.CSSParser;
 import org.freixas.gamma.execution.ExecutionException;
+import org.freixas.gamma.file.URLFile;
 import org.freixas.gamma.parser.ParseException;
 
 import java.io.File;
@@ -121,17 +122,10 @@ public final class Stylesheet
      * @throws StyleException If the styles have a syntax error.
      * @throws IOException If there is a problem reading the file.
      */
-    static public Stylesheet createStylesheet(File cssFile) throws IOException, ParseException, StyleException
+    static public Stylesheet createStylesheet(URLFile cssFile) throws IOException, ParseException, StyleException
     {
         if (cssFile == null) return new Stylesheet();
-
-        if (!cssFile.exists()) {
-            throw new StyleException("File '" + cssFile + "' does not exist.");
-        }
-        if (cssFile.isDirectory()) {
-            throw new StyleException("File '" + cssFile + "' is a directory.");
-        }
-        String css = Files.readString(cssFile.toPath());
+        String css = cssFile.readString();
 
         return createStylesheet(cssFile, css);
     }
@@ -145,7 +139,7 @@ public final class Stylesheet
      *
      * @return The created stylesheet.
      */
-    static public Stylesheet createStylesheet(File cssFile, String css) throws ParseException
+    static public Stylesheet createStylesheet(URLFile cssFile, String css) throws ParseException
     {
         if (css == null || css.length() == 0) return new Stylesheet();
 
@@ -236,7 +230,7 @@ public final class Stylesheet
      *
      * @return The created StyleStruct
      */
-    public StyleStruct createStyleStruct(File file, String commandName, String id, String cls, String style)
+    public StyleStruct createStyleStruct(URLFile file, String commandName, String id, String cls, String style)
     {
         // We have two caches:
         //

@@ -41,12 +41,12 @@ public class Version
      * Gamma's version number.
      */
     static public String VERSION;
-    static public int MAJOR_VERSION = 0;
+    static public int MAJOR_VERSION = 1;
     static public int MINOR_VERSION = 0;
     static public int BUILD_NUMBER = 0;
     static public String VERSION_QUALIFIER = "development";
 
-    static Pattern versionPattern = Pattern.compile("^(\\d*)\\.(\\d*)\\.(\\d*)(-(.*))$");
+    static Pattern versionPattern = Pattern.compile("^(\\d*)\\.(\\d*)\\.(\\d*)(-(.+))?$");
 
     static {
         InputStream resourceAsStream = Version.class.getResourceAsStream(
@@ -64,18 +64,70 @@ public class Version
                     MINOR_VERSION = Integer.parseInt(matcher.group(2));
                     BUILD_NUMBER = Integer.parseInt(matcher.group(3));
                     VERSION_QUALIFIER = matcher.group(5);
+                    String versionQualifier = VERSION_QUALIFIER == null || VERSION_QUALIFIER.length() == 0 ?
+                        "" : "-" + VERSION_QUALIFIER;
 
-                    VERSION = MAJOR_VERSION + "." + MINOR_VERSION + (VERSION_QUALIFIER.length() > 0 ? "-" + VERSION_QUALIFIER : "");
+                    VERSION = MAJOR_VERSION + "." + MINOR_VERSION + "." + BUILD_NUMBER + versionQualifier;
                 }
             }
             else {
-                VERSION = MAJOR_VERSION + "." + MINOR_VERSION + (VERSION_QUALIFIER.length() > 0 ? "-" + VERSION_QUALIFIER : "");
+                VERSION = MAJOR_VERSION + "." + MINOR_VERSION + "." + BUILD_NUMBER + "-" + VERSION_QUALIFIER;
             }
         }
 
         catch (IOException ignored) {
-            VERSION = MAJOR_VERSION + "." + MINOR_VERSION + (VERSION_QUALIFIER.length() > 0 ? "-" + VERSION_QUALIFIER : "");
+            VERSION = MAJOR_VERSION + "." + MINOR_VERSION + "." + MINOR_VERSION +  "-" + VERSION_QUALIFIER;
         }
+    }
+
+    /**
+     * Return true if the given version string is valid.
+     *
+     * @param versionString The version string to check.
+     *
+     * @return True if the given version string is valid.
+     */
+    static public boolean isValidVersion(String versionString)
+    {
+        Matcher matcher = versionPattern.matcher(versionString);
+        return (matcher.matches());
+    }
+
+    /**
+     * Return true if the given version is valid and if Gamma's version is
+     * greater than or equal to the given version. If this is a development
+     * version of Gamma, this method always returns true.
+     * <p>
+     * The version qualifier is ignored in the comparison.
+     * <p>
+     * Use the isValidMethod() function to differentiate between whether the
+     * version is invalid or is valid but greater than the current version.
+     *
+     * @param versionString The version we are comparing Gamma's version to.
+     *
+     * @return True if the given version string is valid and is less than or
+     * equal to the current version of Gamma.
+     */
+    static public boolean GE(String versionString)
+    {
+        if (VERSION_QUALIFIER.equals("development")) return true;
+
+        Matcher matcher = versionPattern.matcher(versionString);
+        if (matcher.matches()) {
+            int majorVersion = Integer.parseInt(matcher.group(1));
+            int minorVersion = Integer.parseInt(matcher.group(2));
+            int buildNumber = Integer.parseInt(matcher.group(3));
+
+            if (majorVersion < MAJOR_VERSION) return true;
+            if (majorVersion == MAJOR_VERSION) {
+                if (minorVersion < MINOR_VERSION) return true;
+                if (minorVersion == MINOR_VERSION) {
+                    return buildNumber <= BUILD_NUMBER;
+                }
+            }
+        }
+
+        return false;
     }
 
 }
