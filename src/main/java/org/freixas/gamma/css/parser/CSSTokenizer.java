@@ -118,9 +118,9 @@ public final class CSSTokenizer extends Tokenizer
             // Handle names and possibly colors
 
             else if (c == '_' || c == '-' || Character.isLetter(c)) {
+                context = captureContext();
                 String name = getName();
                 Color color = getColorByName(name);
-                context = captureContext();
                 if (color == null) {
                     list.add(new Token<>(Token.Type.NAME, name, context));
                 }
@@ -261,7 +261,6 @@ public final class CSSTokenizer extends Tokenizer
         if (name.equals("rgb") || name.equals("hsl") || name.equals("hsla")) {
 
             StringBuilder builder = new StringBuilder(name);
-            next();
 
             while (c != ')' && c != EOF) {
                 builder.append(c);
@@ -279,6 +278,8 @@ public final class CSSTokenizer extends Tokenizer
 
             else {
                 try {
+                    builder.append(c);
+                    next();
                     return Color.web(builder.toString());
                 }
                 catch (IllegalArgumentException e) {
