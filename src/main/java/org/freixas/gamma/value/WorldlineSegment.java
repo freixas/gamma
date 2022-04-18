@@ -225,7 +225,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
                     else {
                         maxT = curve.vToT(limitValue);
                         if (Util.fuzzyLT(maxT, min.t)) {
-                            throw new ExecutionException("The observer segment's final velocity will never be reached. The starting velocity is " + min.v);
+                            throw new ExecutionException("The observer segment's final velocity will never be reached. The starting velocity is " + min.v + "and the acceleration is " + ((a > 0) ? "positive" : "negative"));
                         }
                     }
                 }
@@ -338,7 +338,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
     /**
      * Copy constructor.
      *
-     * @param other The other worldline to copy.
+     * @param other The other worldline segment to copy.
      */
     public WorldlineSegment(WorldlineSegment other)
     {
@@ -365,6 +365,51 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
         this.constantDistance = other.constantDistance;
     }
 
+    /**
+     * Create a copy of this worldline segment, but modify it to fall within
+     * a given time interval. This is used by IntervalObserver.
+     *
+     * @param other The other worldline segment to copy.
+     */
+    public WorldlineSegment(WorldlineSegment other, double minT, double maxT)
+    {
+        minT = Math.max(other.min.t, minT);
+        maxT = Math.min(other.max.t, maxT);
+
+        this.min = new WorldlineEndpoint(minT, other.curve);
+        this.max = new WorldlineEndpoint(maxT, other.curve);
+
+        this.originalMin = other.originalMin;
+        this.originalMax = other.originalMax;
+
+        this.a = other.a;
+        this.curve = other.curve;
+
+        if (other.zeroAcceleration) {
+
+            // We have a line segment
+
+            this.curveSegment = new LineSegment(min.x, min.t, max.x, max.t);
+        }
+        else {
+
+            // We have a hyperbolic segment
+
+            this.curveSegment = new HyperbolicSegment(a, min, max, curve);
+        }
+
+        this.isLastSegment = other.isLastSegment;
+
+        this.zeroAcceleration = other.zeroAcceleration;
+        this.constantVelocity = other.constantVelocity;
+        this.zeroVelocity = other.zeroVelocity;
+        this.increasingVelocity = other.increasingVelocity;
+        this.decreasingVelocity = other.decreasingVelocity;
+
+        this.constantTime = other.constantTime;
+        this.constantTau = other.constantTau;
+        this.constantDistance = other.constantDistance;
+    }
     // **********************************************************************
     // *
     // * ExecutionMutable Support
@@ -549,12 +594,30 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
      */
     public double vToX(double v)
     {
+        // V is outside the range
+
         if (increasingVelocity && (Util.fuzzyLT(v, min.v) || Util.fuzzyGT(v, max.v))) return Double.NaN;
         if (decreasingVelocity && (Util.fuzzyLT(v, max.v) || Util.fuzzyGT(v, min.v))) return Double.NaN;
-        if (constantVelocity) return min.x;
-        double x = curve.vToX(v);
-        if (!isLastSegment && Util.fuzzyEQ(x, max.x)) return Double.NaN;
-        return x;
+
+        // If v is in the range, and we have a constant velocity, all points match.
+        // Return the earliest x.
+
+        if (constantVelocity) {
+            if (Util.fuzzyEQ(v, min.v)) return min.x;
+            return Double.NaN;
+        }
+
+        // Except for the last segment, the last point on this segment is
+        // not part of this segment
+
+        if (!isLastSegment && Util.fuzzyEQ(v, max.v)) return Double.NaN;
+
+        try {
+            return curve.vToX(v);
+        }
+        catch (ArithmeticException e) {
+            return Double.NaN;
+        }
     }
 
     /**
@@ -566,12 +629,30 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
      */
     public double vToD(double v)
     {
+        // V is outside the range
+
         if (increasingVelocity && (Util.fuzzyLT(v, min.v) || Util.fuzzyGT(v, max.v))) return Double.NaN;
         if (decreasingVelocity && (Util.fuzzyLT(v, max.v) || Util.fuzzyGT(v, min.v))) return Double.NaN;
-        if (constantVelocity) return min.d;
-        double d = curve.vToD(v);
-        if (!isLastSegment && Util.fuzzyEQ(d, max.d)) return Double.NaN;
-        return d;
+
+        // If v is in the range, and we have a constant velocity, all points match.
+        // Return the earliest d.
+
+        if (constantVelocity) {
+            if (Util.fuzzyEQ(v, min.v)) return min.d;
+            return Double.NaN;
+        }
+
+        // Except for the last segment, the last point on this segment is
+        // not part of this segment
+
+        if (!isLastSegment && Util.fuzzyEQ(v, max.v)) return Double.NaN;
+
+        try {
+            return curve.vToD(v);
+        }
+        catch (ArithmeticException e) {
+            return Double.NaN;
+        }
     }
 
     /**
@@ -583,12 +664,30 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
      */
     public double vToT(double v)
     {
+        // V is outside the range
+
         if (increasingVelocity && (Util.fuzzyLT(v, min.v) || Util.fuzzyGT(v, max.v))) return Double.NaN;
         if (decreasingVelocity && (Util.fuzzyLT(v, max.v) || Util.fuzzyGT(v, min.v))) return Double.NaN;
-        if (constantVelocity) return min.t;
-        double t = curve.vToT(v);
-        if (!isLastSegment && Util.fuzzyEQ(t, max.x)) return Double.NaN;
-        return t;
+
+        // If v is in the range, and we have a constant velocity, all points match.
+        // Return the earliest t.
+
+        if (constantVelocity) {
+            if (Util.fuzzyEQ(v, min.v)) return min.t;
+            return Double.NaN;
+        }
+
+        // Except for the last segment, the last point on this segment is
+        // not part of this segment
+
+        if (!isLastSegment && Util.fuzzyEQ(v, max.v)) return Double.NaN;
+
+        try {
+            return curve.vToT(v);
+        }
+        catch (ArithmeticException e) {
+            return Double.NaN;
+        }
     }
 
     /**
@@ -600,28 +699,31 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
      */
     public double vToTau(double v)
     {
+        // V is outside the range
+
         if (increasingVelocity && (Util.fuzzyLT(v, min.v) || Util.fuzzyGT(v, max.v))) return Double.NaN;
         if (decreasingVelocity && (Util.fuzzyLT(v, max.v) || Util.fuzzyGT(v, min.v))) return Double.NaN;
-        if (constantVelocity) return min.tau;
-        double tau = curve.vToTau(v);
-        if (!isLastSegment && Util.fuzzyEQ(tau, max.tau)) return Double.NaN;
-        return tau;
-    }
 
-//    /**
-//     * Given v, return gamma. If v matches no segment points, return NaN. If v
-//     * matches all segment points return gamma for the v that occurs earliest in
-//     * time.
-//     *
-//     * @param v The velocity.
-//     * @return Gamma of NaN.
-//     */
-//    public double vToGamma(double v)
-//    {
-//        if (increasingVelocity && (Util.fuzzyLT(v, min.v) || Util.fuzzyGT(v, max.v))) return Double.NaN;
-//        if (decreasingVelocity && (Util.fuzzyLT(v, max.v) || Util.fuzzyGT(v, min.v))) return Double.NaN;
-//        return curve.vToGamma(v);
-//    }
+        // If v is in the range, and we have a constant velocity, all points match.
+        // Return the earliest tau.
+
+        if (constantVelocity) {
+            if (Util.fuzzyEQ(v, min.v)) return min.tau;
+            return Double.NaN;
+        }
+
+        // Except for the last segment, the last point on this segment is
+        // not part of this segment
+
+        if (!isLastSegment && Util.fuzzyEQ(v, max.v)) return Double.NaN;
+
+        try {
+            return  curve.vToTau(v);
+        }
+        catch (ArithmeticException e) {
+            return Double.NaN;
+        }
+    }
 
     // **********************************************************
     // *
@@ -638,10 +740,29 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
      */
     public double dToV(double d)
     {
+        // D is outside the range
+
         if (Util.fuzzyLT(d, min.d) || Util.fuzzyGT(d, max.d)) return Double.NaN;
-        if (constantDistance) return min.v;
+
+        // If d is in the range, and we have a constant distance, all points match.
+        // Return the earliest v.
+
+        if (constantDistance) {
+            if (Util.fuzzyEQ(d, min.d)) return min.v;
+            return Double.NaN;
+        }
+
+        // Except for the last segment, the last point on this segment is
+        // not part of this segment
+
         if (!isLastSegment && Util.fuzzyEQ(d, max.d)) return Double.NaN;
-        return curve.dToV(d);
+
+        try {
+            return curve.dToV(d);
+        }
+        catch (ArithmeticException e) {
+            return Double.NaN;
+        }
      }
 
     /**
@@ -652,9 +773,29 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
      */
     public double dToX(double d)
     {
+        // D is outside the range
+
         if (Util.fuzzyLT(d, min.d) || Util.fuzzyGT(d, max.d)) return Double.NaN;
-        if (!isLastSegment && constantDistance) return min.x;
-        return curve.dToX(d);
+
+        // If d is in the range, and we have a constant distance, all points match.
+        // Return the earliest x.
+
+        if (constantDistance) {
+            if (Util.fuzzyEQ(d, min.d)) return min.x;
+            return Double.NaN;
+        }
+
+        // Except for the last segment, the last point on this segment is
+        // not part of this segment
+
+        if (!isLastSegment && Util.fuzzyEQ(d, max.d)) return Double.NaN;
+
+        try {
+            return curve.dToX(d);
+        }
+        catch (ArithmeticException e) {
+            return Double.NaN;
+        }
     }
 
     /**
@@ -666,10 +807,29 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
      */
     public double dToT(double d)
     {
+        // D is outside the range
+
         if (Util.fuzzyLT(d, min.d) || Util.fuzzyGT(d, max.d)) return Double.NaN;
-        if (constantDistance) return min.t;
+
+        // If d is in the range, and we have a constant distance, all points match.
+        // Return the earliest t.
+
+        if (constantDistance) {
+            if (Util.fuzzyEQ(d, min.d)) return min.t;
+            return Double.NaN;
+        }
+
+        // Except for the last segment, the last point on this segment is
+        // not part of this segment
+
         if (!isLastSegment && Util.fuzzyEQ(d, max.d)) return Double.NaN;
-        return curve.dToT(d);
+
+        try {
+            return curve.dToT(d);
+        }
+        catch (ArithmeticException e) {
+            return Double.NaN;
+        }
     }
 
     /**
@@ -681,26 +841,29 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
      */
     public double dToTau(double d)
     {
-        if (Util.fuzzyLT(d, min.d) || Util.fuzzyGT(d, max.d)) return Double.NaN;
-        if (constantDistance) return min.tau;
-        if (!isLastSegment && Util.fuzzyEQ(d, max.d)) return Double.NaN;
-        return curve.dToTau(d);
-    }
+        // D is outside the range
 
-    /**
-     * Given d, return gamma.
-     *
-     * @param d The distance in the rest frame.
-     * @return Gamma. If d matches no segment points, return NaN. If d matches
-     * all segment points return gamma for the v that occurs earliest in time.
-     */
-     @SuppressWarnings("unused")
-     public double dToGamma(double d)
-    {
         if (Util.fuzzyLT(d, min.d) || Util.fuzzyGT(d, max.d)) return Double.NaN;
-        if (constantDistance) return curve.vToGamma(min.v);
+
+        // If d is in the range, and we have a constant distance, all points match.
+        // Return the earliest tau.
+
+        if (constantDistance) {
+            if (Util.fuzzyEQ(d, min.d)) return min.tau;
+            return Double.NaN;
+        }
+
+        // Except for the last segment, the last point on this segment is
+        // not part of this segment
+
         if (!isLastSegment && Util.fuzzyEQ(d, max.d)) return Double.NaN;
-        return curve.dToGamma(d);
+
+        try {
+            return curve.dToTau(d);
+        }
+        catch (ArithmeticException e) {
+            return Double.NaN;
+        }
     }
 
     // **********************************************************
@@ -717,9 +880,23 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
      */
     public double tToV(double t)
     {
+        // T is outside the range
+
         if (Util.fuzzyLT(t, min.t) || Util.fuzzyGT(t, max.t)) return Double.NaN;
-        if (constantTime) return min.v;
+
+        // If t is in the range, and we have a constant distance, all points match.
+        // Return the earliest tau.
+
+        if (constantTime) {
+            if (Util.fuzzyEQ(t, min.t)) return min.v;
+            return Double.NaN;
+        }
+
+        // Except for the last segment, the last point on this segment is
+        // not part of this segment
+
         if (!isLastSegment && Util.fuzzyEQ(t, max.t)) return Double.NaN;
+
         return curve.tToV(t);
     }
 
@@ -731,9 +908,23 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
      */
     public double tToX(double t)
     {
+        // T is outside the range
+
         if (Util.fuzzyLT(t, min.t) || Util.fuzzyGT(t, max.t)) return Double.NaN;
-        if (constantTime) return min.x;
+
+        // If t is in the range, and we have a constant distance, all points match.
+        // Return the earliest tau.
+
+        if (constantTime) {
+            if (Util.fuzzyEQ(t, min.t)) return min.x;
+            return Double.NaN;
+        }
+
+        // Except for the last segment, the last point on this segment is
+        // not part of this segment
+
         if (!isLastSegment && Util.fuzzyEQ(t, max.t)) return Double.NaN;
+
         return curve.tToX(t);
     }
 
@@ -745,9 +936,23 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
      */
     public double tToD(double t)
     {
+        // T is outside the range
+
         if (Util.fuzzyLT(t, min.t) || Util.fuzzyGT(t, max.t)) return Double.NaN;
-        if (constantTime) return min.d;
+
+        // If t is in the range, and we have a constant distance, all points match.
+        // Return the earliest tau.
+
+        if (constantTime) {
+            if (Util.fuzzyEQ(t, min.t)) return min.d;
+            return Double.NaN;
+        }
+
+        // Except for the last segment, the last point on this segment is
+        // not part of this segment
+
         if (!isLastSegment && Util.fuzzyEQ(t, max.t)) return Double.NaN;
+
         return curve.tToD(t);
     }
 
@@ -759,23 +964,25 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
      */
     public double tToTau(double t)
     {
+        // T is outside the range
+
         if (Util.fuzzyLT(t, min.t) || Util.fuzzyGT(t, max.t)) return Double.NaN;
-        if (constantTime) return min.tau;
+
+        // If t is in the range, and we have a constant distance, all points match.
+        // Return the earliest tau.
+
+        if (constantTime) {
+            if (Util.fuzzyEQ(t, min.t)) return min.tau;
+            return Double.NaN;
+        }
+
+        // Except for the last segment, the last point on this segment is
+        // not part of this segment
+
         if (!isLastSegment && Util.fuzzyEQ(t, max.t)) return Double.NaN;
+
         return curve.tToTau(t);
     }
-
-//    /**
-//     * Given t, return gamma. If t matches no segment points, return NaN.
-//     *
-//     * @param t The time in the rest frame.
-//     * @return Gamma.
-//     */
-//    public double tToGamma(double t)
-//    {
-//        if (Util.fuzzyLT(t, min.t) || Util.fuzzyGT(t, max.t)) return Double.NaN;
-//        return curve.tToGamma(t);
-//    }
 
     // **********************************************************
     // *
@@ -791,9 +998,23 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
      */
     public double tauToV(double tau)
     {
+        // Tau is outside the range
+
         if (Util.fuzzyLT(tau, min.tau) || Util.fuzzyGT(tau, max.tau)) return Double.NaN;
-        if (constantTau) return min.v;
+
+        // If t is in the range, and we have a constant distance, all points match.
+        // Return the earliest tau.
+
+        if (constantTau) {
+            if (Util.fuzzyEQ(tau, min.tau)) return min.v;
+            return Double.NaN;
+        }
+
+        // Except for the last segment, the last point on this segment is
+        // not part of this segment
+
         if (!isLastSegment && Util.fuzzyEQ(tau, max.tau)) return Double.NaN;
+
         return curve.tauToV(tau);
     }
 
@@ -805,9 +1026,23 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
      */
     public double tauToX(double tau)
     {
+        // Tau is outside the range
+
         if (Util.fuzzyLT(tau, min.tau) || Util.fuzzyGT(tau, max.tau)) return Double.NaN;
-        if (constantTau) return min.x;
+
+        // If t is in the range, and we have a constant distance, all points match.
+        // Return the earliest tau.
+
+        if (constantTau) {
+            if (Util.fuzzyEQ(tau, min.tau)) return min.x;
+            return Double.NaN;
+        }
+
+        // Except for the last segment, the last point on this segment is
+        // not part of this segment
+
         if (!isLastSegment && Util.fuzzyEQ(tau, max.tau)) return Double.NaN;
+
         return curve.tauToX(tau);
     }
 
@@ -821,10 +1056,24 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
      */
     public double tauToD(double tau)
     {
+        // Tau is outside the range
+
         if (Util.fuzzyLT(tau, min.tau) || Util.fuzzyGT(tau, max.tau)) return Double.NaN;
-        if (constantTau) return min.d;
+
+        // If t is in the range, and we have a constant distance, all points match.
+        // Return the earliest tau.
+
+        if (constantTau) {
+            if (Util.fuzzyEQ(tau, min.tau)) return min.d;
+            return Double.NaN;
+        }
+
+        // Except for the last segment, the last point on this segment is
+        // not part of this segment
+
         if (!isLastSegment && Util.fuzzyEQ(tau, max.tau)) return Double.NaN;
-       return curve.tauToD(tau);
+
+        return curve.tauToD(tau);
     }
 
     /**
@@ -835,23 +1084,25 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
      */
     public double tauToT(double tau)
     {
+        // Tau is outside the range
+
         if (Util.fuzzyLT(tau, min.tau) || Util.fuzzyGT(tau, max.tau)) return Double.NaN;
-        if (constantTau) return min.t;
+
+        // If t is in the range, and we have a constant distance, all points match.
+        // Return the earliest tau.
+
+        if (constantTau) {
+            if (Util.fuzzyEQ(tau, min.tau)) return min.t;
+            return Double.NaN;
+        }
+
+        // Except for the last segment, the last point on this segment is
+        // not part of this segment
+
         if (!isLastSegment && Util.fuzzyEQ(tau, max.tau)) return Double.NaN;
+
         return curve.tauToT(tau);
     }
-
-//   /**
-//     * Given tau, return gamma. If tau matches no segment points, return NaN.
-//     *
-//     * @param tau The time in the accelerated frame or NaN.
-//     * @return Gamma.
-//     */
-//    public double tauToGamma(double tau)
-//    {
-//        if (Util.fuzzyLT(tau, min.tau) || Util.fuzzyGT(tau, max.tau)) return Double.NaN;
-//        return curve.tauToGamma(tau);
-//    }
 
     // **********************************************************
     // *
@@ -900,6 +1151,12 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
         // TO DO
         return null;
     }
+
+    // **********************************************************************
+    // *
+    // * Standard methods: toString, clone hashCode, equals
+    // *
+    // **********************************************************************
 
     @Override
     public String toString()
