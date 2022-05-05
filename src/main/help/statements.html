@@ -101,7 +101,7 @@
                 <p>If <span class="literal">external</span> is omitted, the entire stylesheet must be contained in the string. Since stylesheets can have values that are strings, you will need to be careful with how the internal strings are specified.</p>
                 <h2><a id="set"></a>set</h2>
                 <p><span class="literal">set</span> <span class="non-terminal">setting</span> ( <span class="literal">,</span> <span class="non-terminal">setting</span> )*<br />
-                    <span class="non-terminal">setting</span> → <span class="literal">units</span> <span class="non-terminal">float</span> | <span class="literal">displayPrecision</span> <span class="non-terminal">float</span> | <span class="literal">printPrecision</span> <span class="non-terminal">float</span><br />
+                    <span class="non-terminal">setting</span> → <span class="literal">units :</span> <span class="non-terminal">float</span> | <span class="literal">displayPrecision :</span> <span class="non-terminal">float</span> | <span class="literal">printPrecision :</span> <span class="non-terminal">float</span> | <span class="literal">minVersion :</span> <span class="non-terminal">string</span><br />
                 </p>
                 <p>The set statement controls a few global settings:</p>
                 <ul>
@@ -110,8 +110,9 @@
                     </li>
                     <li><span class="item-intro">printPrecision:</span> The default precision for any number that is converted to a string and printed with the <span class="literal">print</span> statement.The value represents the number of digits to the right of the decimal point. If omitted, the default value is 12.
                     </li>
+                    <li><span class="item-intro">minVersion:</span> The string value contains three numbers separated by periods. The numbers represent the major and minor versions and the build number of the minimum Gamma version under which the script will run.</li>
                 </ul>
-                <p>The override the precision, use the toString() function.</p>
+                <p>The override the precision for a single case, use the toString() function.</p>
                 <h1><a id="assignment-statements"></a>Assignment Statements</h1>
                 <p>An assignment statement assigns a value to a variable. The value is derived from an expression. To learn about expressions and variables, see <a href="expressions.html">Expressions</a>.</p>
                 <p> An assignment statement creates a variable if it doesn't exist.</p>

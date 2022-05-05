@@ -56,7 +56,7 @@ public class gammaFunction extends ArgInfoFunction
             return Relativity.gamma(frame.getV());
         }
         else {
-            throw new ExecutionException("gamma requires a velocity or a frame");
+            throw new ExecutionException("gamma() requires a velocity, observer, or frame");
         }
     }
 
@@ -65,6 +65,5 @@ public class gammaFunction extends ArgInfoFunction
     {
         return argInfo;
     }
-
 
 }

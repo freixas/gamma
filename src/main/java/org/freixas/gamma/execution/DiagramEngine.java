@@ -48,7 +48,21 @@ public class DiagramEngine
 
     private boolean isClosed;
 
-    @SuppressWarnings("LeakingThisInConstructor")
+    // **********************************************************************
+    // *
+    // * Constructor
+    // *
+    // **********************************************************************
+
+    /**
+     * Create a new diagram engine.
+     *
+     * @param window The associated window in which the diagram will be displayed.
+     * @param hCodes The h-codes to run.
+     * @param isAnimated True if this is an animated diagram.
+     * @param setStatement The set statement to use.
+     * @param stylesheet The stylesheet to use.
+     */
     public DiagramEngine(MainWindow window, LinkedList<Object> hCodes, boolean isAnimated, SetStatement setStatement, Stylesheet stylesheet)
     {
         this.window = window;
@@ -67,6 +81,40 @@ public class DiagramEngine
 
         window.setDiagramEngine(this);
     }
+
+    // **********************************************************************
+    // *
+    // * Getters
+    // *
+    // **********************************************************************
+
+    public LinkedList<Object> getHCodes()
+    {
+        return program.getHCodes();
+    }
+
+    public boolean isAnimated()
+    {
+        return isAnimated;
+    }
+
+    public SetStatement getSetStatement()
+    {
+        return setStatement;
+    }
+
+    public Stylesheet getStylesheet()
+    {
+        return stylesheet;
+    }
+
+    // **********************************************************************
+    // *
+    // * Control Methods
+    // *
+    // **********************************************************************
+
+
 
     public void execute() throws ExecutionException, ProgrammingException
     {

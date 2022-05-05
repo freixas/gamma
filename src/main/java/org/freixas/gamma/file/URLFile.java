@@ -36,6 +36,12 @@ public class URLFile
     private final URL url;
     private final File file;
 
+    // **********************************************************************
+    // *
+    // * Constructors
+    // *
+    // **********************************************************************
+
     /**
      * Create a URLFile from a string. URLs are identified only if they contain
      * "//:".
@@ -103,26 +109,83 @@ public class URLFile
         this.file = file!= null ? file.getAbsoluteFile() : null;
     }
 
+    // **********************************************************************
+    // *
+    // * Getters
+    // *
+    // **********************************************************************
+
+    /**
+     * Return true if this URLFile represents a URL.
+     *
+     * @return True if this URLFile represents a URL.
+     */
     public boolean isURL()
     {
         return !isFile;
     }
 
+    /**
+     * Return true if this URLFile represents a File.
+     *
+     * @return True if this URLFile represents a File.
+     */
     public boolean isFile()
     {
         return isFile;
     }
 
+    /**
+     * Get the URL represented by this URLFile. This will be null if isURL()
+     * is false.
+     *
+     * @return The URL represented by this URLFile.
+     */
     public URL getURL()
     {
         return url;
     }
 
+    /**
+     * Get the File represented by this URLFile. This will be null if isFile()
+     * is false.
+     *
+     * @return The File represented by this URLFile.
+     */
     public File getFile()
     {
         return file;
     }
 
+    /**
+     * Get the path portion of the URLFile.
+     *
+     * @return The path portion of the URLFile.
+     */
+    public String getPath()
+    {
+        if (isFile) {
+            if (file == null) return "";
+            return file.getPath();
+        }
+        else {
+            return url.getPath();
+        }
+    }
+
+    // **********************************************************************
+    // *
+    // * Functionality
+    // *
+    // **********************************************************************
+
+    /**
+     * Read the contents of the URLFile into a string.
+     *
+     * @return The contents of the URLFile.
+     *
+     * @throws IOException If the file can't be read.
+     */
     public String readString() throws IOException
     {
         String str;
@@ -138,6 +201,20 @@ public class URLFile
         return str;
     }
 
+    /**
+     * Given a string representing a File or URL dependent on this URLFile,
+     * create a URLFile for the dependent. If the name designates a relative
+     * path, it is relative to this URLFile.
+     * <p>
+     * If this URLFile represents a URL, then any dependent files must come from
+     * the same domain.
+     *
+     * @param name The name of the dependent file.
+     *
+     * @return The dependent URLFile.
+     *
+     * @throws IOException If the file cannot be read for any reason.
+     */
     public URLFile getDependentScriptURL(String name) throws IOException
     {
         // The cases we need to consider are:
@@ -209,26 +286,25 @@ public class URLFile
         }
     }
 
-    public String getPath()
-    {
-        if (isFile) {
-            if (file == null) return "";
-            return file.getPath();
-        }
-        else {
-            return url.getPath();
-        }
-    }
+    // **********************************************************************
+    // *
+    // * Standard methods: toString, clone hashCode, equals
+    // *
+    // **********************************************************************
 
+    @Override
     public String toString()
     {
         if (isFile) return file.toString();
         return url.toString();
     }
 
-    public boolean equals(URLFile other)
+    @Override
+    public boolean equals(Object obj)
     {
-        if (other == null) return false;
+        if (obj == null) return false;
+        if (!(obj instanceof URLFile other)) return false;
+
         if (this.isFile != other.isFile) return false;
         if (isFile) {
             return this.file.equals(other.file);

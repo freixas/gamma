@@ -16,15 +16,22 @@
  */
 package org.freixas.gamma.math;
 
+import org.freixas.gamma.execution.ExecutionException;
 import org.freixas.gamma.value.Coordinate;
 
 /**
  *
  * @author Antonio Freixas
  */
+@SuppressWarnings("unused")
 public final class Relativity
 {
-    // We cache the last v and gamma values so as to speed up
+    static final double C_M_SEC = 299792458.0;
+    static final double C = C_M_SEC;
+    static final double YEAR_IN_SEC = 365.25 * 24 * 60 * 60;
+    static final double SEC_IN_YEARS = 1 / YEAR_IN_SEC;
+
+    // We cache the last v and gamma values to speed up
     // the gamma calculation
 
     static private double v = Double.NaN;
@@ -122,7 +129,7 @@ public final class Relativity
      * v.This is the Lorentz transformation.
      *
      * @param x The x coordinate.
-     * @param t The t coordiante.
+     * @param t The t coordinate.
      * @param v The velocity.
      *
      * @return (x', t')
@@ -168,12 +175,13 @@ public final class Relativity
      *
      * @return Gamma.
      */
-    static public double gamma(double v) {
-	if (Double.isNaN(Relativity.v) || Relativity.v != v) {
-	    Relativity.v = v;
-	    Relativity.gamma = 1 / Math.sqrt(1 - v*v);
-	}
-	return Relativity.gamma;
+    static public double gamma(double v)
+    {
+        if (Double.isNaN(Relativity.v) || Relativity.v != v) {
+            Relativity.v = v;
+            Relativity.gamma = 1 / Math.sqrt(1 - v * v);
+        }
+        return Relativity.gamma;
     }
 
     /**
@@ -221,25 +229,25 @@ public final class Relativity
 
     /**
      * Given a proper length measured in frame F' at velocity v, calculate
-     * the contracted length in frame F.
+     * the contracted length in the rest frame.
      *
      * @param length The proper length (in F').
-     * @param v The relative velocity.
+     * @param v The velocity of frame F' relative to the rest frame.
      *
-     * @return The contracted length (in F).
+     * @return The contracted length in the rest frame.
      */
     static public double lengthContraction(double length, double v) {
 	return length / Relativity.gamma(v);
     }
 
     /**
-     * Given a contracted length measured in frame F, calculate the proper
+     * Given a contracted length measured in the rest frame, calculate the proper
      * length in frame F' moving at velocity v.
      *
-     * @param length The contracted length (in F).
-     * @param v The relative velocity.
+     * @param length The contracted length in the rest frame.
+     * @param v The velocity of frame F' relative to the rest frame.
      *
-     * @return The proper length (in F').
+     * @return The proper length in F'.
      */
     static public double invLengthContraction(double length, double v) {
 	return length * Relativity.gamma(v);
@@ -247,66 +255,66 @@ public final class Relativity
 
     /**
      * Given a proper duration measured in frame F' at velocity v, calculate the
-     * dilated duration in frame F.
+     * dilated duration in the rest frame.
      *
-     * @param duration The proper duration (in F').
-     * @param v The relative velocity.
+     * @param duration The proper duration in F'.
+     * @param v The velocity of frame F' relative to the rest frame.
      *
-     * @return The dilated duration (in F).
+     * @return The dilated duration in the rest frame.
      */
     static public double timeDilation(double duration, double v) {
-	return duration * Relativity.gamma(v);
+	    return duration * Relativity.gamma(v);
     }
 
     /**
-     * Given a dilated duration measured in frame F, calculate the dilated
+     * Given a dilated duration measured in the rest frame, calculate the dilated
      * duration in frame F' moving at velocity v.
      *
-     * @param duration The dilated duration (in F).
-     * @param v The relative velocity.
+     * @param duration The dilated duration in the rest frame.
+     * @param v The velocity of frame F' relative to the rest frame.
      *
-     * @return The proper duration (in F').
+     * @return The proper duration in F'.
      */
     static public double invTimeDilation(double duration, double v) {
-	return duration / Relativity.gamma(v);
+	    return duration / Relativity.gamma(v);
     }
 
     /**
-     * Given a velocity v1 relative to frame F, calculate the corresponding
+     * Given a velocity v1 relative to the rest frame, calculate the corresponding
      * velocity relative to frame F' moving at velocity v.
      *
-     * @param v1 A velocity relative to frame F.
-     * @param v The velocity of frame F'.
+     * @param v A velocity relative to the rest frame.
+     * @param frameV The velocity of frame F' also relative to the rest frame.
      *
      * @return The corresponding velocity in frame F'.
      */
-    static public double vPrime(double v1, double v)
+    static public double vPrime(double v, double frameV)
     {
-        return (v1 - v) / (1 - (v1 * v));
+        return (v - frameV) / (1 - (v * frameV));
     }
 
     /**
      * Given a velocity v1 relative to frame F' moving at velocity v, calculate
-     * the corresponding velocity relative to frame F.
+     * the corresponding velocity relative to the rest frame.
      *
-     * @param v1 A velocity relative to frame F'.
-     * @param v The velocity of frame F'.
+     * @param v A velocity relative to frame F'.
+     * @param frameV The velocity of frame F' relative to the rest frame.
      *
-     * @return The corresponding velocity in frame F.
+     * @return The corresponding velocity in the rest frame.
      */
-    static public double v(double v1, double v)
+    static public double v(double v, double frameV)
     {
-        return (v1 + v) / (1 + (v1 * v));
+        return (v + frameV) / (1 + (v * frameV));
     }
 
     /**
-     * Convert a velocity to an x axis angle in degrees. The velocity must be
+     * Convert a velocity to an x-axis angle in degrees. The velocity must be
      * between -1 and 1, exclusive. The output will be between -45 and 45,
      * exclusive.
      *
      * @param v The velocity as a percentage of the speed of light.
      *
-     * @return The x axis angle in degrees.
+     * @return The x-axis angle in degrees.
      */
     static public double vToXAngle(double v)
     {
@@ -314,11 +322,11 @@ public final class Relativity
     }
 
     /**
-     * Convert an x axis angle in degrees to a velocity. The angle must be
+     * Convert an x-axis angle in degrees to a velocity. The angle must be
      * between -45 and 45, exclusive. The output will be between -1 and 1,
      * exclusive.
      *
-     * @param angle The x axis angle in degrees.
+     * @param angle The x-axis angle in degrees.
      *
      * @return The velocity.
      */
@@ -421,5 +429,112 @@ public final class Relativity
         if (invert) vAngle = Util.normalizeAngle180(vAngle + 180);
         return vAngle;
     }
+
+    /**
+     * Given the wavelength of a signal as observed by a source and the
+     * wavelength of the same signal as observed by a receiver, calculate the
+     * relative velocity between the source and receiver, as measured in the
+     * co-moving frame of the receiver at the instant the signal is received.
+     * <p>
+     * The velocity is positive when the observers are moving away from each
+     * other and negative when they are moving towards each other. In a Minkowski
+     * spacetime diagram, this means that the sign of the velocity is correct if
+     * the source is to the right of the receiver and should be inverted otherwise.
+     * <p>
+     * The units are not important as long as they are the same for both
+     * wavelengths.
+     *
+     * @param sourceWavelength The wavelength of a signal as observed by a source.
+     * @param receiverWavelength The wavelength of a signal as observed by a receiver.
+     *
+     * @return The velocity, as a percentage of light speed.
+     */
+    static public double dopplerWavelengthToV(double sourceWavelength, double receiverWavelength)
+    {
+        if (sourceWavelength <= 0) throw new ExecutionException("The source wavelength must be > 0");
+        if (receiverWavelength <= 0) throw new ExecutionException("The received wavelength must be > 0");
+        double s2 = sourceWavelength * sourceWavelength;
+        double r2 = receiverWavelength * receiverWavelength;
+        return (r2 - s2) / (s2 + r2);
+    }
+
+    /**
+     * Given a frequency of a signal as observed by a source and the frequency of
+     * the same signal as observed by a receiver, calculate the relative
+     * velocity between the source and receiver, as measured in the co-moving frame
+     * of the receiver at the instant the signal is received.
+     * <p>
+     * The velocity is positive when the observers are moving away from each
+     * other and negative when they are moving towards each other. In a Minkowski
+     * spacetime diagram, this means that the sign of the velocity is correct if
+     * the source is to the right of the receiver and should be inverted otherwise.
+     * <p>
+     * The units are not important as long as they are the same for both
+     * frequencies.
+     *
+     * @param sourceFrequency The frequency of a signal as observed by a source.
+     * @param receiverFrequency The frequency of a signal as observed by a source.
+     *
+     * @return The velocity, as a percentage of light speed.
+     */
+    static public double dopplerFrequencyToV(double sourceFrequency, double receiverFrequency)
+    {
+        if (sourceFrequency <= 0) throw new ExecutionException("The source frequency must be > 0");
+        if (receiverFrequency <= 0) throw new ExecutionException("The received frequency must be > 0");
+        double s2 = sourceFrequency * sourceFrequency;
+        double r2 = receiverFrequency * receiverFrequency;
+        return (s2 - r2) / (s2 + r2);
+    }
+
+    /**
+     * An electromagnetic signal is sent from a source to a receiver. Given the
+     * relative velocity of the source to the receiver and given the wavelength
+     * of the signal sent by the source, return the wavelength of the signal
+     * received by the receiver.
+     * <p>
+     * The velocity should be positive when the observers are moving away from
+     * each other and negative when they are moving towards each other. In a
+     * Minkowski spacetime diagram, this means that the sign of the velocity
+     * matches the actual velocity if the source is to the right of the receiver
+     * and should be inverted otherwise.
+     *
+     * @param sourceWavelength The wavelength of the signal sent by the source.
+     * @param v The relative velocity of the source to the receiver as measured
+     * in the co-moving frame of the receiver at the instant the signal is
+     * received.
+     *
+     * @return The wavelength of the signal received by the receiver,
+     */
+    static public double dopplerVToWavelength(double sourceWavelength, double v)
+    {
+        if (Math.abs(v) >= 1.0) throw new ExecutionException("The velocity must be between -1 and 1, exclusive");
+        return sourceWavelength * Math.sqrt((1 + v) / (1 - v));
+    }
+
+    /**
+     * An electromagnetic signal is sent from a source to a receiver. Given the
+     * relative velocity of the source to the receiver and given the frequency
+     * of the signal sent by the source, return the frequency of the signal
+     * received by the receiver.
+     * <p>
+     * The velocity should be positive when the observers are moving away from
+     * each other and negative when they are moving towards each other. In a
+     * Minkowski spacetime diagram, this means that the sign of the velocity
+     * matches the actual velocity if the source is to the right of the receiver
+     * and should be inverted otherwise.
+     *
+     * @param sourceFrequency The frequency of the signal sent by the source.
+     * @param v The relative velocity of the source to the receiver as measured
+     * in the co-moving frame * of the receiver at the instant the signal is
+     * received.
+     *
+     * @return The frequency of the signal received by the receiver.
+     */
+    static public double dopplerVToFrequency(double sourceFrequency, double v)
+    {
+        if (Math.abs(v) >= 1.0) throw new ExecutionException("The velocity must be between -1 and 1, exclusive");
+        return sourceFrequency / Math.sqrt((1 + v) / (1 - v));
+    }
+
 
 }

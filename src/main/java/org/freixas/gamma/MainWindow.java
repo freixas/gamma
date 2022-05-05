@@ -37,6 +37,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.freixas.gamma.execution.DiagramEngine;
 import org.freixas.gamma.execution.ScriptPrintDialog;
+import org.freixas.gamma.execution.SlideshowEngine;
 import org.freixas.gamma.file.FileWatcher;
 import org.freixas.gamma.file.URLFile;
 import org.freixas.gamma.parser.ParseException;
@@ -63,6 +64,7 @@ import java.util.ArrayList;
  * @author Antonio Freixas
  *
  */
+@SuppressWarnings({ "FieldCanBeLocal", "unused" })
 public final class MainWindow extends Stage
 {
     // The toggle for whether to display the Greetings dialog or not.
@@ -72,7 +74,7 @@ public final class MainWindow extends Stage
     static private boolean displayGreetingsDialog = PreferencesManager.getDisplayGreetingMessage();
 
     private final int ID;                       // The window's ID
-    private URLFile script;                   // The associated script
+    private URLFile script;                     // The associated script
     private final File[] directoryDefaults;     // The default dirs for each type of file
 
     // Various menu items
@@ -81,6 +83,19 @@ public final class MainWindow extends Stage
     private MenuItem fileMenuExportVideo;
     private MenuItem fileMenuPrint;
     private MenuItem fileMenuClose = null;
+
+    // Various toolbar items
+
+    private Button toolbarFileNew;
+    private Button toolbarFileOpen;
+    private Button toolbarFileOpenURL;
+    private Button toolbarFileExportDiagram;
+    private Button toolbarReload;
+    private Button toolbarSlideshowStart;
+    private Button toolbarSlideshowPrevious;
+    private Button toolbarSlideshowPlayPause;
+    private Button toolbarSlideshowNext;
+    private Button toolbarSlideshowEnd;
 
     // Various containers/controls
 
@@ -101,9 +116,9 @@ public final class MainWindow extends Stage
     private FileWatcher watcher = null;
     private Thread watcherThread = null;
 
-    private DiagramEngine diagramEngine = null; // The diagram engine
+    private SlideshowEngine slideshowEngine;    // The associated slideshow engine
+    private DiagramEngine diagramEngine;        // The diagram engine
     private Canvas canvas;                      // The diagram drawing area
-
 
     // **********************************************************************
     // *
@@ -131,6 +146,9 @@ public final class MainWindow extends Stage
         this.ID = ID;
         this.script = null;
         this.directoryDefaults = directoryDefaults;
+
+        this.slideshowEngine = null;
+        this.diagramEngine = null;
 
         // Load the view (FXML file) and controller. Get a reference to the controller.
 
@@ -269,6 +287,16 @@ public final class MainWindow extends Stage
         directoryDefaults[type.getValue()] = dir;
     }
 
+    public SlideshowEngine getSlideShowEngine()
+    {
+        return slideshowEngine;
+    }
+
+    public void setSlideshowEngine(SlideshowEngine slideshowEngine)
+    {
+        this.slideshowEngine = slideshowEngine;
+    }
+
     /**
      * Get the script associated with this main window. The script can be
      * null if there is no associated script file or URL.
@@ -321,6 +349,9 @@ public final class MainWindow extends Stage
             fileMenuExportVideo.setDisable(disable);
             fileMenuPrint.setDisable(disable);
 
+            toolbarFileExportDiagram.setDisable(disable);
+            toolbarReload.setDisable(disable);
+
             // Update the title bar
 
             setTitle("Gamma - " + (script != null ? script.toString() : ""));
@@ -347,10 +378,7 @@ public final class MainWindow extends Stage
 
                 File scriptFile = script.getFile();
 
-                isNewScript =
-                    open ||
-                        this.script == null ||
-                        !script.equals(this.script);
+                isNewScript = open || !script.equals(this.script);
 
                 // Determine if we must create a new watcher. It's possible to call setScript()
                 // with the same set of files
@@ -536,6 +564,19 @@ public final class MainWindow extends Stage
             }
         }
 
+        // Toolbar items
+
+        toolbarFileNew = (Button)getScene().lookup("#toolbar-file-new");
+        toolbarFileOpen = (Button)getScene().lookup("#toolbar-file-open");
+        toolbarFileOpenURL = (Button)getScene().lookup("#toolbar-file-open-url");
+        toolbarFileExportDiagram = (Button)getScene().lookup("#toolbar-file-export-diagram");
+        toolbarReload = (Button)getScene().lookup("#toolbar-reload");
+        toolbarSlideshowStart = (Button)getScene().lookup("#toolbar-slideshow-start");
+        toolbarSlideshowPrevious = (Button)getScene().lookup("#toolbar-slideshow-previous");
+        toolbarSlideshowPlayPause = (Button)getScene().lookup("#toolbar-slideshow-play-pause");
+        toolbarSlideshowNext = (Button)getScene().lookup("#toolbar-slideshow-next");
+        toolbarSlideshowEnd = (Button)getScene().lookup("#toolbar-slideshow-end");
+
         // The top of the window tree
 
         top = (VBox)getScene().lookup("#top");
@@ -581,7 +622,7 @@ public final class MainWindow extends Stage
     public void enableDisplayControls(boolean enable)
     {
         if (enable && !hasDisplayControls) {
-            top.getChildren().add(1, controlsSplitter);
+            top.getChildren().add(2, controlsSplitter);
             controlsSplitter.getItems().addAll(diagramParent, scrollPane);
             controlsSplitter.setDividerPositions(.9, .1);
             VBox.setVgrow(diagramParent, Priority.ALWAYS);
@@ -592,7 +633,7 @@ public final class MainWindow extends Stage
         if (!enable && hasDisplayControls) {
             controlsSplitter.getItems().clear();
             top.getChildren().remove(controlsSplitter);
-            top.getChildren().add(1, diagramParent);
+            top.getChildren().add(2, diagramParent);
             VBox.setVgrow(diagramParent, Priority.ALWAYS);
             hasDisplayControls = false;
             top.layout();

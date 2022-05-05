@@ -22,6 +22,7 @@ import org.freixas.gamma.Version;
 import org.freixas.gamma.css.value.StyleException;
 import org.freixas.gamma.css.value.Stylesheet;
 import org.freixas.gamma.execution.ExecutionException;
+import org.freixas.gamma.execution.Slideshow;
 import org.freixas.gamma.execution.hcode.*;
 import org.freixas.gamma.file.URLFile;
 import org.freixas.gamma.value.*;
@@ -226,6 +227,10 @@ public final class Parser
     private final URLFile URLFile;      // The file or URL associated with the script
     private final String script;            // The code to parse
     private ArrayList<Token<?>> tokens;     // The tokens from tokenizing the code
+
+    private boolean isSlideshow;            // Whether this script is a slideshow
+    private Slideshow slideshow;            // The slideshow definition
+
     private LinkedList<Object> hCodes;      // The h-codes produced by parsing
     private Stylesheet stylesheet;          // The final stylesheet
     private ArrayList<URLFile> dependentFiles; // A list of all dependent files
@@ -257,6 +262,17 @@ public final class Parser
         this.URLFile = URLFile;
         this.script = script;
         this.hCodes = new LinkedList<>();
+
+        isSlideshow = false;
+        slideshow = null;
+
+        animationStatementIsPresent = false;
+        animationVariableIsPresent = false;
+        displayVariableIsPresent = false;
+        stylesheet = new Stylesheet();
+        this.dependentFiles = new ArrayList<>();
+
+        setStatement = new SetStatement();
     }
 
     // **********************************************************************
@@ -273,6 +289,27 @@ public final class Parser
     public ArrayList<Token<?>> getTokens()
     {
         return this.tokens;
+    }
+
+    /**
+     * Returns true if this script is a slideshow.
+     *
+     * @return True if this script is a slideshow.
+     */
+    public boolean isSlideshow()
+    {
+        return isSlideshow;
+    }
+
+    /**
+     * Returns the slideshow object. This is null except when the script
+     * has been identified as a slideshow.
+     *
+     * @return The slideshow object.
+     */
+    public Slideshow getSlideshow()
+    {
+        return slideshow;
     }
 
     /**
@@ -368,6 +405,9 @@ public final class Parser
         stylesheet = new Stylesheet();
         this.dependentFiles = new ArrayList<>();
 
+        isSlideshow = false;
+        slideshow = null;
+
         labelId = 0;
         loopLabels = new LinkedList<>();
 
@@ -431,11 +471,155 @@ public final class Parser
         LinkedList<Object> codes = new LinkedList<>();
 
         nextToken();
-        while (!isEOF()) {
-            codes.addAll(parseStatementBlock());
+
+        if (isName() && getString().equals("slideshow")) {
+            parseSlideshow();
+        }
+        else {
+            while (!isEOF()) {
+                codes.addAll(parseStatementBlock());
+            }
         }
 
         return codes;
+    }
+
+    /**
+     * Parse a slideshow.
+     */
+
+    private void parseSlideshow() throws ParseException
+    {
+        // We start knowing that the current token points to "slideshow"
+
+        nextToken();
+
+        isSlideshow = true;
+        slideshow = new Slideshow(URLFile);
+
+        parseSlideshowSettings();
+
+        // On return, we know the current token is a '{'
+
+        nextToken();
+        while (!isDelimiter() || getChar() != '}') {
+            parseSlide();
+        }
+
+        // If we exited the loop, we have a '}'
+        // The next thing should be an EOF
+
+        nextToken();
+        if (isEOF()) return;
+
+        throwParseException("A slideshow block cannot be followed by anything");
+    }
+
+    private void parseSlideshowSettings() throws ParseException
+    {
+        // If we see a '{', we have no slideshow settings
+
+        if (isDelimiter() && getChar() == '{') return;
+
+        boolean autoPlaySeen = false;
+        boolean defaultPauseSeen = false;
+
+        slideshow.setAutoPlay(false);
+        while (true) {
+            if (isName()) {
+                if (getString().equals("autoPlay")) {
+                    if (autoPlaySeen) throwParseException("Duplicate 'autoPlay'");
+                    slideshow.setAutoPlay(true);
+                    autoPlaySeen = true;
+                }
+                else if (getString().equals("defaultPause")) {
+                    if (defaultPauseSeen) throwParseException("Duplicate 'defaultPause'");
+                    nextToken();
+                    defaultPauseSeen = true;
+                    if (isNumber()) {
+                        slideshow.setDefaultDiagramPause(getNumber());
+                    }
+                    else {
+                        throwParseException("Expected a number");
+                    }
+                }
+                else {
+                    throwParseException("Expected a slideshow setting or block");
+                }
+            }
+            else {
+                throwParseException("Expected a slideshow setting or block");
+            }
+
+            // After processing a setting, we need a comma or a '{'
+
+            nextToken();
+
+            if (isDelimiter() && getChar() == '{') return;
+
+            if (!isDelimiter() || getChar() != ',') {
+                throwParseException("Expected ',' or '{'");
+            }
+
+            // The next thing after the comma should be another setting, so loop
+            // back
+
+            nextToken();
+        }
+    }
+
+    private void parseSlide() throws ParseException
+    {
+        // We expect the current token to be 'script'
+
+        if (isName() && getString().equals("script")) {
+            nextToken();
+
+            // The next thing should be a string containing a script name
+
+            if (isString()) {
+                String filename = getString();
+                nextToken();
+
+                // The next thing might be a pause setting
+
+                double pause = Double.NaN;
+                if (isName() && getString().equals("pause")) {
+
+                    // The next thing should be a number
+
+                    if (isNumber()) {
+                        pause = getNumber();
+                        nextToken();
+                    }
+                }
+
+                // Add a slide
+
+                try {
+                    slideshow.addSlide(filename, pause);
+                }
+                catch (Exception e) {
+                    throwParseException(e.getLocalizedMessage());
+                }
+
+                // Next should be a ';'
+
+                if (isDelimiter() && getChar() == ';') {
+                    nextToken();
+                    return;
+                }
+
+                throwParseException("Expected a ';'");
+            }
+            else {
+                throwParseException("Expected a string with the path of the script");
+            }
+        }
+
+        else {
+            throwParseException("Expected 'script'");
+        }
     }
 
     /**
@@ -569,7 +753,6 @@ public final class Parser
      */
     private LinkedList<Object> parseSemicolonStatement(boolean leftVariableDetected) throws ParseException
     {
-
         LinkedList<Object> codes = new LinkedList<>(parseSimpleStatement(leftVariableDetected));
 
         if (!isDelimiter() || getChar() != ';') {
@@ -624,7 +807,6 @@ public final class Parser
      */
     private LinkedList<Object> parseIfStatement() throws ParseException
     {
-
         // We start knowing only that the current token points to "if"
 
         nextToken();

@@ -63,21 +63,32 @@ public class ScriptParseCompleteHandler implements Runnable
 
         URLFile script = parser.getScriptURL();
 
-        // The parser may detect some dependent files, such as stylesheets or
-        // include files. Any changes to those should  also cause the script to
-        // reload, so we need to tell the main window about the changes
+        // Is this a slideshow?
 
-        ArrayList<URLFile> dependentFiles = parser.getDependentFiles();
-        window.setScript(script, dependentFiles, false);
+        if (parser.isSlideshow()) {
+            SlideshowEngine ssEngine =
+                new SlideshowEngine(window, parser.getSlideshow());
+            ssEngine.execute();
+        }
 
-        // The parser has finished. Start up the diagram engine.
+        else {
 
-        DiagramEngine dEngine =
-            new DiagramEngine(
-                window, parser.getHCodes(),
-                parser.isAnimated(),
-                parser.getSetStatement(), parser.getStylesheet());
-        dEngine.execute();
+            // The parser may detect some dependent files, such as stylesheets or
+            // include files. Any changes to those should  also cause the script to
+            // reload, so we need to tell the main window about the changes
+
+            ArrayList<URLFile> dependentFiles = parser.getDependentFiles();
+            window.setScript(script, dependentFiles, false);
+
+            // The parser has finished. Start up the diagram engine.
+
+            DiagramEngine dEngine =
+                new DiagramEngine(
+                    window, parser.getHCodes(),
+                    parser.isAnimated(),
+                    parser.getSetStatement(), parser.getStylesheet());
+            dEngine.execute();
+        }
     }
 
 }
