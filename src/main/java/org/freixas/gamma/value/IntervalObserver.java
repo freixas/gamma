@@ -198,8 +198,9 @@ public class IntervalObserver extends Observer
     public IntervalObserver relativeTo(Frame prime)
     {
         ConcreteObserver relObserver = observer.relativeTo(prime);
-        double minT = prime.toFrame(min.x, min.t).t;
-        double maxT = prime.toFrame(max.x, max.t).t;
+
+        double minT = Double.isInfinite(min.t) ? min.t : prime.toFrame(min.x, min.t).t;
+        double maxT = Double.isInfinite(max.t) ? max.t : prime.toFrame(max.x, max.t).t;
 
         return new IntervalObserver(relObserver, new Interval(Interval.Type.T, minT, maxT));
     }

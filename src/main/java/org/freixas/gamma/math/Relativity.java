@@ -56,6 +56,9 @@ public final class Relativity
     /**
      * Given (x, t), calculate x' given an inertial frame F' at velocity v. This
      * is the Lorentz transformation.
+     * <p>
+     * This method assumes the values are neither NaN nor infinite, and that v
+     * is between -1.0 and 1.0, exclusive.
      *
      * @param x The x value.
      * @param t The t value
@@ -63,14 +66,17 @@ public final class Relativity
      *
      * @return x'.
      */
-    static public double xPrime(double x, double t, double v) {
-	return (x - v * t) * Relativity.gamma(v);
-
+    static public double xPrime(double x, double t, double v)
+    {
+        return (x - v * t) * Relativity.gamma(v);
     }
 
     /**
      * Given (x, t), calculate t' given an inertial frame F' at velocity v. This
      * is the Lorentz transformation.
+     * <p>
+     * This method assumes the values are neither NaN nor infinite, and that v
+     * is between -1.0 and 1.0, exclusive.
      *
      * @param x The x value.
      * @param t The t value
@@ -78,13 +84,17 @@ public final class Relativity
      *
      * @return t'.
      */
-    static public double tPrime(double x, double t, double v) {
-	return (t - v * x) * Relativity.gamma(v);
+    static public double tPrime(double x, double t, double v)
+    {
+        return (t - v * x) * Relativity.gamma(v);
     }
 
     /**
      * Given (x', t'), calculate x given an inertial frame F' at velocity v.
      * This is the inverse Lorentz transformation.
+     * <p>
+     * This method assumes the values are neither NaN nor infinite, and that v
+     * is between -1.0 and 1.0, exclusive.
      *
      * @param xPrime The x value.
      * @param tPrime The t value
@@ -92,13 +102,17 @@ public final class Relativity
      *
      * @return x.
      */
-    static public double x(double xPrime, double tPrime, double v) {
-	return (xPrime + v * tPrime) * Relativity.gamma(v);
+    static public double x(double xPrime, double tPrime, double v)
+    {
+        return (xPrime + v * tPrime) * Relativity.gamma(v);
     }
 
     /**
      * Given (x', t'), calculate t given an inertial frame F' at velocity v.
      * This is the inverse Lorentz transformation.
+     * <p>
+     * This method assumes the values are neither NaN nor infinite, and that v
+     * is between -1.0 and 1.0, exclusive.
      *
      * @param xPrime The x value.
      * @param tPrime The t value
@@ -106,13 +120,17 @@ public final class Relativity
      *
      * @return t.
      */
-    static public double t(double xPrime, double tPrime, double v) {
-	return (tPrime + v * xPrime) * Relativity.gamma(v);
+    static public double t(double xPrime, double tPrime, double v)
+    {
+        return (tPrime + v * xPrime) * Relativity.gamma(v);
     }
 
     /**
      * Given (x, t), calculate (x', t') given an inertial frame F' at velocity
      * v. This is the Lorentz transformation.
+     * <p>
+     * This method assumes the values are neither NaN nor infinite, and that v
+     * is between -1.0 and 1.0, inclusive.
      *
      * @param rest The (x, t) coordinate.
      * @param v The velocity.
@@ -127,6 +145,9 @@ public final class Relativity
     /**
      * Given (x, t), calculate (x', t') given an inertial frame F' at velocity
      * v.This is the Lorentz transformation.
+     * <p>
+     * This method assumes the values are neither NaN nor infinite, and that v
+     * is between -1.0 and 1.0, exclusive.
      *
      * @param x The x coordinate.
      * @param t The t coordinate.
@@ -142,6 +163,9 @@ public final class Relativity
     /**
      * Given (x', t'), calculate (x, t) given an inertial frame F' at velocity
      * v.This is the Lorentz transformation.
+     * <p>
+     * This method assumes the values are neither NaN nor infinite, and that v
+     * is between -1.0 and 1.0, exclusive.
      *
      * @param prime The (x', t') coordinate.
      * @param v The velocity.
@@ -155,7 +179,10 @@ public final class Relativity
 
     /**
      * Given (x', t'), calculate (x, t) given an inertial frame F' at velocity
-     * v.This is the Lorentz transformation.
+     * v. This is the Lorentz transformation.
+     * <p>
+     * This method assumes the values are neither NaN nor infinite, and that v
+     * is between -1.0 and 1.0, exclusive.
      *
      * @param xP The x' coordinate
      * @param tP The t' coordinate.
@@ -169,7 +196,11 @@ public final class Relativity
     }
 
     /**
-     * Given an inertial frame F' at velocity v, calculate gamma, 1 / sqrt(1 - v<sup>2</sup>).
+     * Given an inertial frame F' at velocity v, calculate gamma, 1 / sqrt(1 -
+     * v<sup>2</sup>).
+     * <p>
+     * This method assumes the value is not NaN and is between -1.0 and 1.0,
+     * exclusive.
      *
      * @param v The velocity.
      *
@@ -188,6 +219,8 @@ public final class Relativity
      * Given gamma, return the corresponding velocity. There are actually two
      * answers, differing only in sign. The sign of the returned value will be
      * the same as the sign of gamma.
+     * <p>
+     * This method assumes the value is not NaN nor infinite.
      *
      * @param gamma The gamma value.
      *
@@ -203,85 +236,112 @@ public final class Relativity
      * Given a time tau in inertial frame F' for an observer moving at velocity
      * v, calculate the matching time t, assuming this observer's tau 0 occurs
      * when t is 0.
+     * <p>
+     * This method assumes the values are neither NaN nor infinite, and that v
+     * is between -1.0 and 1.0, exclusive.
      *
      * @param tau The time in frame F', the moving frame.
      * @param v The velocity of the moving observer
      *
      * @return Time for the rest observer.
      */
-    static public double tauToT(double tau, double v) {
-	return tau * Relativity.gamma(v);
+    static public double tauToT(double tau, double v)
+    {
+        return tau * Relativity.gamma(v);
     }
 
     /**
      * Given a time t in inertial frame F, calculate the matching time tau for
      * an observer moving at velocity v, assuming this observer's tau 0 occurs
      * when t is 0.
+     * <p>
+     * This method assumes the values are neither NaN nor infinite, and that v
+     * is between -1.0 and 1.0, exclusive.
      *
      * @param t The time in frame F, the rest frame.
      * @param v The velocity of the moving observer.
      *
      * @return Tau for the moving observer.
      */
-    static public double tToTau(double t, double v) {
-	return t / Relativity.gamma(v);
+    static public double tToTau(double t, double v)
+    {
+        return t / Relativity.gamma(v);
     }
 
     /**
      * Given a proper length measured in frame F' at velocity v, calculate
      * the contracted length in the rest frame.
+     * <p>
+     * This method assumes the values are neither NaN nor infinite, and that v
+     * is between -1.0 and 1.0, exclusive.
      *
      * @param length The proper length (in F').
      * @param v The velocity of frame F' relative to the rest frame.
      *
      * @return The contracted length in the rest frame.
      */
-    static public double lengthContraction(double length, double v) {
-	return length / Relativity.gamma(v);
+    static public double lengthContraction(double length, double v)
+    {
+        return length / Relativity.gamma(v);
     }
 
     /**
      * Given a contracted length measured in the rest frame, calculate the proper
      * length in frame F' moving at velocity v.
+     * <p>
+     * This method assumes the values are neither NaN nor infinite, and that v
+     * is between -1.0 and 1.0, exclusive.
      *
      * @param length The contracted length in the rest frame.
      * @param v The velocity of frame F' relative to the rest frame.
      *
      * @return The proper length in F'.
      */
-    static public double invLengthContraction(double length, double v) {
-	return length * Relativity.gamma(v);
+    static public double invLengthContraction(double length, double v)
+    {
+        return length * Relativity.gamma(v);
     }
 
     /**
      * Given a proper duration measured in frame F' at velocity v, calculate the
      * dilated duration in the rest frame.
+     * <p>
+     * This method assumes the values are neither NaN nor infinite, and that v
+     * is between -1.0 and 1.0, exclusive.
      *
      * @param duration The proper duration in F'.
      * @param v The velocity of frame F' relative to the rest frame.
      *
      * @return The dilated duration in the rest frame.
      */
-    static public double timeDilation(double duration, double v) {
-	    return duration * Relativity.gamma(v);
+    static public double timeDilation(double duration, double v)
+    {
+        return duration * Relativity.gamma(v);
     }
 
     /**
-     * Given a dilated duration measured in the rest frame, calculate the dilated
-     * duration in frame F' moving at velocity v.
+     * Given a dilated duration measured in the rest frame, calculate the
+     * dilated duration in frame F' moving at velocity v.
+     * <p>
+     * This method assumes the values are neither NaN nor infinite, and that v
+     * is between -1.0 and 1.0, exclusive.
      *
      * @param duration The dilated duration in the rest frame.
      * @param v The velocity of frame F' relative to the rest frame.
      *
      * @return The proper duration in F'.
      */
-    static public double invTimeDilation(double duration, double v) {
-	    return duration / Relativity.gamma(v);
+    static public double invTimeDilation(double duration, double v)
+    {
+        return duration / Relativity.gamma(v);
     }
 
     /**
-     * Given a velocity v1 relative to the rest frame, calculate the corresponding
-     * velocity relative to frame F' moving at velocity v.
+     * Given a velocity v1 relative to the rest frame, calculate the
+     * corresponding velocity relative to frame F' moving at velocity v.
+     * <p>
+     * This method assumes the values are not NaN and is between -1.0 and 1.0,
+     * exclusive.
      *
      * @param v A velocity relative to the rest frame.
      * @param frameV The velocity of frame F' also relative to the rest frame.
@@ -296,6 +356,9 @@ public final class Relativity
     /**
      * Given a velocity v1 relative to frame F' moving at velocity v, calculate
      * the corresponding velocity relative to the rest frame.
+     * <p>
+     * This method assumes the values are not NaN and is between -1.0 and 1.0,
+     * exclusive.
      *
      * @param v A velocity relative to frame F'.
      * @param frameV The velocity of frame F' relative to the rest frame.
