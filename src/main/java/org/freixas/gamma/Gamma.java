@@ -180,7 +180,10 @@ public final class Gamma extends Application
                 try {
                     Stylesheet.USER_STYLESHEET = Stylesheet.createStylesheet(cssFile);
                 }
-                catch (IOException | org.freixas.gamma.parser.ParseException | StyleException e)
+                catch (IOException e) {
+                    System.err.println(new GammaIOException(e).getLocalizedMessage());
+                }
+                catch (org.freixas.gamma.parser.ParseException | StyleException e)
                 {
                     System.err.println(e.getLocalizedMessage());
                 }

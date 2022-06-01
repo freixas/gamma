@@ -43,6 +43,7 @@
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
@@ -52,6 +53,7 @@
 <?import javafx.scene.layout.VBox?>
 
 <!--suppress ALL -->
+
 <VBox id="top" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" stylesheets="@MainWindow.css" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.freixas.gamma.MainWindowController">
    <children>
     <MenuBar id="menuBar" fx:id="menuBar" minHeight="-Infinity" style="-fx-view-order: 0;" VBox.vgrow="NEVER">
@@ -101,6 +103,132 @@
         </Menu>
       </menus>
     </MenuBar>
+      <ToolBar VBox.vgrow="NEVER">
+        <items>
+            <Button id="toolbar-file-new" fx:id="toolbarFileNew" mnemonicParsing="false" onAction="#toolbarFileNew" styleClass="toolbar-ss">
+               <graphic>
+                  <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@new-file.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="New File" />
+               </tooltip>
+            </Button>
+            <Button id="toolbar-file-open" fx:id="toolbarFileOpen" mnemonicParsing="false" onAction="#toolbarFileOpen" styleClass="toolbar-ss">
+               <graphic>
+                  <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@open-file.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="Open File" />
+               </tooltip>
+            </Button>
+            <Button id="toolbar-file-open-url" fx:id="toolbarFileOpenURL" mnemonicParsing="false" onAction="#toolbarFileOpenURL" styleClass="toolbar-ss">
+               <graphic>
+                  <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@open-url.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="Open URL" />
+               </tooltip>
+            </Button>
+            <Separator orientation="VERTICAL" prefHeight="0.0" />
+            <Button id="toolbar-file-export-diagram" fx:id="toolbarFileExportDiagram" disable="true" mnemonicParsing="false" onAction="#toolbarFileExportDiagram" styleClass="toolbar-ss">
+               <graphic>
+                  <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@export-diagram.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="Export Diagram" />
+               </tooltip>
+            </Button>
+            <Separator orientation="VERTICAL" prefHeight="0.0" />
+            <Button id="toolbar-reload" fx:id="toolbarReload" disable="true" mnemonicParsing="false" onAction="#toolbarReload" styleClass="toolbar-ss">
+               <graphic>
+                  <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@reload.png" />
+                     </image></ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="Reload Script" />
+               </tooltip>
+            </Button>
+            <Separator orientation="VERTICAL" prefHeight="0.0" />
+          <Button id="toolbar-slideshow-start" fx:id="toolbarSlideshowStart" disable="true" mnemonicParsing="false" onAction="#toolbarSlideshowStart" styleClass="toolbar-ss">
+               <graphic>
+                  <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@ss_start.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="First Slide" />
+               </tooltip>
+            </Button>
+            <Button id="toolbar-slideshow-previous" fx:id="toolbarSlideshowPrevious" disable="true" mnemonicParsing="false" onAction="#toolbarSlideshowPrevious" styleClass="toolbar-ss">
+               <graphic>
+                  <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@ss_prev.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="Previous Slide" />
+               </tooltip>
+            </Button>
+            <Button id="toolbar-slideshow-play-pause" fx:id="toolbarSlideshowPlayPause" disable="true" mnemonicParsing="false" onAction="#toolbarSlideshowPlayPause" styleClass="toolbar-ss">
+               <graphic>
+                  <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@ss_play.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="Play Slideshow" />
+               </tooltip>
+            </Button>
+            <Button id="toolbar-slideshow-next" fx:id="toolbarSlideshowNext" disable="true" mnemonicParsing="false" onAction="#toolbarSlideshowNext" styleClass="toolbar-ss">
+               <graphic>
+                  <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@ss_next.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="Next Slide" />
+               </tooltip>
+            </Button>
+            <Button id="toolbar-slideshow-end" fx:id="toolbarSlideshowEnd" disable="true" mnemonicParsing="false" onAction="#toolbarSlideshowEnd" styleClass="toolbar-ss">
+               <graphic>
+                  <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@ss_end.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+               <tooltip>
+                  <Tooltip text="Last Slide" />
+               </tooltip>
+            </Button>
+        </items>
+      </ToolBar>
       <SplitPane id="controlsSplitter" dividerPositions="0.7610759493670887" VBox.vgrow="ALWAYS">
          <items>
             <VBox id="diagramParent" alignment="CENTER" minHeight="1.0" minWidth="1.0" style="-fx-view-order: 100;">
@@ -134,13 +262,13 @@
                </opaqueInsets>
             </Label>
             <Separator focusTraversable="false" orientation="VERTICAL" HBox.hgrow="ALWAYS" />
-            <HBox id="animationControls" disable="true" HBox.hgrow="NEVER">
+            <HBox id="animation-controls" disable="true" HBox.hgrow="NEVER">
                <children>
-                  <Button id="animStart" focusTraversable="false" mnemonicParsing="false">
+                  <Button id="anim-start" focusTraversable="false" mnemonicParsing="false">
                      <graphic>
-                        <ImageView pickOnBounds="true" preserveRatio="true">
+                        <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
                            <image>
-                              <Image url="@player_start.png" />
+                              <Image url="@anim_start.png" />
                            </image>
                         </ImageView>
                      </graphic>
@@ -148,11 +276,11 @@
                         <Tooltip text="Go to first frame" />
                      </tooltip>
                   </Button>
-                  <Button id="animStepBackward" focusTraversable="false" layoutX="10.0" layoutY="10.0" mnemonicParsing="false">
+                  <Button id="anim-previous" focusTraversable="false" layoutX="10.0" layoutY="10.0" mnemonicParsing="false">
                      <graphic>
-                        <ImageView pickOnBounds="true" preserveRatio="true">
+                        <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
                            <image>
-                              <Image url="@player_step_backward.png" />
+                              <Image url="@anim_prev.png" />
                            </image>
                         </ImageView>
                      </graphic>
@@ -160,11 +288,11 @@
                         <Tooltip text="Step back one frame" />
                      </tooltip>
                   </Button>
-                  <Button id="animPlay" focusTraversable="false" mnemonicParsing="false">
+                  <Button id="anim-play-pause" focusTraversable="false" mnemonicParsing="false">
                      <graphic>
-                        <ImageView pickOnBounds="true" preserveRatio="true">
+                        <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
                            <image>
-                              <Image url="@player_play.png" />
+                              <Image url="@anim_play.png" />
                            </image>
                         </ImageView>
                      </graphic>
@@ -172,11 +300,11 @@
                         <Tooltip text="Play" />
                      </tooltip>
                   </Button>
-                  <Button id="animStepForward" focusTraversable="false" mnemonicParsing="false">
+                  <Button id="anim-next" focusTraversable="false" mnemonicParsing="false">
                      <graphic>
-                        <ImageView pickOnBounds="true" preserveRatio="true">
+                        <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
                            <image>
-                              <Image url="@player_step_forward.png" />
+                              <Image url="@anim_next.png" />
                            </image>
                         </ImageView>
                      </graphic>
@@ -184,11 +312,11 @@
                         <Tooltip text="Step forward one frame" />
                      </tooltip>
                   </Button>
-                  <Button id="animEnd" focusTraversable="false" layoutX="162.0" layoutY="10.0" mnemonicParsing="false">
+                  <Button id="anim-end" focusTraversable="false" layoutX="162.0" layoutY="10.0" mnemonicParsing="false">
                      <graphic>
-                        <ImageView pickOnBounds="true" preserveRatio="true">
+                        <ImageView fitHeight="16.0" fitWidth="16.0" pickOnBounds="true" preserveRatio="true">
                            <image>
-                              <Image url="@player_end.png" />
+                              <Image url="@anim_end.png" />
                            </image>
                         </ImageView>
                      </graphic>

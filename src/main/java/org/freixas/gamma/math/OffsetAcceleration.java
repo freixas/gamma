@@ -204,8 +204,8 @@ import org.freixas.gamma.value.WorldlineSegment;
  * See http://web.physics.ucsb.edu/~fratus/phys103/LN/IGR.pdf See
  * https://math.ucr.edu/home/baez/physics/Relativity/SR/Rocket/rocket.html
  *
- * @see gamma.math.Acceleration
- * @see gamma.value.WorldlineSegment
+ * @see org.freixas.gamma.math.Acceleration
+ * @see org.freixas.gamma.value.WorldlineSegment
  *
  * @author Antonio Freixas
  */
@@ -215,6 +215,7 @@ public class OffsetAcceleration implements ExecutionImmutable
     private final double vInit;
     private final Coordinate vPoint;
     private final double vPointTau;
+    @SuppressWarnings("FieldCanBeLocal")
     private final double vPointD;
 
     private final Coordinate offset;
@@ -327,6 +328,7 @@ public class OffsetAcceleration implements ExecutionImmutable
     }
 
     // **********************************************************
+    // *
     // *
     // * Source is v
     // *
@@ -977,8 +979,7 @@ public class OffsetAcceleration implements ExecutionImmutable
         if (zeroAcceleration) {
             Coordinate intersection = line.intersect(new ConcreteLine(Line.AxisType.T, vInit, vPoint));
             if (intersection == null) return null;
-            Coordinate[] results = { intersection };
-            return results;
+            return new Coordinate[] { intersection };
         }
 
         // Now we translate the curve and line to the standard system, intersect

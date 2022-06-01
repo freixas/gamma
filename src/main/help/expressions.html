@@ -306,7 +306,8 @@
                     </tbody>
                 </table>
                 <h1><a id="functions"></a>Functions</h1>
-                <p>In Gamma, functions return single values, although that value can be a multivalued object. The following functions are available:</p>
+                <p>In Gamma, a function is a construct that receives multiple values (called &quot;parameters&quot; or &quot;arguments&quot;) and uses them to compute a single result, which then takes the place of the function. Unless otherwise stated, every function argument can be an expression. For clarity in the following tables, each argument is listed with the name of the data type that the expression should resolve to. As throughout Gamma and unless otherwise mentioned, if the type is frame, an observer can also be used (the frame used is the inertial frame at the observer's tau  0).</p>
+                <p>The following functions are available:</p>
                 <h2><a id="lorentz-transformation-functions"></a>Lorentz Transformation Functions</h2>
                 <p>Note that the Lorentz transformation are performed using the <span class="literal">-&gt;</span> and <span class="literal">&lt;-</span> operators.</p>
                 <table class="function-table">
@@ -322,12 +323,24 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td>gamma( <span class="non-terminal">expr</span> )</td>
-                            <td>The gamma value for the given value. The value can be a float (velocity) and frame or an observer promoted to a frame (at tau = 0).</td>
+                            <td>gamma( <span class="non-terminal">frame</span> )</td>
+                            <td>The gamma value for the given frame. The <span class="non-terminal">frame</span> arguement can also be a <span class="non-terminal">float</span> (velocity) or <span class="non-terminal">observer</span>.</td>
                         </tr>
                         <tr>
                             <td>gammaToV( <span class="non-terminal">float</span> )</td>
-                            <td>The velocity matching the given gamma. The sign of the velocity matches the sign of the gamma value.</td>
+                            <td>The argument is a gamma value and the result is the velocity matching the given gamma. The sign of the velocity matches the sign of the gamma value.</td>
+                        </tr>
+                        <tr>
+                          <td>lengthContraction( float , frame )</td>
+                          <td>The first value is a length as measured in the frame given as the second argument. The <span class="non-terminal">frame</span> arguement can also be a <span class="non-terminal">float</span> (velocity) or <span class="non-terminal">observer</span>. The result is the contracted length measured in the rest frame.</td>
+                        </tr>
+                        <tr>
+                          <td>timeDilation( float , frame )</td>
+                          <td>The first value is a duration as measured in the frame given as the second argument. The <span class="non-terminal">frame</span> arguement can also be a <span class="non-terminal">float</span> (velocity) or <span class="non-terminal">observer</span>. The result is the dilated duration measured in the rest frame.</td>
+                        </tr>
+                        <tr>
+                          <td>toRelativeV( float , frame (, frame)* )</td>
+                          <td>The first argument is a velocity. This velocity is relative to the rest frame unless the third parameter is given, in which case it is relative to that frame. The second argument is always the frame in which the final computed velocity is measured. The result is a velocity relative to the frame given as the second argument. In other words, if an observer at rest in the rest frame (or the frame given by the final argument)  measures an object's velocity and provides it as the first argument, then another observer, at rest in the frame given by the second argument, will find that the same object's velocity matches the result of this function.<br></td>
                         </tr>
                     </tbody>
                 </table>
@@ -353,8 +366,9 @@
                             <td>The angle of the x-axis of an inertial frame with the given velocity. The angle is in degrees from -90° (exclusive) to -45° (exclusive) or from +45 (exclusive) to +90° (inclusive).</td>
                         </tr>
                         <tr>
-                          <td>toRelativeAngle ( <span class="non-terminal">float </span>, <span class="non-terminal">expr</span> )</td>
-                          <td>The first value is an angle in degrees relative to the rest frame. The second value can be a float (velocity) and frame or an observer promoted to a frame (at tau = 0). The function returns the equivalent angle  in the frame specified by the second argument. The angle is in the range -180, exclusive, to 180, inclusive. Note that if toRelativeAngle(angle1, v) = angle2, then toRelativeAngle(angle2, -v) = angle1.</td>
+                          <td>toRelativeAngle ( <span class="non-terminal">float </span>, <span class="non-terminal">frame</span> )</td>
+                          <td><p>The first value is an angle in degrees relative to the rest frame. The second value can be a float (velocity), frame or an observer promoted to a frame (at tau = 0). The function returns the equivalent angle  in the frame specified by the second argument. To make this clearer, consider a line in the rest frame going through two events and measure its angle. If we select another frame and view the same line from its viewpoint, the line's angle will equal the value returned by this function.</p>
+                          <p>The angle is in the range -180, exclusive, to 180, inclusive. Note that if toRelativeAngle(angle1, v) = angle2, then toRelativeAngle(angle2, -v) = angle1.</p></td>
                         </tr>
                     </tbody>
                 </table>
@@ -636,6 +650,52 @@
                             <td>Returns the  hyperbolic tangent of the value.</td>
                         </tr>
                     </tbody>
+                </table>
+                <h2><a id="wavelength-functions"></a>Wavelength Functions</h2>
+                <p>The first four functions deal with an electromagnetic signal that travels between two observers. Each observer notes the frequency or wavelength of the signal as it passes by.</p>
+                <p>The first two of the four functions take source and received values and compute the velocity of the first observer as measured by second observer relative to the inertial frame of the second observer at the instant this observer measures the signal. The units used to measure the wavelengths or frequencies don't matter as long as they are consistent.</p>
+              <p>The velocity is positive if the two observers are moving away from each other. This matches the true relative velocity only if the source observer is to the right of the receiver on the spacetime diagram, otherwise the sign should be inverted.</p>
+                <p>The next two functions invert the above. The first argument is the wavelength or frequency as measured by the first observer. The second argument is the velocity of the first observer measured by the second observer relative to the inertial frame of the second observer at the instant this observer measures the signal. The result is in the same units as the first argument.</p>
+                <p>The given velocity should be positive if the two observers are moving away from each other. The true velocity can be used if the source observer is to the right of the receiver on the spacetime diagram, otherwise the sign should be inverted.</p>
+                <p>The final two functions convert electromagnetic signal frequencies (in Hz) to wavelengths (in meters) and vice versa.<br>
+                </p>
+                <table class="function-table">
+                  <colgroup>
+                    <col class="column1" />
+                    <col class="column2" />
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <td>Function</td>
+                      <td>Returns</td>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>dopplerWavelengthToV( <span class="non-terminal">float </span>, <span class="non-terminal">float</span> )</td>
+                      <td>The values are wavelengths. The result is a velocity. The velocity is positive if the observers are moving away from each other.</td>
+                    </tr>
+                    <tr>
+                      <td>dopplerFrequencyToV( <span class="non-terminal">float </span>, <span class="non-terminal">float</span> )</td>
+                      <td>The values are frequencies. The result is a velocity. The velocity is positive if the observers are moving away from each other.</td>
+                    </tr>
+                    <tr>
+                      <td>dopplerVToWavelength( <span class="non-terminal">float </span>, <span class="non-terminal">float</span> )</td>
+                      <td>The first value is the wavelength measured by the first observer. The second is the relative velocity of the first observer relative to the second. The result is a wavelength.  The velocity should be given as positive if the observers are moving away from each other.</td>
+                    </tr>
+                    <tr>
+                      <td>dopplerVToFrequency( <span class="non-terminal">float </span>, <span class="non-terminal">float</span> )</td>
+                      <td>The first value is the frequency measured by the first observer. The second is the relative velocity of the first observer relative to the second. The result is a frequency.  The velocity should be given as positive if the observers are moving away from each other.</td>
+                    </tr>
+                    <tr>
+                      <td>frequencyToWavelength( <span class="non-terminal">float </span>)</td>
+                      <td>The value is a frequency in Hertz (cycles per second) and the result is a wavelength in meters.</td>
+                    </tr>
+                    <tr>
+                      <td>wavelengthToFrequency( <span class="non-terminal">float </span>)</td>
+                      <td>The value is a wavelength in meters and the result is a frequency in Hertz (cycles per second).</td>
+                    </tr>
+                  </tbody>
                 </table>
                 <h2><a id="string-functions"></a>String Functions</h2>
                 <table class="function-table">

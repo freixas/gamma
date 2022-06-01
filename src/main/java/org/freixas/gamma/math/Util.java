@@ -285,6 +285,35 @@ public final class Util
     }
 
     /**
+     * Given an electromagnetic signal with a frequency in cycles per sec (Hz),
+     * return the corresponding, wavelength in meters.
+     *
+     * @param frequency An electromagnetic signal with a frequency in cycles
+     * per sec (Hz)
+     *
+     * @return A wavelength in meters;
+     */
+    static public double frequencyToWavelength(double frequency)
+    {
+        if (frequency <= 0) throw new ExecutionException("The frequency must be > 0");
+        return Relativity.C / frequency;
+    }
+
+    /**
+     * Given an electromagnetic wavelength in meters, return the corresponding
+     * frequency in cycles per sec (Hz).
+     *
+     * @param wavelength An electromagnetic wavelength in meters.
+     *
+     * @return The frequency in cycles per sec (Hz).
+     */
+    static public double wavelengthToFrequency(double wavelength)
+    {
+        if (wavelength <= 0) throw new ExecutionException("The source frequency must be > 0");
+        return Relativity.C / wavelength;
+    }
+
+    /**
      * Convert a double to an integer by truncating toward zero. This truncates
      * the number so that 1.99999 becomes 1 and -1.99999 becomes -1.
      *

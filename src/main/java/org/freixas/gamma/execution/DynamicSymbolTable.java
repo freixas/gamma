@@ -138,4 +138,15 @@ public class DynamicSymbolTable extends BaseSymbolTable
         }
     }
 
+    /**
+     * Remove the display controls from the main window.
+     *
+     * @param window The main window.
+     */
+
+    public void removeDisplayControls(MainWindow window)
+    {
+        window.removeAllDisplayControls();
+    }
+
 }

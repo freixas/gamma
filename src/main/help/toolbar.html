@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"><!-- InstanceBegin template="/Templates/gamma-help.dwt" codeOutsideHTMLIsLocked="false" -->
+    <head>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="styles/help.css" type="text/css" />
+        <!-- InstanceBeginEditable name="doctitle" -->
+        <title>Help - Menu</title>
+        <!-- InstanceEndEditable -->
+    </head>
+
+    <body>
+        <div id ="header">
+            <div id="main-page"><a href="index.html">Return to Top</a></div>
+            <!-- InstanceBeginEditable name="Header" -->
+            Help - Menu
+
+            <!-- InstanceEndEditable --> </div>
+        <div id="main">
+            <div id="nav">
+                <!-- InstanceBeginEditable name="Nav" -->
+                <ol>
+                    <li><a href="#toolbar">Toolbar</a>
+                      <ol>
+                        <li><a href="#main-toolbar-area">Main Toolbar Area</a>
+                          <ol>
+                            <li><a href="#new-file">New File</a></li>
+                            <li><a href="#open-file">Open File</a></li>
+                            <li><a href="#open-URL">Open URL</a></li>
+                            <li><a href="#export-diagram">Export Diagram</a></li>
+                            <li><a href="#close-window">Reload</a></li>
+                          </ol>
+                        </li>
+                        <li><a href="#slideshow-buttons">Slideshow Buttons</a>
+                          <ol>
+                            <li><a href="#first-slide">First Slide</a></li>
+                            <li><a href="#previous-slide">Previous Slide</a></li>
+                            <li><a href="#play-pause-mode">Play/Pause Mode</a></li>
+                            <li><a href="#next-slide">Next Slide</a></li>
+                            <li><a href="#last-slide">Last Slide</a></li>
+                          </ol>
+                        </li>
+                      </ol>
+                    </li>
+                </ol>
+                <!-- InstanceEndEditable -->
+            </div>
+            <div id="content">
+                <!-- InstanceBeginEditable name="content" -->
+                <h1><a id="toolbar"></a>Toolbar</h1>
+                <h2><a id="main-toolbar-area"></a>Main Toolbar Area </h2>
+                <h3><a id="new-file"></a><img src="images/new-file.png" width="32" height="32" alt="New file"></h3>
+                <p>Creates a file, associates it with the window, load the empty file, and executes the empty script. From then on, each time the file (or any dependent file) is saved, the file will be re-loaded and executed.</p>
+                <h3><a id="open-file"></a><img src="images/open-file.png" width="32" height="32" alt="Open file"></h3>
+                <p>Opens an existing file, associates it with the window, loads the script, and executes it. From then on, each time the file (or any dependent file) is saved, the file will be re-loaded and executed.</p>
+                <h3><a id="open-url"><img src="images/open-url.png" width="32" height="32" alt="Open URL"></a></h3>
+                <p>Opens an existing file located on the web, associates it with the window, loads the script, and executes it. The file is not monitored for changes.</p>
+                <h3><a id="export-diagram"></a><img src="images/export-diagram.png" width="32" height="32" alt="Export diagram"></h3>
+                <p>Saves the diagram as a JPG, PNG, or TIFF.</p>
+                <h3><a id="close-window"></a><img src="images/reload.png" width="32" height="32" alt="Reload"></h3>
+                <p>Reload the current diagram. This does not re-read or parse the file—it re-executes file as though it had just been loaded and parsed. </p>
+                <h2><a id="slideshow-buttons"></a>Slideshow Buttons</h2>
+                <p>The slideshow buttons are enabled only when the current script is a slideshow.</p>
+                <h3><a id="first-slide"><img src="images/ss_start.png" width="32" height="32" alt="Go to first slide"></a></h3>
+                <p>Go to the first script (slide) in the slideshow.</p>
+                <h3><a id="previous-slide"><img src="images/ss_prev.png" width="32" height="32" alt="Go to the previous slide"></a></h3>
+                <p>Go to the previous script (slide) in the slideshow.</p>
+                <h3><a id="play-pause-mode"><img src="images/ss_play.png" width="32" height="32" alt="Enable play mode"> <img src="images/ss_pause.png" width="32" height="32" alt="Enable pause mode"></a></h3>
+                <p>You can use this button to play or pause the animation (the icon shown is for the mode you will enter, not the mode currently enabled).  In &quot;play&quot; mode, scripts (slides) advance automatically from one to the next; in &quot;pause&quot; mode, scripts (slides) advance only through the use of the slideshow controls.                </p>
+                <p>The point at which the slide advances depends on the slide and the pause time assigned to it. Once a diagram is drawn (for an animation, once the last frame of the animation is drawn), it will remain for some number of seconds before advancing. The delay time is unique to each slide and can range from 0 to infinity (if it is infinity, the slide will never automatically advance).</p>
+                <p>If you interact with the slide, the delay time resets to its full delay time. An interaction can be a zoom or pan action, or moving a GUI control. For example, if the delay time is 5 seconds, a slide will advace (in play mode) only 5 seconds after it is drawn or after your last interaction with it.</p>
+                <h3><a id="next-slide"><img src="images/ss_next.png" width="32" height="32" alt="Go to the next slide"></a></h3>
+                <p>Go to the next script (slide) in the slideshow.</p>
+                <h3><a id="last-slide"><img src="images/ss_end.png" width="32" height="32" alt="Go to last slide"></a></h3>
+                <p>Go to the last script (slide) in the slideshow.</p>
+                <!-- InstanceEndEditable -->
+            </div>
+        </div>
+    </body>
+    <!-- InstanceEnd -->
+</html>

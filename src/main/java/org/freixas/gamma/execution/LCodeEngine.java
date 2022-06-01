@@ -127,7 +127,8 @@ public class LCodeEngine
 
     /**
      * Get the display command  (which is not stored on the lcode list).
-     * @return
+     *
+     * @return The display command.
      */
     public Command getDisplayCommand()
     {
@@ -284,9 +285,7 @@ public class LCodeEngine
         FrameStruct fStruct = (FrameStruct)frameCommand.getCmdStruct();
         if (!fStruct.frame.equals(HCodeEngine.getDefFrame())) {
             final Frame prime = fStruct.frame;
-            commands.forEach((Command command) -> {
-                command.getCmdStruct().relativeTo(prime);
-            });
+            commands.forEach((Command command) -> command.getCmdStruct().relativeTo(prime));
         }
     }
 
@@ -307,11 +306,10 @@ public class LCodeEngine
 
              // Execute normal commands
 
-             ListIterator<Command> iter = commands.listIterator();
-             while (iter.hasNext()) {
-                 iter.next().execute(context);
-                 if (isClosed) return;
-             }
+            for (Command command : commands) {
+                command.execute(context);
+                if (isClosed) return;
+            }
         }
         catch (Throwable e) {
             throwGammaException(e);
@@ -417,12 +415,15 @@ public class LCodeEngine
         // ************************************************************
 
         mousePressedEventHandler = event -> {
+            window.userInteractionOccurred();
             mouseX = event.getX();
             mouseY = event.getY();
         };
         canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, mousePressedEventHandler);
 
         mouseDraggedEventHandler = event -> {
+            window.userInteractionOccurred();
+
             try {
                 double deltaX = event.getX() - mouseX;
                 double deltaY = event.getY() - mouseY;
@@ -452,6 +453,8 @@ public class LCodeEngine
         // ************************************************************
 
         scrollEventHandler = event -> {
+            window.userInteractionOccurred();
+
             GraphicsContext gc = canvas.getGraphicsContext2D();
 
             double delta = event.getDeltaY();
@@ -482,6 +485,8 @@ public class LCodeEngine
 
             // Reset zoom/pan (Ctrl + 0)
 
+            window.userInteractionOccurred();
+
             if (event.getCode() == KeyCode.DIGIT0) {
                 ((DisplayCommandExec)displayCommand.getCmdExec()).
                     setInitialZoomPan(context, ((DisplayStruct)displayCommand.getCmdStruct()));
@@ -495,13 +500,18 @@ public class LCodeEngine
            }
 
             engine.execute();
-            if (engine.isMouseInside()) {
-                // displayCoordinates(label, event.getX(), event.getY());
-            }
         };
         canvas.addEventHandler(KeyEvent.KEY_PRESSED, keyPressedEventHandler);
     }
 
+    /**
+     *  Display the current rest frame coordinates corresponding to the
+     *  give screen (mouse) coordinates.
+     *
+     * @param label The node in which to display the coordinates.
+     * @param x The X screen (mouse) coordinate.
+     * @param y The Y screen (mouse) coordinate.
+     */
     private void displayCoordinates(Label label, double x, double y)
     {
         try {
@@ -576,7 +586,7 @@ public class LCodeEngine
     }
 
     /**
-     * Remove all the listeners attached to this lcode engine
+     * Remove all the listeners attached to this l-code engine
      */
     private void removeListeners()
     {

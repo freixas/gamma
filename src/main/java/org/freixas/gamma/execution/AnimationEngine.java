@@ -46,7 +46,7 @@ import javafx.scene.layout.HBox;
 public class AnimationEngine
 {
     enum State {
-        RUNNING, STOPPED, NOT_SET
+        RUNNING, PAUSED, NOT_SET
     }
 
     static class DiagramAnimationTimer extends AnimationTimer
@@ -153,13 +153,13 @@ public class AnimationEngine
     private double speed;
     private State state;
 
-    private Canvas canvas;
-    private HBox animationControls;
-    private Button buttonAnimStart;
-    private Button buttonAnimEnd;
-    private Button buttonAnimStepBackward;
-    private Button buttonAnimStepForward;
-    private Button buttonAnimPlayPause;
+    private final Canvas canvas;
+    private final HBox animationControls;
+    private final Button buttonAnimStart;
+    private final Button buttonAnimEnd;
+    private final Button buttonAnimPrevious;
+    private final Button buttonAnimNext;
+    private final Button buttonAnimPlayPause;
 
     EventHandler<ActionEvent> animStartEventHandler;
     EventHandler<ActionEvent> animEndEventHandler;
@@ -168,8 +168,8 @@ public class AnimationEngine
     EventHandler<ActionEvent> animPlayPauseEventHandler;
     EventHandler<KeyEvent> keyTypedEventHandler;
 
-    private ImageView playImage;
-    private ImageView stopImage;
+    private final ImageView playImage;
+    private final ImageView pauseImage;
 
     private int framesPerAnimation;
     private int framesPerRep;
@@ -191,27 +191,30 @@ public class AnimationEngine
         this.state = State.NOT_SET;
         this.isClosed = false;
 
-        setup();
-    }
-
-    private void setup()
-    {
         // Get the drawing area
 
         canvas = window.getCanvas();
 
-        animationControls       = (HBox)  window.getScene().lookup("#animationControls");
-        buttonAnimStart         = (Button)window.getScene().lookup("#animStart");
-        buttonAnimEnd           = (Button)window.getScene().lookup("#animEnd");
-        buttonAnimStepBackward  = (Button)window.getScene().lookup("#animStepBackward");
-        buttonAnimStepForward   = (Button)window.getScene().lookup("#animStepForward");
-        buttonAnimPlayPause     = (Button)window.getScene().lookup("#animPlay");
+        animationControls   = (HBox)  window.getScene().lookup("#animation-controls");
+        buttonAnimStart     = (Button)window.getScene().lookup("#anim-start");
+        buttonAnimEnd       = (Button)window.getScene().lookup("#anim-end");
+        buttonAnimPrevious  = (Button)window.getScene().lookup("#anim-previous");
+        buttonAnimNext      = (Button)window.getScene().lookup("#anim-next");
+        buttonAnimPlayPause = (Button)window.getScene().lookup("#anim-play-pause");
 
-        InputStream playIS = window.getClass().getResourceAsStream("/player_play.png");
-        InputStream stopIS = window.getClass().getResourceAsStream("/player_stop.png");
+        InputStream playIS  = window.getClass().getResourceAsStream("/anim_play.png");
+        InputStream pauseIS = window.getClass().getResourceAsStream("/anim_pause.png");
 
-        playImage = playIS == null ? null : new ImageView(new Image(playIS));
-        stopImage = stopIS == null ? null : new ImageView(new Image(stopIS));
+        playImage  = playIS == null ? null : new ImageView(new Image(playIS));
+        pauseImage = pauseIS == null ? null : new ImageView(new Image(pauseIS));
+        if (playImage != null) {
+            playImage.setFitHeight(16);
+            playImage.setFitWidth(16);
+        }
+        if (pauseImage != null) {
+            pauseImage.setFitHeight(16);
+            pauseImage.setFitWidth(16);
+        }
 
         // Enable the button area
 
@@ -221,7 +224,7 @@ public class AnimationEngine
 
         addListeners();
 
-        setState(State.STOPPED);
+        setState(State.PAUSED);
     }
 
     /**
@@ -230,8 +233,6 @@ public class AnimationEngine
      */
     private void addListeners()
     {
-        final AnimationEngine engine = this;
-
         // ************************************************************
         // *
         // * BUTTON HANDLERS
@@ -247,30 +248,30 @@ public class AnimationEngine
         animEndEventHandler = event -> {
             toEnd();
             canvas.requestFocus();
-	};
-	buttonAnimEnd.addEventHandler(ActionEvent.ANY, animEndEventHandler);
+        };
+        buttonAnimEnd.addEventHandler(ActionEvent.ANY, animEndEventHandler);
 
         animStepBackwardEventHandler = event -> {
             stepBackward();
             canvas.requestFocus();
         };
-	buttonAnimStepBackward.addEventHandler(ActionEvent.ANY, animStepBackwardEventHandler);
+        buttonAnimPrevious.addEventHandler(ActionEvent.ANY, animStepBackwardEventHandler);
 
         animStepForwardEventHandler = event -> {
             stepForward();
             canvas.requestFocus();
-	};
-	buttonAnimStepForward.addEventHandler(ActionEvent.ANY, animStepForwardEventHandler);
+        };
+        buttonAnimNext.addEventHandler(ActionEvent.ANY, animStepForwardEventHandler);
 
         animPlayPauseEventHandler = event -> {
             togglePlay();
             canvas.requestFocus();
-	};
-	buttonAnimPlayPause.addEventHandler(ActionEvent.ANY, animPlayPauseEventHandler);
+        };
+        buttonAnimPlayPause.addEventHandler(ActionEvent.ANY, animPlayPauseEventHandler);
 
         // ************************************************************
         // *
-        // * KEYBOARDHANDLER
+        // * KEYBOARD HANDLER
         // *
         // ************************************************************
 
@@ -311,7 +312,7 @@ public class AnimationEngine
             int frame = absoluteToLogicalFrame(absFrame);
             executeFrame(frame);
         }
-        setState(State.STOPPED);
+        setState(State.PAUSED);
         if (timer != null) timer.stop();
     }
 
@@ -324,7 +325,7 @@ public class AnimationEngine
             int frame = absoluteToLogicalFrame(absFrame);
             executeFrame(frame);
         }
-        setState(State.STOPPED);
+        setState(State.PAUSED);
         if (timer != null) timer.stop();
     }
 
@@ -332,20 +333,20 @@ public class AnimationEngine
     {
         // Only if stopped
 
-        if (state != State.STOPPED) return;
+        if (state != State.PAUSED) return;
         int frame = getNextFrame(-1);
         executeFrame(frame);
-        setState(State.STOPPED);
+        setState(State.PAUSED);
     }
 
     private void stepForward()
     {
         // Only if stopped
 
-        if (state != State.STOPPED) return;
+        if (state != State.PAUSED) return;
         int frame = getNextFrame(1);
         executeFrame(frame);
-        setState(State.STOPPED);
+        setState(State.PAUSED);
     }
 
     private void play()
@@ -356,7 +357,7 @@ public class AnimationEngine
 
     private void togglePlay()
     {
-        if (state == State.STOPPED) {
+        if (state == State.PAUSED) {
             play();
         }
         else if (state == State.RUNNING) {
@@ -366,7 +367,7 @@ public class AnimationEngine
 
     private synchronized void stop()
     {
-        setState(State.STOPPED);
+        setState(State.PAUSED);
         if (timer != null) timer.stop();
     }
 
@@ -396,17 +397,17 @@ public class AnimationEngine
             buttonAnimStart.setDisable(false);
             buttonAnimEnd.setDisable(false);
             buttonAnimPlayPause.setDisable(false);
-            buttonAnimStepBackward.setDisable(true);
-            buttonAnimStepForward.setDisable(true);
+            buttonAnimPrevious.setDisable(true);
+            buttonAnimNext.setDisable(true);
 
-            if (stopImage != null) buttonAnimPlayPause.setGraphic(stopImage);
+            if (pauseImage != null) buttonAnimPlayPause.setGraphic(pauseImage);
         }
-        else if (state == State.STOPPED) {
+        else if (state == State.PAUSED) {
             buttonAnimStart.setDisable(absFrame == 0);
             buttonAnimEnd.setDisable( absFrame == absMaxFrame);
             buttonAnimPlayPause.setDisable(absFrame == absMaxFrame);
-            buttonAnimStepBackward.setDisable(absFrame == 0);
-            buttonAnimStepForward.setDisable(absFrame == absMaxFrame);
+            buttonAnimPrevious.setDisable(absFrame == 0);
+            buttonAnimNext.setDisable(absFrame == absMaxFrame);
 
             if (playImage != null) buttonAnimPlayPause.setGraphic(playImage);
         }
@@ -442,13 +443,6 @@ public class AnimationEngine
 
             dynamicSymbolTable = hCodeEngine.getDynamicSymbolTable();
             symbolNames = dynamicSymbolTable.getSymbolNames();
-
-//            // If we have dynamic variables, we need add the controls to the main window
-//
-//            dynamicSymbolTable = hCodeEngine.getDynamicSymbolTable();
-//            if (hasDisplayVariables) {
-//                dynamicSymbolTable.addDisplayControls(window);
-//            }
         }
 
         else {
@@ -567,6 +561,10 @@ public class AnimationEngine
 
         hCodeEngine.execute();
 
+        // If this is the last frame, report that we're done
+
+        if (atEnd()) window.diagramCompleted();
+
         // Try to see if we can keep the focus while the animation is running
 
         canvas.requestFocus();
@@ -664,8 +662,8 @@ public class AnimationEngine
     {
         buttonAnimStart.removeEventHandler(ActionEvent.ACTION, animStartEventHandler);
         buttonAnimEnd.removeEventHandler(ActionEvent.ACTION, animEndEventHandler);
-        buttonAnimStepBackward.removeEventHandler(ActionEvent.ACTION, animStepBackwardEventHandler);
-        buttonAnimStepForward.removeEventHandler(ActionEvent.ACTION, animStepForwardEventHandler);
+        buttonAnimPrevious.removeEventHandler(ActionEvent.ACTION, animStepBackwardEventHandler);
+        buttonAnimNext.removeEventHandler(ActionEvent.ACTION, animStepForwardEventHandler);
         buttonAnimPlayPause.removeEventHandler(ActionEvent.ACTION, animPlayPauseEventHandler);
         canvas.removeEventFilter(KeyEvent.KEY_TYPED, keyTypedEventHandler);
         window.getScene().removeEventFilter(KeyEvent.KEY_PRESSED, keyTypedEventHandler);
