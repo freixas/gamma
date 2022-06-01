@@ -77,8 +77,8 @@ scripts (Gamma programs) under **Help / Sample Scripts**.
 There are currently three installers:
 
 - An [MSI installer](https://github.com/freixas/gamma/releases/download/1.0.1/gamma-1.0.1.msi) for x64-based Windows 10 systems (likely to work on x64 Windows 7 and 8).
-- A [DEB package](https://github.com/freixas/gamma/releases/download/1.0.0-alpha3/gamma_1.0.0-1_amd64.deb) for x64 Debian-based Linux distributions
-- A [DMG package](https://github.com/freixas/gamma/releases/download/1.0.0-alpha3/gamma-1.0.0.dmg) for x64-based MacOS 11 systems (might work on MacOS 10.5)
+- A [DEB package](https://github.com/freixas/gamma/releases/download/1.0.1/gamma_1.0.1-1_amd64.deb) for x64 Debian-based Linux distributions
+- A [DMG package](https://github.com/freixas/gamma/releases/download/1.0.1/gamma-1.0.1.dmg) for x64-based MacOS 11 systems (might work on MacOS 10.5)
 
 For other systems (x32-based systems, Macs with M1, other Linux distributions), 
 there is a universal [tar.gz file](https://github.com/freixas/gamma/releases/download/1.0.1/gamma-1.0.1.tar.gz) which should work as long as you can find
