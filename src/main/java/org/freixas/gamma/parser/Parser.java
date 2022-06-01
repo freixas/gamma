@@ -17,6 +17,7 @@
 package org.freixas.gamma.parser;
 
 import javafx.util.Pair;
+import org.freixas.gamma.GammaIOException;
 import org.freixas.gamma.ProgrammingException;
 import org.freixas.gamma.Version;
 import org.freixas.gamma.css.value.StyleException;
@@ -515,6 +516,11 @@ public final class Parser
         throwParseException("A slideshow block cannot be followed by anything");
     }
 
+    /**
+     * Parse the slideshow settings.
+     *
+     * @throws ParseException When a syntax error occurs.
+     */
     private void parseSlideshowSettings() throws ParseException
     {
         // If we see a '{', we have no slideshow settings
@@ -536,11 +542,22 @@ public final class Parser
                     if (defaultPauseSeen) throwParseException("Duplicate 'defaultPause'");
                     nextToken();
                     defaultPauseSeen = true;
+
+                    double pause = Double.NaN;
                     if (isNumber()) {
-                        slideshow.setDefaultDiagramPause(getNumber());
+                        pause = getNumber();
+                    }
+                    else if (isName() && Constants.isConstant(getString())) {
+                        Object obj = Constants.get(getString());
+                        if (obj instanceof Double) {
+                            pause = (Double)obj;
+                        }
+                    }
+                    if (Double.isNaN(pause) || pause < 0.0) {
+                        throwParseException("Expected a non-negative number");
                     }
                     else {
-                        throwParseException("Expected a number");
+                        slideshow.setDefaultDiagramPause(pause);
                     }
                 }
                 else {
@@ -568,6 +585,11 @@ public final class Parser
         }
     }
 
+    /**
+     * Parse a slide.
+     *
+     * @throws ParseException When a syntax error occurs.
+     */
     private void parseSlide() throws ParseException
     {
         // We expect the current token to be 'script'
@@ -585,19 +607,34 @@ public final class Parser
 
                 double pause = Double.NaN;
                 if (isName() && getString().equals("pause")) {
+                    nextToken();
 
                     // The next thing should be a number
 
                     if (isNumber()) {
                         pause = getNumber();
-                        nextToken();
                     }
+                    else if (isName() && Constants.isConstant(getString())) {
+                        Object obj = Constants.get(getString());
+                        if (obj instanceof Double) {
+                            pause = (Double)obj;
+                        }
+                    }
+                    if (Double.isNaN(pause) || pause < 0.0) {
+                        throwParseException("Expected a non-negative number");
+                    }
+                    nextToken();
                 }
 
                 // Add a slide
 
                 try {
-                    slideshow.addSlide(filename, pause);
+                    URLFile script = slideshow.getSlideshowURLFile().getDependentScriptURL(filename);
+                    if (script.isFile()) dependentFiles.add(script);
+                    slideshow.addSlide(script, pause);
+                }
+                catch (ParseException e) {
+                    throw e;
                 }
                 catch (Exception e) {
                     throwParseException(e.getLocalizedMessage());
@@ -1264,7 +1301,7 @@ public final class Parser
 
             // Add it to the list of dependent files
 
-            dependentFiles.add(dependentURL);
+            if (dependentURL.isFile()) dependentFiles.add(dependentURL);
 
             // Tokenize it
 
@@ -1291,7 +1328,7 @@ public final class Parser
             setCurrentTokenTo(tokenPtr - 1);
         }
         catch (IOException e) {
-            throwParseException("IO Error - " + e.getMessage());
+            throwParseException(new GammaIOException(e).getLocalizedMessage());
         }
     }
 
@@ -1339,7 +1376,7 @@ public final class Parser
 
                 // Add it to the list of dependent files
 
-                dependentFiles.add(dependentURL);
+                if (dependentURL.isFile()) dependentFiles.add(dependentURL);
 
             }
             else {
@@ -1351,7 +1388,7 @@ public final class Parser
             stylesheet.addStylesheet(sheet);
         }
         catch (IOException e) {
-            throwParseException("IO Error - " + e.getMessage());
+            throwParseException(new GammaIOException(e).getLocalizedMessage());
         }
         catch (StyleException e) {
             throwParseException(e.getLocalizedMessage());

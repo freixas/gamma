@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="styles/help.css" type="text/css" />
+        <title>Help - Statements</title>
+    </head>
+
+    <body>
+        <div id ="header">
+            <div id="main-page"><a href="index.html">Return to Top</a></div>
+
+            Help - Statements   </div>
+        <div id="main">
+            <div id="nav">
+                <ol>
+                    <li><a href="#slideshows">Slideshows</a>
+                      <ol>
+                        <li><a href="#slideshow">slideshow</a></li>
+                        <li><a href="#script">script</a></li>
+                      </ol>
+                    </li>
+                </ol>
+            </div>
+            <div id="content">
+                <p class="note">See <a href="syntax.html">Syntax Notation</a> for information about the syntax notation used here.</p>
+                <h1><a id="slideshows"></a>Slideshows</h1>
+                <p>Slideshows are special types of scripts—ones that contain other scripts. Each script in a slideshow is called a slide.</p>
+              <p>Slideshows are intended for presentations such as lectures and for creating movies.              </p>
+              <h2><a id="slideshow"></a>slideshow</h2>
+              <p><span class="non-terminal">slideshow</span> → <span class="literal">slideshow</span> <span class="non-terminal">slideshowSettings</span>? <span class="non-terminal">slideshowBlock</span><br>
+                  <span class="non-terminal">slideshowSettings</span> → <span class="non-terminal">slideshowSetting</span> ( <span class="literal">,</span> <span class="non-terminal">slideshowSetting</span> )*<br>
+                  <span class="non-terminal">slideshowSetting</span> → <span class="literal">autoPlay</span> | <span class="literal">defaultPause</span> <span class="non-terminal">float</span><br>
+              <span class="non-terminal">slideshowBlock</span> → <span class="literal">{</span> <span class="non-terminal">scriptStatement</span> ( <span class="literal">;</span> <span class="non-terminal">scriptStatement</span> )* <span class="literal">}</span></p>
+                <p>A slideshow script begins with the <span class="literal">slideshow</span> statement. This separates it from normal scripts.</p>
+                <p>A slideshow can contain two settings, both optional:</p>
+                <ul>
+                  <li>If <span class="literal">autoPlay</span> is entered, the slideshow begins in &quot;play&quot; mode, automatically advancing from one slide to the next. If autoPlay is not entered, the slideshow begins in &quot;pause&quot; mode, where slides advance only on request. The end user can change to &quot;play&quot; or &quot;pause&quot; mode at any time.</li>
+                  <li><span class="literal">defaultPause</span> must be followed by a non-negative number. This controls the default number of seconds to pause after a non-animated, non-interactive script finishes. Animated scripts always have a default pause time of 0—as soon as the last frame is displayed, the next slide is loaded. Interactive scripts, on the other hand (even animated ones), have an infinite pause time. The default pause time for any kind of script can be overridden in the <span class="literal">script</span> statement.</li>
+                </ul>
+                <p>This <span class="literal">slideshow</span> statement is followed by a single <a href="statements.html#blocks">block</a>. This block contains only <span class="literal"><a href="#script">script</a></span><a href="#script"> statements</a>.</p>
+                <p>Both <span class="literal">slideshow</span> and <span class="literal">script</span> statements, both of which are <a href="statements.html#parsing-level-statements">parsing-level statements</a>. They can only contain literal values, not variables.</p>
+                <h2><a id="script"></a>script</h2>
+                <p><span class="non-terminal">scriptStatement</span> → <span class="literal">script</span> string <span class="non-terminal">scriptSettings</span>?<br>
+                  <span class="non-terminal">scriptSettings</span> → <span class="literal">pause</span> <span class="non-terminal">float</span><br>
+                </p>
+                <p>The <span class="literal">script</span> statement is folowed by a literal string that refers to a script file. If the file name is relative, it is relative to the location of the slideshow script. If a slideshow  is located on the web, all scripts must come from the same domain. If the slideshow is on the local file system, each script can come from anywhere.</p>
+                <p>The optional <span class="literal">pause</span> controls the number of seconds to pause after a slide finishes. Unlike  <span class="literal">defaultPause</span>, it applies to any kind of script. The pause time begins after the diagram is drawn or after the last frame of an animated diagram is drawn. Once the pause timer starts, it will be reset to its full pause time by any user interaction—zooming, panning, manipulating a GUI control, or changing the animation frame.</p>
+                <p>If a script within a slideshow is itself a script, it will be incorporated as though the individual scripts it contains had been entered in its place. The only difference is that the default pause times for scripts without explicit pause times will come from the nested slideshow rather than the top-level one.</p>
+            </div>
+        </div>
+    </body>
+</html>

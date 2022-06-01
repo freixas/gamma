@@ -135,7 +135,7 @@ public final class MainWindowController implements Initializable
         File selectedFile;
         while ((selectedFile = fileChooser.showSaveDialog(mainWindow)) != null) {
             if (selectedFile.createNewFile()) {
-                mainWindow.setScript(new URLFile(selectedFile), null, true);
+                mainWindow.associateMainScript(selectedFile.getAbsolutePath(), false);
                 return;
             }
             new Alert(Alert.AlertType.ERROR, "Use File/Open to open an existing script.").showAndWait();
@@ -158,7 +158,7 @@ public final class MainWindowController implements Initializable
 
         File selectedFile = fileChooser.showOpenDialog(mainWindow);
         if (selectedFile != null) {
-            mainWindow.setScript(new URLFile(selectedFile), null, true);
+            mainWindow.associateMainScript(selectedFile.getAbsolutePath(), false);
         }
     }
 
@@ -170,27 +170,20 @@ public final class MainWindowController implements Initializable
     @FXML
     public void fileMenuOpenURL(ActionEvent ignoredEvent)
     {
-        while (true) {
-            TextInputDialog dialog = new TextInputDialog();
-            URL resource = getClass().getResource("/AlertDialog.css");
-            if (resource != null) dialog.getDialogPane().getStylesheets().add(resource.toExternalForm());
-            dialog.setTitle("Open a URL");
-            dialog.setHeaderText("Enter a URL to open");
-            dialog.setContentText("URL:");
-            dialog.getEditor().setPrefColumnCount(40);
-            Optional<String> result = dialog.showAndWait();
+        TextInputDialog dialog = new TextInputDialog();
+        URL resource = getClass().getResource("/AlertDialog.css");
+        if (resource != null)
+            dialog.getDialogPane().getStylesheets().add(resource.toExternalForm());
+        dialog.setTitle("Open a URL");
+        dialog.setHeaderText("Enter a URL to open");
+        dialog.setContentText("URL:");
+        dialog.getEditor().setPrefColumnCount(40);
+        Optional<String> result = dialog.showAndWait();
 
-            if (result.isEmpty() || result.get().length() < 1) return;
+        if (result.isEmpty() || result.get().length() < 1) return;
 
-            String urlString = result.get();
-            try {
-                mainWindow.setScript(urlString, true);
-                return;
-            }
-            catch (MalformedURLException e) {
-                mainWindow.showTextAreaAlert(Alert.AlertType.ERROR, "Invalid URL", "Invalid URL", "The given URL '" + urlString + "' is invalid", true);
-            }
-        }
+        String urlString = result.get();
+        mainWindow.associateMainScript(urlString, true);
     }
 
     /**
@@ -291,9 +284,8 @@ public final class MainWindowController implements Initializable
 
         File selectedFile = fileChooser.showOpenDialog(mainWindow);
         if (selectedFile != null) {
-            mainWindow.setScript(new URLFile(selectedFile), null, true);
+            mainWindow.associateMainScript(selectedFile.getAbsolutePath(), false);
         }
-
     }
 
     /**
@@ -370,16 +362,7 @@ public final class MainWindowController implements Initializable
     @FXML
     public void toolbarReload(ActionEvent ignoredEvent)
     {
-        DiagramEngine engine = mainWindow.getDiagramEngine();
-        if (engine == null) return;
-
-        LinkedList<Object> hCodes = engine.getHCodes();
-        boolean isAnimated = engine.isAnimated();
-        SetStatement setStatement = engine.getSetStatement();
-        Stylesheet stylesheet = engine.getStylesheet();
-
-        engine = new DiagramEngine(mainWindow, hCodes, isAnimated, setStatement, stylesheet);
-        engine.execute();
+        mainWindow.reloadScript();
     }
 
     @FXML

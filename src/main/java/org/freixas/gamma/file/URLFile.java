@@ -158,6 +158,26 @@ public class URLFile
     }
 
     /**
+     * Get the name the URLFile file. This is just the last name in the
+     * pathname's name sequence. If the URLFile is a URL, the name is preceded
+     * by the host name in parentheses. If the pathname's name sequence is
+     * empty, then the empty string is returned.
+     *
+     * @return The name of the associated script file.
+     */
+    public String getName()
+    {
+        if (isFile) {
+            return file.getName();
+        }
+        else {
+            String host = url.getHost();
+            String path = url.getPath();
+            return "(" + host + ")" + new File(path).getName();
+        }
+    }
+
+    /**
      * Get the path portion of the URLFile.
      *
      * @return The path portion of the URLFile.

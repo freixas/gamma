@@ -18,7 +18,6 @@ package org.freixas.gamma.file;
 
 import javafx.application.Platform;
 import org.freixas.gamma.MainWindow;
-import org.freixas.gamma.parser.Parser;
 
 import java.io.File;
 import java.nio.file.*;
@@ -42,12 +41,12 @@ import static java.nio.file.StandardWatchEventKinds.*;
  */
 public class FileWatcher extends Thread
 {
+    private final int ID;
     private final File file;
     private final ArrayList<URLFile> dependentFiles;
     private final MainWindow window;
     private final List<Exception> list;
     private final AtomicBoolean stop = new AtomicBoolean(false);
-    private final boolean newFile;
 
     // **********************************************************************
     // *
@@ -58,19 +57,18 @@ public class FileWatcher extends Thread
     /**
      *  Create a file watcher.
      *
+     * @param ID The ID assigned to this watcher.
      * @param file The script file to monitor.
      * @param dependentFiles A list of dependent files (may be empty).
      * @param window The window associated with the script.
-     * @param newFile True if this is a new script file. If it is, it gets
-     * parsed and displayed without waiting for a change.
      */
-    public FileWatcher(File file, ArrayList<URLFile> dependentFiles, MainWindow window, boolean newFile)
+    public FileWatcher(int ID, File file, ArrayList<URLFile> dependentFiles, MainWindow window)
     {
+        this.ID = ID;
         this.file = file;
         this.dependentFiles = dependentFiles;
         this.window = window;
         this.list = Collections.synchronizedList(new ArrayList<>());
-        this.newFile = newFile;
     }
 
     // **********************************************************************
@@ -173,14 +171,7 @@ public class FileWatcher extends Thread
     {
         // We monitor several files, one of which is the main script file and the
         // rest of which are dependent files. The dependent files may change, forcing
-        // the creation of a new file watcher. If this file watcher was created
-        // because we have a new main file, we need to parse the script immediately.
-        // If it was created only because the dependent files changed, then we
-        // want to skip the initial update
-
-        if (newFile) {
-            doOnChange();
-        }
+        // the creation of a new file watcher
 
         try {
             WatchService watchService = FileSystems.getDefault().newWatchService();
@@ -295,8 +286,8 @@ public class FileWatcher extends Thread
                                     // process the script
 
                                     if (modTime > lastModTime + 1000) {
-                                        // System.err.println("doOnChange()\n");
-                                        doOnChange();
+                                        // System.err.println("Modified file detected\n");
+                                        Platform.runLater(window::reloadModifiedMainScript);
                                         lastModTime = modTime;
                                     }
                                 }
@@ -319,39 +310,12 @@ public class FileWatcher extends Thread
                     }
                 }
             }
-        } catch (Exception e) {
-            list.add(e);
-            Platform.runLater(new ScriptParseErrorHandler(window, list));
         }
-    }
-
-    // **********************************************************************
-    // *
-    // * Private
-    // *
-    // **********************************************************************
-
-    /**
-     * If the script file or any dependent file is modified, read it, parse it
-     * and pass the results on to the GUI thread.
-     */
-    private void doOnChange()
-    {
-        try {
-            URLFile URLFile = new URLFile(file);
-            String script = URLFile.readString();
-            Parser parser = new Parser(URLFile, script);
-            parser.parse();
-            Platform.runLater(new ScriptParseCompleteHandler(window, parser));
-        } catch (Exception e) {
-            Exception exception = e;
-            if (exception instanceof NoSuchFileException) {
-                exception = new Exception("File '" + file + "' does not exist.", exception);
-            }
-            list.add(exception);
-            // e.printStackTrace();
-            Platform.runLater(new ScriptParseErrorHandler(window, list));
+        catch (Exception e) {
+            if (!isStopped()) Platform.runLater(() -> window.fileWatcherException(ID, e));
         }
+
+        if (!isStopped()) Platform.runLater(() -> window.fileWatcherDone(ID));
     }
 
 }

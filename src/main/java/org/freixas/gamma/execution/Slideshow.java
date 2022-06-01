@@ -17,14 +17,12 @@
 package org.freixas.gamma.execution;
 
 import org.freixas.gamma.MainWindow;
-import org.freixas.gamma.css.value.Stylesheet;
-import org.freixas.gamma.execution.hcode.SetStatement;
 import org.freixas.gamma.file.URLFile;
 import org.freixas.gamma.parser.Parser;
 
+import java.io.File;
 import java.nio.file.NoSuchFileException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 
 public class Slideshow
 {
@@ -34,36 +32,48 @@ public class Slideshow
     // *
     // **********************************************************************
 
-    public final class Slide
+    static public final class Slide
     {
-        private final String name;
-        private final URLFile URLFile;
-        private final LinkedList<Object> hCodes;
-        private final boolean isAnimated;
-        private final SetStatement setStatement;
-        private final Stylesheet stylesheet;
-
-        private double pause;
+        private final URLFile urlFile;
+        private final Parser parser;
+        private final double pause;
 
         /**
          * Create a slide.
          *
+         * @param urlFile The URLFile that contains the script.
          * @param parser The parser that has completed parsing the script that
          * represents this slide.
-         * @param name The name of the script.
          * @param pause The number of seconds to pause after the last user
          * interaction with this slide before proceeding with the next.
          */
-        public Slide(Parser parser, String name, double pause)
+        public Slide(URLFile urlFile, Parser parser, double pause)
         {
-            this.name = name;
-            this.URLFile = parser.getScriptURL();
-            this.hCodes = parser.getHCodes();
-            this.isAnimated = parser.isAnimated();
-            this.setStatement = parser.getSetStatement();
-            this.stylesheet = parser.getStylesheet();
-
+            this.urlFile = urlFile;
+            this.parser = parser;
             this.pause = pause;
+        }
+
+        /**
+         * Get the URLFile that contains the script.
+         *
+         * @return The URLFile that contains the script.
+         */
+        public URLFile getUrlFile()
+        {
+            return urlFile;
+        }
+
+        /**
+         * Get the parser that has completed parsing the script that represents
+         * this slide.
+         *
+         * @return The parser that has completed parsing the script that
+         * represents this slide.
+         */
+        public Parser getParser()
+        {
+            return parser;
         }
 
         /**
@@ -91,8 +101,8 @@ public class Slideshow
 
     private boolean autoPlay;
     private double defaultDiagramPause;
-    private double defaultAnimationPause;
-    private double defaultInteractivePause;
+    private final double defaultAnimationPause;
+    private final double defaultInteractivePause;
 
     // **********************************************************************
     // *
@@ -117,44 +127,47 @@ public class Slideshow
     // *
     // **********************************************************************
 
+    /**
+     * Get the URLFile of the slideshow.
+     *
+     * @return The URLFile of the slideshow.
+     */
+    public URLFile getSlideshowURLFile()
+    {
+        return slideshowURLFile;
+    }
+
+    /**
+     * Return true if autoplay is on. If enabled, the slideshow begins in
+     * PLAY mode; otherwise, it is in PAUSE mode.
+     *
+     * @return True if autoplay is on.
+     */
     public boolean isAutoPlay()
     {
         return autoPlay;
     }
 
+    /**
+     * Enable or disable autoplay. If enabled, the slideshow begins in
+     * PLAY mode; otherwise, it is in PAUSE mode.
+     *
+     * @param autoPlay True if autoplay should be enabled.
+     */
     public void setAutoPlay(boolean autoPlay)
     {
         this.autoPlay = autoPlay;
     }
 
-    public double getDefaultDiagramPause()
-    {
-        return defaultDiagramPause;
-    }
-
+    /**
+     * Set the default diagram pause in seconds. This is the default amount of
+     * time to pause after a non-animated, non-interactive diagram.
+     *
+     * @param defaultDiagramPause The default diagram pause time
+     */
     public void setDefaultDiagramPause(double defaultDiagramPause)
     {
         this.defaultDiagramPause = defaultDiagramPause;
-    }
-
-    public double getDefaultAnimationPause()
-    {
-        return defaultAnimationPause;
-    }
-
-    public void setDefaultAnimationPause(double defaultAnimationPause)
-    {
-        this.defaultAnimationPause = defaultAnimationPause;
-    }
-
-    public double getDefaultInteractivePause()
-    {
-        return defaultInteractivePause;
-    }
-
-    public void setDefaultInteractivePause(double defaultInteractivePause)
-    {
-        this.defaultInteractivePause = defaultInteractivePause;
     }
 
     /**
@@ -190,9 +203,11 @@ public class Slideshow
     }
 
     /**
-     * Add a slide to the end of the slideshow/
+     * Add a slide to the end of the slideshow. If the slideshow is from a local
+     * file, then slides can come from anywhere. If the slideshow is from a URL,
+     * then all slides must come from the same domain.
      *
-     * @param name The name of the script file which will become the slide.
+     * @param urlFile The URLFile that contains the script which will become the slide.
      * @param pause The number of seconds to pause after the last user
      * interaction with this slide before proceeding with the next. If it's
      * NaN, we will use a default value
@@ -200,12 +215,11 @@ public class Slideshow
      * @throws Exception Thrown if there is a problem reading or parsing the
      * file.
      */
-    public void addSlide(String name, double pause)  throws Exception
+    public void addSlide(URLFile urlFile, double pause)  throws Exception
     {
         try {
-            URLFile URLFile = slideshowURLFile.getDependentScriptURL(name);
-            String script = URLFile.readString();
-            Parser parser = new Parser(URLFile, script);
+            String script = urlFile.readString();
+            Parser parser = new Parser(urlFile, script);
             parser.parse();
 
             if (parser.isSlideshow()) {
@@ -217,18 +231,16 @@ public class Slideshow
                     if (parser.isAnimated()) pause = defaultAnimationPause;
                     if (parser.hasDisplayVariables()) pause = defaultInteractivePause;
                 }
-
-                slideshow.add(new Slide(parser, name, pause));
+                slideshow.add(new Slide(urlFile, parser, pause));
             }
         }
         catch (Exception e) {
             Exception exception = e;
             if (exception instanceof NoSuchFileException) {
-                exception = new Exception("File '" + name + "' does not exist.", exception);
+                exception = new Exception("File '" + urlFile.getPath() + "' does not exist.", exception);
             }
             throw exception;
         }
-
     }
 
     /**
@@ -240,7 +252,6 @@ public class Slideshow
     public void showSlide(MainWindow mainWindow, int index)
     {
         Slide slide = getSlide(index);
-        DiagramEngine engine = new DiagramEngine(mainWindow, slide.hCodes, slide.isAnimated, slide.setStatement, slide.stylesheet);
-        engine.execute();
+        mainWindow.runSlide(slide);
     }
 }

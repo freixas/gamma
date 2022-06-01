@@ -16,12 +16,16 @@
  */
 package org.freixas.gamma.execution;
 
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Alert;
+import javafx.scene.transform.Affine;
 import org.freixas.gamma.GammaRuntimeException;
 import org.freixas.gamma.MainWindow;
 import org.freixas.gamma.ProgrammingException;
 import org.freixas.gamma.css.value.Stylesheet;
 import org.freixas.gamma.execution.hcode.SetStatement;
+import org.freixas.gamma.parser.Parser;
 
 import java.util.LinkedList;
 
@@ -38,6 +42,8 @@ import java.util.LinkedList;
 public class DiagramEngine
 {
     private final MainWindow window;
+    private final Parser parser;
+
     private final HCodeProgram program;
     private final boolean isAnimated;
     private final SetStatement setStatement;
@@ -58,28 +64,22 @@ public class DiagramEngine
      * Create a new diagram engine.
      *
      * @param window The associated window in which the diagram will be displayed.
-     * @param hCodes The h-codes to run.
-     * @param isAnimated True if this is an animated diagram.
-     * @param setStatement The set statement to use.
-     * @param stylesheet The stylesheet to use.
+     * @param parser The completed parse of a script file.
      */
-    public DiagramEngine(MainWindow window, LinkedList<Object> hCodes, boolean isAnimated, SetStatement setStatement, Stylesheet stylesheet)
+    public DiagramEngine(MainWindow window, Parser parser)
     {
         this.window = window;
-        this.program = new HCodeProgram(hCodes);
-        this.isAnimated = isAnimated;
-        this.setStatement = setStatement;
-        this.stylesheet = stylesheet;
+        this.parser = parser;
+
+        this.program = new HCodeProgram(parser.getHCodes());
+        this.isAnimated = parser.isAnimated();
+        this.setStatement = parser.getSetStatement();
+        this.stylesheet = parser.getStylesheet();
 
         this.animationEngine = null;
         this.hCodeEngine = null;
 
         this.isClosed = false;
-
-        // This call shuts down any diagram engine currently running in this
-        // window
-
-        window.setDiagramEngine(this);
     }
 
     // **********************************************************************
@@ -88,24 +88,34 @@ public class DiagramEngine
     // *
     // **********************************************************************
 
+    /**
+     * Get the associated main window.
+     *
+     * @return The associated main window.
+     */
+    public MainWindow getWindow()
+    {
+        return window;
+    }
+
+    /**
+     * Get the parser associated with this diagram engine.
+     *
+     * @return The parser associated with this diagram engine.
+     */
+    public Parser getParser()
+    {
+        return parser;
+    }
+
+    /**
+     * Get the h-codes associated with this diagram engine.
+     *
+     * @return The h-codes associated with this diagram engine.
+     */
     public LinkedList<Object> getHCodes()
     {
         return program.getHCodes();
-    }
-
-    public boolean isAnimated()
-    {
-        return isAnimated;
-    }
-
-    public SetStatement getSetStatement()
-    {
-        return setStatement;
-    }
-
-    public Stylesheet getStylesheet()
-    {
-        return stylesheet;
     }
 
     // **********************************************************************
@@ -113,8 +123,6 @@ public class DiagramEngine
     // * Control Methods
     // *
     // **********************************************************************
-
-
 
     public void execute() throws ExecutionException, ProgrammingException
     {
@@ -134,6 +142,10 @@ public class DiagramEngine
             else {
                 hCodeEngine = new HCodeEngine(window, setStatement, stylesheet, program);
                 hCodeEngine.execute();
+
+                // Let the main window know that the diagram has been drawn
+
+                window.diagramCompleted();
              }
         }
         catch (Throwable e) {
@@ -197,6 +209,11 @@ public class DiagramEngine
             hCodeEngine = null;
         }
         window.enableDisplayControls(false);
+
+        Canvas canvas = window.getCanvas();
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        gc.setTransform(new Affine());
+        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
     }
 
     // **********************************************************

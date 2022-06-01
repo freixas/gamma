@@ -294,6 +294,8 @@ public class HCodeEngine
     {
         if (lCodeEngine != null) lCodeEngine.close();
         lCodeEngine = null;
+
+        dynamicTable.removeDisplayControls(window);
     }
 
     public void addCommand(Command command)
