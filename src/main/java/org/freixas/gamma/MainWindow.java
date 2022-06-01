@@ -35,8 +35,7 @@ import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import org.freixas.gamma.execution.DiagramEngine;
-import org.freixas.gamma.execution.ScriptPrintDialog;
+import org.freixas.gamma.execution.*;
 import org.freixas.gamma.file.FileWatcher;
 import org.freixas.gamma.file.URLFile;
 import org.freixas.gamma.parser.ParseException;
@@ -63,8 +62,13 @@ import java.util.ArrayList;
  * @author Antonio Freixas
  *
  */
+@SuppressWarnings({ "FieldCanBeLocal", "unused" })
 public final class MainWindow extends Stage
 {
+    // The ID to assign to the next FileWatcher we create
+
+    static private int nextWatcherID = -1;
+
     // The toggle for whether to display the Greetings dialog or not.
     // This is global to all main windows -- only the first main window displayed
     // should display the Greetings dialog, and only if the setting is enabled
@@ -72,7 +76,10 @@ public final class MainWindow extends Stage
     static private boolean displayGreetingsDialog = PreferencesManager.getDisplayGreetingMessage();
 
     private final int ID;                       // The window's ID
-    private URLFile script;                   // The associated script
+
+    private URLFile mainScript;                 // The associated main script
+    private Parser mainScriptParser;            // The parser used to parse the main script
+
     private final File[] directoryDefaults;     // The default dirs for each type of file
 
     // Various menu items
@@ -81,6 +88,19 @@ public final class MainWindow extends Stage
     private MenuItem fileMenuExportVideo;
     private MenuItem fileMenuPrint;
     private MenuItem fileMenuClose = null;
+
+    // Various toolbar items
+
+    private Button toolbarFileNew;
+    private Button toolbarFileOpen;
+    private Button toolbarFileOpenURL;
+    private Button toolbarFileExportDiagram;
+    private Button toolbarReload;
+    private Button toolbarSlideshowStart;
+    private Button toolbarSlideshowPrevious;
+    private Button toolbarSlideshowPlayPause;
+    private Button toolbarSlideshowNext;
+    private Button toolbarSlideshowEnd;
 
     // Various containers/controls
 
@@ -98,12 +118,15 @@ public final class MainWindow extends Stage
 
     // Used to monitor for changes in the associated script
 
-    private FileWatcher watcher = null;
-    private Thread watcherThread = null;
+    private int watcherID;
+    private FileWatcher watcher;
+    private Thread watcherThread;
 
-    private DiagramEngine diagramEngine = null; // The diagram engine
+    private Slideshow slideshow;                // The associated slideshow
+    private SlideshowEngine slideshowEngine;    // The associated slideshow engine
+    private Slideshow.Slide slide;              // The associated slide, if any
+    private DiagramEngine diagramEngine;        // The diagram engine
     private Canvas canvas;                      // The diagram drawing area
-
 
     // **********************************************************************
     // *
@@ -129,8 +152,18 @@ public final class MainWindow extends Stage
         // instantiated.
 
         this.ID = ID;
-        this.script = null;
+        this.mainScript = null;
+        this.mainScriptParser = null;
         this.directoryDefaults = directoryDefaults;
+
+        this.watcherID = -1;
+        this.watcher = null;
+        this.watcherThread = null;
+
+        this.slideshow = null;
+        this.slideshowEngine = null;
+        this.slide = null;
+        this.diagramEngine = null;
 
         // Load the view (FXML file) and controller. Get a reference to the controller.
 
@@ -152,12 +185,7 @@ public final class MainWindow extends Stage
             locateUIElements();
             setCloseState(Gamma.getWindowCount() > 1);
 
-            try {
-                setScript(name, isURL);
-            }
-            catch (MalformedURLException e) {
-                showTextAreaAlert(Alert.AlertType.ERROR, "Invalid URL", "Invalid URL", "The URL given for the script is invalid: '" + name +"'", true);
-            }
+            associateMainScript(name, isURL);
 
             if (displayGreetingsDialog) {
                 try {
@@ -240,8 +268,8 @@ public final class MainWindow extends Stage
             // If we want the default directory to use for a script and we have
             // an associated file, use its parent directory
 
-            if (type == Gamma.FileType.SCRIPT && script != null && script.isFile()) {
-                directoryDefaults[type.getValue()] = script.getFile().getParentFile();
+            if (type == Gamma.FileType.SCRIPT && mainScript != null && mainScript.isFile()) {
+                directoryDefaults[type.getValue()] = mainScript.getFile().getParentFile();
             }
 
             // Otherwise, ask for the global default
@@ -269,6 +297,16 @@ public final class MainWindow extends Stage
         directoryDefaults[type.getValue()] = dir;
     }
 
+    public SlideshowEngine getSlideShowEngine()
+    {
+        return slideshowEngine;
+    }
+
+    public void setSlideshowEngine(SlideshowEngine slideshowEngine)
+    {
+        this.slideshowEngine = slideshowEngine;
+    }
+
     /**
      * Get the script associated with this main window. The script can be
      * null if there is no associated script file or URL.
@@ -277,171 +315,8 @@ public final class MainWindow extends Stage
      */
     public URLFile getScript()
     {
-        return script;
+        return mainScript;
     }
-
-    /**
-     * Set the script file associated with this main window by providing a name.
-     * The name can be the name of a URL or a file, or it can be null. URLs are
-     * identified either because the name contains "://" or because isURL is
-     * true.
-     *
-     * @param name The name of the script file.
-     * @param isURL True if the name should be interpreted as a URL.
-     *
-     * @throws MalformedURLException If the URL is not properly formed.
-     */
-    public void setScript(String name, boolean isURL) throws MalformedURLException
-    {
-        URLFile script = name == null ? null : new URLFile(name, isURL);
-        setScript(script, new ArrayList<>(), true);
-    }
-
-     /**
-     * Set the script file associated with this main window. The file can be
-     * null.
-     * <p>
-     * Certain menu items are enabled or disabled depending on whether the script
-     * is null. The title bar is updated to display the file name. If the script
-     * is not null, setting the associated script is run.
-     *
-     * @param script The script file associated with this window.
-     * @param dependentFiles The files referenced by the script.
-     * @param open True if the file was just opened
-     */
-    public void setScript(@Nullable URLFile script, ArrayList<URLFile> dependentFiles, boolean open)
-    {
-        try {
-            boolean isNewScript;
-            boolean disable = script == null;
-
-            // Enable/disable various File Menu entries
-
-            fileMenuExportDiagram.setDisable(disable);
-            fileMenuExportVideo.setDisable(disable);
-            fileMenuPrint.setDisable(disable);
-
-            // Update the title bar
-
-            setTitle("Gamma - " + (script != null ? script.toString() : ""));
-
-            // In case we ever decide to support disassociating a window from
-            // a script
-
-            if (script == null) {
-                setTitle("Gamma");
-
-                if (watcherThread != null) {
-                    watcher.stopThread();
-                }
-
-            }
-
-            // The URLFile is a file
-
-            else if (script.isFile()) {
-
-                // Decide if we have a new script file
-                // If the file was just opened, it's always a new file, even if
-                // the user re-opens the same file
-
-                File scriptFile = script.getFile();
-
-                isNewScript =
-                    open ||
-                        this.script == null ||
-                        !script.equals(this.script);
-
-                // Determine if we must create a new watcher. It's possible to call setScript()
-                // with the same set of files
-
-                if (watcherThread == null || isNewScript || !watcher.hasSameFiles(scriptFile, dependentFiles)) {
-
-                    // Stop any existing watcher
-
-                    if (watcherThread != null) {
-                        watcher.stopThread();
-                    }
-
-                    // The final parameter tells the file watcher whether we have
-                    // a new script file (requiring an immediate parse/display) or
-                    // whether we are just updating the dependent files
-
-                    watcher = new FileWatcher(scriptFile, dependentFiles, this, isNewScript);
-                    watcherThread = new Thread(watcher);
-                    watcherThread.start();
-                    if (diagramEngine != null) {
-                        diagramEngine.close();
-                        diagramEngine = null;
-                    }
-                }
-
-                // Save the new file and update the default directory for scripts
-
-                this.script = script;
-                setDefaultDirectory(Gamma.FileType.SCRIPT, scriptFile);
-
-                // Is this a new script? If so, try to open the editor on it
-
-                if (isNewScript) {
-
-                    // Check to make sure the file exists
-
-                    if (script.getFile().isFile()) {
-                        String editorCommand = PreferencesManager.getEditorCommand();
-                        if (editorCommand.length() > 0) {
-                            editorCommand = editorCommand.replace("$F$", script.toString());
-                            try {
-                                Platform.cmd(editorCommand);
-                            }
-                            catch (Exception e) {
-                                showTextAreaAlert(
-                                    Alert.AlertType.ERROR,
-                                    "Editor Command Error", "Editor Command Error",
-                                    "Error when trying to execute this editor command:\n\n" + editorCommand + "\n\n" +
-                                        "The reported error is:\n\n" +
-                                        e.getLocalizedMessage(),
-                                    true);
-                            }
-                        }
-                    }
-                }
-            }
-
-            // The URLFile is a URL
-
-            else {
-
-                // Load the URL contents
-
-                String urlContents = script.readString();
-
-                // Set the associated script
-
-                this.script = script;
-
-                // Parse it
-
-                Parser parser = new Parser(this.script, urlContents);
-                parser.parse();
-
-                // Start up the diagram engine.
-
-                DiagramEngine dEngine =
-                    new DiagramEngine(
-                        this, parser.getHCodes(),
-                        parser.isAnimated(),
-                        parser.getSetStatement(), parser.getStylesheet());
-                dEngine.execute();
-            }
-        }
-        catch (ParseException e) {
-            showParseException(e);
-        }
-        catch (IOException e) {
-            showTextAreaAlert(Alert.AlertType.ERROR,"URL Read Error", "URL Read Error", "Couldn't read " + script, true);
-        }
-     }
 
     /**
      * Get the screen on which this window was created.
@@ -502,6 +377,502 @@ public final class MainWindow extends Stage
 
     // **********************************************************************
     // *
+    // * Manage Script Association
+    // *
+    // **********************************************************************
+
+    /**
+     * Associate a script file with this window. This is main script file,
+     * meaning it can be a regular or slideshow script. This method should be
+     * called when the user associates a script with a window using "File/Open"
+     * or "File/Open URL".
+     * <p>
+     * If the given name contains "://" or if isURL is true, the name is treated
+     * as a URL; otherwise, it is treated as a filename. If the name is null,
+     * the main window is disassociated from any script file.
+     * <p>
+     * This method performs the following steps:
+     * <ul>
+     *     <li>Any associated script is terminated and disassociated.
+     *     <li>If the script is null, this method is done.
+     *     <li>The script is read. If it can't be read, an error is reported and
+     *         the script is not associated with this window. The user must again
+     *         use "File/Open" or "File/Open URL".
+     *     <li>The script is associated with the window.
+     *     <li>The script is parsed.
+     *     <li>If a syntax error occurs, an error is displayed. The user can
+     *         again use "File/Open" or "File/Open URL" or, if the script is
+     *         local, just save the script again.
+     *     <li>If the script is on the local file system, a FileWatcher is
+     *         started  to monitor for changes in the script or in any
+     *         dependent file.
+     *     <li>If the file is a regular script, it is executed.
+     *     <li>If the file is a slideshow, all dependent scripts are parsed. If
+     *         any of them have syntax errors, all syntax errors for all
+     *         dependent scripts are displayed. The user can
+     *         again use "File/Open" or "File/Open URL" or, if the script or any
+     *         dependent script is local, just save it.
+     * </ul>
+     *
+     * @param name The name of the script file.
+     * @param isURL True if the name should be interpreted as a URL.
+     */
+    public void associateMainScript(@Nullable String name, boolean isURL)
+    {
+        // End anything we previously have running
+
+        disassociateMainScript();
+
+        // If the given name is null, we're done
+
+        if (name == null) return;
+
+        // Create a URLFile from the name
+
+        URLFile script;
+        try {
+            script = new URLFile(name, isURL);
+        }
+        catch (MalformedURLException e) {
+            showTextAreaAlert(Alert.AlertType.ERROR, "Invalid URL", "Invalid URL", e.getLocalizedMessage(), true);
+            return;
+        }
+
+        // Read the contents
+
+        String content;
+        try {
+            content = script.readString();
+        }
+        catch (IOException e) {
+            showTextAreaAlert(Alert.AlertType.ERROR, "I/O Error", "I/O Error", new GammaIOException(e).getLocalizedMessage(), true);
+            return;
+        }
+
+        // If we've reached this point, we can now associate this main script
+        // file with this window
+
+        mainScript = script;
+
+        if (mainScript.isFile()) {
+
+            // If this is a local file, we can also update the default directory for
+            // script files to point to the directory in which the script exists
+
+            setDefaultDirectory(Gamma.FileType.SCRIPT, mainScript.getFile());
+
+            // If this is a local file and we have an editor command, try to
+            // open the script in the editor
+
+            String editorCommand = PreferencesManager.getEditorCommand();
+            if (editorCommand.length() > 0) {
+                editorCommand = editorCommand.replace("$F$", script.toString());
+                try {
+                    Platform.cmd(editorCommand);
+                }
+                catch (Exception e) {
+                    showTextAreaAlert(
+                        Alert.AlertType.ERROR,
+                        "Editor Command Error", "Editor Command Error",
+                        "Error when trying to execute this editor command:\n\n" + editorCommand + "\n\n" +
+                            "The reported error is:\n\n" +
+                            e.getLocalizedMessage(),
+                        true);
+                }
+            }
+        }
+
+        // Parse the main script and execute it
+
+        parseAndExecuteMainScript(content);
+    }
+
+    /**
+     * Reload a modified associated main script file. This means that the file
+     * (and any dependent files) are reloaded from local disk or from the web
+     * and parsed again. Note that it is possible for a script to change from
+     * slideshow to regular or vice versa.
+     * <p>
+     * Generally, this would be called when a FileWatcher notices that the
+     * contents of the script file or of any dependent files have changed. Only
+     * local files are monitored, not URLs.
+     * <p>
+     * This method performs the following steps:
+     * <ul>
+     *     <li>Any associated script is terminated.
+     *     <li>The script is read. If it can't be read, an error is reported and
+     *         the script is disassociated from this window. The user must
+     *         again use "File/Open" or "File/Open URL".
+     *     <li>The script is parsed.
+     *     <li>If the script is on the local file system and any dependent
+     *         files have changed, the existing FileWatcher is terminated and
+     *         a new one started.
+     *     <li>If a syntax error occurs, an error is displayed. The user can
+     *         again use "File/Open" or "File/Open URL" or, if the script is
+     *         local, just save the script again.
+     *     <li>If the file is a regular script, it is executed.
+     *     <li>If the file is a slideshow, all dependent scripts are parsed. If
+     *         any of them have syntax errors, all syntax errors for all
+     *         dependent scripts are displayed. The user can again use
+     *         "File/Open" or "File/Open URL" or, if the script or any
+     *         dependent script is local, just save it.
+     * </ul>
+     */
+    public void reloadModifiedMainScript()
+    {
+        // End anything we previously have running
+
+        terminateAssociatedScript();
+
+        // If we don't have an associated file, we're done
+
+        if (mainScript == null) return;
+
+        // Read the contents of the currently associated file. If we get an
+        // error, we disassociate the file
+
+        String content;
+        try {
+            content = mainScript.readString();
+        }
+        catch (IOException e) {
+            disassociateMainScript();
+            showTextAreaAlert(Alert.AlertType.ERROR, "I/O Error", "I/O Error", new GammaIOException(e).getLocalizedMessage(), true);
+            return;
+        }
+
+        // Parse the main script and execute it
+
+        parseAndExecuteMainScript(content);
+    }
+
+    /**
+     * Reload the current script file from the whatever was last read and parsed.
+     * This method is called when the user asks that the file be reloaded.
+     * <p>
+     * This method performs the following steps:
+     * <ul>
+     *     <li>If there is no associated script file, it does nothing.
+     *     <li>If the script had a syntax error, it does nothing.
+     *     <li>The associated script file is terminated.
+     *     <li>If the main script is a slideshow, the current slide is restarted.
+     *     <li>If the main script is a regular script, it is restarted.
+     * </ul>
+     */
+    public void reloadScript()
+    {
+        // No associated file
+
+        if (diagramEngine == null) return;
+
+        // This counts as a user interaction
+
+        userInteractionOccurred();
+
+        // Close the current diagram engine and start a new one
+
+        diagramEngine.close();
+        if (slideshowEngine != null) {
+            diagramEngine = new DiagramEngine(this, slideshowEngine.getCurrentSlide().getParser());
+        }
+        else {
+            diagramEngine = new DiagramEngine(this, mainScriptParser);
+        }
+        diagramEngine.execute();
+    }
+
+    /**
+     * Parse a main script file and execute it.
+     * <p>
+     * This method performs the following steps:
+     * <ul>
+     *     <li>The script is parsed.
+     *     <li>If a syntax error occurs, an error is displayed. The user can
+     *         again use "File/Open" or "File/Open URL" or, if the script is
+     *         local, just save the script again.
+     *     <li>If the script is on the local file system, a FileWatcher is
+     *         started  to monitor for changes in the script or in any
+     *         dependent file.
+     *     <li>If the file is a regular script, it is executed.
+     *     <li>If the file is a slideshow, all dependent scripts are parsed. If
+     *         any of them have syntax errors, all syntax errors for all
+     *         dependent scripts are displayed. The user can
+     *         again use "File/Open" or "File/Open URL" or, if the script or any
+     *         dependent script is local, just save it.
+     * </ul>
+     *
+     * @param content The contents of the main script file.
+     */
+    private void parseAndExecuteMainScript(String content)
+    {
+        // Make sure the title is correct
+
+        setTitle("Gamma - " + mainScript.getName());
+
+        // Parse the main script.
+
+        ParseException parseException = null;
+        mainScriptParser = new Parser(mainScript, content);
+        try {
+            mainScriptParser.parse();
+        }
+        catch (ParseException e) {
+            parseException = e;
+        }
+
+        // Reuse an existing FileWatcher or start a new one
+
+        setupFileWatcher();
+
+        // If we have a syntax error, display it, and we're done
+
+        if (parseException != null) {
+            showParseException(parseException);
+            return;
+        }
+
+        // The script file is valid. Enable various file menu and toolbar
+        // entries
+
+        fileMenuExportDiagram.setDisable(false);
+        fileMenuExportVideo.setDisable(false);
+        fileMenuPrint.setDisable(false);
+
+        toolbarFileExportDiagram.setDisable(false);
+        toolbarReload.setDisable(false);
+
+        // We need to either fire off a DiagramEngine or a SlideshowEngine
+
+        if (mainScriptParser.isSlideshow()) {
+            slideshow = mainScriptParser.getSlideshow();
+            slideshowEngine = new SlideshowEngine(this, slideshow);
+            slideshowEngine.execute();
+        }
+
+        else {
+            diagramEngine = new DiagramEngine(this, mainScriptParser);
+            diagramEngine.execute();
+        }
+    }
+
+    /**
+     * Execute a slide in a slideshow.
+     * <p>
+     * This method performs the following steps:
+     * <ul>
+     *     <li>Any running slide is terminated.
+     *     <li>The new slide is executed.
+     * </ul>
+     *
+     * @param slide The slide to execute.
+     */
+    public void runSlide(Slideshow.Slide slide) throws ExecutionException, ProgrammingException
+    {
+        if (diagramEngine != null) diagramEngine.close();
+        diagramEngine = null;
+
+        // Add the slide name from the display
+
+        setTitle("Gamma - " + mainScript.getName() + " - " + slide.getUrlFile().getName());
+
+        diagramEngine = new DiagramEngine(this, slide.getParser());
+        diagramEngine.execute();
+    }
+
+    /**
+     * Terminate the associated script and disassociate it from this window.
+     */
+    private void disassociateMainScript()
+    {
+        // Stop monitoring
+
+        stopFileWatcher();
+
+        // Terminate any running engines
+
+        terminateAssociatedScript();
+
+        // Set the title back to default
+
+        setTitle("Gamma");
+
+        mainScript = null;
+        mainScriptParser = null;
+    }
+
+    /**
+     * Terminate the associated script. This may be permanent, or we may want to
+     * restart the script.
+     */
+    private void terminateAssociatedScript()
+    {
+        // Close a slideshow if one exists
+
+        if (slideshow != null) {
+
+            if (slideshowEngine != null) slideshowEngine.close();
+
+            slideshow = null;
+            slideshowEngine = null;
+            slide = null;
+
+            // Clear the slide name from the display
+
+            setTitle("Gamma - " + mainScript.getName());
+        }
+
+        // Close a diagram engine if one is running. It is possible to have
+        // both a slideshow and diagram engine running
+
+        if (diagramEngine != null)  {
+            diagramEngine.close();
+            diagramEngine = null;
+        }
+
+        // Disable various file menu and toolbar entries
+
+        fileMenuExportDiagram.setDisable(true);
+        fileMenuExportVideo.setDisable(true);
+        fileMenuPrint.setDisable(true);
+
+        toolbarFileExportDiagram.setDisable(true);
+        toolbarReload.setDisable(true);
+    }
+
+    /**
+     * This is called when a non-animated diagram is fully drawn or when the
+     * last frame of an animated diagram is fully drawn.
+     */
+    public void diagramCompleted()
+    {
+        if (slideshowEngine != null) {
+            slideshowEngine.slideDone();
+        }
+    }
+
+    /**
+     * This is called whenever a user interaction occurs:
+     * <ul>
+     *     <li>The user zooms or pans.
+     *     <li>The user reloads the slide.
+     *     <li>The user manipulates a GUI control.
+     * </ul>
+     * If we are running a slideshow, this information is passed on to the
+     * slideshow engine; otherwise, it is ignored.
+     */
+    public void userInteractionOccurred()
+    {
+        if (slideshowEngine == null) return;
+        slideshowEngine.userInteraction();
+    }
+
+    // **********************************************************************
+    // *
+    // * Manage the FileWatcher
+    // *
+    // **********************************************************************
+
+    /**
+     * Start a new FileWatcher.
+     * <p>
+     * A FileWatcher is never started if the main script file is not a local
+     * file.
+     */
+    private void startNewFileWatcher()
+    {
+        // Terminate any existing watcher
+
+        stopFileWatcher();
+
+        // Start a new one, but only if we have a local file
+
+        if (mainScript != null && mainScript.isFile()) {
+
+            // Get the dependent files if we have any
+
+            ArrayList<URLFile> dependentFiles = null;
+            if (mainScriptParser != null) dependentFiles = mainScriptParser.getDependentFiles();
+
+            // Create the watcher
+
+            watcherID = nextWatcherID++;
+            watcher = new FileWatcher(nextWatcherID, mainScript.getFile(), dependentFiles, this);
+            watcherThread = new Thread(watcher);
+            watcherThread.start();
+        }
+    }
+
+    /**
+     * Re-use an existing FileWatcher, if one is running; otherwise, start a new
+     * one. This method is called when we already have a FileWatcher for the
+     * main script file, but the file has been recompiled and might have new
+     * dependent files.
+     * <p>
+     * A FileWatcher is never re-used if the main script file is not a local
+     * file.
+     * <p>
+     * A new FileWatcher is started if
+     * <ul>
+     *     <li>No FileWatcher exists, or
+     *     <li>The current file watcher is monitoring a different set of files
+     *     than what we need.
+     * </ul>
+     */
+    public void setupFileWatcher()
+    {
+        // Check to see if we can re-use the existing FileWatcher. To re-use a
+        // FileWatcher, one must exist and be monitoring the exact same files
+        // as what we now need to monitor
+
+        ArrayList<URLFile> dependentFiles = null;
+        if (mainScriptParser != null) dependentFiles = mainScriptParser.getDependentFiles();
+
+        if (watcher == null || !watcher.hasSameFiles(mainScript.getFile(), dependentFiles)) {
+            startNewFileWatcher();
+        }
+    }
+
+    public void stopFileWatcher()
+    {
+        if (watcherThread != null) {
+            watcher.stopThread();
+            watcher = null;
+            watcherID = -1;
+            watcherThread = null;
+        }
+    }
+
+    /**
+     * If an exception occurs in a FileWatcher, we report it here, but only if
+     * it is a FileWatcher that we are currently using.
+     *
+     * @param ID The ID of the watcher that generated the exception.
+     * @param e The exception we need to report.
+     */
+    public void fileWatcherException(int ID, Exception e)
+    {
+        if (ID == watcherID) {
+            showTextAreaAlert(Alert.AlertType.ERROR, "Error", "Error", e.getLocalizedMessage(), true);
+        }
+    }
+
+    /**
+     * If a FileWatcher stops, we need to remove any references we have to it. If
+     * this is not a FileWatcher that we are currently using, we ignore it.
+     *
+     * @param ID The ID of the watcher that stopped.
+     */
+    public void fileWatcherDone(int ID)
+    {
+        if (ID == watcherID) {
+            watcher = null;
+            watcherID = -1;
+            watcherThread = null;
+        }
+    }
+
+    // **********************************************************************
+    // *
     // * GUI Management
     // *
     // **********************************************************************
@@ -535,6 +906,19 @@ public final class MainWindow extends Stage
                 }
             }
         }
+
+        // Toolbar items
+
+        toolbarFileNew = (Button)getScene().lookup("#toolbar-file-new");
+        toolbarFileOpen = (Button)getScene().lookup("#toolbar-file-open");
+        toolbarFileOpenURL = (Button)getScene().lookup("#toolbar-file-open-url");
+        toolbarFileExportDiagram = (Button)getScene().lookup("#toolbar-file-export-diagram");
+        toolbarReload = (Button)getScene().lookup("#toolbar-reload");
+        toolbarSlideshowStart = (Button)getScene().lookup("#toolbar-slideshow-start");
+        toolbarSlideshowPrevious = (Button)getScene().lookup("#toolbar-slideshow-previous");
+        toolbarSlideshowPlayPause = (Button)getScene().lookup("#toolbar-slideshow-play-pause");
+        toolbarSlideshowNext = (Button)getScene().lookup("#toolbar-slideshow-next");
+        toolbarSlideshowEnd = (Button)getScene().lookup("#toolbar-slideshow-end");
 
         // The top of the window tree
 
@@ -581,7 +965,7 @@ public final class MainWindow extends Stage
     public void enableDisplayControls(boolean enable)
     {
         if (enable && !hasDisplayControls) {
-            top.getChildren().add(1, controlsSplitter);
+            top.getChildren().add(2, controlsSplitter);
             controlsSplitter.getItems().addAll(diagramParent, scrollPane);
             controlsSplitter.setDividerPositions(.9, .1);
             VBox.setVgrow(diagramParent, Priority.ALWAYS);
@@ -592,7 +976,7 @@ public final class MainWindow extends Stage
         if (!enable && hasDisplayControls) {
             controlsSplitter.getItems().clear();
             top.getChildren().remove(controlsSplitter);
-            top.getChildren().add(1, diagramParent);
+            top.getChildren().add(2, diagramParent);
             VBox.setVgrow(diagramParent, Priority.ALWAYS);
             hasDisplayControls = false;
             top.layout();
@@ -607,6 +991,8 @@ public final class MainWindow extends Stage
      */
     public void addDisplayControl(DisplayVariable var) {
         enableDisplayControls(true);
+
+        final MainWindow window = this;
 
         if (var instanceof RangeVariable range) {
             Label label = new Label(range.getLabel());
@@ -627,6 +1013,8 @@ public final class MainWindow extends Stage
 
             slider.valueProperty().addListener(
                 (value, oldValue, newValue) -> {
+                    window.userInteractionOccurred();
+
                     Point2D p = slider.localToScene(0.0, 0.0);
                     Tooltip tooltip = slider.getTooltip();
                     if (tooltip == null) {
@@ -649,6 +1037,8 @@ public final class MainWindow extends Stage
                 });
             slider.setOnMouseClicked((MouseEvent event) -> {
                 if (event.getClickCount() == 2) {
+                    window.userInteractionOccurred();
+
                     double value = range.getInitialValue();
                     slider.setValue(value);
                 }
@@ -665,7 +1055,10 @@ public final class MainWindow extends Stage
             displayControlArea.getChildren().add(button);
 
             button.selectedProperty().addListener(
-                (value, oldValue, newValue) -> bool.setBooleanCurrentValue(newValue));
+                (value, oldValue, newValue) -> {
+                    window.userInteractionOccurred();
+                    bool.setBooleanCurrentValue(newValue);
+                });
         }
         else if (var instanceof ChoiceVariable choice) {
             Label label = new Label(choice.getLabel());
@@ -680,12 +1073,23 @@ public final class MainWindow extends Stage
             displayControlArea.getChildren().add(box);
 
             box.getSelectionModel().selectedIndexProperty().addListener(
-                (value, oldValue, newValue) -> choice.setIntCurrentValue(newValue.intValue() + 1));
+                (value, oldValue, newValue) -> {
+                    window.userInteractionOccurred();
+                    choice.setIntCurrentValue(newValue.intValue() + 1);
+                });
         }
 
         Separator separator = new Separator(Orientation.HORIZONTAL);
         separator.setPrefWidth(200);
         displayControlArea.getChildren().add(separator);
+    }
+
+    /**
+     * Remove all the display controls that might have been added.
+     */
+    public void removeAllDisplayControls()
+    {
+        displayControlArea.getChildren().clear();
     }
 
     /**
@@ -826,13 +1230,11 @@ public final class MainWindow extends Stage
     @Override
     public void close()
     {
-        if (watcherThread != null) {
-            watcher.stopThread();
-            watcher = null;
-            watcherThread = null;
-        }
-        script = null;
+        stopFileWatcher();
+        mainScript = null;
 
+        if (slideshowEngine != null) slideshowEngine.close();
+        slideshowEngine = null;
         if (diagramEngine != null) diagramEngine.close();
         diagramEngine = null;
         super.close();

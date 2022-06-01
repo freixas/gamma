@@ -76,6 +76,11 @@ public class HCodeProgram
         }
     }
 
+    public LinkedList<Object> getHCodes()
+    {
+        return this.program;
+    }
+
     /**
      * Reset the program for a new execution. This is called even for the first
      * execution.

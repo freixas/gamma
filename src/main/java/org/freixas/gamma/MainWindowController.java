@@ -16,7 +16,16 @@
  */
 package org.freixas.gamma;
 
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
+import javafx.print.PrinterJob;
 import javafx.scene.control.*;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
+import org.freixas.gamma.css.value.Stylesheet;
+import org.freixas.gamma.execution.DiagramEngine;
+import org.freixas.gamma.execution.hcode.SetStatement;
 import org.freixas.gamma.file.ExportDiagramDialog;
 import org.freixas.gamma.file.URLFile;
 import org.freixas.gamma.preferences.PreferencesDialog;
@@ -25,16 +34,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Locale;
+import java.util.LinkedList;
 import java.util.Optional;
 import java.util.ResourceBundle;
-
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import javafx.print.PrinterJob;
-import javafx.stage.FileChooser;
-import javafx.stage.FileChooser.ExtensionFilter;
 
 /**
  * FXML Controller for the main window.
@@ -45,6 +47,10 @@ public final class MainWindowController implements Initializable
 {
     @FXML
     private MenuBar menuBar;
+
+    @FXML
+    private Menu fileMenu;
+
     @FXML
     private MenuItem fileMenuNew;
     @FXML
@@ -63,24 +69,47 @@ public final class MainWindowController implements Initializable
     private MenuItem fileMenuPreferences;
     @FXML
     private MenuItem fileMenuExit;
+
+    @FXML
+    private Menu windowMenu;
+
     @FXML
     private MenuItem windowMenuNewWindow;
+
+    @FXML
+    private Menu helpMenu;
+    @FXML
+    private MenuItem helpSampleScripts;
     @FXML
     private MenuItem helpMenuContents;
     @FXML
     private MenuItem helpMenuAbout;
+
     @FXML
-    private Menu fileMenu;
+    private Button toolbarFileNew;
     @FXML
-    private Menu windowMenu;
+    private Button toolbarFileOpen;
     @FXML
-    private Menu helpMenu;
+    private Button toolbarFileOpenURL;
+
+    @FXML
+    private Button toolbarFileExportDiagram;
+
+    @FXML
+    private Button toolbarReload;
+
+    @FXML
+    private Button toolbarSlideshowStart;
+    @FXML
+    private Button toolbarSlideshowPlayPause;
+    @FXML
+    private Button toolbarSlideshowNext;
+    @FXML
+    private Button toolbarSlideshowPrevious;
+    @FXML
+    private Button toolbarSlideshowEnd;
 
     private MainWindow mainWindow;
-    @FXML
-    private MenuItem helpSampleScripts;
-    @FXML
-    private MenuItem helpQuickStart;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle)
@@ -106,7 +135,7 @@ public final class MainWindowController implements Initializable
         File selectedFile;
         while ((selectedFile = fileChooser.showSaveDialog(mainWindow)) != null) {
             if (selectedFile.createNewFile()) {
-                mainWindow.setScript(new URLFile(selectedFile), null, true);
+                mainWindow.associateMainScript(selectedFile.getAbsolutePath(), false);
                 return;
             }
             new Alert(Alert.AlertType.ERROR, "Use File/Open to open an existing script.").showAndWait();
@@ -129,7 +158,7 @@ public final class MainWindowController implements Initializable
 
         File selectedFile = fileChooser.showOpenDialog(mainWindow);
         if (selectedFile != null) {
-            mainWindow.setScript(new URLFile(selectedFile), null, true);
+            mainWindow.associateMainScript(selectedFile.getAbsolutePath(), false);
         }
     }
 
@@ -138,29 +167,23 @@ public final class MainWindowController implements Initializable
      * <p>
      * Loads and parses content from a URL and associates it with the main window.
      */
+    @FXML
     public void fileMenuOpenURL(ActionEvent ignoredEvent)
     {
-        while (true) {
-            TextInputDialog dialog = new TextInputDialog();
-            URL resource = getClass().getResource("/AlertDialog.css");
-            if (resource != null) dialog.getDialogPane().getStylesheets().add(resource.toExternalForm());
-            dialog.setTitle("Open a URL");
-            dialog.setHeaderText("Enter a URL to open");
-            dialog.setContentText("URL:");
-            dialog.getEditor().setPrefColumnCount(40);
-            Optional<String> result = dialog.showAndWait();
+        TextInputDialog dialog = new TextInputDialog();
+        URL resource = getClass().getResource("/AlertDialog.css");
+        if (resource != null)
+            dialog.getDialogPane().getStylesheets().add(resource.toExternalForm());
+        dialog.setTitle("Open a URL");
+        dialog.setHeaderText("Enter a URL to open");
+        dialog.setContentText("URL:");
+        dialog.getEditor().setPrefColumnCount(40);
+        Optional<String> result = dialog.showAndWait();
 
-            if (result.isEmpty() || result.get().length() < 1) return;
+        if (result.isEmpty() || result.get().length() < 1) return;
 
-            String urlString = result.get();
-            try {
-                mainWindow.setScript(urlString, true);
-                return;
-            }
-            catch (MalformedURLException e) {
-                mainWindow.showTextAreaAlert(Alert.AlertType.ERROR, "Invalid URL", "Invalid URL", "The given URL '" + urlString + "' is invalid", true);
-            }
-        }
+        String urlString = result.get();
+        mainWindow.associateMainScript(urlString, true);
     }
 
     /**
@@ -261,9 +284,8 @@ public final class MainWindowController implements Initializable
 
         File selectedFile = fileChooser.showOpenDialog(mainWindow);
         if (selectedFile != null) {
-            mainWindow.setScript(new URLFile(selectedFile), null, true);
+            mainWindow.associateMainScript(selectedFile.getAbsolutePath(), false);
         }
-
     }
 
     /**
@@ -311,6 +333,61 @@ public final class MainWindowController implements Initializable
     public void setMainWindow(MainWindow window)
     {
         mainWindow = window;
+    }
+
+    @FXML
+    public void toolbarFileNew(ActionEvent ignoredEvent) throws IOException
+    {
+        fileMenuNew(ignoredEvent);
+    }
+
+    @FXML
+    public void toolbarFileOpen(ActionEvent ignoredEvent)
+    {
+        fileMenuOpen(ignoredEvent);
+    }
+
+    @FXML
+    public void toolbarFileOpenURL(ActionEvent ignoredEvent)
+    {
+        fileMenuOpenURL(ignoredEvent);
+    }
+
+    @FXML
+    public void toolbarFileExportDiagram(ActionEvent ignoredEvent) throws Exception
+    {
+        fileMenuExportDiagram(ignoredEvent);
+    }
+
+    @FXML
+    public void toolbarReload(ActionEvent ignoredEvent)
+    {
+        mainWindow.reloadScript();
+    }
+
+    @FXML
+    public void toolbarSlideshowStart(ActionEvent ignoredEvent)
+    {
+    }
+
+    @FXML
+    public void toolbarSlideshowPrevious(ActionEvent ignoredEvent)
+    {
+    }
+
+    @FXML
+    public void toolbarSlideshowPlayPause(ActionEvent ignoredEvent)
+    {
+    }
+
+    @FXML
+    public void toolbarSlideshowNext(ActionEvent ignoredEvent)
+    {
+    }
+
+    @FXML
+    public void toolbarSlideshowEnd(ActionEvent ignoredEvent)
+    {
     }
 
 }

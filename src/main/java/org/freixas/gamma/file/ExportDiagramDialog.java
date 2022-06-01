@@ -18,6 +18,7 @@
 package org.freixas.gamma.file;
 
 import org.freixas.gamma.Gamma;
+import org.freixas.gamma.GammaIOException;
 import org.freixas.gamma.MainWindow;
 import org.freixas.gamma.math.Util;
 import org.freixas.gamma.preferences.PreferencesManager;
@@ -277,7 +278,7 @@ public class ExportDiagramDialog extends Dialog<ButtonType>
             Alert alert = new Alert(AlertType.ERROR);
             alert.setTitle("Write Error");
             alert.setHeaderText("Write Error");
-            alert.setContentText("Write failed!\n" + e.getLocalizedMessage());
+            alert.setContentText("Write failed!\n" + new GammaIOException(e).getLocalizedMessage());
             alert.showAndWait();
         }
 

@@ -40,11 +40,13 @@ public abstract class Function extends ExecutorContext
 {
     public enum Type
     {
+        GAMMATOV,
+        DOPPLER_WAVELENGTH_TO_V, DOPPLER_FREQUENCY_TO_V,
+        FREQUENCY_TO_WAVELENGTH, WAVELENGTH_TO_FREQUENCY,
         DTOT, DTOTAU, DTOV, DTOX,
         TTOD, TTOTAU, TTOV, TTOX,
         TAUTOD, TAUTOT, TAUTOV, TAUTOX,
         VTOD, VTOT, VTOTAU, VTOX,
-        GAMMATOV,
         SET_BOUNDS, CLEAR_BOUNDS,
         SET_INTERVAL, CLEAR_INTERVAL,
         TO_STRING,
@@ -60,6 +62,25 @@ public abstract class Function extends ExecutorContext
         SIGN, SIN, SINH, SQRT,
         TAN, TANH
     }
+
+    // GAMMATOV
+    static final FunctionalOneArg<Double, Double> gammaToV = (engine, gamma) -> {
+        if (gamma == null) return null;
+        return Relativity.gammaToV(gamma);
+    };
+
+    // DOPPLER_WAVELENGTH_TO_V
+    static final FunctionalTwoArg<Double, Double, Double> dopplerWavelengthToV = (engine, source, receiver) ->
+        Relativity.dopplerWavelengthToV(source, receiver);
+    // DOPPLER_FREQUENCY_TO_V
+    static final FunctionalTwoArg<Double, Double, Double> dopplerFrequencyToV = (engine, source, receiver) ->
+        Relativity.dopplerFrequencyToV(source, receiver);
+    // FREQUENCY_TO_WAVELENGTH
+    static FunctionalOneArg<Double, Double> frequencyToWavelength = (engine, frequency) ->
+        Util.frequencyToWavelength(frequency);
+    // WAVELENGTH_TO_FREQUENCY
+    static FunctionalOneArg<Double, Double> wavelengthToFrequency = (engine, wavelength) ->
+        Util.wavelengthToFrequency(wavelength);
 
     // DTOT
     static final FunctionalTwoArg<Double, Observer, Double> dToT = (engine, dbl, observer) -> {
@@ -140,12 +161,6 @@ public abstract class Function extends ExecutorContext
     static final FunctionalTwoArg<Double, Observer, Double> vToX = (engine, dbl, observer) -> {
         double result = observer.vToX(dbl);
         return Double.isNaN(result) ? null : result;
-    };
-
-    // GAMMATOV
-    static final FunctionalOneArg<Double, Double> gammaToV = (engine, gamma) -> {
-        if (gamma == null) return null;
-        return Relativity.gammaToV(gamma);
     };
 
     // SET_BOUNDS
@@ -321,10 +336,17 @@ public abstract class Function extends ExecutorContext
     static final HashMap<Type, LambdaFunction> map = new HashMap<>();
 
     static {
+        map.put(Type.GAMMATOV,          gammaToV);
+
         map.put(Type.DTOT,              dToT);
         map.put(Type.DTOTAU,            dToTau);
         map.put(Type.DTOV,              dToV);
         map.put(Type.DTOX,              dToX);
+
+        map.put(Type.DOPPLER_WAVELENGTH_TO_V,       dopplerWavelengthToV);
+        map.put(Type.DOPPLER_FREQUENCY_TO_V,        dopplerFrequencyToV);
+        map.put(Type.FREQUENCY_TO_WAVELENGTH,       frequencyToWavelength);
+        map.put(Type.WAVELENGTH_TO_FREQUENCY,       wavelengthToFrequency);
 
         map.put(Type.TTOD,              tToD);
         map.put(Type.TTOTAU,            tToTau);
@@ -340,8 +362,6 @@ public abstract class Function extends ExecutorContext
         map.put(Type.VTOT,              vToT);
         map.put(Type.VTOTAU,            vToTau);
         map.put(Type.VTOX,              vToX);
-
-        map.put(Type.GAMMATOV,          gammaToV);
 
         map.put(Type.SET_BOUNDS,        setBounds);
         map.put(Type.CLEAR_BOUNDS,      clearBounds);
@@ -384,10 +404,21 @@ public abstract class Function extends ExecutorContext
     static final HashMap<String, Function> functions = new HashMap<>();
 
     static {
-        functions.put("gamma",      new gammaFunction());
+        functions.put("gamma",              new gammaFunction());
+        functions.put("gammaToV",           new GenericFunction(Type.GAMMATOV));
+        functions.put("lengthContraction",  new lengthContractionFunction());
+        functions.put("timeDilation",       new timeDilationFunction());
+        functions.put("toRelativeV",        new toRelativeVFunction());
+        functions.put("toRelativeAngle",    new toRelativeAngleFunction());
+        functions.put("toXAngle",           new toXAngleFunction());
+        functions.put("toTAngle",           new toTAngleFunction());
 
-        functions.put("toXAngle",   new toXAngleFunction());
-        functions.put("toTAngle",   new toTAngleFunction());
+        functions.put("dopplerWavelengthToV",  new GenericFunction(Type.DOPPLER_WAVELENGTH_TO_V));
+        functions.put("dopplerFrequencyToV",   new GenericFunction(Type.DOPPLER_FREQUENCY_TO_V));
+        functions.put("dopplerVToWavelength",  new dopplerVToWavelengthFunction());
+        functions.put("dopplerVToFrequency",   new dopplerVToFrequencyFunction());
+        functions.put("frequencyToWavelength", new GenericFunction(Type.FREQUENCY_TO_WAVELENGTH));
+        functions.put("wavelengthToFrequency", new GenericFunction(Type.WAVELENGTH_TO_FREQUENCY));
 
         functions.put("dToT",       new GenericFunction(Type.DTOT));
         functions.put("dToTau",     new GenericFunction(Type.DTOTAU));
@@ -408,10 +439,6 @@ public abstract class Function extends ExecutorContext
         functions.put("vToT",       new GenericFunction(Type.VTOT));
         functions.put("vToTau",     new GenericFunction(Type.VTOTAU));
         functions.put("vToX",       new GenericFunction(Type.VTOX));
-
-        functions.put("gammaToV",   new GenericFunction(Type.GAMMATOV));
-
-        functions.put("toRelativeAngle",    new toRelativeAngleFunction());
 
         functions.put("setBounds",          new GenericFunction(Type.SET_BOUNDS));
         functions.put("clearBounds",        new GenericFunction(Type.CLEAR_BOUNDS));
