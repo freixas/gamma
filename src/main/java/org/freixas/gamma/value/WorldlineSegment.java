@@ -479,7 +479,7 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
     public void setInfinitePast()
     {
         if (curveSegment instanceof LineSegment) {
-            ConcreteLine line = new ConcreteLine(Line.AxisType.T, min.v, new Coordinate(min.x, min.t));
+            ConcreteLine line = new ConcreteLine(Line.AxisType.T, max.v, new Coordinate(max.x, max.t));
             curveSegment = new ConcreteLine(line, true, false);
         }
         else if (curveSegment instanceof ConcreteLine line) {
