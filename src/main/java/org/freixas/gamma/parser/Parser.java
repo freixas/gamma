@@ -2174,13 +2174,6 @@ public final class Parser
             codes.add(new Coordinate(0, 0));
         }
 
-        if (distanceSeen) {
-            codes.addAll(distanceCodes);
-        }
-        else {
-            codes.add(0.0);
-        }
-
         if (tauSeen) {
             codes.addAll(tauCodes);
         }
@@ -2188,7 +2181,14 @@ public final class Parser
             codes.add(0.0);
         }
 
-       codes.add(new GenericHCode(HCode.Type.W_INITIALIZER));
+        if (distanceSeen) {
+            codes.addAll(distanceCodes);
+        }
+        else {
+            codes.add(0.0);
+        }
+
+        codes.add(new GenericHCode(HCode.Type.W_INITIALIZER));
 
        return codes;
     }
