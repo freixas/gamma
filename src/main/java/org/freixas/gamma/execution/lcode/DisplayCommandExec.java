@@ -61,10 +61,8 @@ public class DisplayCommandExec extends CommandExec
 
             width = canvas.getWidth();
             height = canvas.getHeight();
-            double centerX = width / 2.0;
-            double centerT = height / 2.0;
-
-            Point2D originalCenter = gc.getTransform().inverseTransform(centerX, centerT);
+            double origCenterX = width / 2.0;
+            double origCenterT = height / 2.0;
 
             // Now resize
 
@@ -81,17 +79,18 @@ public class DisplayCommandExec extends CommandExec
 
             // Get the new center
 
-            centerX = width / 2.0;
-            centerT = height / 2.0;
+            double centerX = width / 2.0;
+            double centerT = height / 2.0;
 
+            Point2D originalCenter = gc.getTransform().inverseTransform(origCenterX, origCenterT);
             Point2D newCenter = gc.getTransform().inverseTransform(centerX, centerT);
 
             // Determine the difference and use it to restore the original
             // coordinate to the center
 
             gc.translate(
-                newCenter.getX()- originalCenter.getX(),
-                newCenter.getY()- originalCenter.getY());
+                newCenter.getX() - originalCenter.getX(),
+                originalCenter.getY() - newCenter.getY());
 
             context.invScale = context.getCurrentInvScale();
             context.bounds = context.getCurrentCanvasBounds();
