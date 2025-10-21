@@ -209,39 +209,68 @@ public class LineSegment extends CurveSegment implements ExecutionImmutable
 
                 // Calculate the slopes if not yet set
 
-                if (Double.isNaN(slopeXT)) {
-                    if (Util.fuzzyEQ(p2.t, p1.t)) {
-                        slopeXT = Double.POSITIVE_INFINITY;
-                    }
-                    else {
-                        slopeXT = (p2.x - p1.x) / (p2.t - p1.t);
-                    }
-                    if (Util.fuzzyEQ(p2.x, p1.x)) {
-                        slopeTX = Double.POSITIVE_INFINITY;
+                if (Double.isNaN(slopeTX)) {
+
+                    // Use slopeTX to solve for T
+
+                    if (p2.x == p1.x) {
+                        slopeTX = Double.POSITIVE_INFINITY;     // Vertical
                     }
                     else {
                         slopeTX = (p2.t - p1.t) / (p2.x - p1.x);
                     }
+
+                    // Use slopeXT to solve for X
+
+                    if (slopeTX == 0.0) {
+                        slopeXT = Double.POSITIVE_INFINITY;     // Horizontal
+                    }
+                    else {
+                        slopeXT = 1.0 / slopeTX;
+                    }
                 }
 
-                if ((outcodeOut & 0x08) != 0) {    // Point is above the clip window
+                // Point is above the clip window
+                // The line cannot be horizontal, or it would have been excluded
+
+                if ((outcodeOut & 0x08) != 0) {
                     t = bounds.max.t;
-                    x = p1.x + slopeXT * (t - p1.t);
-                }
-                else if ((outcodeOut & 0x04) != 0) { // Point is below the clip window
-                    t = bounds.min.t;
-                    x = p1.x + slopeXT * (t - p1.t);
-                }
-                else if ((outcodeOut & 0x02) != 0) {  // Point is to the right of clip window
-                    x = bounds.max.x;
-                    t = p1.t + slopeTX * (x - p1.x);
-                }
-                else if ((outcodeOut & 0x01) != 0) {   // Point is to the left of clip window
-                    x = bounds.min.x;
-                    t = p1.t + slopeTX * (x - p1.x);
+                    Double xOffset = slopeXT * (t - p1.t);
+                    if (Double.isNaN(xOffset)) xOffset = 0.0;
+                  x = p1.x + xOffset;
                 }
 
-                // Now we move outside point to intersection point to clip
+                // Point is below the clip window
+                // The line cannot be horizontal, or it would have been excluded
+
+                else if ((outcodeOut & 0x04) != 0) {
+                    t = bounds.min.t;
+                    Double xOffset = slopeXT * (t - p1.t);
+                    if (Double.isNaN(xOffset)) xOffset = 0.0;
+                    x = p1.x + xOffset;
+                }
+
+                // Point is to the right of clip window
+                // The line cannot be vertical, or it would have been excluded
+
+                else if ((outcodeOut & 0x02) != 0) {
+                    x = bounds.max.x;
+                    Double tOffset = slopeTX * (x - p1.x);
+                    if (Double.isNaN(tOffset)) tOffset = 0.0;
+                    t = p1.t + tOffset;
+                }
+
+                // Point is to the left of clip window
+                // The line cannot be vertical, or it would have been excluded
+
+                else if ((outcodeOut & 0x01) != 0) {
+                    x = bounds.min.x;
+                    Double tOffset = slopeTX * (x - p1.x);
+                    if (Double.isNaN(tOffset)) tOffset = 0.0;
+                    t = p1.t + tOffset;
+                }
+
+                // Now we move the outside point to the intersection point to clip
                 // and get ready for next pass.
 
                 if (outcodeOut == outcode0) {
