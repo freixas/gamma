@@ -17,6 +17,8 @@
 package org.freixas.gamma.value;
 
 import org.freixas.gamma.execution.HCodeEngine;
+import static java.lang.Double.NEGATIVE_INFINITY;
+import static java.lang.Double.POSITIVE_INFINITY;
 
 /**
  * Create an interval.
@@ -112,6 +114,13 @@ public class Interval implements ExecutionImmutable, Displayable
      */
     public double getDelta()
     {
+        // This code avoids generating NaN if max and min are both the same
+        // type of infinity (e.g. POSITIVE_INFINITY - POSITIVE_INFINITY = NaN).
+        //
+        // If only one value is an infinity and if max > min, then max - min
+        // will return either a finite number or POSITIVE_INFINITY.
+
+        if (max == min) return 0;
         return max - min;
     }
 
