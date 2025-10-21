@@ -385,16 +385,37 @@ public class WorldlineSegment implements ExecutionMutable, Displayable
         this.a = other.a;
         this.curve = other.curve;
 
+        // If the acceleration is 0, we have a line or a line segment
+
         if (other.zeroAcceleration) {
+
+            // We have a ConcreteLine. The modified value returned may be a line or a line segment
+
+            if (other.curveSegment instanceof ConcreteLine) {
+                ConcreteLine line = (ConcreteLine)other.curveSegment;
+                this.curveSegment = line.infiniteIntersect(new Bounds(Double.NEGATIVE_INFINITY, minT, Double.POSITIVE_INFINITY, maxT));
+            }
+
+            // We have a BoundedLine. The modified line will be a BoundedLine with the
+            // bounds being the intersection of the existing bounds with the
+            // interval
+
+            else if (other.curveSegment instanceof BoundedLine) {
+                BoundedLine line = (BoundedLine)other.curveSegment;
+                Bounds bounds = (new Bounds(Double.NEGATIVE_INFINITY, minT, Double.POSITIVE_INFINITY, maxT)).intersect(line.getBounds());
+                this.curveSegment = new BoundedLine(line, bounds);
+            }
 
             // We have a line segment
 
-            this.curveSegment = new LineSegment(min.x, min.t, max.x, max.t);
+            else {
+                this.curveSegment = new LineSegment(min.x, min.t, max.x, max.t);
+            }
         }
+
+        // If the acceleration is not 0, then we have a HyperbolicSegment
+
         else {
-
-            // We have a hyperbolic segment
-
             this.curveSegment = new HyperbolicSegment(a, min, max, curve);
         }
 
