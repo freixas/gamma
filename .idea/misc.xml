@@ -17,5 +17,5 @@
     <resource url="http://maven.apache.org/ASSEMBLY/2.1.0" location="$PROJECT_DIR$/src/assembly/dep.xml" />
     <resource url="http://maven.apache.org/xsd/assembly-2.1.0.xsd" location="$PROJECT_DIR$/src/assembly/dep.xml" />
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_17" default="true" project-jdk-name="17" project-jdk-type="JavaSDK" />
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_25" default="true" project-jdk-name="25" project-jdk-type="JavaSDK" />
 </project>
