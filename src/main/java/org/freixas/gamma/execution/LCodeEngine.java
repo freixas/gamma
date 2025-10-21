@@ -306,6 +306,8 @@ public class LCodeEngine
 
              // Execute normal commands
 
+            context.bounds = context.getCurrentCanvasBounds();
+
             for (Command command : commands) {
                 command.execute(context);
                 if (isClosed) return;
@@ -457,7 +459,7 @@ public class LCodeEngine
 
             GraphicsContext gc = canvas.getGraphicsContext2D();
 
-            double delta = event.getDeltaY();
+            double delta = -event.getDeltaY();
             if (delta == 0.0) return;
 
             Point2D center = new Point2D(event.getX(), event.getY());
@@ -591,7 +593,7 @@ public class LCodeEngine
     private void removeListeners()
     {
         canvasParent.widthProperty().removeListener(widthListener);
-        canvasParent.widthProperty().removeListener(heightListener);
+        canvasParent.heightProperty().removeListener(heightListener);
         canvas.removeEventHandler(MouseEvent.MOUSE_MOVED, mouseMovedEventHandler);
         canvas.removeEventHandler(MouseEvent.MOUSE_ENTERED, mouseEnteredEventHandler);
         canvas.removeEventHandler(MouseEvent.MOUSE_EXITED, mouseExitedEventHandler);
