@@ -45,63 +45,59 @@ public class DisplayCommandExec extends CommandExec
     public void execute(Context context, Struct cmdStruct, StyleStruct styles)
     {
         Canvas canvas = context.canvas;
-        GraphicsContext gc = canvas.getGraphicsContext2D();
+        GraphicsContext gc = context.gc; //canvas.getGraphicsContext2D();
 
         // The canvas is only resized if the width and height remain
         // undefined in the structure
 
         double width;
         double height;
-        try {
-            // When we resize, we want to keep the coordinate at the center
-            // of the canvas unchanged (NOTE: I am assuming that a resize
-            // leaves the upper left corner's coordinate unchanged
 
-            // Let's get the coordinate at the center
+        if (resize) {
+            try {
+                // When we resize, we want to keep the coordinate at the center
+                // of the canvas unchanged (NOTE: I am assuming that a resize
+                // leaves the upper left corner's coordinate unchanged
 
-            width = canvas.getWidth();
-            height = canvas.getHeight();
-            double origCenterX = width / 2.0;
-            double origCenterT = height / 2.0;
+                // Let's get the coordinate at the center
 
-            // Now resize
+                width = canvas.getWidth();
+                height = canvas.getHeight();
+                double origCenterX = width / 2.0;
+                double origCenterT = height / 2.0;
 
-            if (resize) {
-                width = ((Region)canvas.getParent()).getWidth();
-                height = ((Region)canvas.getParent()).getHeight();
+                // Now resize
+
+                width = ((Region) canvas.getParent()).getWidth();
+                height = ((Region) canvas.getParent()).getHeight();
+                canvas.setWidth(width);
+                canvas.setHeight(height);
+
+                // Get the new center
+
+                double centerX = width / 2.0;
+                double centerT = height / 2.0;
+
+                Point2D originalCenter = gc.getTransform().inverseTransform(origCenterX, origCenterT);
+                Point2D newCenter = gc.getTransform().inverseTransform(centerX, centerT);
+
+                // Determine the difference and use it to restore the original
+                // coordinate to the center
+
+                gc.translate(
+                    newCenter.getX() - originalCenter.getX(),
+                    newCenter.getY() - originalCenter.getY());
+
+                context.invScale = context.getCurrentInvScale();
+                context.bounds = context.getCurrentCanvasBounds();
+
             }
-            else {
-                width = fixedWidth;
-                height = fixedHeight;
+            catch (NonInvertibleTransformException e) {
+                throw new ProgrammingException("DisplayCommandExec.execute()", e);
             }
-            canvas.setWidth(width);
-            canvas.setHeight(height);
-
-            // Get the new center
-
-            double centerX = width / 2.0;
-            double centerT = height / 2.0;
-
-            Point2D originalCenter = gc.getTransform().inverseTransform(origCenterX, origCenterT);
-            Point2D newCenter = gc.getTransform().inverseTransform(centerX, centerT);
-
-            // Determine the difference and use it to restore the original
-            // coordinate to the center
-
-            gc.translate(
-                newCenter.getX() - originalCenter.getX(),
-                originalCenter.getY() - newCenter.getY());
-
-            context.invScale = context.getCurrentInvScale();
-            context.bounds = context.getCurrentCanvasBounds();
-
-        }
-        catch (NonInvertibleTransformException e)
-        {
-            throw new ProgrammingException("DisplayCommandExec.execute()", e);
         }
 
-        if (!resize) {
+        else {
             Region parent = ((Region)canvas.getParent());
             Rectangle clip = (Rectangle)parent.getClip();
             if (clip != null) {
@@ -204,9 +200,6 @@ public class DisplayCommandExec extends CommandExec
             fixedHeight = height;
         }
 
-        fixedWidth = fixedWidth / screen.getOutputScaleX();
-        fixedHeight = fixedHeight / screen.getOutputScaleY();
-
         // We now know the width and height we want for the canvas, so set it.
         // We should listen only for window resizes to prevent this method
         // from potentially being recursively called, but let's minimize
@@ -220,19 +213,24 @@ public class DisplayCommandExec extends CommandExec
         }
 
         // We are not going to resize the canvas. This means that the canvas
-        // might exceed its parent's size or it might not fill the parent.
+        // might exceed its parent's size, or it might not fill the parent.
         // Add a clip to the parent so that we don't draw outside its bounds.
         // Add a clip to the canvas so that we don't draw outside its bounds.
 
         if (!resize) {
+
+            // The parent has no transforms applied
+
             Rectangle clip = new Rectangle();
             clip.setWidth(parent.getWidth());
             clip.setHeight(parent.getHeight());
             parent.setClip(clip);
 
+            // The drawing canvas has a scaling transform
+
             clip = new Rectangle();
-            clip.setWidth(fixedWidth);
-            clip.setHeight(fixedHeight);
+            clip.setWidth(fixedWidth / screen.getOutputScaleX());
+            clip.setHeight(fixedHeight / screen.getOutputScaleY());
             canvas.setClip(clip);
         }
         else {

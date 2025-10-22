@@ -301,7 +301,7 @@ public class LCodeEngine
         try {
             // Execute the display command
 
-             displayCommand.execute(context);
+             displayCommand.executeDisplay(context);
 
              // Execute normal commands
 

@@ -60,7 +60,7 @@ public class Command
         GraphicsContext gc = context.gc;
         gc.save();
         gc.setGlobalAlpha(styles.opacity);
-        
+
         try {
             cmdExec.execute(context, cmdStruct, styles);
         }
@@ -68,4 +68,18 @@ public class Command
             gc.restore();
         }
     }
+
+    public void executeDisplay(Context context)
+    {
+        // For the display command, we actually want it to affect
+        // the global graphics context, so we call this version of
+        // execute
+
+        // Handle the global opacity style at this level
+
+        GraphicsContext gc = context.gc;
+        gc.setGlobalAlpha(styles.opacity);
+        cmdExec.execute(context, cmdStruct, styles);
+    }
+
 }
