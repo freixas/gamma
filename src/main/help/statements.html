@@ -71,6 +71,12 @@
                                     <li><a href="#worldline">worldline</a></li>
                                 </ol>
                             </li>
+                            <li><a href="#other-commands">Other Commands</a>
+                                <ol>
+                                    <li><a href="#print">print</a></li>
+                                </ol>
+                            </li>
+                            
                         </ol>
                     </li>
                 </ol>
@@ -149,8 +155,9 @@
                 <p>The final string is a label displayed with the slider.</p>
                 <h2><a id="toggle"></a>toggle</h2>
                 <p><span class="literal">toggle</span> <span class="non-terminal">leftVariable</span> <span class="literal">=</span><span class="non-terminal"> float</span> <span class="literal">label</span> <span class="non-terminal">string</span> <span class="literal">restart</span>? </p>
-                <p>The range assignment adds a checkbox to the diagram. The diagram is created by executing the script with the variable set to its assigned value. If the end user toggles the checkbox, the script is re-executed. The assignment is ignored and the value of the variable is set to match the slider.</p>
-                <p>The initial value can be anything. It is interpreted as a boolean. The checkbox is checked if the value is not zero, unselected if it is 0. When the end user toggles it, the variable will be either 0 or 1, depending on whether the box is unchecked or checked.</p>
+                <p>A toogle  assignment adds a checkbox to the diagram. If the value given is not zero, the variable is set to 1, otherwise it is set to 0.</p>
+                <p>The diagram is created by executing the script with the variable set to its assigned value. If the end user toggles the checkbox, the script is re-executed. This time, the assignment is ignored and the value of the variable is set to match the slider.</p>
+                <p>Initially, the checkbox is checked if the given value is not zero, unchecked if it is 0. When the end user toggles it, the variable will be set to either 0 or 1, depending on whether the box is unchecked or checked.</p>
                 <p>The final string is a label displayed with the toggle.</p>
                 <p><span class="literal">restart</span> causes all animation variables to be removed and the animation to restart. This allows the toggle to change the animation variables or the length of the animation.</p>
                 <h2><a id="choice"></a>choice</h2>
@@ -1250,6 +1257,16 @@
                         </tr>
                     </tbody>
                 </table>
+                <h2><a id="other-commands"></a>Other Commands</h2>
+                <p>These commands are executed in the order in which they appear in the script, but they don't draw anything.</p>
+                <h3><a id="print"></a>print</h3>
+                <p><span class="literal">print</span><br/><span class="literal">print</span><span class="non-terminal"> expr</span></p>
+                <p>The print command prints the value of the expression. If no expression is given, it prints a blank line.</p>
+                <p>If the expression evaluates to a float, the floating point value is
+                displayed. If it evaluates to a string, the string is displayed. If it evaluates to an object, some information about the object 
+                will be displayed.</p>
+                <p>To print multiple values of any type, concatenate them with a string: a + &quot; &quot; + b will print the values a and b 
+                separated by a space.</p>
             </div>
         </div>
     </body>

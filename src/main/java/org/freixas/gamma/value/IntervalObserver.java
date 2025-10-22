@@ -85,18 +85,20 @@ public class IntervalObserver extends Observer
 
         // Inside this class, the interval is always a time range
 
-        if (null != interval.getType()) switch (interval.getType()) {
-            case T -> {
-                minT = interval.getMin();
-                maxT = interval.getMax();
-            }
-            case TAU -> {
-                minT = this.observer.dToTau(interval.getMin());
-                maxT = this.observer.dToTau(interval.getMax());
-            }
-            case D -> {
-                minT = this.observer.dToT(interval.getMin());
-                maxT = this.observer.dToT(interval.getMax());
+        if (null != interval.getType()) {
+            switch (interval.getType()) {
+                case T -> {
+                    minT = interval.getMin();
+                    maxT = interval.getMax();
+                }
+                case TAU -> {
+                    minT = this.observer.dToTau(interval.getMin());
+                    maxT = this.observer.dToTau(interval.getMax());
+                }
+                case D -> {
+                    minT = this.observer.dToT(interval.getMin());
+                    maxT = this.observer.dToT(interval.getMax());
+                }
             }
         }
 

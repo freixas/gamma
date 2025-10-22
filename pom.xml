@@ -14,7 +14,7 @@
 
     <!-- *** VERSION *** -->
 
-    <version>1.0.1</version>
+    <version>1.0.2</version>
 
     <developers>
         <developer>
@@ -31,8 +31,8 @@
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <maven.compiler.source>25</maven.compiler.source>
+        <maven.compiler.target>25</maven.compiler.target>
 
         <skipTests>true</skipTests>
 
@@ -41,7 +41,7 @@
         <app.version>${gamma.version}</app.version>
         <windows.vendor>${project.name}</windows.vendor>
 
-        <javafx.version>17.0.2</javafx.version>
+        <javafx.version>25</javafx.version>
         <jvm.modules>javafx.controls,javafx.fxml,javafx.swing,javafx.web</jvm.modules>
         <main-class>org.freixas.gamma.Gamma</main-class>
 
@@ -78,7 +78,7 @@
         <dependency>
             <groupId>commons-cli</groupId>
             <artifactId>commons-cli</artifactId>
-            <version>1.5.0</version>
+            <version>1.10.0</version>
         </dependency>
 
         <dependency>
@@ -91,7 +91,7 @@
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
-            <version>23.0.0</version>
+            <version>26.0.2-1</version>
             <scope>compile</scope>
         </dependency>
 
@@ -432,7 +432,7 @@
                                 <arg>--no-header-files</arg>
                                 <arg>--strip-debug</arg>
                                 <arg>--no-man-pages</arg>
-                                <arg>--compress=2</arg>
+                                <!-- <arg> - -compress=2</arg> -->
                             </args>
                         </configuration>
                     </execution>

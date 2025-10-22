@@ -112,6 +112,13 @@ public class Interval implements ExecutionImmutable, Displayable
      */
     public double getDelta()
     {
+        // This code avoids generating NaN if max and min are both the same
+        // type of infinity (e.g. POSITIVE_INFINITY - POSITIVE_INFINITY = NaN).
+        //
+        // If only one value is an infinity and if max > min, then max - min
+        // will return either a finite number or POSITIVE_INFINITY.
+
+        if (max == min) return 0;
         return max - min;
     }
 

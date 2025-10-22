@@ -50,6 +50,22 @@ public class Path implements ExecutionImmutable, Displayable
 
         this.coords = new ArrayList<>();
         for (Coordinate coord : coords) {
+            if (Double.isInfinite(coord.x)) {
+                if (coord.x < 0) {
+                    coord.x = -Integer.MAX_VALUE;
+                }
+                else {
+                    coord.x = Integer.MAX_VALUE;
+                }
+            }
+            if (Double.isInfinite(coord.t)) {
+                if (coord.t < 0) {
+                    coord.t = -Integer.MAX_VALUE;
+                }
+                else {
+                    coord.t = Integer.MAX_VALUE;
+                }
+            }
             if (coord.x < minX) minX = coord.x;
             if (coord.x > maxX) maxX = coord.x;
             if (coord.t < minT) minT = coord.t;

@@ -96,30 +96,89 @@ public final class Util
         return getAngle(start.x, start.t, end.x, end.t);
     }
 
+// NOTE: Doesn't handle infinities well...
+//
+//    /**
+//     * Get the angle of a line segment (from +180 to -180)
+//     *
+//     * @param startX The starting point's x value.
+//     * @param startT The starting point's t value.
+//     * @param endX The ending point's x value.
+//     * @param endT The ending point's t value.
+//     *
+//     * @return The angle of the line segment in degrees in the range +180
+//     * (inclusive) to -180 (exclusive).
+//     */
+//    static public double getAngle(double startX, double startT, double endX, double endT)
+//    {
+//        double deltaX = endX - startX;
+//        double deltaT = endT - startT;
+//        double m = (deltaT) / (deltaX);
+//
+//        if (Util.fuzzyZero(deltaX)) {
+//            if (deltaT > 0.0) return 90.0;
+//            return -90.0;
+//        }
+//
+//        // The angle will be from +90 to -90
+//
+//        double angle = Math.toDegrees(Math.atan(m));
+//
+//        if (deltaX > 0.0) return angle;
+//        if (angle <= 0.0) return 180.0 + angle;
+//        return angle - 180.0;
+//    }
+
     /**
-     * Get the angle of a line segment (from +180 to -180)
+     * Get the angle of a line segment (from +180 to -180). The line segment
+     * could potentially have infinite endpoints.
+     * <p>
+     * Java’s Math.atan2() already copes with most infinities, but there are a
+     * few edge cases:
+     *<p>
+     *     (dx, dy) = (∞, ∞) → 45 degrees.
+     *     (dx, dy) = (−∞, ∞) → 135 degrees.
+     *     (dx, dy) = (−∞, −∞) → −135 degrees.
+     *     (dx, dy) = (∞, −∞) → −45 degrees.
+     *     (dx, dy) = (∞, 0) → 0 degrees.
+     *     (dx, dy) = (0, ∞) → 90 degrees.
+     *     (dx, dy) = (−∞, 0) → ±180 degrees.
+     *     (dx, dy) = (0, −∞) → −90 degrees.
+     * <p>
+     * If both dx and dy are both 0, then we have the pathological case where
+     * the line segment is a point, so we return 90°
      *
-     * @param startX The starting point's x value.
-     * @param startT The starting point's t value.
-     * @param endX The ending point's x value.
-     * @param endT The ending point's t value.
+     * @param x1 The starting point's x value.
+     * @param t1 The starting point's t value.
+     * @param x2 The ending point's x value.
+     * @param t2 The ending point's t value.
      *
      * @return The angle of the line segment in degrees in the range +180
      * (inclusive) to -180 (exclusive).
      */
-    static public double getAngle(double startX, double startT, double endX, double endT)
+
+    public static double getAngle(double x1, double t1, double x2, double t2)
     {
-        double deltaX = endX - startX;
-        double deltaT = endT - startT;
-        double m = (deltaT) / (deltaX);
+        double deltaX = x2 - x1;
+        double deltaT = t2 - t1;
 
         if (Util.fuzzyZero(deltaX)) {
-            if (deltaT > 0.0) return 90.0;
-            return -90.0;
+            if (deltaT < 0.0) return -90.0;
+            return 90.0;
         }
-        // The angle will be from +90 to -90
 
-        double angle = Math.toDegrees(Math.atan(m));
+        // Handle both dx and dy infinite (direction well-defined)
+
+        if (Double.isInfinite(deltaX) && Double.isInfinite(deltaT)) {
+            if (deltaX > 0 && deltaT > 0) return 45.0;
+            if (deltaX < 0 && deltaT > 0) return 135.0;
+            if (deltaX < 0 && deltaT < 0) return -135.0;
+            if (deltaX > 0 && deltaT < 0) return -45.0;
+        }
+
+        // Fall back to atan2 which handles infinities correctly
+
+        double angle = Math.toDegrees(Math.atan2(deltaT, deltaX));
 
         if (deltaX > 0.0) return angle;
         if (angle <= 0.0) return 180.0 + angle;
@@ -276,7 +335,7 @@ public final class Util
     static public boolean fuzzyGT(double d1, double d2)
     {
         if (fuzzyEQ(d1, d2)) return false;
-         return d1 - EPSILON > d2;
+        return d1 - EPSILON > d2;
     }
 
     static public boolean fuzzyGE(double d1, double d2)
@@ -360,7 +419,7 @@ public final class Util
      *
      * @return The rounded value.
      */
-    static public long rountToLong(double d)
+    static public long roundToLong(double d)
     {
         return (int)(d >= 0 ? Math.ceil(d - 0.5) : Math.floor(d + 0.5));
     }

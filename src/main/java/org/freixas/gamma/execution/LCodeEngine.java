@@ -23,7 +23,6 @@ import org.freixas.gamma.drawing.Context;
 import org.freixas.gamma.execution.lcode.*;
 import org.freixas.gamma.value.Frame;
 import java.util.ArrayList;
-import java.util.ListIterator;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
@@ -306,6 +305,8 @@ public class LCodeEngine
 
              // Execute normal commands
 
+            context.bounds = context.getCurrentCanvasBounds();
+
             for (Command command : commands) {
                 command.execute(context);
                 if (isClosed) return;
@@ -455,9 +456,7 @@ public class LCodeEngine
         scrollEventHandler = event -> {
             window.userInteractionOccurred();
 
-            GraphicsContext gc = canvas.getGraphicsContext2D();
-
-            double delta = event.getDeltaY();
+            double delta = -event.getDeltaY();
             if (delta == 0.0) return;
 
             Point2D center = new Point2D(event.getX(), event.getY());
@@ -543,16 +542,16 @@ public class LCodeEngine
 
             if (delta == 0.0) return;
 
-             Affine transform = gc.getTransform();
+            Affine transform = gc.getTransform();
 
-             double curInvScale = context.getCurrentInvScale();
+            double curInvScale = context.getCurrentInvScale();
 
-             // Scale using this rather magic formula
+            // Scale using this rather magic formula
 
-             double zoomExp = 1 + (Math.abs(delta) / 1000.0);
-             double zoomIncr = Math.pow(curInvScale, zoomExp) / 10.0;
-             if (delta < 0) zoomIncr = -zoomIncr;
-             double newScale = curInvScale + zoomIncr;
+            double zoomExp = 1 + (Math.abs(delta) / 1000.0);
+            double zoomIncr = Math.pow(curInvScale, zoomExp) / 10.0;
+            if (delta < 0) zoomIncr = -zoomIncr;
+            double newScale = curInvScale + zoomIncr;
 
              // Limit the scaling
 
@@ -591,7 +590,7 @@ public class LCodeEngine
     private void removeListeners()
     {
         canvasParent.widthProperty().removeListener(widthListener);
-        canvasParent.widthProperty().removeListener(heightListener);
+        canvasParent.heightProperty().removeListener(heightListener);
         canvas.removeEventHandler(MouseEvent.MOUSE_MOVED, mouseMovedEventHandler);
         canvas.removeEventHandler(MouseEvent.MOUSE_ENTERED, mouseEnteredEventHandler);
         canvas.removeEventHandler(MouseEvent.MOUSE_EXITED, mouseExitedEventHandler);

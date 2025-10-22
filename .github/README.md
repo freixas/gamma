@@ -47,7 +47,7 @@ scripts (Gamma programs) under **Help / Sample Scripts**.
 
 ### Physics-based Objects
 
-- Coordiantes
+- Coordinates
 - Inertial frames
 - Observers
 - Lines

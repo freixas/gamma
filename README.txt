@@ -1,7 +1,7 @@
 Gamma is an application for drawing Minkowski spacetime diagrams.
 
 * INSTALLERS ARE AVAILABLE FOR WINDOWS AND DEBIAN-BASED LINUX DISTRIBUTIONS
-* MACOS INSTALLERS ARE PLANNED
+* MACOS INSTALLERS ARE NOT CURRENTLY PLANNED
 * THERE IS A UNIVERSAL ZIP FILE (SEE BELOW)
 
 Known Problems:
@@ -14,7 +14,7 @@ Known Problems:
 ********************************************************************
 ********************************************************************
 
-WINDOWS 7-10
+WINDOWS 7-11
 
 * Download and run (double-click on) the Windows x64 installer (MSI)
   gamma-<version>.msi. For x32 systems, you will need to use the universal ZIP
@@ -47,63 +47,47 @@ To install the universal tar.gz file, you will need to know how to:
 
 INSTALL JAVA
 
-Download and install Java JDK 17.0.2 (or later) from
+Download and install Java 25 (or later). There are several versions and any of
+them should work. The version used to build and test Gamma is the OpenJDK version
+from
 
+https://jdk.java.net/25/
+
+You could also try the versions at
+
+https://learn.microsoft.com/en-us/java/openjdk/download or
 https://www.oracle.com/java/technologies/downloads/
 
-This is also called "Java SE Development Kit 17.0.2". The page includes a link
-to installation instructions in the section on "Release Information".
+The installer versions are the easiest to install. If you get a zip or tar file,
+the general approach is to unpack it somewhere, set the JAVA_HOME environment
+variable to point to this location and add the path to the bin folder inside
+the unpacked Java JDK to your PATH.
 
-There are also open source versions at
-
-https://jdk.java.net/17/
-
-These versions don't include installers or even installation instructions.
-
-To verify that Java is installed properly, type:
+To verify that Java is installed properly, bring up a new command (Windows)
+or terminal (Mac/Linux) window and type:
 
   java --version
 
-into a cmd.exe or terminal window. This should output something starting with:
+This should output something that includes:
 
-  java version "17.0.2"
+  JDK 25 or OpenJDK 25
 
-Make sure that the JAVA_HOME variable is set. Using a terminal window, enter:
+To make sure that the JAVA_HOME variable is set, enter:
 
   echo %JAVA_HOME% (Windows)
   echo $JAVA_HOME (Mac/Linux)
-
-If this does not display path, set JAVA_HOME to the path where Java
-was installed. On Windows, locate the top of the Java installation (usually
-something like C:\Program Files\Java\<version>). Then, in a terminal window,
-type:
-
-  setx JAVA_HOME ""
-
-On Mac/Linux, use the "which" command in a terminal window to find the java
-executable:
-
-  which java
-
-Remove "/bin" from the path. This should be your JAVA_HOME value. You will need
-to set it in whatever profile file you are using: ~/.bash_profile, ~/.profile,
-or others. In this file, enter:
-
-  JAVA_HOME="<path>"
-
-You may have to log out/in to make this effective.
 
 --------------------------------------------------------------------
 
 INSTALL JAVAFX
 
-Download and install JavaFX 17.0.2 [LTS] (or later) from
+Download and install JavaFX 25 [LTS] (or later) from
 
 https://gluonhq.com/products/javafx/
 
 (for Type, select SDK)
 
-The download should be a ZIP file. You can place the javafx-sdk-17.0.2
+The download should be a ZIP file. You can place the included javafx-sdk-25
 folder anywhere.
 
 You will need to create a JAVAFX_HOME environment variable. The JAVAFX_HOME path
@@ -114,8 +98,7 @@ should point to the top of the unpacked ZIP file.
 INSTALL GAMMA
 
 Unzip the Gamma installation package to any location. If you unpacked the file
-into <some path>, then add <some path>\app (Windows) or <some path>/app (Mac/
-Linux) to your PATH.
+into <some path>, then add <some path> to your PATH.
 
 --------------------------------------------------------------------
 
