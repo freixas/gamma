@@ -14,6 +14,7 @@ jobs:
       uses: actions/setup-java@v5
       with:
         java-version: '25'
+        check-latest: true
         distribution: 'temurin'
         cache: 'maven'
     - name: Build with Maven
