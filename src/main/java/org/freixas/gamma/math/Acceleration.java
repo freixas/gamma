@@ -166,10 +166,10 @@ import org.freixas.gamma.value.Line;
  * a 1g acceleration using units years and light years, 1 g = 1.03227407852535
  * ly / year<sup>2</sup>.
  * <p>
- * See http://web.physics.ucsb.edu/~fratus/phys103/LN/IGR.pdf<br>
- * See http://math.ucr.edu/home/baez/physics/Relativity/SR/Rocket/rocket.html
+ * See <a href="http://web.physics.ucsb.edu/~fratus/phys103/LN/IGR.pdf">...</a><br>
+ * See <a href="http://math.ucr.edu/home/baez/physics/Relativity/SR/Rocket/rocket.html">...</a>
  *
- * @see org.freixas.gamma.math.OffsetAcceleration
+ * @see OffsetAcceleration
  * @author Antonio Freixas
  */
 public final class Acceleration

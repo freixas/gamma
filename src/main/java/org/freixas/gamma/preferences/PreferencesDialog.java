@@ -30,7 +30,6 @@ import javafx.stage.Modality;
  */
 public class PreferencesDialog extends Dialog<ButtonType>
 {
-    private final DialogPane dialogPane;
     private final PreferencesDialogController controller;
 
     // **********************************************************************
@@ -42,14 +41,15 @@ public class PreferencesDialog extends Dialog<ButtonType>
     /**
      * Create a preferences dialog.
      */
+    @SuppressWarnings("this-escape")
     public PreferencesDialog() throws Exception
     {
         // Load the view (FXML file) and controller. Get a reference to the controller.
 
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(getClass().getResource("/PreferencesDialog.fxml"));
-        dialogPane = loader.load();
-        controller = (PreferencesDialogController)loader.getController();
+        DialogPane dialogPane = loader.load();
+        controller = loader.getController();
         setDialogPane(dialogPane);
     }
 
@@ -63,7 +63,7 @@ public class PreferencesDialog extends Dialog<ButtonType>
 
         showAndWait()
             .filter(response -> response == ButtonType.OK)
-            .ifPresent(response -> controller.updatePreferences());
+            .ifPresent(_ -> controller.updatePreferences());
     }
 
 }

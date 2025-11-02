@@ -50,7 +50,7 @@ public class ObserverHCode extends ArgInfoHCode
 
         // Grab the worldline initializer
 
-        WInitializer initializer = (WInitializer)data.get(0);
+        WInitializer initializer = (WInitializer)data.getFirst();
 
         ArrayList<WSegment> segments = new ArrayList<>();
 
@@ -64,7 +64,7 @@ public class ObserverHCode extends ArgInfoHCode
 
             // Check that all segments have a limit except for the last
 
-            if (i < numOfSegments && segment.getType() == WorldlineSegment.LimitType.NONE) {
+            if (i < numOfSegments && segment.type() == WorldlineSegment.LimitType.NONE) {
                 throw new ExecutionException("All worldline segments except the last need a limit");
             }
 

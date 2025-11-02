@@ -27,6 +27,6 @@ import org.freixas.gamma.execution.HCodeEngine;
 @FunctionalInterface
 public interface FunctionalTwoArgNoRet<T1, T2> extends LambdaFunction
 {
-    public void execute(HCodeEngine engine, T1 arg1, T2 arg2);
+    void execute(HCodeEngine engine, T1 arg1, T2 arg2);
 }
 

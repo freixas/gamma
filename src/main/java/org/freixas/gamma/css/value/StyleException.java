@@ -17,6 +17,8 @@
  */
 package org.freixas.gamma.css.value;
 
+import java.io.Serial;
+
 /**
  * Exceptions caused by stylesheet syntax errors.
  *
@@ -25,6 +27,9 @@ package org.freixas.gamma.css.value;
 
 public final class StyleException extends Exception
 {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     // **********************************************************************
     // *
     // * Constructors

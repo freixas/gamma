@@ -51,21 +51,18 @@ public class dopplerVToFrequencyFunction extends ArgInfoFunction
             throw new ExecutionException("The dopplerVToFrequency() function's source frequency value must be > 0");
         }
 
-        if (arg1 == null) {
-            throw new ExecutionException("The dopplerVToFrequency() function's second parameter is null");
-        }
-        else if (arg1 instanceof Double v) {
-            return Relativity.dopplerVToFrequency(frequency, v);
-        }
-        else if (arg1 instanceof Observer observer) {
-            return Relativity.dopplerVToFrequency(frequency, new Frame(observer).getV());
-        }
-        else if (arg1 instanceof Frame frame) {
-            return Relativity.dopplerVToFrequency(frequency, frame.getV());
-        }
-        else {
-            throw new ExecutionException("dopplerVToFrequency() requires a velocity, observer, or frame as its second parameter");
-        }
+        return switch (arg1) {
+            case null ->
+                throw new ExecutionException("The dopplerVToFrequency() function's second parameter is null");
+            case Double v ->
+                Relativity.dopplerVToFrequency(frequency, v);
+            case Observer observer ->
+                Relativity.dopplerVToFrequency(frequency, new Frame(observer).getV());
+            case Frame frame ->
+                Relativity.dopplerVToFrequency(frequency, frame.getV());
+            default ->
+                throw new ExecutionException("dopplerVToFrequency() requires a velocity, observer, or frame as its second parameter");
+        };
     }
 
     @Override

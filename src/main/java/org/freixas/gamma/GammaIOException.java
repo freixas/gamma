@@ -51,6 +51,9 @@ import java.nio.file.FileSystemException;
  */
 public class GammaIOException extends Exception
 {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     // **********************************************************************
     // *
     // * Constructors
@@ -58,7 +61,7 @@ public class GammaIOException extends Exception
     // **********************************************************************
 
     /**
-     * Create a a Gamma I/O exception from a Java I/O Exception.
+     * Create a Gamma I/O exception from a Java I/O Exception.
      *
      * @param cause The exception which caused the problem.
      */
@@ -68,7 +71,7 @@ public class GammaIOException extends Exception
     }
 
     /**
-     * Create a a Gamma I/O exception from a Java I/O Exception.
+     * Create a Gamma I/O exception from a Java I/O Exception.
      *
      * @param message The message to display.
      * @param cause The exception which caused the problem.
@@ -84,6 +87,7 @@ public class GammaIOException extends Exception
      *
      * @return The cause of this throwable or null if the cause is nonexistent or unknown.
      */
+    @SuppressWarnings("unused")
     public String getLocalizedMessage()
     {
         Throwable cause = getCause();
@@ -91,115 +95,92 @@ public class GammaIOException extends Exception
 
         // We skip some I/O errors we think are unlikely to occur in this
         // application
-        
-        if (cause instanceof AttachOperationFailedException) {
-            return "Attach operation failed - " + causeMessage;
-        }
-        else if (cause instanceof ChangedCharSetException) {
-            return "Changed character set error - " + causeMessage;
-        }
-        else if (cause instanceof CharacterCodingException) {
-            return "Character coding error - " + causeMessage;
-        }
-        else if (cause instanceof CharConversionException) {
-            return "Character conversion error - " + causeMessage;
-        }
-        else if (cause instanceof ClosedChannelException) {
-            return "The channel was closed - " + causeMessage;
-        }
-        else if (cause instanceof ClosedConnectionException) {
-            return "The connection was closed - " + causeMessage;
-        }
-        else if (cause instanceof EOFException) {
-            return "End of file - " + causeMessage;
-        }
-        else if (cause instanceof FileLockInterruptionException) {
-            return "The file lock was interrupted - " + causeMessage;
-        }
-        else if (cause instanceof FileNotFoundException) {
-            return "The file was not found - " + causeMessage;
-        }
-        // 	else if (cause instanceof FilerException) {
-        // 	    return "Filer - " + causeMessage;
-        // 	}
-        else if (cause instanceof FileSystemException) {
-            return "File system error - " + causeMessage;
-        }
-        else if (cause instanceof HttpRetryException) {
-            return "HTTP retry error - " + causeMessage;
-        }
-        else if (cause instanceof HttpTimeoutException) {
-            return "HTTP timeout error - " + causeMessage;
-        }
-        else if (cause instanceof IIOException) {
-            return "Error while reading or writing - " + causeMessage;
-        }
-        else if (cause instanceof InterruptedByTimeoutException) {
-            return "An I/O operation was interrupted by a timeout - " + causeMessage;
-        }
-        else if (cause instanceof InterruptedIOException) {
-            return "An I/O operation was interrupted - " + causeMessage;
-        }
-        // 	else if (cause instanceof InvalidPropertiesFormatException) {
-        // 	    return "InvalidPropertiesFormat - " + causeMessage;
-        // 	}
-        // 	else if (cause instanceof JMXProviderException) {
-        // 	    return "JMXProvider - " + causeMessage;
-        // 	}
-        // 	else if (cause instanceof JMXServerErrorException) {
-        // 	    return "JMXServerError - " + causeMessage;
-        // 	}
-        // 	else if (cause instanceof MalformedURLException) {
-        // 	    return "Malformed URL - " + causeMessage;
-        // 	}
-        // 	else if (cause instanceof ObjectStreamException) {
-        // 	    return "ObjectStream - " + causeMessage;
-        // 	}
-        else if (cause instanceof ProtocolException) {
-            return "An error occurred in the I/O protocol - " + causeMessage;
-        }
-        // 	else if (cause instanceof RemoteException) {
-        // 	    return "Remote - " + causeMessage;
-        // 	}
-        // 	else if (cause instanceof SaslException) {
-        // 	    return "Sasl - " + causeMessage;
-        // 	}
-        // 	else if (cause instanceof SocketException) {
-        // 	    return "Socket - " + causeMessage;
-        // 	}
-        else if (cause instanceof SSLException) {
-            return "SSL error - " + causeMessage;
-        }
-        else if (cause instanceof SyncFailedException) {
-            return "Synchronization failed - " + causeMessage;
-        }
-        // 	else if (cause instanceof TransportTimeoutException) {
-        // 	    return "TransportTimeout - " + causeMessage;
-        // 	}
-        else if (cause instanceof UnknownHostException) {
-            return "Unknown host - " + causeMessage;
-        }
-        else if (cause instanceof UnknownServiceException) {
-            return "Unknown service - " + causeMessage;
-        }
-        else if (cause instanceof UnsupportedEncodingException) {
-            return "Unsupported encoding - " + causeMessage;
-        }
-        // 	else if (cause instanceof UserPrincipalNotFoundException) {
-        // 	    return "User Principal Not Found - " + causeMessage;
-        // 	}
-        else if (cause instanceof UTFDataFormatException) {
-            return "Malformed UTF character encountered - " + causeMessage;
-        }
-        else if (cause instanceof WebSocketHandshakeException) {
-            return "Web socket handshake failed - " + causeMessage;
-        }
-        // 	else if (cause instanceof ZipException) {
-        // 	    return "Zip - " + causeMessage;
-        // 	}
-        else {
-            return causeMessage;
-        }
+
+        return switch (cause) {
+            case AttachOperationFailedException attachOperationFailedException ->
+                "Attach operation failed - " + causeMessage;
+            case ChangedCharSetException changedCharSetException ->
+                "Changed character set error - " + causeMessage;
+            case CharacterCodingException characterCodingException ->
+                "Character coding error - " + causeMessage;
+            case CharConversionException charConversionException ->
+                "Character conversion error - " + causeMessage;
+            case ClosedChannelException closedChannelException ->
+                "The channel was closed - " + causeMessage;
+            case ClosedConnectionException closedConnectionException ->
+                "The connection was closed - " + causeMessage;
+            case EOFException eofException -> "End of file - " + causeMessage;
+            case FileLockInterruptionException fileLockInterruptionException ->
+                "The file lock was interrupted - " + causeMessage;
+            case FileNotFoundException fileNotFoundException ->
+                "The file was not found - " + causeMessage;
+
+            // 	case FilerException ->
+            // 	    "Filer - " + causeMessage;
+
+            case FileSystemException fileSystemException ->
+                "File system error - " + causeMessage;
+            case HttpRetryException httpRetryException ->
+                "HTTP retry error - " + causeMessage;
+            case HttpTimeoutException httpTimeoutException ->
+                "HTTP timeout error - " + causeMessage;
+            case IIOException iioException ->
+                "Error while reading or writing - " + causeMessage;
+            case InterruptedByTimeoutException interruptedByTimeoutException ->
+                "An I/O operation was interrupted by a timeout - " + causeMessage;
+            case InterruptedIOException interruptedIOException ->
+                "An I/O operation was interrupted - " + causeMessage;
+
+            // 	case instanceof InvalidPropertiesFormatException ->
+            // 	    "InvalidPropertiesFormat - " + causeMessage;
+            // case JMXProviderException ->
+            // 	    "JMXProvider - " + causeMessage;
+            // 	case JMXServerErrorException ->
+            // 	    "JMXServerError - " + causeMessage;
+            // 	case MalformedURLException ->
+            // 	    "Malformed URL - " + causeMessage;
+            // 	case ObjectStreamException ->
+            // 	    "ObjectStream - " + causeMessage;
+
+            case ProtocolException protocolException ->
+                "An error occurred in the I/O protocol - " + causeMessage;
+
+            // 	case RemoteException ->
+            // 	    "Remote - " + causeMessage;
+            // 	case SaslException ->
+            // 	    "Sasl - " + causeMessage;
+            // 	case SocketException ->
+            // 	    "Socket - " + causeMessage;
+
+            case SSLException sslException ->
+                "SSL error - " + causeMessage;
+            case SyncFailedException syncFailedException ->
+                "Synchronization failed - " + causeMessage;
+
+            // 	case TransportTimeoutException ->
+            // 	    "TransportTimeout - " + causeMessage;
+
+            case UnknownHostException unknownHostException ->
+                "Unknown host - " + causeMessage;
+            case UnknownServiceException unknownServiceException ->
+                "Unknown service - " + causeMessage;
+            case UnsupportedEncodingException unsupportedEncodingException ->
+                "Unsupported encoding - " + causeMessage;
+
+            // 	case UserPrincipalNotFoundException ->
+            // 	    "User Principal Not Found - " + causeMessage;
+
+            case UTFDataFormatException utfDataFormatException ->
+                "Malformed UTF character encountered - " + causeMessage;
+            case WebSocketHandshakeException webSocketHandshakeException ->
+                "Web socket handshake failed - " + causeMessage;
+
+            // 	case ZipException ->
+            // 	    "Zip - " + causeMessage;
+            // 	}
+
+            case null, default -> causeMessage;
+        };
     }
 
 

@@ -129,6 +129,7 @@ public class LCodeEngine
      *
      * @return The display command.
      */
+    @SuppressWarnings("unused")
     public Command getDisplayCommand()
     {
         return displayCommand;
@@ -139,6 +140,7 @@ public class LCodeEngine
      *
      * @return The frame command.
      */
+    @SuppressWarnings("unused")
     public Command getFrameCommand()
     {
         return frameCommand;
@@ -185,6 +187,7 @@ public class LCodeEngine
      *
      * @return True if the mouse is inside the canvas.
      */
+    @SuppressWarnings("unused")
     public boolean isMouseInside()
     {
         return mouseInside;
@@ -205,7 +208,7 @@ public class LCodeEngine
 
     public void addCommand(Command command)
     {
-        Struct struct = command.getCmdStruct();
+        Struct struct = command.cmdStruct();
 
         if (struct instanceof AnimationStruct) {
             animationCommand = command;
@@ -262,10 +265,10 @@ public class LCodeEngine
 
             // Run the display command
 
-            ((DisplayCommandExec)displayCommand.getCmdExec()).initializeCanvas(
+            ((DisplayCommandExec)displayCommand.cmdExec()).initializeCanvas(
                 context,
-                (DisplayStruct)displayCommand.getCmdStruct(),
-                displayCommand.getStyles());
+                (DisplayStruct)displayCommand.cmdStruct(),
+                displayCommand.styles());
 
             // Draw the initial display
 
@@ -281,10 +284,10 @@ public class LCodeEngine
         // Use the frame command to revise all the coordinates in the structures.
         // Optimize if we have the default frame
 
-        FrameStruct fStruct = (FrameStruct)frameCommand.getCmdStruct();
+        FrameStruct fStruct = (FrameStruct)frameCommand.cmdStruct();
         if (!fStruct.frame.equals(HCodeEngine.getDefFrame())) {
             final Frame prime = fStruct.frame;
-            commands.forEach((Command command) -> command.getCmdStruct().relativeTo(prime));
+            commands.forEach((Command command) -> command.cmdStruct().relativeTo(prime));
         }
     }
 
@@ -367,7 +370,7 @@ public class LCodeEngine
         // *
         // ************************************************************
 
-        widthListener = (ObservableValue<? extends Number> ov, Number oldValue, Number newValue) -> {
+        widthListener = (ObservableValue<? extends Number> _, Number _, Number _) -> {
             if (engine.lastWidth != canvasParent.getWidth()) {
                 engine.execute();
                 engine.lastWidth = canvasParent.getWidth();
@@ -375,7 +378,7 @@ public class LCodeEngine
         };
         canvasParent.widthProperty().addListener(widthListener);
 
-        heightListener = (ObservableValue<? extends Number> ov, Number oldValue, Number newValue) -> {
+        heightListener = (ObservableValue<? extends Number> _, Number _, Number _) -> {
             if (engine.lastHeight != canvasParent.getHeight()) {
                 engine.execute();
                 engine.lastHeight = canvasParent.getHeight();
@@ -403,7 +406,7 @@ public class LCodeEngine
         };
         canvas.addEventHandler(MouseEvent.MOUSE_ENTERED, mouseEnteredEventHandler);
 
-        mouseExitedEventHandler = event -> {
+        mouseExitedEventHandler = _ -> {
             label.setText("");
             engine.setMouseInside(false);
         };
@@ -487,8 +490,8 @@ public class LCodeEngine
             window.userInteractionOccurred();
 
             if (event.getCode() == KeyCode.DIGIT0) {
-                ((DisplayCommandExec)displayCommand.getCmdExec()).
-                    setInitialZoomPan(context, ((DisplayStruct)displayCommand.getCmdStruct()));
+                ((DisplayCommandExec)displayCommand.cmdExec()).
+                    setInitialZoomPan(context, ((DisplayStruct)displayCommand.cmdStruct()));
             }
 
             // Zoom in/out (Ctrl + +/-)

@@ -26,7 +26,7 @@ import org.freixas.gamma.value.Coordinate;
 import org.freixas.gamma.value.HyperbolicSegment;
 
 /**
- * Draw a hypergird.
+ * Draw a hypergrid.
  *
  * @author Antonio Freixas
  */
@@ -41,6 +41,7 @@ public class Hypergrid
      * @param struct The hypergrid properties.
      * @param styles The style properties.
      */
+    @SuppressWarnings("unused")
     static public void draw(Context context, HypergridStruct struct,
                             StyleStruct styles)
     {

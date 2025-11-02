@@ -61,6 +61,7 @@ public class ToggleVariable extends DisplayVariable
      *
      * @return The initial value.
      */
+    @SuppressWarnings("unused")
     public boolean getInitialValue()
     {
         return initialValue;

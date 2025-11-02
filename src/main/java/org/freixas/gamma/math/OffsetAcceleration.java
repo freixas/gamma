@@ -66,7 +66,7 @@ import org.freixas.gamma.value.WorldlineSegment;
  * Since every possible velocity maps to a specific point on an acceleration
  * curve, we use the given velocity to identify a point on the standard
  * acceleration curve and then translate this point to a given coordinate that
- * we is called vPoint. Keep in mind that vPoint is <em>not</em> the curve's
+ * we call vPoint. Keep in mind that vPoint is <em>not</em> the curve's
  * offset, but is used to calculate the offset.
  * <p>
  * We set the accelerated frame's clock to tau and the distance to d at vPoint.
@@ -201,11 +201,11 @@ import org.freixas.gamma.value.WorldlineSegment;
  * a 1g acceleration using units years and light years, 1 g = 1.03227407852535
  * ly / year<sup>2</sup>.
  * <p>
- * See http://web.physics.ucsb.edu/~fratus/phys103/LN/IGR.pdf See
- * https://math.ucr.edu/home/baez/physics/Relativity/SR/Rocket/rocket.html
+ * See <a href="http://web.physics.ucsb.edu/~fratus/phys103/LN/IGR.pdf">...</a> See
+ * <a href="https://math.ucr.edu/home/baez/physics/Relativity/SR/Rocket/rocket.html">...</a>
  *
- * @see org.freixas.gamma.math.Acceleration
- * @see org.freixas.gamma.value.WorldlineSegment
+ * @see Acceleration
+ * @see WorldlineSegment
  *
  * @author Antonio Freixas
  */
@@ -215,8 +215,6 @@ public class OffsetAcceleration implements ExecutionImmutable
     private final double vInit;
     private final Coordinate vPoint;
     private final double vPointTau;
-    @SuppressWarnings("FieldCanBeLocal")
-    private final double vPointD;
 
     private final Coordinate offset;
     private final double dOffset;
@@ -246,8 +244,6 @@ public class OffsetAcceleration implements ExecutionImmutable
         this.vInit = zeroVelocity ? 0.0 : v;
         this.vPoint = vPoint;
         this.vPointTau = tau;
-        this.vPointD = d;
-
 
         // Handle the case where the acceleration is 0
 
@@ -259,7 +255,7 @@ public class OffsetAcceleration implements ExecutionImmutable
             stdVPointTau = 0;
             stdVPointD = 0;
 
-            // Calculate the offset from vPoint to stdVpoint.
+            // Calculate the offset from vPoint to stdVPoint.
             // We subtract the offset to go from offset to standard coordinates.
             // We add the offset to go from standard to offset coordinates.
 
@@ -291,7 +287,7 @@ public class OffsetAcceleration implements ExecutionImmutable
 
             stdVPointD = Acceleration.xToD(a, stdX, stdT >= 0.0);
 
-            // Calculate the offset from vPoint to stdVpoint.
+            // Calculate the offset from vPoint to stdVPoint.
             // We subtract the offset to go from offset to standard coordinates.
             // We add the offset to go from standard to offset coordinates.
             //
@@ -404,6 +400,7 @@ public class OffsetAcceleration implements ExecutionImmutable
      * @param v The velocity.
      * @return Gamma.
      */
+    @SuppressWarnings("unused")
     public final double vToGamma(double v)
     {
         // The acceleration is moot. Since we have v, we can derive gamma
@@ -430,6 +427,7 @@ public class OffsetAcceleration implements ExecutionImmutable
      * @throws ArithmeticException When the x coordinate doesn't cross the
      * offset acceleration curve.
      */
+    @SuppressWarnings("unused")
     public final double xToV(double x)
     {
         return xToV(x, false);
@@ -471,6 +469,7 @@ public class OffsetAcceleration implements ExecutionImmutable
      * @throws ArithmeticException When the x coordinate doesn't cross the
      * offset acceleration curve.
      */
+    @SuppressWarnings("unused")
     public final double xToD(double x)
     {
         return xToD(x, false);
@@ -519,6 +518,7 @@ public class OffsetAcceleration implements ExecutionImmutable
      * @throws ArithmeticException When the x coordinate doesn't cross the
      * offset acceleration curve or matches all the curve points.
      */
+    @SuppressWarnings("unused")
     public final double xToT(double x)
     {
         return xToT(x, false);
@@ -561,6 +561,7 @@ public class OffsetAcceleration implements ExecutionImmutable
      * @throws ArithmeticException When the x coordinate doesn't cross the
      * offset acceleration curve or matches all the curve points.
      */
+    @SuppressWarnings("unused")
     public final double xToTau(double x)
     {
         return xToTau(x, false);
@@ -600,6 +601,7 @@ public class OffsetAcceleration implements ExecutionImmutable
      * @throws ArithmeticException When the x coordinate doesn't cross the
      * offset acceleration curve or matches all the curve points.
      */
+    @SuppressWarnings("unused")
     public final double xToGamma(double x)
     {
 	if (zeroAcceleration) return Relativity.gamma(vInit);
@@ -703,7 +705,8 @@ public class OffsetAcceleration implements ExecutionImmutable
      * @return Gamma.
      * @throws ArithmeticException When a = 0, v = 0, and d != d at VPoint.
      */
-     public final double dToGamma(double d)
+    @SuppressWarnings("unused")
+    public final double dToGamma(double d)
     {
         if (zeroAcceleration) {
             if (!zeroVelocity) return Relativity.gamma(vInit);
@@ -784,6 +787,7 @@ public class OffsetAcceleration implements ExecutionImmutable
      * @param t The time in the rest frame.
      * @return Gamma.
      */
+    @SuppressWarnings("unused")
     public final double tToGamma(double t)
     {
 	if (zeroAcceleration) return Relativity.gamma(vInit);
@@ -828,7 +832,7 @@ public class OffsetAcceleration implements ExecutionImmutable
      *
      * @param tau The time in the accelerated frame.
      *
-     * @return The distance in the rest frame..
+     * @return The distance in the rest frame.
      */
     public final double tauToD(double tau)
     {
@@ -864,7 +868,8 @@ public class OffsetAcceleration implements ExecutionImmutable
      * @param tau The time in the accelerated frame.
      * @return Gamma.
      */
-    public final double tauToGamma(double tau)
+   @SuppressWarnings("unused")
+   public final double tauToGamma(double tau)
     {
 	if (zeroAcceleration) return Relativity.gamma(vInit);
 	return Acceleration.tauToGamma(a, toStdTau(tau));
@@ -996,12 +1001,13 @@ public class OffsetAcceleration implements ExecutionImmutable
     }
 
     /**
-     * Find the intersection of a standard acceleration curve with a line.
+     * Find the intersection of a standard acceleration curve with a worldline.
+     * Not currently supported.
      *
-     * @param other The other observer.
+     * @param ignoredOther The other observer.
      * @return The intersection or null if none.
      */
-    public final Coordinate intersect(WorldlineSegment other)
+    public final Coordinate intersect(WorldlineSegment ignoredOther)
     {
         return null;
     }

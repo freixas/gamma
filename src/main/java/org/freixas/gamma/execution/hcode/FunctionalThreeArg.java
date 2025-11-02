@@ -29,6 +29,6 @@ import org.freixas.gamma.execution.HCodeEngine;
 @FunctionalInterface
 public interface FunctionalThreeArg<T1, T2, T3, R> extends LambdaFunction
 {
-    public R execute(HCodeEngine engine, T1 arg1, T2 arg2, T3 arg3);
+    R execute(HCodeEngine engine, T1 arg1, T2 arg2, T3 arg3);
 }
 

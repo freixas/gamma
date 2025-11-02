@@ -18,7 +18,7 @@ package org.freixas.gamma.execution.hcode;
 
 import org.freixas.gamma.execution.ArgInfo;
 import org.freixas.gamma.execution.HCodeEngine;
-import org.freixas.gamma.math.Util;
+
 import java.util.ArrayList;
 import java.util.List;
 

@@ -22,7 +22,7 @@ import org.freixas.gamma.parser.ParseException;
  *
  * @author Antonio Freixas
  */
-@SuppressWarnings("serial")
+
 public class ExecutionException extends RuntimeException
 {
     public ExecutionException(String message)
@@ -33,7 +33,7 @@ public class ExecutionException extends RuntimeException
     public ExecutionException(String message, Throwable cause)
     {
         super(
-            message == null && cause != null && cause instanceof ParseException ?
+            message == null && cause instanceof ParseException ?
                 ("Stylesheet parsing error: " + cause.getLocalizedMessage()) :
                 (message +
                     (cause != null ?

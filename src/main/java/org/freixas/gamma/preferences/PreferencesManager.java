@@ -182,7 +182,7 @@ public class PreferencesManager
      * of files. This method is only called by MainWindows that don't have a
      * default of their own. MainWindow defaults will always be directories that
      * have been accessed during the lifetime of this program. The directories
-     * that this method returns may never have been accessed and will be created
+     * that this method returns may have never been accessed and will be created
      * if they don't exist.
      *
      * @param type The type of file.
@@ -232,8 +232,8 @@ public class PreferencesManager
             }
         }
 
-        // We reach here  only if the default directory was undefined or if it
-        // was a file or if it didn't exist and we were unable to create it.
+        // We reach here only if the default directory was undefined, or if it
+        // was a file, or if it didn't exist and we were unable to create it.
         // The fallback is to user USER_DATA_HOME/Gamma/(Scripts|Images|Videos)
 
         defaultDirectory = new File(Gamma.USER_DATA_HOME, "Gamma" + defaultName);

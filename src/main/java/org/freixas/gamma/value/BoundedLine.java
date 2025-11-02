@@ -254,29 +254,22 @@ public class BoundedLine extends Line
 
         ConcreteLine newLine = line.relativeTo(prime);
 
-        CurveSegment newSegment;
+        CurveSegment newSegment = switch (segment) {
+            case null -> null;
 
-        if (segment == null) {
-            newSegment = null;
-        }
+            // If the CurveSegment is a ConcreteLine, we need to make it
+            // relative to the drawing frame
 
-        // If the CurveSegment is a ConcreteLine, we need to make it
-        // relative to the drawing frame
+            case ConcreteLine concreteLine -> concreteLine.relativeTo(prime);
 
-        else if (segment instanceof ConcreteLine concreteLine) {
-            newSegment = concreteLine.relativeTo(prime);
-        }
+            // If the CurveSegment is a LineSegment, make it relative to the
+            // drawing frame
 
-        // If the CurveSegment is a LineSegment, make it relative to the
-        // drawing frame
+            case LineSegment boundedSegment -> boundedSegment.relativeTo(prime);
 
-        else if (segment instanceof LineSegment boundedSegment) {
-            newSegment = boundedSegment.relativeTo(prime);
-        }
-
-        else {
-            throw new ProgrammingException("BoundedLine.relativeTo(): Unexpected CurveSegment type");
-        }
+            default ->
+                throw new ProgrammingException("BoundedLine.relativeTo(): Unexpected CurveSegment type");
+        };
 
         return new BoundedLine(newLine, originalBounds, newSegment);
     }
@@ -329,15 +322,12 @@ public class BoundedLine extends Line
     @Override
     public LineSegment intersect(Bounds bounds)
     {
-        if (segment == null) return null;
+        return switch (segment) {
+            case ConcreteLine concreteLine -> concreteLine.intersect(bounds);
+            case LineSegment lineSegment -> lineSegment.intersect(bounds);
+            default -> null;
+        };
 
-        if (segment instanceof ConcreteLine concreteLine) {
-            return concreteLine.intersect(bounds);
-        }
-        else if (segment instanceof LineSegment lineSegment) {
-            return lineSegment.intersect(bounds);
-        }
-        return null;
     }
 
     // **********************************************************************

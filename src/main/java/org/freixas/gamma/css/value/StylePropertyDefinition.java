@@ -411,6 +411,7 @@ public final class StylePropertyDefinition
      * @param min The minimum value.
      * @param max The maximum value.
      */
+    @SuppressWarnings("unused")
     public StylePropertyDefinition(
         String propName, Field field, StyleProperty.Type type, Min min, Max max)
     {
@@ -575,7 +576,7 @@ public final class StylePropertyDefinition
 
             // If we have dependent style properties, set their values as well
 
-            if (dependencies != null && dependencies.length > 0) {
+            if (dependencies != null) {
                 for (StylePropertyDefinition dependency : dependencies) {
                     dependency.setStyleStructValue(styles, value);
                 }

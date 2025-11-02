@@ -92,6 +92,7 @@ public class ExportDiagramDialog extends Dialog<ButtonType>
      *
      * @param window The main window associated with this dialog.
      */
+    @SuppressWarnings("this-escape")
     public ExportDiagramDialog(MainWindow window) throws Exception
     {
         this.window = window;
@@ -138,7 +139,7 @@ public class ExportDiagramDialog extends Dialog<ButtonType>
 
         showAndWait()
             .filter(response -> response == ButtonType.NEXT)
-            .ifPresent(response -> saveSettingsAndExport());
+            .ifPresent(_ -> saveSettingsAndExport());
     }
 
     // **********************************************************************

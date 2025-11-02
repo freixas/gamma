@@ -108,13 +108,13 @@ public class ExportDiagramDialogController implements Initializable
 
         radioButtons[ExportDiagramDialog.ImageType.JPG.getValue()]
             .selectedProperty()
-            .addListener((obj, oldValue, value) -> setJPGState(value));
+            .addListener((_, _, value) -> setJPGState(value));
 
         setGIFState(imageFormat == ExportDiagramDialog.ImageType.GIF.getValue());
 
         radioButtons[ExportDiagramDialog.ImageType.GIF.getValue()]
             .selectedProperty()
-            .addListener((obj, oldValue, value) -> setGIFState(value));
+            .addListener((_, _, value) -> setGIFState(value));
 
         UnaryOperator<TextFormatter.Change> integerFormatter =
             change -> {
@@ -142,25 +142,25 @@ public class ExportDiagramDialogController implements Initializable
         yMM.setTextFormatter(new TextFormatter<Double>(doubleFormatter));
         ppi.setTextFormatter(new TextFormatter<Integer>(integerFormatter));
 
-        xPixels.focusedProperty().addListener( (obj, oldValue, newValue) -> {
+        xPixels.focusedProperty().addListener( (_, _, newValue) -> {
             if (!newValue) handleXPixels(null);
         });
-        yPixels.focusedProperty().addListener( (obj, oldValue, newValue) -> {
+        yPixels.focusedProperty().addListener( (_, _, newValue) -> {
             if (!newValue) handleYPixels(null);
         });
-        xInches.focusedProperty().addListener( (obj, oldValue, newValue) -> {
+        xInches.focusedProperty().addListener( (_, _, newValue) -> {
             if (!newValue) handleXInches(null);
         });
-        yInches.focusedProperty().addListener( (obj, oldValue, newValue) -> {
+        yInches.focusedProperty().addListener( (_, _, newValue) -> {
             if (!newValue) handleYInches(null);
         });
-        xMM.focusedProperty().addListener( (obj, oldValue, newValue) -> {
+        xMM.focusedProperty().addListener( (_, _, newValue) -> {
             if (!newValue) handleXMM(null);
         });
-        yMM.focusedProperty().addListener( (obj, oldValue, newValue) -> {
+        yMM.focusedProperty().addListener( (_, _, newValue) -> {
             if (!newValue) handleYMM(null);
         });
-        ppi.focusedProperty().addListener( (obj, oldValue, newValue) -> {
+        ppi.focusedProperty().addListener( (_, _, newValue) -> {
             if (!newValue) handlePPI(null);
         });
     }

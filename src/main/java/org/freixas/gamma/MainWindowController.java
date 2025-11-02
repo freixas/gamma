@@ -23,18 +23,12 @@ import javafx.print.PrinterJob;
 import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
-import org.freixas.gamma.css.value.Stylesheet;
-import org.freixas.gamma.execution.DiagramEngine;
-import org.freixas.gamma.execution.hcode.SetStatement;
 import org.freixas.gamma.file.ExportDiagramDialog;
-import org.freixas.gamma.file.URLFile;
 import org.freixas.gamma.preferences.PreferencesDialog;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.LinkedList;
 import java.util.Optional;
 import java.util.ResourceBundle;
 

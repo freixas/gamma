@@ -17,9 +17,6 @@
 package org.freixas.gamma.execution.hcode;
 
 import org.freixas.gamma.execution.*;
-import org.freixas.gamma.value.Address;
-import org.freixas.gamma.value.AnimationVariable;
-import org.freixas.gamma.value.ObjectPropertyAddress;
 import org.freixas.gamma.value.SymbolTableAddress;
 
 import java.util.ArrayList;

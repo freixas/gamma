@@ -75,6 +75,7 @@ public class HCodeEngine
 
     private final boolean isClosed;
 
+    @SuppressWarnings("this-escape")
     public HCodeEngine(MainWindow window, SetStatement setStatement, Stylesheet stylesheet, HCodeProgram program)
     {
         this.window = window;
@@ -305,18 +306,14 @@ public class HCodeEngine
 
     public String toDisplayableString(Object obj)
     {
-        if (obj instanceof String str) {
-            return str;
-        }
-        else if (obj instanceof Double dbl) {
-            return Util.toString(dbl, precision);
-        }
-        else if (obj instanceof Displayable displayable) {
-            return displayable.toDisplayableString(this);
-        }
-        else {
-            throw new ProgrammingException("HCodeEngine.toDisplayableString(): Couldn't convert object to string");
-        }
+        return switch (obj) {
+            case String str -> str;
+            case Double dbl -> Util.toString(dbl, precision);
+            case Displayable displayable ->
+                displayable.toDisplayableString(this);
+            case null, default ->
+                throw new ProgrammingException("HCodeEngine.toDisplayableString(): Couldn't convert object to string");
+        };
     }
 
     public void throwGammaException(Throwable e) throws GammaRuntimeException

@@ -20,7 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * An base class extended by any object that can hold a property accessible
+ * A base class extended by any object that can hold a property accessible
  * by a script writer.
  *
  * @author Antonio Freixas

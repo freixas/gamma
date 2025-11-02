@@ -52,6 +52,7 @@ public class IntervalObserver extends Observer
      * @param observer The observer to use.
      * @param interval The interval to apply to the observer.
      */
+    @SuppressWarnings("this-escape")
     public IntervalObserver(Observer observer, Interval interval)
     {
         if (observer == null) throw new ExecutionException("setInterval() has a null observer");

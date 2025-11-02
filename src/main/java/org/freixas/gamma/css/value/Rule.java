@@ -18,7 +18,6 @@
 package org.freixas.gamma.css.value;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 /**
  * A stylesheet Rule. A stylesheet contains a sequence of Rules, each of
@@ -64,6 +63,7 @@ public final class Rule
      *
      * @return The list of selectors.
      */
+    @SuppressWarnings("unused")
     public ArrayList<Selector> getSelectors()
     {
         return selectors;

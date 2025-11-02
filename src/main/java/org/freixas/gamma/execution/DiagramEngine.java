@@ -113,6 +113,7 @@ public class DiagramEngine
      *
      * @return The h-codes associated with this diagram engine.
      */
+    @SuppressWarnings("unused")
     public LinkedList<Object> getHCodes()
     {
         return program.getHCodes();

@@ -32,7 +32,7 @@ import javafx.scene.text.FontWeight;
  * <li>Strings are Strings.
  * <li>Font weights are StyleProperties.FontWeightTypes.
  * <li>Font families are Strings.
- * <li>Font styles are StylePropertoes.FontStyleTypes.
+ * <li>Font styles are StyleProperties.FontStyleTypes.
  * <li>The above 3 items plus the font size become a javafx.scene.text.Font.
  * <li>Text anchors are StyleProperties.TextAnchorTypes.
  * <li>Arrows are StyleProperties.ArrowTypes.
@@ -108,8 +108,9 @@ public class StyleStruct
 
     public double opacity = 1.0;
     public StyleProperties.Arrow arrow = StyleProperties.Arrow.NONE;
-    public double arrowWidth = 10.0;
-    public double arrowHeight = 8.0;
+    // Future:
+    // public double arrowWidth = 10.0;
+    // public double arrowHeight = 8.0;
     public double eventDiameter = 5.0;
     public StyleProperties.EventShape eventShape = StyleProperties.EventShape.CIRCLE;
 }

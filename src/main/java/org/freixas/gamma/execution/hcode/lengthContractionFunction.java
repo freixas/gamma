@@ -49,21 +49,18 @@ public class lengthContractionFunction extends ArgInfoFunction
 
         if (length < 0) throw new ExecutionException("The lengthContraction() function's length must be >= 0");
 
-        if (arg1 == null) {
-            throw new ExecutionException("The lengthContraction() function's second parameter is null");
-        }
-        else if (arg1 instanceof Double v) {
-            return Relativity.lengthContraction(length, v);
-        }
-        else if (arg1 instanceof Observer observer) {
-            return Relativity.lengthContraction(length, new Frame(observer).getV());
-        }
-        else if (arg1 instanceof Frame frame) {
-            return Relativity.lengthContraction(length, frame.getV());
-        }
-        else {
-            throw new ExecutionException("lengthContraction() requires a velocity, observer, or frame as its second parameter");
-        }
+        return switch (arg1) {
+            case null ->
+                throw new ExecutionException("The lengthContraction() function's second parameter is null");
+            case Double v ->
+                Relativity.lengthContraction(length, v);
+            case Observer observer ->
+                Relativity.lengthContraction(length, new Frame(observer).getV());
+            case Frame frame ->
+                Relativity.lengthContraction(length, frame.getV());
+            default ->
+                throw new ExecutionException("lengthContraction() requires a velocity, observer, or frame as its second parameter");
+        };
     }
 
     @Override

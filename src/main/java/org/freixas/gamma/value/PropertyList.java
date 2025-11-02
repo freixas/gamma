@@ -78,7 +78,7 @@ public class PropertyList implements PropertyElement, ExecutionMutable
     {
         Integer i = index.get(name);
         if (i == null) return null;
-        return properties.get(i).getValue();
+        return properties.get(i).value();
     }
 
     /**
@@ -103,7 +103,7 @@ public class PropertyList implements PropertyElement, ExecutionMutable
 
     protected void addProperty(Property property)
     {
-        String name = property.getName();
+        String name = property.name();
 
         // If the property exists, remove it
 
@@ -115,7 +115,7 @@ public class PropertyList implements PropertyElement, ExecutionMutable
 
         // Add the property at the end of the list
 
-        index.put(property.getName(), properties.size());
+        index.put(property.name(), properties.size());
         properties.add(property);
     }
 

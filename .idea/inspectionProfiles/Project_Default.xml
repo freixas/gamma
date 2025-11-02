@@ -2,6 +2,19 @@
   <profile version="1.0">
     <option name="myName" value="Project Default" />
     <inspection_tool class="CommentedOutCode" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
+    <inspection_tool class="ExtractMethodRecommender" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="minLength" value="615" />
+    </inspection_tool>
+    <inspection_tool class="SizeReplaceableByIsEmpty" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredTypes">
+        <set>
+          <option value="java.lang.String" />
+          <option value="java.util.LinkedList" />
+          <option value="java.util.Stack" />
+          <option value="javafx.collections.ObservableList" />
+        </set>
+      </option>
+    </inspection_tool>
     <inspection_tool class="UnaryPlus" enabled="false" level="WARNING" enabled_by_default="false" />
   </profile>
 </component>

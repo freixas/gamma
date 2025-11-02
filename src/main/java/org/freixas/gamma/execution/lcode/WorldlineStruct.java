@@ -27,8 +27,6 @@ import org.freixas.gamma.value.Observer;
 public class WorldlineStruct extends Struct
 {
     public Observer observer;
-    public boolean observerSet = false;
-    public Bounds clip = null;
 
     public Bounds bounds;
 
@@ -40,6 +38,5 @@ public class WorldlineStruct extends Struct
     public void relativeTo(Frame prime)
     {
         observer = observer.relativeTo(prime);
-        // clip = new Bounds(prime.toFrame(clip.min), prime.toFrame(clip.max));
     }
 }

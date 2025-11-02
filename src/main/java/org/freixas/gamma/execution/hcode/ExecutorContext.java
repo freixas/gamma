@@ -36,6 +36,7 @@ public abstract class ExecutorContext
      *
      * @return The number of values returned by this h-code.
      */
+    @SuppressWarnings("unused")
     abstract public int getNumberOfReturnedValues();
 
 }

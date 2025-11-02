@@ -18,6 +18,8 @@ package org.freixas.gamma;
 
 import org.freixas.gamma.parser.TokenContext;
 
+import java.io.Serial;
+
 /**
  * Most exceptions eventually become GammaRuntimeExceptions. Most exceptions are either syntax errors or script
  * runtime errors. These get displayed in a nice dialog, where we try to show the user exactly where the error
@@ -29,6 +31,9 @@ import org.freixas.gamma.parser.TokenContext;
  */
 public class GammaRuntimeException extends RuntimeException
 {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     public enum Type
     {
         /**
@@ -48,7 +53,7 @@ public class GammaRuntimeException extends RuntimeException
     }
 
     private final Type type;
-    TokenContext context;
+    transient TokenContext context;
 
     // **********************************************************************
     // *

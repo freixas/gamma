@@ -23,9 +23,7 @@ import org.freixas.gamma.execution.ExecutionException;
 import org.freixas.gamma.file.URLFile;
 import org.freixas.gamma.parser.ParseException;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

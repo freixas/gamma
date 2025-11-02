@@ -88,6 +88,7 @@ public class ScriptErrorDialog extends Stage
      *
      * @throws IOException If the FXML file fails to load.
      */
+    @SuppressWarnings("this-escape")
     public ScriptErrorDialog(MainWindow window, String resourceName, String  title) throws IOException
     {
         // Load the view (FXML file) and controller. Get a reference to the controller.

@@ -28,7 +28,6 @@ import org.freixas.gamma.value.Frame;
 public class LabelStruct extends Struct
 {
     public Coordinate location;
-    public boolean locationSet = false;
     public String text = "";
     public double rotation = 0.0;
     public boolean frameRelativeRotation = false;

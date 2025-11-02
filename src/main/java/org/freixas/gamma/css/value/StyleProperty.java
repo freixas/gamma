@@ -137,7 +137,7 @@ public final class StyleProperty
             // If we have dependent style properties, set their values as well
 
             StylePropertyDefinition[] dependencies = definition.getDependencies();
-            if (dependencies != null && dependencies.length > 0) {
+            if (dependencies != null) {
                 for (StylePropertyDefinition dependency : dependencies) {
                     dependency.setStyleStructValue(styles, value);
                 }

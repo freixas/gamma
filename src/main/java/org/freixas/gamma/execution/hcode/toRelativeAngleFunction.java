@@ -50,19 +50,13 @@ public class toRelativeAngleFunction extends ArgInfoFunction
         if (Double.isInfinite(angle)) throw new ExecutionException("In toRelativeAngle(), the angle can't be infinite");
         if (arg1 == null) throw new ExecutionException("In toRelativeAngle(), the velocity can't be null");
 
-        double v;
-        if (arg1 instanceof Double dbl) {
-            v = (Double)arg1;
-        }
-        else if (arg1 instanceof Observer observer) {
-            v = new Frame(observer).getV();
-        }
-        else if (arg1 instanceof Frame frame) {
-            v = frame.getV();
-        }
-        else {
-            throw new ExecutionException("toRelativeAngle()'s second parameter must be a velocity, frame, or observer");
-        }
+        double v = switch (arg1) {
+            case Double _ -> (Double) arg1;
+            case Observer observer -> new Frame(observer).getV();
+            case Frame frame -> frame.getV();
+            default ->
+                throw new ExecutionException("toRelativeAngle()'s second parameter must be a velocity, frame, or observer");
+        };
 
         if (Math.abs(v) >= 1.0) throw new ExecutionException("In toRelativeAngle(), the velocity must be between -1 and 1, exclusive");
 

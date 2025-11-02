@@ -51,7 +51,7 @@ public final class GreetingsDialogController implements Initializable
         // Monitor the display toggle
 
         displayOption.selectedProperty().addListener(
-            (Object, oldValue, newValue) -> PreferencesManager.setDisplayGreetingMessage(!newValue));
+            (_, _, newValue) -> PreferencesManager.setDisplayGreetingMessage(!newValue));
 
         // Load the greetings message
 
