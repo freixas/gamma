@@ -21,7 +21,6 @@ import javafx.scene.control.Alert;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 
 /**
  * This class handles platform-dependent tasks.
@@ -98,17 +97,16 @@ public class Platform
      */
     static public void cmd(String cmd) throws IOException
     {
+        String cmd1 = "bash";
+        String cmd2 = "-c";
+
         if (IS_WINDOWS) {
-            Runtime.getRuntime().exec(cmd);
+            cmd1 = "cmd.exe";
+            cmd2 = "/c";
         }
-        else if (IS_MAC) {
-            String[] execCommand = new String[] { "bash", "-c", cmd};
-            Runtime.getRuntime().exec(execCommand);
-        }
-        else if (IS_LINUX) {
-            String[] execCommand = new String[] { "bash", "-c", cmd};
-            Runtime.getRuntime().exec(execCommand);
-        }
+
+        ProcessBuilder builder = new ProcessBuilder(cmd1, cmd2, cmd);
+        builder.start();
 
     }
 
