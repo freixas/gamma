@@ -19,13 +19,13 @@ Known Problems:
 WINDOWS 7-11
 
 * Download and run (double-click on) the Windows x64 installer (MSI)
-  gamma-1.0.3.msi. For x32 systems, you will need to use the universal ZIP
+  gamma-@gamma.version@.msi. For x32 systems, you will need to use the universal ZIP
   file. Once installed, you can run it from a desktop icon or from the Start
   menu.
 
 DEBIAN-BASED LINUX DISTRIBUTIONS
 
-* Download and run sudo dpkg -i gamma_1.0.3_amd64.deb. Once installed, you can
+* Download and run sudo dpkg -i gamma_@gamma.fullversion@_amd64.deb. Once installed, you can
   run it from a desktop icon.
 
 OTHER SYSTEMS
@@ -49,11 +49,11 @@ To install the universal tar.gz file, you will need to know how to:
 
 INSTALL JAVA
 
-Download and install Java 25 (or later). There are several versions and any of
+Download and install Java @gamma.java.version@ (or later). There are several versions and any of
 them should work. The version used to build and test Gamma is the OpenJDK version
 from
 
-https://jdk.java.net/25/
+https://jdk.java.net/@gamma.java.version@/
 
 You could also try the versions at
 
@@ -72,7 +72,7 @@ or terminal (Mac/Linux) window and type:
 
 This should output something that includes:
 
-  JDK 25 or OpenJDK 25
+  JDK @gamma.java.version@ or OpenJDK @gamma.java.version@
 
 To make sure that the JAVA_HOME variable is set, enter:
 
@@ -83,13 +83,13 @@ To make sure that the JAVA_HOME variable is set, enter:
 
 INSTALL JAVAFX
 
-Download and install JavaFX 25 [LTS] (or later) from
+Download and install JavaFX @gamma.java.version@ [LTS] (or later) from
 
 https://gluonhq.com/products/javafx/
 
 (for Type, select SDK)
 
-The download should be a ZIP file. You can place the included javafx-sdk-25
+The download should be a ZIP file. You can place the included javafx-sdk-@gamma.java.version@
 folder anywhere.
 
 You will need to create a JAVAFX_HOME environment variable. The JAVAFX_HOME path
@@ -99,7 +99,7 @@ should point to the top of the unpacked ZIP file.
 
 INSTALL GAMMA
 
-Unzip the Gamma installation package, gamma-1.0.3.tar.gz to any location.
+Unzip the Gamma installation package, gamma-@gamma.version@.tar.gz to any location.
 If you unpacked the file into <some path>, then add <some path> to your PATH.
 
 --------------------------------------------------------------------

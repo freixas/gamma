@@ -12,11 +12,11 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
-          ref: refs/tags/v1.0.3-RC1
-      - name: Set up JDK 25
+          ref: refs/tags/@gamma.release.tag@
+      - name: Set up JDK @gamma.java.version@
         uses: actions/setup-java@v5
         with:
-          java-version: '25'
+          java-version: '@gamma.java.version@'
           distribution: 'temurin'
           cache: 'maven'
       - name: Build with Maven
