@@ -51,6 +51,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 
@@ -226,7 +227,7 @@ public final class MainWindow extends Stage
 
     /**
      * Get the ID assigned to this window.
-     *
+     * <p>
      * The ID is assigned by the application and is an arbitrary integer used to
      * quickly identify a specific window.
      *
@@ -331,7 +332,7 @@ public final class MainWindow extends Stage
             screen = Screen.getPrimary();
             return screen;
         }
-        screen = screens.get(0);
+        screen = screens.getFirst();
         return screen;
     }
 
@@ -433,7 +434,7 @@ public final class MainWindow extends Stage
         try {
             script = new URLFile(name, isURL);
         }
-        catch (MalformedURLException e) {
+        catch (MalformedURLException | URISyntaxException e) {
             showTextAreaAlert(Alert.AlertType.ERROR, "Invalid URL", "Invalid URL", e.getLocalizedMessage(), true);
             return;
         }
@@ -461,11 +462,11 @@ public final class MainWindow extends Stage
 
             setDefaultDirectory(Gamma.FileType.SCRIPT, mainScript.getFile());
 
-            // If this is a local file and we have an editor command, try to
+            // If this is a local file, and we have an editor command, try to
             // open the script in the editor
 
             String editorCommand = PreferencesManager.getEditorCommand();
-            if (editorCommand.length() > 0) {
+            if (!editorCommand.isEmpty()) {
                 editorCommand = editorCommand.replace("$F$", script.toString());
                 try {
                     Platform.cmd(editorCommand);
@@ -645,7 +646,7 @@ public final class MainWindow extends Stage
 
         if (mainScriptParser.isSlideshow()) {
             slideshow = mainScriptParser.getSlideshow();
-            slideshowEngine = new SlideshowEngine(this, slideshow);
+            slideshowEngine = SlideshowEngine.create(this, slideshow);
             slideshowEngine.execute();
         }
 
@@ -1187,7 +1188,7 @@ public final class MainWindow extends Stage
     {
         if (scriptPrintDialog == null) {
             try {
-                scriptPrintDialog = new ScriptPrintDialog(this);
+                scriptPrintDialog = ScriptPrintDialog.create(this);
             }
             catch (Exception e) {
                 showTextAreaAlert(

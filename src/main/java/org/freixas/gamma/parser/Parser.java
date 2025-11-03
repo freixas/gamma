@@ -27,8 +27,10 @@ import org.freixas.gamma.execution.Slideshow;
 import org.freixas.gamma.execution.hcode.*;
 import org.freixas.gamma.file.URLFile;
 import org.freixas.gamma.value.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -154,7 +156,7 @@ public final class Parser
         }
 
         @Override
-        public String toString()
+        public @NotNull String toString()
         {
             return "Op{" + "operator=" + operator + '}';
         }
@@ -287,6 +289,7 @@ public final class Parser
      *
      * @return The tokens produced by parsing.
      */
+    @SuppressWarnings("unused")
     public ArrayList<Token<?>> getTokens()
     {
         return this.tokens;
@@ -370,6 +373,7 @@ public final class Parser
      *
      * @return The URLFile associated with the script.
      */
+    @SuppressWarnings("unused")
     public URLFile getScriptURL()
     {
         return URLFile;
@@ -876,20 +880,20 @@ public final class Parser
 
         // Add the test for the conditional expression. If false, this
         // jumps to the else clause (if any) or to the next statement. If
-        // true, it falls through to the if clause
+        // true, it falls through to the if-clause
 
-        codes.add(new JumpIfFalseHCode(labelElse.getId()));
+        codes.add(new JumpIfFalseHCode(labelElse.id()));
 
         // Add the if true clause
 
         codes.addAll(ifCodes);
 
-        // If we have an else clause, we need to let the if clause jump to
+        // If we have an else clause, we need to let the if-clause jump to
         // the next statement. Then we add the label that marks the start of
         // the else clause and add the else clause code
 
         if (!elseCodes.isEmpty()) {
-            codes.add(new JumpHCode(labelDone.getId()));
+            codes.add(new JumpHCode(labelDone.id()));
             codes.add(labelElse);
             codes.addAll(elseCodes);
         }
@@ -939,13 +943,13 @@ public final class Parser
 
         nextToken();
 
-        codes.add(new JumpIfFalseHCode(labelDone.getId()));
+        codes.add(new JumpIfFalseHCode(labelDone.id()));
 
         // Add the statement that forms the body of the while statement and
         // jump back to the test
 
         codes.addAll(parseStatement());
-        codes.add(new JumpHCode(labelStart.getId()));
+        codes.add(new JumpHCode(labelStart.id()));
         codes.add(labelDone);
 
         loopLabels.pop();
@@ -1029,10 +1033,10 @@ public final class Parser
         // We will do some optimization depending on whether the final
         // value is a variable or a constant
 
-        boolean finalIsConstant = (finalValue.size() == 1) && (finalValue.get(0) instanceof Double);
+        boolean finalIsConstant = (finalValue.size() == 1) && (finalValue.getFirst() instanceof Double);
         Double finalConstant = 1.0;
         if (finalIsConstant) {
-            finalConstant = (Double)finalValue.get(0);
+            finalConstant = (Double)finalValue.getFirst();
         }
         else {
             codes.add(finalVariable);
@@ -1044,10 +1048,10 @@ public final class Parser
         // We will also do some optimization depending on whether the step
         // value is a variable or a constant
 
-        boolean stepIsConstant = (stepValue.size() == 1) && (stepValue.get(0) instanceof Double);
+        boolean stepIsConstant = (stepValue.size() == 1) && (stepValue.getFirst() instanceof Double);
         Double stepConstant = 1.0;
         if (stepIsConstant) {
-            stepConstant = (Double)stepValue.get(0);
+            stepConstant = (Double)stepValue.getFirst();
         }
         else {
             codes.add(stepVariable);
@@ -1059,7 +1063,7 @@ public final class Parser
         // If the step variable is a constant and is 0, then we skip
         // generating any code for the body of the 'for' statement
 
-        if (!(stepIsConstant && (double)stepValue.get(0) == 0.0)) {
+        if (!(stepIsConstant && (double)stepValue.getFirst() == 0.0)) {
 
             // Alternative code when the stepConstant value is not a constant.
             // If the step size is 0, we jump over the body
@@ -1069,7 +1073,7 @@ public final class Parser
                 codes.add(new GenericHCode(HCode.Type.FETCH));
                 codes.add(0.0);
                 codes.add(new GenericHCode(HCode.Type.EQ));
-                codes.add(new JumpIfTrueHCode(labelDone.getId()));
+                codes.add(new JumpIfTrueHCode(labelDone.id()));
             }
 
             codes.add(labelStart);
@@ -1093,7 +1097,7 @@ public final class Parser
                         codes.add(new GenericHCode(HCode.Type.FETCH));
                     }
                     codes.add(new GenericHCode(HCode.Type.LE));
-                    codes.add(new JumpIfFalseHCode(labelDone.getId()));
+                    codes.add(new JumpIfFalseHCode(labelDone.id()));
                 }
                 else if (stepConstant < 0) {
                     codes.add(loopVariable);
@@ -1107,7 +1111,7 @@ public final class Parser
                         codes.add(new GenericHCode(HCode.Type.FETCH));
                     }
                     codes.add(new GenericHCode(HCode.Type.GE));
-                    codes.add(new JumpIfFalseHCode(labelDone.getId()));
+                    codes.add(new JumpIfFalseHCode(labelDone.id()));
                 }
             }
             else {
@@ -1123,7 +1127,7 @@ public final class Parser
                 codes.add(new GenericHCode(HCode.Type.FETCH));
                 codes.add(0.0);
                 codes.add(new GenericHCode(HCode.Type.GT));
-                codes.add(new JumpAndHCode(label1.getId()));
+                codes.add(new JumpAndHCode(label1.id()));
 
                 codes.add(loopVariable);
                 codes.add(new GenericHCode(HCode.Type.FETCH));
@@ -1138,13 +1142,13 @@ public final class Parser
                 codes.add(new GenericHCode(HCode.Type.LE));
                 codes.add(new GenericHCode(HCode.Type.AND));
                 codes.add(label1);
-                codes.add(new JumpOrHCode(label2.getId()));
+                codes.add(new JumpOrHCode(label2.id()));
 
                 codes.add(stepVariable);
                 codes.add(new GenericHCode(HCode.Type.FETCH));
                 codes.add(0.0);
                 codes.add(new GenericHCode(HCode.Type.LT));
-                codes.add(new JumpAndHCode(label3.getId()));
+                codes.add(new JumpAndHCode(label3.id()));
 
                 codes.add(loopVariable);
                 codes.add(new GenericHCode(HCode.Type.FETCH));
@@ -1161,7 +1165,7 @@ public final class Parser
                 codes.add(label3);
                 codes.add(new GenericHCode(HCode.Type.OR));
                 codes.add(label2);
-                codes.add(new JumpIfFalseHCode(labelDone.getId()));
+                codes.add(new JumpIfFalseHCode(labelDone.id()));
             }
 
             // Execute the body
@@ -1188,7 +1192,7 @@ public final class Parser
 
             // Jump back to the start of the loop
 
-            codes.add(new JumpHCode(labelStart.getId()));
+            codes.add(new JumpHCode(labelStart.id()));
 
             // Label for exit
 
@@ -1223,11 +1227,11 @@ public final class Parser
 
         // Grab the pair of labels at the top of the stack
 
-        Pair<Label, Label> pair = loopLabels.get(0);
+        Pair<Label, Label> pair = loopLabels.getFirst();
 
         // The second value is the exit point of the loop
 
-        codes.add(new JumpHCode(pair.getValue().getId()));
+        codes.add(new JumpHCode(pair.getValue().id()));
 
         return codes;
     }
@@ -1255,11 +1259,11 @@ public final class Parser
 
         // Grab the pair of labels at the top of the stack
 
-        Pair<Label, Label> pair = loopLabels.get(0);
+        Pair<Label, Label> pair = loopLabels.getFirst();
 
         // The first value (the key) is the point at which to continue the loop
 
-        codes.add(new JumpHCode(pair.getKey().getId()));
+        codes.add(new JumpHCode(pair.getKey().id()));
 
         return codes;
     }
@@ -1317,7 +1321,7 @@ public final class Parser
 
             // Remove the EOF at the end of the included tokens
 
-            includeTokens.remove(includeTokens.size() - 1);
+            includeTokens.removeLast();
 
             // Add all the new stuff after the ';', which is now at tokenPtr - 1
 
@@ -1329,6 +1333,9 @@ public final class Parser
         }
         catch (IOException e) {
             throwParseException(new GammaIOException(e).getLocalizedMessage());
+        }
+        catch (URISyntaxException e) {
+            throwParseException(e.getLocalizedMessage());
         }
     }
 
@@ -1390,7 +1397,7 @@ public final class Parser
         catch (IOException e) {
             throwParseException(new GammaIOException(e).getLocalizedMessage());
         }
-        catch (StyleException e) {
+        catch (StyleException | URISyntaxException e) {
             throwParseException(e.getLocalizedMessage());
         }
     }
@@ -3164,7 +3171,7 @@ public final class Parser
         if (ptr < 0) {
             tokenPtr = -1;
             curToken = dummyToken;
-            peek = tokens.get(0);
+            peek = tokens.getFirst();
         }
         else if (ptr >= tokens.size()) {
             tokenPtr = tokens.size() - 1;
