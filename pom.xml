@@ -32,9 +32,9 @@
         <gamma.maven.version>3.9.11</gamma.maven.version>
         <gamma.git.version>2.51.1</gamma.git.version>
 
-        <!-- Used to suppress errors on dynamically injected properties -->
+        <!-- Used to suppress errors on dynamically injected properties
         <os.detected.classifier>placeholder</os.detected.classifier>
-        <os.detected.name>placeholder</os.detected.name>
+        <os.detected.name>placeholder</os.detected.name> -->
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
@@ -71,7 +71,8 @@
                         <artifactId>exec-maven-plugin</artifactId>
                         <version>3.1.0</version>
                         <executions>
-                            <execution>
+
+                           <execution>
                                 <id>delete-gamma-exe</id>
                                 <phase>pre-clean</phase>
                                 <goals>
@@ -81,12 +82,13 @@
                                     <executable>cmd</executable>
                                     <arguments>
                                         <argument>/c</argument>
-                                        <argument>echo Deleting gamma.exe &amp;&amp; del /F /Q "${project.basedir}\target\installer-work\image\gamma\gamma.exe"</argument>
+                                        <argument>echo Deleting gamma.exe &amp;&amp; if exist "${project.basedir}\target\installer-work\image\gamma\gamma.exe" del /F /Q "${project.basedir}\target\installer-work\image\gamma\gamma.exe"</argument>
                                     </arguments>
                                     <workingDirectory>${project.basedir}</workingDirectory>
                                     <skip>false</skip>
                                 </configuration>
                             </execution>
+
                         </executions>
                     </plugin>
                 </plugins>
