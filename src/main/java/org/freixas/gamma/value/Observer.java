@@ -236,7 +236,7 @@ abstract public class Observer implements ExecutionImmutable, Displayable
     /**
      * Find the intersection of this worldline with another. We check segments
      * one at a time from earliest to latest. We check our first segment against
-     * all of the other worldline's segments, then our second segment, etc. We
+     * all the other worldline's segments, then our second segment, etc. We
      * return the first intersection with the earliest time coordinate. If there
      * is no intersection with any segment, we return null.
      *

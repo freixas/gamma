@@ -26,7 +26,6 @@ import org.freixas.gamma.value.Path;
 public class PathStruct extends Struct
 {
     public Path path;
-    public boolean pathSet = false;
     public boolean closed = false;
     public boolean stroke = true;
     public boolean fill = false;

@@ -26,7 +26,7 @@ import org.freixas.gamma.value.Line;
  */
 public class AxesStruct extends Struct
 {
-    public class AxisStruct
+    public static class AxisStruct
     {
         public Line.AxisType axisType;
         public String label;

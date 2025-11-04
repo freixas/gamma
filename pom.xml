@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <name>Gamma</name>
-    <description>A Minskowski spacetime diagram generator.</description>
+    <description>A Minkowski spacetime diagram generator.</description>
     <inceptionYear>2021</inceptionYear>
 
     <groupId>org.freixas.gamma</groupId>
@@ -14,7 +14,7 @@
 
     <!-- *** VERSION *** -->
 
-    <version>1.0.2</version>
+    <version>1.0.3</version>
 
     <developers>
         <developer>
@@ -25,9 +25,16 @@
     </developers>
 
     <properties>
-
         <gamma.version>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}</gamma.version>
         <gamma.fullversion>${project.version}</gamma.fullversion>
+        <gamma.release.tag>v${project.version}-RC1</gamma.release.tag>
+        <gamma.java.version>25</gamma.java.version>
+        <gamma.maven.version>3.9.11</gamma.maven.version>
+        <gamma.git.version>2.51.1</gamma.git.version>
+
+        <!-- Used to suppress errors on dynamically injected properties -->
+        <os.detected.classifier>placeholder</os.detected.classifier>
+        <os.detected.name>placeholder</os.detected.name>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
@@ -48,6 +55,117 @@
         <windows.upgrade.uuid>16182549-0ebf-4817-b77a-0e2fe720122c</windows.upgrade.uuid>
 
     </properties>
+
+    <profiles>
+        <profile>
+            <id>windows</id>
+            <activation>
+                <os>
+                    <family>Windows</family>
+                </os>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>delete-gamma-exe</id>
+                                <phase>pre-clean</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>cmd</executable>
+                                    <arguments>
+                                        <argument>/c</argument>
+                                        <argument>echo Deleting gamma.exe &amp;&amp; del /F /Q "${project.basedir}\target\installer-work\image\gamma\gamma.exe"</argument>
+                                    </arguments>
+                                    <workingDirectory>${project.basedir}</workingDirectory>
+                                    <skip>false</skip>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>unix</id>
+            <activation>
+                <os>
+                    <family>Unix</family>
+                </os>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>delete-gamma-exe</id>
+                                <phase>pre-clean</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>sh</executable>
+                                    <arguments>
+                                        <argument>-c</argument>
+                                        <argument>echo Deleting gamma.exe &amp;&amp; rm -f "${project.basedir}/target/installer-work/image/gamma/gamma.exe"</argument>
+                                    </arguments>
+                                    <workingDirectory>${project.basedir}</workingDirectory>
+                                    <skip>false</skip>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>macos</id>
+            <activation>
+                <os>
+                    <family>Mac OS X</family>
+                </os>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>delete-gamma-exe</id>
+                                <phase>pre-clean</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>sh</executable>
+                                    <arguments>
+                                        <argument>-c</argument>
+                                        <argument>echo Deleting gamma.exe &amp;&amp; rm -f "${project.basedir}/target/installer-work/image/gamma/gamma.exe"</argument>
+                                    </arguments>
+                                    <workingDirectory>${project.basedir}</workingDirectory>
+                                    <skip>false</skip>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+    </profiles>
 
     <dependencies>
 
@@ -112,7 +230,7 @@
             <extension>
                 <groupId>kr.motd.maven</groupId>
                 <artifactId>os-maven-plugin</artifactId>
-                <version>1.7.0</version>
+                <version>1.7.1</version>
             </extension>
         </extensions>
 
@@ -141,25 +259,31 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.0.0-M5</version>
+                    <version>3.5.4</version>
                 </plugin>
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-install-plugin</artifactId>
-                    <version>3.0.0-M1</version>
+                    <version>3.1.2</version>
                 </plugin>
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
-                    <version>3.0.0-M2</version>
+                    <version>3.1.2</version>
                 </plugin>
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-site-plugin</artifactId>
-                    <version>3.11.0</version>
+                    <version>4.0.0-M13</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>3.9.0</version>
                 </plugin>
 
             </plugins>
@@ -176,7 +300,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.3.0</version>
+                <version>3.6.1</version>
                 <executions>
                     <execution>
                         <id>parse-version</id>
@@ -195,7 +319,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>3.6.2</version>
                 <executions>
                     <execution>
                         <id>enforce-versions</id>
@@ -226,7 +350,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>versions-maven-plugin</artifactId>
-                <version>2.9.0</version>
+                <version>2.19.0</version>
             </plugin>
 
             <!-- Clean the build -->
@@ -234,7 +358,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-clean-plugin</artifactId>
-                <version>3.1.0</version>
+                <version>3.5.0</version>
+                <configuration>
+                    <retryOnError>true</retryOnError>
+                </configuration>
             </plugin>
 
             <!-- Compile control -->
@@ -242,9 +369,9 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.10.0</version>
+                <version>3.14.1</version>
                 <configuration>
-                    <release>17</release>
+                    <release>25</release>
                     <compilerArgs>
                         <arg>-Xlint:all</arg>
                     </compilerArgs>
@@ -267,7 +394,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.2.2</version>
+                <version>3.4.2</version>
                 <configuration>
                     <outputDirectory>${project.build.directory}/dependency
                     </outputDirectory>
@@ -282,7 +409,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.3.0</version>
+                <version>3.7.1</version>
                 <configuration>
                     <finalName>${project.artifactId}-${gamma.fullversion}</finalName>
                     <appendAssemblyId>false</appendAssemblyId>
@@ -310,8 +437,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>3.3.1</version>
                 <executions>
+
+                    <!-- Execution for the icons -->
 
                     <execution>
                         <id>copy-resources-1</id>
@@ -329,6 +458,8 @@
                         </configuration>
                     </execution>
 
+                    <!-- Execution for the help files -->
+
                     <execution>
                         <id>copy-resources-2</id>
                         <phase>validate</phase>
@@ -345,6 +476,8 @@
                         </configuration>
                     </execution>
 
+                    <!-- Execution for the sample scripts -->
+
                     <execution>
                         <id>copy-resources-3</id>
                         <phase>validate</phase>
@@ -356,6 +489,52 @@
                             <resources>
                                 <resource>
                                     <directory>src/main/sample_scripts</directory>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+
+                    <!-- Execution for README.md, README.txt -->
+
+                    <execution>
+                        <id>generate-readme</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${basedir}/.</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/templates</directory>
+                                    <filtering>true</filtering>
+                                    <includes>
+                                        <include>README.md</include>
+                                        <include>README.txt</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+
+                     <!-- Execution for GitHub workflows -->
+
+                    <execution>
+                        <id>generate-workflows</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${basedir}/.github/workflows</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/templates</directory>
+                                    <filtering>true</filtering>
+                                    <includes>
+                                        <include>maven-build-installer-macos.yml</include>
+                                        <include>maven-build-installer-unix.yml</include>
+                                    </includes>
                                 </resource>
                             </resources>
                         </configuration>
@@ -374,7 +553,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>3.9.0</version>
                 <executions>
 
                     <execution>

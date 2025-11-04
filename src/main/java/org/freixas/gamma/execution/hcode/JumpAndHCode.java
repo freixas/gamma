@@ -70,7 +70,7 @@ public class JumpAndHCode extends ArgInfoHCode implements Jump
     @Override
     public void execute(HCodeEngine engine, List<Object> data)
     {
-        Object arg = data.get(0);
+        Object arg = data.getFirst();
         data.clear();
 
         boolean isFalse =

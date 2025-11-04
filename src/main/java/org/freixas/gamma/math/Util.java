@@ -18,6 +18,8 @@ package org.freixas.gamma.math;
 
 import org.freixas.gamma.execution.ExecutionException;
 import org.freixas.gamma.value.Coordinate;
+
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -393,6 +395,7 @@ public final class Util
      *
      * @return The truncated value
      */
+    @SuppressWarnings("unused")
     static public long toLong(double d)
     {
         return (long)(d >= 0 ? Math.floor(d) : Math.ceil(d));
@@ -419,6 +422,7 @@ public final class Util
      *
      * @return The rounded value.
      */
+    @SuppressWarnings("unused")
     static public long roundToLong(double d)
     {
         return (int)(d >= 0 ? Math.ceil(d - 0.5) : Math.floor(d + 0.5));
@@ -437,6 +441,7 @@ public final class Util
         return d >= 0 ? Math.ceil(d - 0.5) : Math.floor(d + 0.5);
     }
 
+    @SuppressWarnings("unused")
     static public boolean toBoolean(double d)
     {
         return !fuzzyZero(d);
@@ -452,7 +457,8 @@ public final class Util
      */
     static public String toString(Double value, int precision)
     {
-        return String.format("%." + precision + "f", value);
+        String format = String.format("%%.%df", precision);
+        return String.format(Locale.US, format, value);
     }
 
 }

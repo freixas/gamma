@@ -124,7 +124,7 @@ public class DynamicSymbolTable extends BaseSymbolTable
             }
         }
 
-        if (list.size() > 0) {
+        if (!list.isEmpty()) {
 
             // Now we need to sort the list into display order
 

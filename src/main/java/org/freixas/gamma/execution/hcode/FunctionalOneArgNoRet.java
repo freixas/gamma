@@ -26,5 +26,5 @@ import org.freixas.gamma.execution.HCodeEngine;
 @FunctionalInterface
 public interface FunctionalOneArgNoRet<T1> extends LambdaFunction
 {
-    public void execute(HCodeEngine engine, T1 arg);
+    void execute(HCodeEngine engine, T1 arg);
 }

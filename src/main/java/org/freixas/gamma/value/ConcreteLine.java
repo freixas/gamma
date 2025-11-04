@@ -20,6 +20,7 @@ import org.freixas.gamma.ProgrammingException;
 import org.freixas.gamma.execution.HCodeEngine;
 import org.freixas.gamma.math.Relativity;
 import org.freixas.gamma.math.Util;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A concrete line is the main implementation of a line. It is usually infinite,
@@ -49,7 +50,7 @@ public class ConcreteLine extends Line
     record UnsortedBounds(Coordinate min, Coordinate max)
     {
         @Override
-        public String toString()
+        public @NotNull String toString()
         {
             return "UnsortedBounds{" + "from " + min + " to " + max + '}';
         }

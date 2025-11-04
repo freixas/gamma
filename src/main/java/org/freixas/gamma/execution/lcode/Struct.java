@@ -16,7 +16,6 @@
  */
 package org.freixas.gamma.execution.lcode;
 
-import org.freixas.gamma.GammaRuntimeException;
 import org.freixas.gamma.ProgrammingException;
 import org.freixas.gamma.math.Util;
 import org.freixas.gamma.value.Frame;
@@ -32,7 +31,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -148,6 +146,7 @@ public abstract class Struct
      * @param min The allowed minimum (Double.NEGATIVE_INFINITY is allowed).
      * @param max The allowed maximum (Double.POSITIVE_INFINITY is allowed).
      */
+    @SuppressWarnings("unused")
     protected void rangeCheck(String propertyName, int value, int min, int max)
     {
         if (value < min || value > max) {
@@ -164,6 +163,7 @@ public abstract class Struct
      * @param min The allowed minimum (Double.NEGATIVE_INFINITY is allowed).
      * @param max The allowed maximum (Double.POSITIVE_INFINITY is allowed).
      */
+    @SuppressWarnings("unused")
     protected void rangeCheck(String propertyName, double value, double min, double max)
     {
         if (value < min || value > max) {
@@ -181,7 +181,7 @@ public abstract class Struct
      * set to false. After initialization, they will all be set to true.
      * <p>
      * This method should not be used for creating the style structure,
-     * StyleStruct. The style structure should be a copy of the the master style
+     * StyleStruct. The style structure should be a copy of the master style
      * structure, which is held by the h-code engine and then initialized from
      * the property list using initializeStruct. *
      *
@@ -235,15 +235,11 @@ public abstract class Struct
             HashMap<String, Field> fieldMap = allFields.get(cmdStructName);
             HashMap<String, Method> methodMap = allMethods.get(cmdStructName);
 
-            // Get all the style struct's fields
-
-            HashMap<String, Field> styleFieldMap = allFields.get("StyleStruct");
-
             // Go through the property list
 
             for (int i = 0; i < list.size(); i++) {
                 Property property = list.getProperty(i);
-                String propertyName = property.getName();
+                String propertyName = property.name();
                 if (propertyName.equals("class")) propertyName = "cls";
 
                 // This is a command property, set it
@@ -291,8 +287,8 @@ public abstract class Struct
         HashMap<String, Method> methodMap)
         throws IllegalArgumentException, IllegalAccessException, InvocationTargetException
     {
-        String propertyName = property.getName();
-        Object propertyValue = property.getValue();
+        String propertyName = property.name();
+        Object propertyValue = property.value();
 
         // The Field and Property are of the same type or the Field is a
         // super-class of Property

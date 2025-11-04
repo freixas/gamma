@@ -16,14 +16,15 @@
  */
 package org.freixas.gamma.file;
 
-import org.freixas.gamma.ProgrammingException;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Objects;
 import java.util.Scanner;
 
 /**
@@ -51,7 +52,7 @@ public class URLFile
      * @throws MalformedURLException If the name represents a URL, but is not
      * a valid URL.
      */
-    public URLFile(String name) throws MalformedURLException
+    public URLFile(String name) throws MalformedURLException, URISyntaxException
     {
         this(name, false);
     }
@@ -67,7 +68,7 @@ public class URLFile
      * a valid URL.
      */
 
-    public URLFile(String name, boolean isURL) throws MalformedURLException
+    public URLFile(String name, boolean isURL) throws URISyntaxException, MalformedURLException
     {
         this.isFile = !isURL && !name.contains("://");
 
@@ -76,11 +77,11 @@ public class URLFile
             this.file = new File(name).getAbsoluteFile();
         }
         else if (name.contains("://")) {
-            this.url = new URL(name);
+            this.url = new URI(name).toURL();
             this.file = null;
         }
         else {
-            this.url = new URL("http://" + name);
+            this.url = new URI("http://" + name).toURL();
             this.file = null;
         }
     }
@@ -213,7 +214,7 @@ public class URLFile
             str = Files.readString(file.toPath());
         }
         else {
-            try (Scanner scanner = new Scanner(url.openStream(), StandardCharsets.UTF_8.toString())) {
+            try (Scanner scanner = new Scanner(url.openStream(), StandardCharsets.UTF_8)) {
                 scanner.useDelimiter("\\A");
                 str = scanner.hasNext() ? scanner.next() : "";
             }
@@ -235,7 +236,7 @@ public class URLFile
      *
      * @throws IOException If the file cannot be read for any reason.
      */
-    public URLFile getDependentScriptURL(String name) throws IOException
+    public URLFile getDependentScriptURL(String name) throws IOException, URISyntaxException
     {
         // The cases we need to consider are:
         //
@@ -261,7 +262,7 @@ public class URLFile
             // Case 2: Use the dependent URL as is
 
             else if (isAbsoluteURL) {
-                return new URLFile(new URL(name));
+                return new URLFile(new URI(name).toURL());
             }
 
             // Case 3: Convert a relative path to an absolute file path
@@ -291,7 +292,7 @@ public class URLFile
             // domain as the script
 
             else if (isAbsoluteURL) {
-                URL dependentURL = new URL(name);
+                URL dependentURL = new URI(name).toURL();
                 if (!dependentURL.getHost().equals(url.getHost())) {
                     throw new IOException("Dependent files must be from the same domain ('" + url.getHost() + "')");
                 }
@@ -301,7 +302,7 @@ public class URLFile
             // Case 6:  Convert a relative path to an absolute URL
 
             else {
-                return new URLFile(new URL(url, name));
+                return new URLFile(url.toURI().resolve(name).toURL());
             }
         }
     }
@@ -320,6 +321,11 @@ public class URLFile
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hash(url);
+    }
+
+    @Override
     public boolean equals(Object obj)
     {
         if (obj == null) return false;
@@ -330,7 +336,12 @@ public class URLFile
             return this.file.equals(other.file);
         }
         else {
-            return this.url.equals(other.url);
+            try {
+                return this.url.toURI().equals(other.url.toURI());
+            }
+            catch (URISyntaxException e) {
+                return false;
+            }
         }
     }
 

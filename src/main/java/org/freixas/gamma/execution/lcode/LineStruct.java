@@ -26,7 +26,6 @@ import org.freixas.gamma.value.Line;
 public class LineStruct extends Struct
 {
     public Line line;
-    public boolean lineSet = false;
 
     public LineStruct()
     {

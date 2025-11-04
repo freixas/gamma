@@ -16,6 +16,8 @@
  */
 package org.freixas.gamma;
 
+import java.io.Serial;
+
 /**
  * Exceptions caused by programming errors.
  *
@@ -23,6 +25,9 @@ package org.freixas.gamma;
  */
 public class ProgrammingException extends RuntimeException
 {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     // **********************************************************************
     // *
     // * Constructors

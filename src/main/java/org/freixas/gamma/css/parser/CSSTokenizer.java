@@ -16,14 +16,12 @@
  */
 package org.freixas.gamma.css.parser;
 
-import org.freixas.gamma.file.URLFile;
 import org.freixas.gamma.parser.TokenContext;
 import javafx.scene.paint.Color;
 import org.freixas.gamma.parser.ParseException;
 import org.freixas.gamma.parser.Token;
 import org.freixas.gamma.parser.Tokenizer;
 
-import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -61,7 +59,6 @@ public final class CSSTokenizer extends Tokenizer
     public ArrayList<Token<?>> tokenize() throws ParseException
     {
         TokenContext context;
-        Token<?> token;
 
         initialize();
         next();

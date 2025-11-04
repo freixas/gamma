@@ -67,7 +67,7 @@ public abstract class HCode extends ExecutorContext
     // ****************************************
 
     // DYNAMIC_NAME
-    static final FunctionalTwoArg<Object, String, String> dynamicName = (engine, obj, baseName) -> {
+    static final FunctionalTwoArg<Object, String, String> dynamicName = (_, obj, baseName) -> {
         if (obj instanceof Double dbl) {
             int index = Util.roundToInt(dbl);
             return baseName + "$" + index;
@@ -86,7 +86,7 @@ public abstract class HCode extends ExecutorContext
         return table.get(symbol);
     };
     // FETCH_PROP
-    static final FunctionalTwoArg<ObjectContainer, String, Object> fetchProp = (engine, container, propName) -> {
+    static final FunctionalTwoArg<ObjectContainer, String, Object> fetchProp = (_, container, propName) -> {
         if (container == null) throw new ExecutionException("can't dereference a null value");
         if (!container.hasProperty(propName)) throw new ExecutionException("'" + propName + " is not a valid property");
         return container.getProperty(propName);
@@ -94,7 +94,7 @@ public abstract class HCode extends ExecutorContext
     // FETCH_ADDRESS
     static final FunctionalOneArg<String, SymbolTableAddress> fetchAddress = (engine, symbol) -> new SymbolTableAddress(engine.getSymbolTable(), symbol);
     // FETCH_PROP_ADDRESS
-    static final FunctionalTwoArg<Address, String, ObjectPropertyAddress> fetchPropAddress = (engine, address, propName) -> {
+    static final FunctionalTwoArg<Address, String, ObjectPropertyAddress> fetchPropAddress = (_, address, propName) -> {
         if (!address.exists()) throw new ProgrammingException("FETCH_PROP_ADDRESS: Invalid address");
         Object value = address.getValue();
         if (value == null) throw new ExecutionException("can't dereference a null value");
@@ -118,88 +118,88 @@ public abstract class HCode extends ExecutorContext
     // ****************************************
 
     // NOT
-    static final FunctionalOneArg<Object, Double> not = (engine, arg1) ->
+    static final FunctionalOneArg<Object, Double> not = (_, arg1) ->
         arg1 == null || (arg1 instanceof Double && Util.fuzzyZero((Double)arg1)) ? 1.0 : 0.0;
     // TO_BOOLEAN
-    static final FunctionalOneArg<Object, Double> toBoolean = (engine, arg1) ->
+    static final FunctionalOneArg<Object, Double> toBoolean = (_, arg1) ->
         arg1 == null || (arg1 instanceof Double && Util.fuzzyZero((Double)arg1)) ? 0.0 : 1.0;
     // OR
-    static final FunctionalTwoArg<Object, Object, Double> or = (engine, arg1, arg2) -> {
+    static final FunctionalTwoArg<Object, Object, Double> or = (_, arg1, arg2) -> {
         double d1 = arg1 == null || (arg1 instanceof Double && Util.fuzzyZero((Double)arg1)) ? 0.0 : 1.0;
         double d2 = arg2 == null || (arg2 instanceof Double && Util.fuzzyZero((Double)arg2)) ? 0.0 : 1.0;
         return !Util.fuzzyZero(d1) || !Util.fuzzyZero(d2) ? 1.0 : 0.0;
     };
     //AND
-    static final FunctionalTwoArg<Object, Object, Double> and = (engine, arg1, arg2) -> {
+    static final FunctionalTwoArg<Object, Object, Double> and = (_, arg1, arg2) -> {
         double d1 = arg1 == null || (arg1 instanceof Double && Util.fuzzyZero((Double)arg1)) ? 0.0 : 1.0;
         double d2 = arg2 == null || (arg2 instanceof Double && Util.fuzzyZero((Double)arg2)) ? 0.0 : 1.0;
         return !Util.fuzzyZero(d1) && !Util.fuzzyZero(d2) ? 1.0 : 0.0;
     };
 
     // EQ
-    static final FunctionalTwoArg<Object, Object, Double> eq = (engine, arg1, arg2) -> Util.fuzzyEQ(arg1, arg2) ? 1.0 : 0.0;
+    static final FunctionalTwoArg<Object, Object, Double> eq = (_, arg1, arg2) -> Util.fuzzyEQ(arg1, arg2) ? 1.0 : 0.0;
     // NE
-    static final FunctionalTwoArg<Object, Object, Double> ne = (engine, arg1, arg2) -> Util.fuzzyNE(arg1, arg2) ? 1.0 : 0.0;
+    static final FunctionalTwoArg<Object, Object, Double> ne = (_, arg1, arg2) -> Util.fuzzyNE(arg1, arg2) ? 1.0 : 0.0;
     // LT
-    static final FunctionalTwoArg<Double, Double, Double> lt = (engine, arg1, arg2) -> Util.fuzzyLT(arg1, arg2) ? 1.0 : 0.0;
+    static final FunctionalTwoArg<Double, Double, Double> lt = (_, arg1, arg2) -> Util.fuzzyLT(arg1, arg2) ? 1.0 : 0.0;
     // GT
-    static final FunctionalTwoArg<Double, Double, Double> gt = (engine, arg1, arg2) -> Util.fuzzyGT(arg1, arg2) ? 1.0 : 0.0;
+    static final FunctionalTwoArg<Double, Double, Double> gt = (_, arg1, arg2) -> Util.fuzzyGT(arg1, arg2) ? 1.0 : 0.0;
     // LE
-    static final FunctionalTwoArg<Double, Double, Double> le = (engine, arg1, arg2) -> Util.fuzzyLE(arg1, arg2) ? 1.0 : 0.0;
+    static final FunctionalTwoArg<Double, Double, Double> le = (_, arg1, arg2) -> Util.fuzzyLE(arg1, arg2) ? 1.0 : 0.0;
     // GE
-    static final FunctionalTwoArg<Double, Double, Double> ge = (engine, arg1, arg2) -> Util.fuzzyGE(arg1, arg2) ? 1.0 : 0.0;
+    static final FunctionalTwoArg<Double, Double, Double> ge = (_, arg1, arg2) -> Util.fuzzyGE(arg1, arg2) ? 1.0 : 0.0;
 
     // UNARY_MINUS
-    static final FunctionalOneArg<Double, Double> unaryMinus = (engine, arg1) -> {
+    static final FunctionalOneArg<Double, Double> unaryMinus = (_, arg1) -> {
         if (arg1 == null) {
             throw new ExecutionException("Can't negate a null value");
         }
         return -arg1;
     };
      // UNARY_PLUS
-    static final FunctionalOneArg<Double, Double> unaryPlus = (engine, arg1) -> {
+    static final FunctionalOneArg<Double, Double> unaryPlus = (_, arg1) -> {
         if (arg1 == null) {
             throw new ExecutionException("Can't operate on a null value");
         }
         return +arg1;
     };
     // SUB
-    static final FunctionalTwoArg<Double, Double, Double> sub = (engine, arg1, arg2) -> {
+    static final FunctionalTwoArg<Double, Double, Double> sub = (_, arg1, arg2) -> {
         if (arg1 == null) {
             throw new ExecutionException("Can't use math on a null value");
         }
         return arg1 - arg2;
     };
     // MULT
-    static final FunctionalTwoArg<Double, Double, Double> mult = (engine, arg1, arg2) -> {
+    static final FunctionalTwoArg<Double, Double, Double> mult = (_, arg1, arg2) -> {
         if (arg1 == null) {
             throw new ExecutionException("Can't use math on a null value");
         }
         return arg1 * arg2;
     };
     // DIV
-    static final FunctionalTwoArg<Double, Double, Double> div = (engine, arg1, arg2) -> {
+    static final FunctionalTwoArg<Double, Double, Double> div = (_, arg1, arg2) -> {
         if (arg1 == null) {
             throw new ExecutionException("Can't use math on a null value");
         }
         return arg1 / arg2;
     };
     // REMAINDER
-    static final FunctionalTwoArg<Double, Double, Double> remainder = (engine, arg1, arg2) -> {
+    static final FunctionalTwoArg<Double, Double, Double> remainder = (_, arg1, arg2) -> {
         if (arg1 == null) {
             throw new ExecutionException("Can't use math on a null value");
         }
         return arg1 % arg2;
     };
     // EXP
-    static final FunctionalTwoArg<Double, Double, Double> exp = (engine, arg1, arg2) -> {
+    static final FunctionalTwoArg<Double, Double, Double> exp = (_, arg1, arg2) -> {
         if (arg1 == null) {
             throw new ExecutionException("Can't use math on a null value");
         }
         return Math.pow(arg1, arg2);
     };
     // LORENTZ
-    static final FunctionalTwoArg<Coordinate, Object, Coordinate> lorentz = (engine, coord, obj) -> {
+    static final FunctionalTwoArg<Coordinate, Object, Coordinate> lorentz = (_, coord, obj) -> {
         if (coord == null) throw new ExecutionException("The coordinate can't be null");
         if (obj == null) throw new ExecutionException("The frame is null");
         @SuppressWarnings("LocalVariableHidesMemberVariable")
@@ -209,7 +209,7 @@ public abstract class HCode extends ExecutorContext
         return frame.toFrame(coord);
     };
     // INV_LORENTZ
-    static final FunctionalTwoArg<Coordinate, Object, Coordinate> invLorentz = (engine, coord, obj) -> {
+    static final FunctionalTwoArg<Coordinate, Object, Coordinate> invLorentz = (_, coord, obj) -> {
         if (coord == null) throw new ExecutionException("The coordinate can't be null");
         if (obj == null) throw new ExecutionException("The frame is null");
         @SuppressWarnings("LocalVariableHidesMemberVariable")
@@ -223,7 +223,7 @@ public abstract class HCode extends ExecutorContext
     // ****************************************
 
     // W_INITIALIZER
-    static final FunctionalThreeArg<Coordinate, Double, Double, WInitializer> wInitializer = (engine, coord, tau, d) -> new WInitializer(coord, tau, d);
+    static final FunctionalThreeArg<Coordinate, Double, Double, WInitializer> wInitializer = (_, coord, tau, d) -> new WInitializer(coord, tau, d);
     // W_SEGMENT
     static final FunctionalFourArg<Double, Double, WorldlineSegment.LimitType, Double, WSegment> wSegment = (engine, v, a, limitType, delta) -> {
         if (v == null) throw new ExecutionException("The velocity is null");
@@ -240,9 +240,9 @@ public abstract class HCode extends ExecutorContext
         return new WSegment(v, a, limitType, delta);
     };
     // PROPERTY
-    static final FunctionalTwoArg<String, Object, Property> property = (engine, name, value) -> new Property(name, value);
+    static final FunctionalTwoArg<String, Object, Property> property = (_, name, value) -> new Property(name, value);
     // PROPERTY_LIST
-    static final VariableArg<PropertyList> propertyList = (engine, data) -> {
+    static final VariableArg<PropertyList> propertyList = (_, data) -> {
         PropertyList properties = new PropertyList();
         for (Object datum : data) {
             if (!(datum instanceof PropertyElement element)) {
@@ -258,14 +258,14 @@ public abstract class HCode extends ExecutorContext
     // ****************************************
 
     // FRAME
-    static final FunctionalTwoArg<Coordinate, Double, Frame> frame = (engine, origin, v) -> {
+    static final FunctionalTwoArg<Coordinate, Double, Frame> frame = (_, origin, v) -> {
         if (origin == null) throw new ExecutionException("The origin is null");
         if (v == null) throw new ExecutionException("The velocity is null");
         if (v <= -1.0 || v >= 1.0) throw new ExecutionException("The velocity must be within -1 and +1.");
         return new Frame(origin, v);
     };
     // OBSERVER_FRAME
-    static final FunctionalThreeArg<Observer, Frame.AtType, Double, Frame> observerFrame = (engine, observer, atType, atValue) -> {
+    static final FunctionalThreeArg<Observer, Frame.AtType, Double, Frame> observerFrame = (_, observer, atType, atValue) -> {
         if (observer == null) throw new ExecutionException("The observer is null");
         if (atValue == null) throw new ExecutionException("The 'at' value is null");
         if (atType == Frame.AtType.V && (atValue <= -1.0 || atValue >= 1.0)) {
@@ -275,7 +275,7 @@ public abstract class HCode extends ExecutorContext
         return new Frame(observer, atType, atValue);
     };
     // AXIS_LINE
-    static final FunctionalThreeArg<Line.AxisType, Object, Double, Line> axisLine = (engine, type, obj, offset) -> {
+    static final FunctionalThreeArg<Line.AxisType, Object, Double, Line> axisLine = (_, type, obj, offset) -> {
         if (obj == null) throw new ExecutionException("The frame is null");
         @SuppressWarnings("LocalVariableHidesMemberVariable")
         Frame frame = Frame.promote(obj);
@@ -283,19 +283,19 @@ public abstract class HCode extends ExecutorContext
         return new ConcreteLine(type, frame, offset);
     };
     // ANGLE_LINE
-    static final FunctionalTwoArg<Double, Coordinate, Line> angleLine = (engine, angle, coord) -> {
+    static final FunctionalTwoArg<Double, Coordinate, Line> angleLine = (_, angle, coord) -> {
         if (angle == null) throw new ExecutionException("The angle is null");
         if (coord == null) throw new ExecutionException("The coordinate is null");
         return new ConcreteLine(angle, coord);
     };
     // ENDPOINT_LINE
-    static final FunctionalTwoArg<Coordinate, Coordinate, Line> endpointLine = (engine, coord1, coord2) -> {
+    static final FunctionalTwoArg<Coordinate, Coordinate, Line> endpointLine = (_, coord1, coord2) -> {
         if (coord1 == null) throw new ExecutionException("The first coordinate is null");
         if (coord2 == null) throw new ExecutionException("The second coordinate is null");
         return new ConcreteLine(coord1, coord2);
     };
     // PATH
-    static final VariableArg<Path> path = (engine, data) -> {
+    static final VariableArg<Path> path = (_, data) -> {
         int numOfCoordinates = data.length;
         ArrayList<Coordinate> coords = new ArrayList<>();
         for (int i = 0; i < numOfCoordinates; i++) {
@@ -308,19 +308,19 @@ public abstract class HCode extends ExecutorContext
         return new Path(coords);
     };
     // BOUNDS
-    static final FunctionalTwoArg<Coordinate, Coordinate, Bounds> bounds = (engine, min, max) -> {
+    static final FunctionalTwoArg<Coordinate, Coordinate, Bounds> bounds = (_, min, max) -> {
         if (min == null) throw new ExecutionException("The minimum coordinate is null");
         if (max == null) throw new ExecutionException("The maximum coordinate is null");
         return new Bounds(min, max);
     };
     // INTERVAL
-    static final FunctionalThreeArg<Interval.Type, Double, Double, Interval> interval = (engine, type, min, max) -> {
+    static final FunctionalThreeArg<Interval.Type, Double, Double, Interval> interval = (_, type, min, max) -> {
         if (min == null) throw new ExecutionException("The minimum value is null");
         if (max == null) throw new ExecutionException("The maximum value is null");
         return new Interval(type, min, max);
     };
     // COORDINATE
-    static final FunctionalTwoArg<Double, Double, Coordinate> coordinate = (engine, x, t) -> {
+    static final FunctionalTwoArg<Double, Double, Coordinate> coordinate = (_, x, t) -> {
         if (x == null) throw new ExecutionException("The x coordinate is null");
         if (t == null) throw new ExecutionException("The t coordinate is null");
         return new Coordinate(x, t);

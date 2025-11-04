@@ -60,7 +60,7 @@ public final class Selector
      */
     public Selector(String name) throws StyleException
     {
-        if (name == null || name.length() == 0) {
+        if (name == null || name.isEmpty()) {
             throw new StyleException("Invalid stylesheet selector");
         }
         // We know the name is syntactically correct, but we don't know that it's
@@ -116,7 +116,7 @@ public final class Selector
                     }
                 }
 
-                // Last item was a class. We can have as many as we want and
+                // Last item was a class. We can have as many as we want, and
                 // we're going to allow them to repeat
 
                 else if (isClass) {
@@ -170,6 +170,7 @@ public final class Selector
      *
      * @return The command name part of the selector.
      */
+    @SuppressWarnings("unused")
     public String getCommandName()
     {
         return commandName;

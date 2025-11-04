@@ -151,7 +151,7 @@ public class Coordinate extends ObjectContainer implements ExecutionMutable, Dis
     }
 
     /**
-     * Determien if two coordinates are equal.
+     * Determine if two coordinates are equal.
      *
      * @param other The other coordinate to compare with.
      *
@@ -225,8 +225,8 @@ public class Coordinate extends ObjectContainer implements ExecutionMutable, Dis
     public int hashCode()
     {
         int hash = 3;
-        hash = 13 * hash + (int)(Double.doubleToLongBits(this.x) ^ (Double.doubleToLongBits(this.x) >>> 32));
-        hash = 13 * hash + (int)(Double.doubleToLongBits(this.t) ^ (Double.doubleToLongBits(this.t) >>> 32));
+        hash = 13 * hash + Long.hashCode(Double.doubleToLongBits(this.x));
+        hash = 13 * hash + Long.hashCode(Double.doubleToLongBits(this.t));
         return hash;
     }
 

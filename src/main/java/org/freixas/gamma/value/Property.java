@@ -23,11 +23,9 @@ import org.freixas.gamma.execution.ExecutionException;
  *
  * @author Antonio Freixas
  */
-public class Property implements PropertyElement, ExecutionImmutable
+public record Property(String name, Object value)
+    implements PropertyElement, ExecutionImmutable
 {
-    private final String name;
-    private final Object value;
-
     // **********************************************************************
     // *
     // * Constructor
@@ -43,7 +41,9 @@ public class Property implements PropertyElement, ExecutionImmutable
     public Property(String name, Object value)
     {
         this.name = name;
-        if (value == null) throw new ExecutionException("The property's value is null");
+        if (value == null) {
+            throw new ExecutionException("The property's value is null");
+        }
         this.value = value;
     }
 
@@ -52,15 +52,5 @@ public class Property implements PropertyElement, ExecutionImmutable
     // * Getters
     // *
     // **********************************************************************
-
-    public String getName()
-    {
-        return name;
-    }
-
-    public Object getValue()
-    {
-        return value;
-    }
 
 }

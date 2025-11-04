@@ -358,7 +358,7 @@ public class Frame  extends ObjectContainer implements ExecutionMutable, Display
     {
         int hash = 3;
         hash = 19 * hash + Objects.hashCode(this.origin);
-        hash = 19 * hash + (int)(Double.doubleToLongBits(this.v) ^ (Double.doubleToLongBits(this.v) >>> 32));
+        hash = 19 * hash + Long.hashCode(Double.doubleToLongBits(this.v));
         return hash;
     }
 

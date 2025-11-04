@@ -129,7 +129,7 @@ abstract public class Tokenizer
      *     terminating EOF)
      *     <li>'cPtr' will hold the position of 'cNext' (but never beyond the
      *     terminating EOF)
-     *     <li>'lineNumnber' will hold the number of the current line (the first
+     *     <li>'lineNumber' will hold the number of the current line (the first
      *     line is line 1)
      *     <li>'lineNumberStart' will hold the character position at which the
      *     line starts
@@ -343,6 +343,7 @@ abstract public class Tokenizer
      * @param pathName The directory in which a log file should be written.
      * @param tokens The token list of log.
      */
+    @SuppressWarnings("unused")
     protected final void debugTokens(String pathName, ArrayList<Token<?>> tokens)
     {
         try {
@@ -377,21 +378,13 @@ abstract public class Tokenizer
 
     private String valueToString(Object value)
     {
-        if (value instanceof Character character) {
-            return quoteForCsv(character.toString());
-        }
-        else if (value instanceof Double double1) {
-            return double1.toString();
-        }
-        else if (value instanceof String string) {
-            return(quoteForCsv(string));
-        }
-        else if (value instanceof Integer integer1) {
-            return integer1.toString();
-        }
-        else {
-            return "";
-        }
+        return switch (value) {
+            case Character character -> quoteForCsv(character.toString());
+            case Double double1 -> double1.toString();
+            case String string -> (quoteForCsv(string));
+            case Integer integer1 -> integer1.toString();
+            case null, default -> "";
+        };
     }
 
     private String quoteForCsv(String str)

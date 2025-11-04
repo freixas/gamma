@@ -42,22 +42,21 @@ public class toXAngleFunction extends ArgInfoFunction
     @Override
     public Object execute(HCodeEngine engine, List<Object> code)
     {
-        Object arg1 = code.get(0);
+        Object arg1 = code.getFirst();
 
-        if (arg1 == null) throw new ExecutionException("The toXAngle() function's value is null ");
+        return switch (arg1) {
+            case null ->
+                throw new ExecutionException("The toXAngle() function's value is null ");
+            case Double dbl ->
+                Relativity.vToXAngle(dbl);
+            case Observer observer ->
+                Relativity.vToXAngle(new Frame(observer).getV());
+            case Frame frame ->
+                Relativity.vToXAngle(frame.getV());
+            default ->
+                throw new ExecutionException("toXAngle requires a velocity, frame, or observer");
+        };
 
-        if (arg1 instanceof Double dbl) {
-            return Relativity.vToXAngle(dbl);
-        }
-        else if (arg1 instanceof Observer observer) {
-            return Relativity.vToXAngle(new Frame(observer).getV());
-        }
-        else if (arg1 instanceof Frame frame) {
-            return Relativity.vToXAngle(frame.getV());
-        }
-        else {
-            throw new ExecutionException("toXAngle requires a velocity, frame, or observer");
-        }
     }
 
     @Override

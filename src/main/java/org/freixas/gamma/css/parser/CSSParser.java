@@ -22,7 +22,6 @@ import org.freixas.gamma.parser.ParseException;
 import org.freixas.gamma.parser.Token;
 import org.freixas.gamma.parser.TokenContext;
 
-import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -67,6 +66,7 @@ public final class CSSParser
      *
      * @return The tokens produced by parsing.
      */
+    @SuppressWarnings("unused")
     public ArrayList<Token<?>> getTokens()
     {
         return this.tokens;
@@ -335,7 +335,7 @@ public final class CSSParser
         if (ptr < 0) {
             tokenPtr = -1;
             curToken = dummyToken;
-            peek = tokens.get(0);
+            peek = tokens.getFirst();
         }
         else if (ptr >= tokens.size()) {
             tokenPtr = tokens.size() - 1;

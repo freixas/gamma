@@ -38,7 +38,17 @@ public class ScriptPrintDialog extends Stage
     // *
     // **********************************************************************
 
-    public ScriptPrintDialog(MainWindow window) throws Exception
+    public static ScriptPrintDialog create(MainWindow window) throws Exception
+    {
+        ScriptPrintDialog dialog = new ScriptPrintDialog(window);
+        dialog.setScene(new Scene(dialog.root));
+        dialog.initOwner(window);
+        dialog.setResizable(true);
+        dialog.setTitle("Script Print");
+        return dialog;
+    }
+
+    private ScriptPrintDialog(MainWindow window) throws Exception
     {
         this.window = window;
 
@@ -47,13 +57,7 @@ public class ScriptPrintDialog extends Stage
         FXMLLoader loader = new FXMLLoader();
         loader.setLocation(getClass().getResource("/ScriptPrintDialog.fxml"));
         root = loader.load();
-        controller = (ScriptPrintDialogController)loader.getController();
-        setScene(new Scene(root));
-
-        initOwner(window);
-
-        setResizable(true);
-        setTitle("Script Print");
+        controller = loader.getController();
     }
 
     public void appendText(String str)
@@ -64,6 +68,11 @@ public class ScriptPrintDialog extends Stage
     public void clear()
     {
         controller.clear();
+    }
+
+    public MainWindow getWindow()
+    {
+        return window;
     }
 
 }

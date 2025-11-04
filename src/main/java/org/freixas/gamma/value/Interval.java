@@ -110,6 +110,7 @@ public class Interval implements ExecutionImmutable, Displayable
      *
      * @return The interval delta.
      */
+    @SuppressWarnings("unused")
     public double getDelta()
     {
         // This code avoids generating NaN if max and min are both the same

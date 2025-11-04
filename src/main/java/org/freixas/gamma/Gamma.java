@@ -26,7 +26,8 @@ import javafx.stage.Stage;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.help.HelpFormatter.Builder;
+import org.apache.commons.cli.help.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.freixas.gamma.css.value.StyleException;
@@ -40,11 +41,11 @@ import javax.swing.JFileChooser;
 
 /**
  * The main application class.
- *
+ * <p>
  * Any functionality that is associated with the application and not
  * associated with just one window is included here. This includes the
  * functionality for creating a new main window.
- *
+ * <p>
  * This class keeps track of all the windows that exist and ensures that
  * the state of various menu buttons are set properly.
  *
@@ -157,8 +158,10 @@ public final class Gamma extends Application
             CommandLine line = parser.parse(options, args);
 
             if (line.hasOption("help")) {
-                HelpFormatter formatter = new HelpFormatter();
-                formatter.printHelp("Gamma [options] [script-files ...]\n", options);
+                Builder builder = HelpFormatter.builder();
+                builder.setShowSince(false);
+                HelpFormatter formatter = builder.get();
+                formatter.printHelp("Gamma [options] [script-files ...]\n", "Run Gamma, a Minkowski spacetime diagram generator", options, "", true);
                 System.exit(0);
             }
 
@@ -173,7 +176,7 @@ public final class Gamma extends Application
             }
             else {
                 String cssFileName = PreferencesManager.getDefaultStylesheet();
-                if (cssFileName.length() > 0) cssFile = new URLFile(cssFileName);
+                if (!cssFileName.isEmpty()) cssFile = new URLFile(cssFileName);
             }
 
             if (cssFile != null) {
@@ -192,12 +195,10 @@ public final class Gamma extends Application
             File[] defaultDirectories = { null, null, null };
 
             String[] filenames = line.getArgs();
-            if (filenames.length > 0) {
-                for (String filename : filenames) {
-                    newMainWindow(filename, false, defaultDirectories);
-                }
+            for (String filename : filenames) {
+                newMainWindow(filename, false, defaultDirectories);
             }
-            if (windowList.size() == 0) {
+            if (windowList.isEmpty()) {
                 newMainWindow(null, false, defaultDirectories);
             }
         }
@@ -262,7 +263,7 @@ public final class Gamma extends Application
     static public void exit()
     {
         while (windowList.size() > 1) {
-            closeWindow(windowList.get(0));
+            closeWindow(windowList.getFirst());
         }
 
         Platform.exit();
@@ -301,7 +302,7 @@ public final class Gamma extends Application
         // It can still be closed through the window manager
 
         if (windowList.size() == 1) {
-            MainWindow finalWindow = windowList.get(0);
+            MainWindow finalWindow = windowList.getFirst();
             finalWindow.setCloseState(false);
         }
     }

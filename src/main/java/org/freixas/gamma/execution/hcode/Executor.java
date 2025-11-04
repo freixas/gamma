@@ -16,7 +16,6 @@
  */
 package org.freixas.gamma.execution.hcode;
 
-import org.freixas.gamma.GammaRuntimeException;
 import org.freixas.gamma.ProgrammingException;
 import org.freixas.gamma.execution.ExecutionException;
 import org.freixas.gamma.execution.HCodeEngine;
@@ -55,7 +54,7 @@ public abstract class Executor
      *
      * @param context The object type on which this executor operates.
      * @param engine The h-code engine.
-     * @param func A LambdaFunction class typically created using a lamdba
+     * @param func A LambdaFunction class typically created using a lambda
      * expression.
      */
     public void execute(ExecutorContext context, HCodeEngine engine, LambdaFunction func)
@@ -86,7 +85,7 @@ public abstract class Executor
             reflectionArgs = new Object[] { engine, args.toArray() };
         }
         else {
-            args.add(0, engine);            // The engine is the first parameter
+            args.addFirst(engine);            // The engine is the first parameter
             reflectionArgs = args.toArray();
         }
 
@@ -102,7 +101,7 @@ public abstract class Executor
      * Find a matching execution method. If we don't find one, then we received
      * values of the wrong type and an exception is thrown.
      *
-     * @param func A LambdaFunction class typically created using a lamdba
+     * @param func A LambdaFunction class typically created using a lambda
      * expression.
      * @param params An array of Object classes. Generic functions wind up
      * reflecting all their generic arguments as type Object.
@@ -157,10 +156,11 @@ public abstract class Executor
      * Get the number of arguments required by this LambdaFunction.
      *
      * @param context The object type on which this executor operates.
-     * @param func A LambdaFunction class typically created using a lamdba
+     * @param func A LambdaFunction class typically created using a lambda
      * expression.
      * @return The number of arguments required by this LambdaFunction.
      */
+    @SuppressWarnings("unused")
     public int getNumberOfArgs(ExecutorContext context, LambdaFunction func)
     {
         int numOfArgs = 0;
@@ -183,6 +183,7 @@ public abstract class Executor
         return numOfArgs;
     }
 
+    @SuppressWarnings("unused")
     public int getNumberOfReturnedValues(ExecutorContext context, LambdaFunction func)
     {
         int numOfRets = 1;

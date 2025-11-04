@@ -29,7 +29,6 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.transform.Affine;
 import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.stage.Screen;
-import javafx.stage.Stage;
 
 /**
  *
@@ -126,6 +125,7 @@ public class DisplayCommandExec extends CommandExec
      * @param struct The display structure.
      * @param styles The styles.
      */
+    @SuppressWarnings("unused")
     public void initializeCanvas(Context context, DisplayStruct struct, StyleStruct styles)
     {
         Canvas canvas = context.canvas;
@@ -151,8 +151,8 @@ public class DisplayCommandExec extends CommandExec
 
         double multiplier = 1.0;
         switch (struct.units) {
-            case "inches" -> { multiplier = screen.getDpi() * screen.getOutputScaleX(); }
-            case "mm" -> { multiplier = screen.getDpi() * screen.getOutputScaleX() / 25.4; }
+            case "inches" -> multiplier = screen.getDpi() * screen.getOutputScaleX();
+            case "mm" -> multiplier = screen.getDpi() * screen.getOutputScaleX() / 25.4;
         }
         if (width != Struct.INT_NOT_SET) {
             width *= multiplier;
@@ -167,7 +167,7 @@ public class DisplayCommandExec extends CommandExec
         double parentWidth = parent.getWidth();
         double parentHeight = parent.getHeight();
 
-        // Neither width or height specified: set the canvas size equal to
+        // Neither width nor height specified: set the canvas size equal to
         // its parent's width and height
 
         if (width == Struct.INT_NOT_SET && height == Struct.INT_NOT_SET) {
@@ -186,7 +186,7 @@ public class DisplayCommandExec extends CommandExec
 
         // Only the width was specified: leave the width alone, and set the
         // canvas height equal to the parent's height. Then modify the
-        // display structure so that the heihgt is fixed from now on
+        // display structure so that the height is fixed from now on
 
         else if (height == Struct.INT_NOT_SET) {
             fixedWidth = width;

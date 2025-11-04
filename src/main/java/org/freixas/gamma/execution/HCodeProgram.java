@@ -53,8 +53,8 @@ public class HCodeProgram
 
         for (int i = codes.size() - 1; i > -1; i--) {
             Object code = codes.get(i);
-            if (code instanceof Label label) {
-                labels.put(label.getId(), lastNonLabel);
+            if (code instanceof Label(int id)) {
+                labels.put(id, lastNonLabel);
             }
             else {
                 lastNonLabel = i;

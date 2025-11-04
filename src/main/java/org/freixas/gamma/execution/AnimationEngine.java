@@ -239,31 +239,31 @@ public class AnimationEngine
         // *
         // ************************************************************
 
-        animStartEventHandler = event -> {
+        animStartEventHandler = _ -> {
             toStart();
             canvas.requestFocus();
         };
         buttonAnimStart.addEventHandler(ActionEvent.ANY, animStartEventHandler);
 
-        animEndEventHandler = event -> {
+        animEndEventHandler = _ -> {
             toEnd();
             canvas.requestFocus();
         };
         buttonAnimEnd.addEventHandler(ActionEvent.ANY, animEndEventHandler);
 
-        animStepBackwardEventHandler = event -> {
+        animStepBackwardEventHandler = _ -> {
             stepBackward();
             canvas.requestFocus();
         };
         buttonAnimPrevious.addEventHandler(ActionEvent.ANY, animStepBackwardEventHandler);
 
-        animStepForwardEventHandler = event -> {
+        animStepForwardEventHandler = _ -> {
             stepForward();
             canvas.requestFocus();
         };
         buttonAnimNext.addEventHandler(ActionEvent.ANY, animStepForwardEventHandler);
 
-        animPlayPauseEventHandler = event -> {
+        animPlayPauseEventHandler = _ -> {
             togglePlay();
             canvas.requestFocus();
         };
@@ -471,14 +471,14 @@ public class AnimationEngine
         // Handle the animation statement and animation variables
 
         AnimationStruct animationStruct =
-            (AnimationStruct)hCodeEngine.getLCodeEngine().getAnimationCommand().getCmdStruct();
+            (AnimationStruct)hCodeEngine.getLCodeEngine().getAnimationCommand().cmdStruct();
 
         int reps = animationStruct.reps;
         speed = animationStruct.speed;
 
         // We calculate the maximum number of frames in a straight repetition by
         // checking the limits of all the animation variables. If an animation
-        // variable doesn"t have a limit, we still impose one
+        // variable doesn't have a limit, we still impose one
 
         framesPerAnimation = getMaxFrames();
 

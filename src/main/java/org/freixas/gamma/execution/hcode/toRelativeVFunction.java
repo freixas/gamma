@@ -61,19 +61,13 @@ public class toRelativeVFunction extends ArgInfoFunction
         // velocity above
 
         Object arg1 = code.get(1);
-        double relativeDestFrameV;
-        if (arg1 instanceof Double dbl) {
-            relativeDestFrameV = dbl;
-        }
-        else if (arg1 instanceof Observer obs) {
-            relativeDestFrameV = new Frame(obs).getV();
-        }
-        else if (arg1 instanceof Frame frame) {
-            relativeDestFrameV = frame.getV();
-        }
-        else {
-            throw new ExecutionException("toRelativeV()'s second argument must be a float, frame, or observer");
-        }
+        double relativeDestFrameV = switch (arg1) {
+            case Double dbl -> dbl;
+            case Observer obs -> new Frame(obs).getV();
+            case Frame frame -> frame.getV();
+            case null, default ->
+                throw new ExecutionException("toRelativeV()'s second argument must be a float, frame, or observer");
+        };
 
 
         // The final argument is optional. If given, it is the frame to which
@@ -84,18 +78,13 @@ public class toRelativeVFunction extends ArgInfoFunction
         double relativeSourceFrameV = 0;
         if (code.size() > 2) {
             arg2 = code.get(2);
-            if (arg2 instanceof Double dbl) {
-                relativeSourceFrameV = dbl;
-            }
-            else if (arg2 instanceof Observer obs) {
-                relativeSourceFrameV = new Frame(obs).getV();
-            }
-            else if (arg2 instanceof Frame frame) {
-                relativeSourceFrameV = frame.getV();
-            }
-            else {
-                throw new ExecutionException("toRelativeV()'s second argument must be a float, frame, or observer");
-            }
+            relativeSourceFrameV = switch (arg2) {
+                case Double dbl -> dbl;
+                case Observer obs -> new Frame(obs).getV();
+                case Frame frame -> frame.getV();
+                case null, default ->
+                    throw new ExecutionException("toRelativeV()'s second argument must be a float, frame, or observer");
+            };
         }
 
         // If the source frame is not 0, we need to convert the velocity to

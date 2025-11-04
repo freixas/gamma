@@ -27,5 +27,5 @@ import org.freixas.gamma.execution.HCodeEngine;
 @FunctionalInterface
 public interface FunctionalOneArg<T1, R> extends LambdaFunction
 {
-    public R execute(HCodeEngine engine, T1 arg);
+    R execute(HCodeEngine engine, T1 arg);
 }

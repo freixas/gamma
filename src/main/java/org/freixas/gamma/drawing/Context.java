@@ -135,6 +135,7 @@ public class Context
      *
      * @return The canvas inverse scale.
      */
+    @SuppressWarnings("unused")
     public final double getCurrentRotatedInvScale()
     {
         try {

@@ -24,18 +24,6 @@ import org.freixas.gamma.value.ExecutionImmutable;
  *
  * @author Antonio Freixas
  */
-public class Label implements ExecutionImmutable
+public record Label(int id) implements ExecutionImmutable
 {
-    private final int id;
-
-    public Label(int id)
-    {
-        this.id = id;
-    }
-
-    public int getId()
-    {
-        return id;
-    }
-
 }

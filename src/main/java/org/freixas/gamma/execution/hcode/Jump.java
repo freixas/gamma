@@ -36,6 +36,7 @@ public interface Jump
      *
      * @return The location to jump to.
      */
+    @SuppressWarnings("unused")
     int getJumpLocation();
 
     /**

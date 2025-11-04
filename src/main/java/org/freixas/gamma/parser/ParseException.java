@@ -16,6 +16,8 @@
  */
 package org.freixas.gamma.parser;
 
+import java.io.Serial;
+
 /**
  * Exceptions causes by syntax errors.
  *
@@ -23,7 +25,10 @@ package org.freixas.gamma.parser;
  */
 public final class ParseException extends Exception
 {
-    private final Token<?> token;
+    private final transient Token<?> token;
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     // **********************************************************************
     // *

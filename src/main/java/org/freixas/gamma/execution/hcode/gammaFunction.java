@@ -42,22 +42,19 @@ public class gammaFunction extends ArgInfoFunction
     @Override
     public Object execute(HCodeEngine engine, List<Object> code)
     {
-        Object arg1 = code.get(0);
-        if (arg1 == null) {
-            throw new ExecutionException("The gamma() function's value is null");
-        }
-        else if (arg1 instanceof Double dbl) {
-            return Relativity.gamma(dbl);
-        }
-        else if (arg1 instanceof Observer observer) {
-            return Relativity.gamma(new Frame(observer).getV());
-        }
-        else if (arg1 instanceof Frame frame) {
-            return Relativity.gamma(frame.getV());
-        }
-        else {
-            throw new ExecutionException("gamma() requires a velocity, observer, or frame");
-        }
+        Object arg1 = code.getFirst();
+        return switch (arg1) {
+            case null ->
+                throw new ExecutionException("The gamma() function's value is null");
+            case Double dbl ->
+                Relativity.gamma(dbl);
+            case Observer observer ->
+                Relativity.gamma(new Frame(observer).getV());
+            case Frame frame ->
+                Relativity.gamma(frame.getV());
+            default ->
+                throw new ExecutionException("gamma() requires a velocity, observer, or frame");
+        };
     }
 
     @Override

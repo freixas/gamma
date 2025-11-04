@@ -40,11 +40,11 @@ public class FunctionHCode extends ArgInfoHCode
     @Override
     public void execute(HCodeEngine engine, List<Object> data)
     {
-        String funcName = (String)data.get(data.size() - 1);
+        String funcName = (String)data.getLast();
 
         Function function = Function.get(funcName);
         if (function == null) {
-            throw new ExecutionException("Uknown function '" + funcName + "'");
+            throw new ExecutionException("Unknown function '" + funcName + "'");
         }
 
         // The function arguments function name
@@ -75,7 +75,7 @@ public class FunctionHCode extends ArgInfoHCode
 
             Object result = argInfoFunction.execute(engine, funcData);
 
-            // Remove all of the function h-code
+            // Remove the function h-code
 
             data.clear();
 

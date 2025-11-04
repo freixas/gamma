@@ -81,7 +81,7 @@ public class ConcreteObserver extends Observer
 
         this.segments = new ArrayList<>();
 
-        if (wSegments.size() < 1) {
+        if (wSegments.isEmpty()) {
 
             // Create a default segment
 
@@ -92,22 +92,22 @@ public class ConcreteObserver extends Observer
         while (iter.hasNext()) {
             WSegment wSegment = iter.next();
 
-            double a = wSegment.getA();
+            double a = wSegment.a();
 
             // Not the last segment
 
             if (iter.hasNext()) {
                 addSegment(
-                        wSegment.getType(),
-                        wSegment.getLimit(),
+                        wSegment.type(),
+                        wSegment.limit(),
                         a,
-                        wSegment.getV());
+                        wSegment.v());
             }
 
             // The last segment
 
             else {
-                addFinalSegment(a, wSegment.getV());
+                addFinalSegment(a, wSegment.v());
             }
         }
     }
@@ -140,7 +140,7 @@ public class ConcreteObserver extends Observer
 
         // Add the first segment
 
-        if (segments.size() < 1) {
+        if (segments.isEmpty()) {
             if (Double.isNaN(v)) v = 0.0;
             segment = new WorldlineSegment(type, delta, a, v, origin, tauInit, dInit);
             segment.setInfinitePast();
@@ -161,7 +161,7 @@ public class ConcreteObserver extends Observer
     private void addFinalSegment(double a, double v)
     {
         WorldlineSegment segment;
-        if (segments.size() < 1) {
+        if (segments.isEmpty()) {
             if (Double.isNaN(v)) v = 0.0;
             segment = new WorldlineSegment(WorldlineSegment.LimitType.T, 0, a, v, origin, tauInit, dInit);
             segment.setInfinitePast();
@@ -597,7 +597,7 @@ public class ConcreteObserver extends Observer
             ", tau at origin " + engine.toDisplayableString(tauInit) +
             ", distance at origin " + engine.toDisplayableString(dInit) + "\n");
 
-        if (segments.size() > 0) {
+        if (!segments.isEmpty()) {
             for (int i = 0; i < segments.size(); i++) {
                 str.append(String.format("  %2d)", i + 1));
                 str.append(" ");
@@ -623,7 +623,7 @@ public class ConcreteObserver extends Observer
                 "Initial tau     : " + tauInit + "\n" +
                 "Initial distance: " + dInit + "\n");
 
-        if (segments.size() > 0) {
+        if (!segments.isEmpty()) {
             str.append("Segments:");
 
             for (int i = 0; i < segments.size(); i++) {

@@ -64,136 +64,129 @@ public abstract class Function extends ExecutorContext
     }
 
     // GAMMATOV
-    static final FunctionalOneArg<Double, Double> gammaToV = (engine, gamma) -> {
+    static final FunctionalOneArg<Double, Double> gammaToV = (_, gamma) -> {
         if (gamma == null) return null;
         return Relativity.gammaToV(gamma);
     };
 
     // DOPPLER_WAVELENGTH_TO_V
-    static final FunctionalTwoArg<Double, Double, Double> dopplerWavelengthToV = (engine, source, receiver) ->
+    static final FunctionalTwoArg<Double, Double, Double> dopplerWavelengthToV = (_, source, receiver) ->
         Relativity.dopplerWavelengthToV(source, receiver);
     // DOPPLER_FREQUENCY_TO_V
-    static final FunctionalTwoArg<Double, Double, Double> dopplerFrequencyToV = (engine, source, receiver) ->
+    static final FunctionalTwoArg<Double, Double, Double> dopplerFrequencyToV = (_, source, receiver) ->
         Relativity.dopplerFrequencyToV(source, receiver);
     // FREQUENCY_TO_WAVELENGTH
-    static FunctionalOneArg<Double, Double> frequencyToWavelength = (engine, frequency) ->
+    static FunctionalOneArg<Double, Double> frequencyToWavelength = (_, frequency) ->
         Util.frequencyToWavelength(frequency);
     // WAVELENGTH_TO_FREQUENCY
-    static FunctionalOneArg<Double, Double> wavelengthToFrequency = (engine, wavelength) ->
+    static FunctionalOneArg<Double, Double> wavelengthToFrequency = (_, wavelength) ->
         Util.wavelengthToFrequency(wavelength);
 
     // DTOT
-    static final FunctionalTwoArg<Double, Observer, Double> dToT = (engine, dbl, observer) -> {
+    static final FunctionalTwoArg<Double, Observer, Double> dToT = (_, dbl, observer) -> {
         double result = observer.dToT(dbl);
         return Double.isNaN(result) ? null : result;
     };
     // DTOTAU
-    static final FunctionalTwoArg<Double, Observer, Double> dToTau = (engine, dbl, observer) -> {
+    static final FunctionalTwoArg<Double, Observer, Double> dToTau = (_, dbl, observer) -> {
         double result = observer.dToTau(dbl);
         return Double.isNaN(result) ? null : result;
     };
     // DTOV
-    static final FunctionalTwoArg<Double, Observer, Double> dToV = (engine, dbl, observer) -> {
+    static final FunctionalTwoArg<Double, Observer, Double> dToV = (_, dbl, observer) -> {
         double result = observer.dToV(dbl);
         return Double.isNaN(result) ? null : result;
     };
     // DTOX
-    static final FunctionalTwoArg<Double, Observer, Double> dToX = (engine, dbl, observer) -> {
+    static final FunctionalTwoArg<Double, Observer, Double> dToX = (_, dbl, observer) -> {
         double result = observer.dToX(dbl);
         return Double.isNaN(result) ? null : result;
     };
     // TTOD
-    static final FunctionalTwoArg<Double, Observer, Double> tToD = (engine, dbl, observer) -> {
+    static final FunctionalTwoArg<Double, Observer, Double> tToD = (_, dbl, observer) -> {
         double result = observer.tToD(dbl);
         return Double.isNaN(result) ? null : result;
     };
-    // TOTTAU
-    static final FunctionalTwoArg<Double, Observer, Double> tToTau = (engine, dbl, observer) -> {
+    // TTOTAU
+    static final FunctionalTwoArg<Double, Observer, Double> tToTau = (_, dbl, observer) -> {
         double result = observer.tToTau(dbl);
         return Double.isNaN(result) ? null : result;
     };
     // TTOV
-    static final FunctionalTwoArg<Double, Observer, Double> tToV = (engine, dbl, observer) -> {
+    static final FunctionalTwoArg<Double, Observer, Double> tToV = (_, dbl, observer) -> {
         double result = observer.tToV(dbl);
         return Double.isNaN(result) ? null : result;
     };
-    // TOTX
-    static final FunctionalTwoArg<Double, Observer, Double> tToX = (engine, dbl, observer) -> {
+    // TTOX
+    static final FunctionalTwoArg<Double, Observer, Double> tToX = (_, dbl, observer) -> {
         double result = observer.tToX(dbl);
         return Double.isNaN(result) ? null : result;
     };
     // TAUTOD
-    static final FunctionalTwoArg<Double, Observer, Double> tauToD = (engine, dbl, observer) -> {
+    static final FunctionalTwoArg<Double, Observer, Double> tauToD = (_, dbl, observer) -> {
         double result = observer.tauToD(dbl);
         return Double.isNaN(result) ? null : result;
     };
     // TAUTOT
-    static final FunctionalTwoArg<Double, Observer, Double> tauToT = (engine, dbl, observer) -> {
+    static final FunctionalTwoArg<Double, Observer, Double> tauToT = (_, dbl, observer) -> {
         double result = observer.tauToT(dbl);
         return Double.isNaN(result) ? null : result;
     };
     // TAUTOV
-    static final FunctionalTwoArg<Double, Observer, Double> tauToV = (engine, dbl, observer) -> {
+    static final FunctionalTwoArg<Double, Observer, Double> tauToV = (_, dbl, observer) -> {
         double result = observer.tauToV(dbl);
         return Double.isNaN(result) ? null : result;
     };
     // TAUTOX
-    static final FunctionalTwoArg<Double, Observer, Double> tauToX = (engine, dbl, observer) -> {
+    static final FunctionalTwoArg<Double, Observer, Double> tauToX = (_, dbl, observer) -> {
         double result = observer.tauToX(dbl);
         return Double.isNaN(result) ? null : result;
     };
     // VTOD
-    static final FunctionalTwoArg<Double, Observer, Double> vToD = (engine, dbl, observer) -> {
+    static final FunctionalTwoArg<Double, Observer, Double> vToD = (_, dbl, observer) -> {
         double result = observer.vToD(dbl);
         return Double.isNaN(result) ? null : result;
     };
     // VTOT
-    static final FunctionalTwoArg<Double, Observer, Double> vToT = (engine, dbl, observer) -> {
+    static final FunctionalTwoArg<Double, Observer, Double> vToT = (_, dbl, observer) -> {
         double result = observer.vToT(dbl);
         return Double.isNaN(result) ? null : result;
     };
     // VTOTAU
-    static final FunctionalTwoArg<Double, Observer, Double> vToTau = (engine, dbl, observer) -> {
+    static final FunctionalTwoArg<Double, Observer, Double> vToTau = (_, dbl, observer) -> {
         double result = observer.vToTau(dbl);
         return Double.isNaN(result) ? null : result;
     };
     // VTOX
-    static final FunctionalTwoArg<Double, Observer, Double> vToX = (engine, dbl, observer) -> {
+    static final FunctionalTwoArg<Double, Observer, Double> vToX = (_, dbl, observer) -> {
         double result = observer.vToX(dbl);
         return Double.isNaN(result) ? null : result;
     };
 
     // SET_BOUNDS
-    static final FunctionalTwoArg<Line, Bounds, BoundedLine> setBounds = (engine, line, bounds) -> new BoundedLine(line, bounds);
+    static final FunctionalTwoArg<Line, Bounds, BoundedLine> setBounds = (_, line, bounds) -> new BoundedLine(line, bounds);
     // CLEAR_BOUNDS
-    static final FunctionalOneArg<Line, Line> clearBounds = (engine, line) -> {
-        if (line == null) throw new ExecutionException("clearBounds() has a null line");
-
-        if (line instanceof ConcreteLine concreteLine) {
-            return concreteLine;
-        }
-        else if (line instanceof BoundedLine boundedLine) {
-            return boundedLine.getLine();
-        }
-        return null;
-    };
+    static final FunctionalOneArg<Line, Line> clearBounds = (_, line) ->
+        switch (line) {
+            case null -> throw new ExecutionException("clearBounds() has a null line");
+            case ConcreteLine concreteLine -> concreteLine;
+            case BoundedLine boundedLine -> boundedLine.getLine();
+            default -> null;
+        };
     // SET_INTERVAL
-    static final FunctionalTwoArg<Observer, Interval, IntervalObserver> setInterval = (engine, observer, interval) -> new IntervalObserver(observer, interval);
+    static final FunctionalTwoArg<Observer, Interval, IntervalObserver> setInterval = (_, observer, interval) -> new IntervalObserver(observer, interval);
     // CLEAR_INTERVAL
-    static final FunctionalOneArg<Observer, Observer> clearInterval = (engine, observer) -> {
-        if (observer == null) throw new ExecutionException("clearInterval() has a null observer");
-
-        if (observer instanceof ConcreteObserver concreteObserver) {
-            return concreteObserver;
-        }
-        else if (observer instanceof IntervalObserver intervalObserver) {
-            return intervalObserver.getObserver();
-        }
-        return null;
-    };
+    static final FunctionalOneArg<Observer, Observer> clearInterval = (_, observer) ->
+        switch (observer) {
+            case null -> throw new ExecutionException("clearInterval() has a null observer");
+            case ConcreteObserver concreteObserver -> concreteObserver;
+            case IntervalObserver intervalObserver ->
+                intervalObserver.getObserver();
+            default -> null;
+        };
 
     // TO_STRING
-    static final FunctionalTwoArg<Double, Double, String> toString = (engine, arg1, arg2) -> {
+    static final FunctionalTwoArg<Double, Double, String> toString = (_, arg1, arg2) -> {
         if (arg1 == null) throw new ExecutionException("toString() has a null value");
         if (arg2 == null) throw new ExecutionException("toString() has a null precision");
 
@@ -205,128 +198,128 @@ public abstract class Function extends ExecutorContext
     };
 
     // ABS
-    static final FunctionalOneArg<Double, Double> abs = (engine, arg1) -> {
+    static final FunctionalOneArg<Double, Double> abs = (_, arg1) -> {
 	if (arg1 == null) throw new ExecutionException("abs() function's value is null");
 	return Math.abs(arg1);
     };
     // ACOS
-    static final FunctionalOneArg<Double, Double> acos = (engine, arg1) -> {
+    static final FunctionalOneArg<Double, Double> acos = (_, arg1) -> {
 	if (arg1 == null) throw new ExecutionException("acos() function's value is null");
 	return Math.toDegrees(Math.acos(arg1));
     };
     // ACOSH
-    static final FunctionalOneArg<Double, Double> acosh = (engine, arg1) -> {
+    static final FunctionalOneArg<Double, Double> acosh = (_, arg1) -> {
 	if (arg1 == null) throw new ExecutionException("acosh() function's value is null");
 	return Util.acosh(arg1);
     };
     // ASIN
-    static final FunctionalOneArg<Double, Double> asin = (engine, arg1) -> {
+    static final FunctionalOneArg<Double, Double> asin = (_, arg1) -> {
 	if (arg1 == null) throw new ExecutionException("asin() function's value is null");
 	return Math.toDegrees(Math.asin(arg1));
     };
     // ASINH
-    static final FunctionalOneArg<Double, Double> asinh = (engine, arg1) -> {
+    static final FunctionalOneArg<Double, Double> asinh = (_, arg1) -> {
 	if (arg1 == null) throw new ExecutionException("asinh() function's value is null");
 	return Util.asinh(arg1);
     };
     // ATAN
-    static final FunctionalOneArg<Double, Double> atan = (engine, arg1) -> {
+    static final FunctionalOneArg<Double, Double> atan = (_, arg1) -> {
 	if (arg1 == null) throw new ExecutionException("atan() function's value is null");
 	return Math.toDegrees(Math.atan(arg1));
     };
     // ATAN2
-    static final FunctionalTwoArg<Double, Double, Double> atan2 = (engine, arg1, arg2) -> {
+    static final FunctionalTwoArg<Double, Double, Double> atan2 = (_, arg1, arg2) -> {
 	if (arg1 == null) throw new ExecutionException("atan2() function's value is null");
 	return Math.toDegrees(Math.atan2(arg1, arg2));
     };
     // ATANH
-    static final FunctionalOneArg<Double, Double> atanh = (engine, arg1) -> {
+    static final FunctionalOneArg<Double, Double> atanh = (_, arg1) -> {
 	if (arg1 == null) throw new ExecutionException("atanh() function's value is null");
 	return Util.atanh(arg1);
     };
     // CEIL
-    static final FunctionalOneArg<Double, Double> ceil = (engine, arg1) -> {
+    static final FunctionalOneArg<Double, Double> ceil = (_, arg1) -> {
 	if (arg1 == null) throw new ExecutionException("ceil() function's value is null");
 	return Math.ceil(arg1);
     };
     // COS
-    static final FunctionalOneArg<Double, Double> cos = (engine, arg1) -> {
+    static final FunctionalOneArg<Double, Double> cos = (_, arg1) -> {
 	if (arg1 == null) throw new ExecutionException("cos() function's value is null");
 	return Math.cos(Math.toRadians(arg1));
     };
     // COSH
-    static final FunctionalOneArg<Double, Double> cosh = (engine, arg1) -> {
+    static final FunctionalOneArg<Double, Double> cosh = (_, arg1) -> {
 	if (arg1 == null) throw new ExecutionException("cosh() function's value is null");
 	return Math.cosh(arg1);
     };
     // E
-    static final FunctionalNoArg<Double> e = (engine) -> Math.E;
+    static final FunctionalNoArg<Double> e = (_) -> Math.E;
     // EXP
-    static final FunctionalOneArg<Double, Double> exp = (engine, arg1) -> {
+    static final FunctionalOneArg<Double, Double> exp = (_, arg1) -> {
 	if (arg1 == null) throw new ExecutionException("exp() function's value is null");
 	return Math.exp(arg1);
     };
     // FLOOR
-    static final FunctionalOneArg<Double, Double> floor = (engine, arg1) -> {
+    static final FunctionalOneArg<Double, Double> floor = (_, arg1) -> {
 	if (arg1 == null) throw new ExecutionException("floor() function's value is null");
 	return Math.floor(arg1);
     };
     // LOG
-    static final FunctionalOneArg<Double, Double> log = (engine, arg1) -> {
+    static final FunctionalOneArg<Double, Double> log = (_, arg1) -> {
 	if (arg1 == null) throw new ExecutionException("log() function's value is null");
 	return Math.log(arg1);
     };
     // LOG10
-    static final FunctionalOneArg<Double, Double> log10 = (engine, arg1) -> {
+    static final FunctionalOneArg<Double, Double> log10 = (_, arg1) -> {
 	if (arg1 == null) throw new ExecutionException("log10() function's value is null");
 	return Math.log10(arg1);
     };
     // MAX
-    static final FunctionalTwoArg<Double, Double, Double> max = (engine, arg1, arg2) -> {
+    static final FunctionalTwoArg<Double, Double, Double> max = (_, arg1, arg2) -> {
 	if (arg1 == null) throw new ExecutionException("max() function's value is null");
 	return Math.max(arg1, arg2);
     };
     // MIN
-    static final FunctionalTwoArg<Double, Double, Double> min = (engine, arg1, arg2) -> {
+    static final FunctionalTwoArg<Double, Double, Double> min = (_, arg1, arg2) -> {
 	if (arg1 == null) throw new ExecutionException("min() function's value is null");
 	return Math.min(arg1, arg2);
     };
     // PI
-    static final FunctionalNoArg<Double> pi = (engine) -> Math.PI;
+    static final FunctionalNoArg<Double> pi = (_) -> Math.PI;
     // RANDOM
-    static final FunctionalNoArg<Double> random = (engine) -> Math.random();
+    static final FunctionalNoArg<Double> random = (_) -> Math.random();
     // ROUND
-    static final FunctionalOneArg<Double, Double> round = (engine, arg1) -> {
+    static final FunctionalOneArg<Double, Double> round = (_, arg1) -> {
 	if (arg1 == null) throw new ExecutionException("round() function's value is null");
-	return (double)Util.roundToDouble(arg1);
+	return Util.roundToDouble(arg1);
     };
     // SIGN
-    static final FunctionalOneArg<Double, Double> sign = (engine, arg1) -> {
+    static final FunctionalOneArg<Double, Double> sign = (_, arg1) -> {
 	if (arg1 == null) throw new ExecutionException("sign() function's value is null");
 	return Util.sign(arg1);
     };
     // SIN
-    static final FunctionalOneArg<Double, Double> sin = (engine, arg1) -> {
+    static final FunctionalOneArg<Double, Double> sin = (_, arg1) -> {
 	if (arg1 == null) throw new ExecutionException("sin() function's value is null");
 	return Math.sin(Math.toRadians(arg1));
     };
     // SINH
-    static final FunctionalOneArg<Double, Double> sinh = (engine, arg1) -> {
+    static final FunctionalOneArg<Double, Double> sinh = (_, arg1) -> {
 	if (arg1 == null) throw new ExecutionException("sinh() function's value is null");
 	return Math.sinh(arg1);
     };
     // SQRT
-    static final FunctionalOneArg<Double, Double> sqrt = (engine, arg1) -> {
+    static final FunctionalOneArg<Double, Double> sqrt = (_, arg1) -> {
 	if (arg1 == null) throw new ExecutionException("sqrt() function's value is null");
 	return Math.sqrt(arg1);
     };
     // TAN
-    static final FunctionalOneArg<Double, Double> tan = (engine, arg1) -> {
+    static final FunctionalOneArg<Double, Double> tan = (_, arg1) -> {
 	if (arg1 == null) throw new ExecutionException("tan() function's value is null");
 	return Math.tan(Math.toRadians(arg1));
     };
     // TANH
-    static final FunctionalOneArg<Double, Double> tanh = (engine, arg1) -> {
+    static final FunctionalOneArg<Double, Double> tanh = (_, arg1) -> {
 	if (arg1 == null) throw new ExecutionException("tanh() function's value is null");
 	return Math.tanh(arg1);
     };

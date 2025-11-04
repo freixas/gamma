@@ -37,7 +37,7 @@ public final class StyleProperties
     // *
     // **********************************************************************
 
-    interface StylePropertyValueEnum
+    public interface StylePropertyValueEnum
     {
         /**
          * Gets the string name associated with an enum (which may not be

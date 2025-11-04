@@ -39,7 +39,7 @@ abstract public class Line extends CurveSegment implements ExecutionImmutable, D
     public enum AxisType implements ExecutionImmutable
     {
         X, T
-    };
+    }
 
     // **********************************************************************
     // *

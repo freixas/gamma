@@ -55,7 +55,7 @@ public class HyperbolicSegment extends CurveSegment implements ExecutionImmutabl
             throw new ProgrammingException("Hyperbolic Segment(): Acceleration is 0");
         }
         if (Util.fuzzyGT(min.t, max.t)) {
-            throw new ProgrammingException("Hypebolic Segment(): Min is greater than max");
+            throw new ProgrammingException("Hyperbolic Segment(): Min is greater than max");
         }
         this.a = a;
         this.min = min;
@@ -82,7 +82,7 @@ public class HyperbolicSegment extends CurveSegment implements ExecutionImmutabl
             throw new ProgrammingException("Hyperbolic Segment(): Acceleration is 0");
         }
         if (Util.fuzzyGT(minT, maxT)) {
-            throw new ProgrammingException("Hypebolic Segment(): Min time is greater than max time");
+            throw new ProgrammingException("Hyperbolic Segment(): Min time is greater than max time");
         }
         this.a = a;
         this.min = new WorldlineEndpoint(minT, curve);
@@ -96,6 +96,7 @@ public class HyperbolicSegment extends CurveSegment implements ExecutionImmutabl
      *
      * @param other The other segment to copy.
      */
+    @SuppressWarnings("unused")
     public HyperbolicSegment(HyperbolicSegment other)
     {
         this.a = other.a;
@@ -315,7 +316,7 @@ public class HyperbolicSegment extends CurveSegment implements ExecutionImmutabl
      *
      * @param x The x coordinate.
      * @param min The minimum t coordinate allowed (inclusive).
-     * @param max The maxiumum t coordinate allowed (inclusive).
+     * @param max The maximum t coordinate allowed (inclusive).
      * @param later Prefer the t value later in time.
      *
      * @return The t coordinate that lies between the min and max values.

@@ -59,7 +59,14 @@ public class SlideshowEngine
     EventHandler<ActionEvent> ssNextEventHandler;
     EventHandler<ActionEvent> ssPlayPauseEventHandler;
 
-    public SlideshowEngine(MainWindow window, Slideshow slideshow)
+    public static SlideshowEngine create(MainWindow window, Slideshow slideshow)
+    {
+        SlideshowEngine engine = new SlideshowEngine(window, slideshow);
+        window.setSlideshowEngine(engine);
+        return engine;
+    }
+
+    private SlideshowEngine(MainWindow window, Slideshow slideshow)
     {
         this.window = window;
         this.slideshow = slideshow;
@@ -67,7 +74,6 @@ public class SlideshowEngine
         this.lastSlideIndex = slideshow.size() - 1;
 
         this.curSlideIndex = -1;
-        window.setSlideshowEngine(this);
 
         this.timer = null;
         this.state = slideshow.isAutoPlay() ? State.PLAYING : State.PAUSED;
@@ -115,19 +121,19 @@ public class SlideshowEngine
         // *
         // ************************************************************
 
-        ssStartEventHandler = event -> firstSlide();
+        ssStartEventHandler = _ -> firstSlide();
         buttonSlideshowStart.addEventHandler(ActionEvent.ANY, ssStartEventHandler);
 
-        ssEndEventHandler = event -> lastSlide();
+        ssEndEventHandler = _ -> lastSlide();
         buttonSlideshowEnd.addEventHandler(ActionEvent.ANY, ssEndEventHandler);
 
-        ssPreviousEventHandler = event -> previousSlide();
+        ssPreviousEventHandler = _ -> previousSlide();
         buttonSlideshowPrevious.addEventHandler(ActionEvent.ANY, ssPreviousEventHandler);
 
-        ssNextEventHandler = event -> nextSlide();
+        ssNextEventHandler = _ -> nextSlide();
         buttonSlideshowNext.addEventHandler(ActionEvent.ANY, ssNextEventHandler);
 
-        ssPlayPauseEventHandler = event -> togglePlay();
+        ssPlayPauseEventHandler = _ -> togglePlay();
         buttonSlideshowPlayPause.addEventHandler(ActionEvent.ANY, ssPlayPauseEventHandler);
     }
 
@@ -230,7 +236,7 @@ public class SlideshowEngine
     }
 
     /**
-     * Change from play to pause or vice-versa.
+     * Change from play to pause or vice versa.
      */
     private void togglePlay()
     {

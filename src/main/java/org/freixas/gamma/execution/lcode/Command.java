@@ -24,33 +24,14 @@ import org.freixas.gamma.drawing.Context;
  *
  * @author Antonio Freixas
  */
-public class Command
+public record Command(Struct cmdStruct, StyleStruct styles, CommandExec cmdExec)
 {
-    private final Struct cmdStruct;
-    private final StyleStruct styles;
-    private final CommandExec cmdExec;
-
     public Command(Struct cmdStruct, StyleStruct styles, CommandExec cmdExec)
     {
         this.cmdStruct = cmdStruct;
         this.cmdStruct.finalizeValues();
         this.styles = styles;
         this.cmdExec = cmdExec;
-    }
-
-    public Struct getCmdStruct()
-    {
-        return cmdStruct;
-    }
-
-    public StyleStruct getStyles()
-    {
-        return styles;
-    }
-
-    public CommandExec getCmdExec()
-    {
-        return cmdExec;
     }
 
     public void execute(Context context)

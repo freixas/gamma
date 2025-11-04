@@ -33,8 +33,8 @@ public class SetStatement
     static public final double DEFAULT_PRINT_PRECISION = 12.0;
 
     private double units;
-    private int displayPrecision = Util.toInt(DEFAULT_DISPLAY_PRECISION);
-    private int printPrecision = Util.toInt(DEFAULT_PRINT_PRECISION);
+    private int displayPrecision;
+    private int printPrecision;
 
     public SetStatement()
     {
@@ -43,7 +43,9 @@ public class SetStatement
 
     public SetStatement(double units, double displayPrecision, double printPrecision)
     {
-        this.units = DEFAULT_UNITS;
+        this.units = units;
+        this.displayPrecision = Util.toInt(displayPrecision);
+        this.printPrecision = Util.toInt(printPrecision);
     }
 
     public void set(double units, double displayPrecision, double printPrecision)

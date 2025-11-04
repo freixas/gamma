@@ -65,7 +65,7 @@ public class PreferencesDialogController implements Initializable
 
         greetings.setSelected(PreferencesManager.getDisplayGreetingMessage());
 
-        ChangeListener<String> validateDir = (obj, oldText, text) -> {
+        ChangeListener<String> validateDir = (obj, _, text) -> {
             StringProperty prop = (StringProperty)obj;
             TextField field = (TextField)prop.getBean();
             File dir = new File(text);
@@ -80,7 +80,7 @@ public class PreferencesDialogController implements Initializable
         imagesDir.textProperty().addListener(validateDir);
         videosDir.textProperty().addListener(validateDir);
 
-        ChangeListener<String> validateFile = (obj, oldText, text) -> {
+        ChangeListener<String> validateFile = (obj, _, text) -> {
             StringProperty prop = (StringProperty)obj;
             TextField field = (TextField)prop.getBean();
             File dir = new File(text);
@@ -132,7 +132,8 @@ public class PreferencesDialogController implements Initializable
     @FXML
     private void selectStylesheetFile(ActionEvent event)
     {
-        selectFile(stylesheetName, "Stylesheet");
+        String type = "Stylesheet";
+        selectFile(stylesheetName, type);
     }
 
     private void selectDirectory(TextField field, String type)
@@ -197,7 +198,7 @@ public class PreferencesDialogController implements Initializable
         PreferencesManager.setDefaultVideosDirectory(videosDirName != null ? videosDirName : "");
 
         String name = stylesheetName.getText();
-        PreferencesManager.setDefaultStylesheet(name != null ? name : null);
+        PreferencesManager.setDefaultStylesheet(name);
 
         String cmd = editorCommand.getText();
         PreferencesManager.setEditorCommand(cmd != null && cmd.length() > 0? cmd : "");

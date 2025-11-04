@@ -51,21 +51,18 @@ public class dopplerVToWavelengthFunction extends ArgInfoFunction
             throw new ExecutionException("The dopplerVToWavelengthFunction() function's source wavelength value must be > 0");
         }
 
-        if (arg1 == null) {
-            throw new ExecutionException("The dopplerVToWavelengthFunction() function's second parameter is null");
-        }
-        else if (arg1 instanceof Double v) {
-            return Relativity.dopplerVToWavelength(wavelength, v);
-        }
-        else if (arg1 instanceof Observer observer) {
-            return Relativity.dopplerVToWavelength(wavelength, new Frame(observer).getV());
-        }
-        else if (arg1 instanceof Frame frame) {
-            return Relativity.dopplerVToWavelength(wavelength, frame.getV());
-        }
-        else {
-            throw new ExecutionException("dopplerVToWavelengthFunction() requires a velocity, observer, or frame as its second parameter");
-        }
+        return switch (arg1) {
+            case null ->
+                throw new ExecutionException("The dopplerVToWavelengthFunction() function's second parameter is null");
+            case Double v ->
+                Relativity.dopplerVToWavelength(wavelength, v);
+            case Observer observer ->
+                Relativity.dopplerVToWavelength(wavelength, new Frame(observer).getV());
+            case Frame frame ->
+                Relativity.dopplerVToWavelength(wavelength, frame.getV());
+            default ->
+                throw new ExecutionException("dopplerVToWavelengthFunction() requires a velocity, observer, or frame as its second parameter");
+        };
     }
 
     @Override

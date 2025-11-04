@@ -235,7 +235,7 @@ public class LineSegment extends CurveSegment implements ExecutionImmutable
 
                 if ((outcodeOut & 0x08) != 0) {
                     t = bounds.max.t;
-                    Double xOffset = slopeXT * (t - p1.t);
+                    double xOffset = slopeXT * (t - p1.t);
                     if (Double.isNaN(xOffset)) xOffset = 0.0;
                   x = p1.x + xOffset;
                 }
@@ -245,7 +245,7 @@ public class LineSegment extends CurveSegment implements ExecutionImmutable
 
                 else if ((outcodeOut & 0x04) != 0) {
                     t = bounds.min.t;
-                    Double xOffset = slopeXT * (t - p1.t);
+                    double xOffset = slopeXT * (t - p1.t);
                     if (Double.isNaN(xOffset)) xOffset = 0.0;
                     x = p1.x + xOffset;
                 }
@@ -255,7 +255,7 @@ public class LineSegment extends CurveSegment implements ExecutionImmutable
 
                 else if ((outcodeOut & 0x02) != 0) {
                     x = bounds.max.x;
-                    Double tOffset = slopeTX * (x - p1.x);
+                    double tOffset = slopeTX * (x - p1.x);
                     if (Double.isNaN(tOffset)) tOffset = 0.0;
                     t = p1.t + tOffset;
                 }
@@ -265,7 +265,7 @@ public class LineSegment extends CurveSegment implements ExecutionImmutable
 
                 else if ((outcodeOut & 0x01) != 0) {
                     x = bounds.min.x;
-                    Double tOffset = slopeTX * (x - p1.x);
+                    double tOffset = slopeTX * (x - p1.x);
                     if (Double.isNaN(tOffset)) tOffset = 0.0;
                     t = p1.t + tOffset;
                 }

@@ -17,7 +17,7 @@
 package org.freixas.gamma.value;
 
 /**
- * This interfaces is used for signaling that a given object is
+ * This interface is used for signaling that a given object is
  * mutable during execution; the user can change object's members from
  * the script.
  *
@@ -36,5 +36,5 @@ public interface ExecutionMutable
      *
      * @return The copied object.
      */
-    public Object createCopy();
+    Object createCopy();
 }

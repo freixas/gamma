@@ -21,7 +21,7 @@ import org.freixas.gamma.execution.HCodeEngine;
 import java.util.List;
 
 /**
- * An ArgInfoFunction is an Function which uses an ArgInfo structure to provide
+ * An ArgInfoFunction is a Function which uses an ArgInfo structure to provide
  * information about its parameters. This class must be sub-classed, with one
  * class per Function.
  * <p>

@@ -49,21 +49,18 @@ public class timeDilationFunction extends ArgInfoFunction
 
         if (duration < 0) throw new ExecutionException("The timeDilation() function's duration must be >= 0");
 
-        if (arg1 == null) {
-            throw new ExecutionException("The timeDilation() function's second parameter is null");
-        }
-        else if (arg1 instanceof Double v) {
-            return Relativity.timeDilation(duration, v);
-        }
-        else if (arg1 instanceof Observer observer) {
-            return Relativity.timeDilation(duration, new Frame(observer).getV());
-        }
-        else if (arg1 instanceof Frame frame) {
-            return Relativity.timeDilation(duration, frame.getV());
-        }
-        else {
-            throw new ExecutionException("timeDilation() requires a velocity, observer, or frame as its second parameter");
-        }
+        return switch (arg1) {
+            case null ->
+                throw new ExecutionException("The timeDilation() function's second parameter is null");
+            case Double v ->
+                Relativity.timeDilation(duration, v);
+            case Observer observer ->
+                Relativity.timeDilation(duration, new Frame(observer).getV());
+            case Frame frame ->
+                Relativity.timeDilation(duration, frame.getV());
+            default ->
+                throw new ExecutionException("timeDilation() requires a velocity, observer, or frame as its second parameter");
+        };
     }
 
     @Override

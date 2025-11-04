@@ -30,7 +30,6 @@ public class EventStruct extends Struct
     static Coordinate coord = new Coordinate(0.0, 0.0);
 
     public Coordinate location = coord;
-    public boolean locationSet = false;
     public String text = "";
     public double rotation = 0.0;
     public boolean frameRelativeRotation = false;
