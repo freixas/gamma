@@ -18,6 +18,8 @@ package org.freixas.gamma.execution;
 
 import org.freixas.gamma.parser.ParseException;
 
+import java.io.Serial;
+
 /**
  *
  * @author Antonio Freixas
@@ -25,6 +27,9 @@ import org.freixas.gamma.parser.ParseException;
 
 public class ExecutionException extends RuntimeException
 {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     public ExecutionException(String message)
     {
         super(message);
