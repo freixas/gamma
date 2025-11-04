@@ -22,6 +22,7 @@ import org.freixas.gamma.execution.HCodeEngine;
  *
  * @author Antonio Freixas
  */
+@SuppressWarnings("unused")
 @FunctionalInterface
 public interface FunctionalNoArgNoRet extends LambdaFunction
 {

@@ -24,7 +24,7 @@ import java.io.Serial;
  * Most exceptions eventually become GammaRuntimeExceptions. Most exceptions are either syntax errors or script
  * runtime errors. These get displayed in a nice dialog, where we try to show the user exactly where the error
  * occurred.
- *
+ * <p>
  * There are also possible programming problems, which have their own display.
  *
  * @author Antonio Freixas
@@ -69,6 +69,7 @@ public class GammaRuntimeException extends RuntimeException
      * relevant portion of the script to the user.
      * @param message The error message.
      */
+    @SuppressWarnings("unused")
     public GammaRuntimeException(Type type, TokenContext context, String message)
     {
         this(type, context, message, null);
@@ -82,6 +83,7 @@ public class GammaRuntimeException extends RuntimeException
      *                script to the user.
      * @param cause The exception which caused the problem.
      */
+    @SuppressWarnings("unused")
     public GammaRuntimeException(Type type, TokenContext context, Throwable cause)
     {
         this(type, context, cause != null ? cause.getLocalizedMessage() : null, cause);

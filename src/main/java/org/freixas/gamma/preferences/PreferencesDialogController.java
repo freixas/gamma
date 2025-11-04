@@ -159,6 +159,7 @@ public class PreferencesDialogController implements Initializable
         }
     }
 
+    @SuppressWarnings("ConstantValue")
     private void selectFile(TextField field, String type)
     {
         FileChooser chooser = new FileChooser();

@@ -32,6 +32,10 @@
         <gamma.maven.version>3.9.11</gamma.maven.version>
         <gamma.git.version>2.51.1</gamma.git.version>
 
+        <!-- Used to suppress errors on dynamically injected properties -->
+        <os.detected.classifier>placeholder</os.detected.classifier>
+        <os.detected.name>placeholder</os.detected.name>
+
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <maven.compiler.source>25</maven.compiler.source>

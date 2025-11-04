@@ -146,6 +146,7 @@ public abstract class Struct
      * @param min The allowed minimum (Double.NEGATIVE_INFINITY is allowed).
      * @param max The allowed maximum (Double.POSITIVE_INFINITY is allowed).
      */
+    @SuppressWarnings("unused")
     protected void rangeCheck(String propertyName, int value, int min, int max)
     {
         if (value < min || value > max) {
@@ -162,6 +163,7 @@ public abstract class Struct
      * @param min The allowed minimum (Double.NEGATIVE_INFINITY is allowed).
      * @param max The allowed maximum (Double.POSITIVE_INFINITY is allowed).
      */
+    @SuppressWarnings("unused")
     protected void rangeCheck(String propertyName, double value, double min, double max)
     {
         if (value < min || value > max) {
@@ -232,10 +234,6 @@ public abstract class Struct
 
             HashMap<String, Field> fieldMap = allFields.get(cmdStructName);
             HashMap<String, Method> methodMap = allMethods.get(cmdStructName);
-
-            // Get all the style struct's fields
-
-            HashMap<String, Field> styleFieldMap = allFields.get("StyleStruct");
 
             // Go through the property list
 
