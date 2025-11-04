@@ -132,7 +132,8 @@ public class PreferencesDialogController implements Initializable
     @FXML
     private void selectStylesheetFile(ActionEvent event)
     {
-        selectFile(stylesheetName, "Stylesheet");
+        String type = "Stylesheet";
+        selectFile(stylesheetName, type);
     }
 
     private void selectDirectory(TextField field, String type)
@@ -161,8 +162,6 @@ public class PreferencesDialogController implements Initializable
 
     private void selectFile(TextField field, String type)
     {
-        assert type != null;    // To remove IntelliJ warning about type variable
-
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Choose " + type + " File");
 
