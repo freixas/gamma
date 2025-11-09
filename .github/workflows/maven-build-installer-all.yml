@@ -10,31 +10,22 @@ jobs:
     strategy:
       matrix:
         include:
-
-          # Ubuntu builds
-          - os: ubuntu-20.04
-            arch: amd64
-            type: deb
           - os: ubuntu-22.04
-            arch: arm64
+            arch: x64
             type: deb
           - os: ubuntu-24.04
-            arch: amd64
+            arch: x64
             type: deb
-
-          # macOS builds
-          - os: macos-12
-            arch: amd64
-            type: dmg
-          - os: macos-13
+          - os: macos-14
             arch: arm64
             type: dmg
-          - os: macos-14
-            arch: amd64
+          - os: macos-15
+            arch: arm64
             type: dmg
 
     runs-on: ${{ matrix.os }}
-    name: Build ${{ matrix.type }} for ${{ matrix.os }} (${{ matrix.arch }})
+    name: Build ${{ matrix.os }} (${{ matrix.arch }})
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -52,8 +43,10 @@ jobs:
       - name: Build with Maven
         run: mvn -B clean package
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
           name: Asset ${{ matrix.type }}-${{ matrix.os }}-${{ matrix.arch }}
           path: ./target/*.${{ matrix.type }}
           if-no-files-found: error
+
