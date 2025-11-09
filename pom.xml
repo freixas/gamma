@@ -536,6 +536,7 @@
                                     <includes>
                                         <include>maven-build-installer-macos.yml</include>
                                         <include>maven-build-installer-unix.yml</include>
+                                        <include>maven-build-installer-all.yml</include>
                                     </includes>
                                 </resource>
                             </resources>
