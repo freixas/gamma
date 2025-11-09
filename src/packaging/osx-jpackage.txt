@@ -4,7 +4,7 @@
 --description "${project.description}"
 --icon "${project.basedir}/src/main/icons/gamma.icns"
 --name ${app.name}
---java-options "--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow"
+--java-options "--enable-native-access=ALL-UNNAMED --enable-native-access=javafx.graphics --sun-misc-unsafe-memory-access=allow "
 --dest "${project.build.directory}"
 --temp "${project.build.directory}/installer-work"
 --main-class ${main-class}
