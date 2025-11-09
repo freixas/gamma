@@ -27,7 +27,7 @@
     <properties>
         <gamma.version>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}</gamma.version>
         <gamma.fullversion>${project.version}</gamma.fullversion>
-        <gamma.release.tag>v${project.version}-RC1</gamma.release.tag>
+        <gamma.release.tag>v${project.version}-RC2</gamma.release.tag>
         <gamma.java.version>25</gamma.java.version>
         <gamma.maven.version>3.9.11</gamma.maven.version>
         <gamma.git.version>2.51.1</gamma.git.version>
@@ -592,8 +592,10 @@
                 <artifactId>jtoolprovider-plugin</artifactId>
                 <version>1.0.34</version>
                 <executions>
+
                     <!-- This command runs jlink, generating a custom JVM by combining the JavaFX modules bundled in
                     this project with the JDK modules. -->
+
                     <execution>
                         <id>jlink</id>
                         <phase>package</phase>
@@ -603,6 +605,7 @@
                         <configuration>
                             <toolName>jlink</toolName>
                             <removeDirectories>${project.build.directory}/jvm-image/</removeDirectories>
+                            <!--suppress UnresolvedMavenProperty -->
                             <modulePath>
                                 ${project.basedir}/javafx-${os.detected.classifier}/javafx-jmods-${javafx.version}/
                             </modulePath>
@@ -617,12 +620,14 @@
                             </args>
                         </configuration>
                     </execution>
+
                     <!-- The command that actually generates the installer. The options for each platform
                     are found the /src/packaging directory. These files are copied into the target directory by
                     the Maven resources plugin, which does the filtering to replace the original values with
                     the actual Maven properties.
                     https://github.com/wiverson/jtoolprovider-plugin/blob/main/java-tool-doc.md
                     -->
+
                     <execution>
                         <id>jpackage</id>
                         <phase>package</phase>
@@ -631,14 +636,22 @@
                         </goals>
                         <configuration>
                             <toolName>jpackage</toolName>
-                            <toolName>jpackage</toolName>
                             <writeOutputToLog>true</writeOutputToLog>
                             <writeErrorsToLog>true</writeErrorsToLog>
                             <failOnError>true</failOnError>
                             <removeDirectories>${project.build.directory}/installer-work</removeDirectories>
-                            <args>@${project.build.directory}/packaging/${os.detected.name}-jpackage.txt</args>
+                            <args>
+                                <arg>--name</arg>
+                                <!--suppress UnresolvedMavenProperty -->
+                                <arg>gamma-${project.version}-${os.detected.name}-${os.detected.arch}</arg>
+                                <arg>--dest</arg>
+                                <arg>${project.build.directory}</arg>
+                                <!--suppress UnresolvedMavenProperty -->
+                                <arg>@${project.build.directory}/packaging/${os.detected.name}-jpackage.txt</arg>
+                            </args>
                         </configuration>
                     </execution>
+
                 </executions>
             </plugin>
 
