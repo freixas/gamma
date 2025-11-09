@@ -76,141 +76,107 @@ scripts (Gamma programs) under **Help / Sample Scripts**.
 
 ## Download and install
 
-There are currently three installers:
+This section is being worked on. I may produce more than these three installers, and their names will
+change:
 
 - An [MSI installer](https://github.com/freixas/gamma/releases/download/@gamma.fullversion@/gamma-@gamma.fullversion@.msi) for x64-based Windows 11 systems (likely to work on x64 Windows 7-10).
 - A [DEB package](https://github.com/freixas/gamma/releases/download/@gamma.fullversion@/gamma_@gamma.fullversion@_amd64.deb) for x64 Debian-based Linux distributions
 - A [DMG package](https://github.com/freixas/gamma/releases/download/@gamma.fullversion@/gamma-@gamma.fullversion@.dmg) for x64-based macOS 11 systems (might work on macOS 10.5)
 
-For other systems (x32-based systems, Macs with M1, other Linux distributions), 
-there is a universal [tar.gz file](https://github.com/freixas/gamma/releases/download/@gamma.fullversion@/gamma-@gamma.fullversion@.tar.gz) which should work as long as you can find
-suitable Java and JavaFX packages. 
+There is also a universal [tar.gz file](https://github.com/freixas/gamma/releases/download/@gamma.fullversion@/gamma-@gamma.fullversion@.tar.gz) 
+which should work on any system with Java and JavaFX.
+
+Currently, the Windows installer has received the most testing, the Unix installers have received some,
+and the macOS installers have received none. 
 
 ### Installation Instructions
 
 <details><summary>Installing on Windows</summary>
 
-- Download the file.
-- In Explorer, double-click on the MSI file. Follow the prompts.
+- Download the Windows installer.
+- In Explorer, double-click on the MSI file. Follow the usual prompts.
 
 </details> 
 
 <details><summary>Installing on Linux</summary>
 
-- Download the file.
-- In the Linux file manager, double-click on the DEB file. Follow the prompts.
-- You need at least Ubuntu 24 (or other recent Debian-supporting Linux distribution).
+- Download the Debian installer.
+- In the Linux file manager, double-click on the DEB file. Follow the usual prompts.
 
 Alternately, from a terminal window, type:
 
 `sudo apt install <path-to-DEB-file>`
 
+I have had some problems running the installer by double-clicking on the DEB file on fresh installation 
+of Ubuntu-24. Also, the Snap version of Firefox can't access the help files in /opt/gamma/help (non-Snap
+versions of browsers work).
+
 </details>
 
 <details><summary>Installing on the Mac</summary>
 
-- Download the file.
+I don't currently have a Mac to test on, but I did have brief access to a macOS "Big Sur", and was able to
+install and run Gamma there.
+
+- Download the Mac installer.
 - In Finder, double-click on the DMG file. Follow the prompts and move the gamma icon into the Applications folder.
 
-**IMPORTANT:** Because I am not willing to pay Apple $99/year to sign and notarize my open-source
+Because I am not willing to pay Apple $99/year to sign and notarize my open-source
 software, the application will appear to install properly, but will complain about
 being "damaged" and won't run.
 
-To run the application, you will need to bring up a terminal window and enter
-these commands:
+Bring up a terminal window and enter these commands:
 
 ```
 cd /Applications
 sudo xattr -r -d com.apple.quarantine gamma.app
 ```
-If anyone can volunteer to build better macOS packages, let me know.
+These commands might be specific to "Big Sur". If anyone manages to install Gamma on other macOS versions,
+let me know what worked.
 
 </details>
 
 <details><summary>Installing the universal tar.gz file</summary>
+&nbsp;
+<div style="margin-left: 20px;">
+<details><summary>Install Java and JavaFX</summary>
 
 The universal tar.gz file will allow Gamma to run on any system that supports
-Java, but it requires that you install some Java packages yourself. To install,
-you will need to know how to:
+Java, but it requires installed versions of Java and JavaFX. If you don't
+have Java or JavaFX version @project.java.version@ (or later) on your system,
+you will need to install these packages.
 
-- Enter DOS (Windows) or shell (Mac/Linux) commands.
-- Define a persistent environment variable.
-- Unpack a tar.gz file.
-- Add a path to the PATH environment variable.
+On the web, you can find detailed instructions (and videos) for 
+installing Java and JavaFX. Install version @project.java.version@ or
+later of these two packages (the version numbers of the two should match).
 
-<details><summary>Install Java</summary>
+Java and JavaFX are available from various vendors. All of these should work, 
+but I used these versions:
 
-Download and install Java JDK @project.java.version@ (or later) from 
+- Java: https://www.oracle.com/java/technologies/downloads
+- JavaFX: https://gluonhq.com/products/javafx/
 
-https://www.oracle.com/java/technologies/downloads
-
-This is also called "Java SE Development Kit @gamma.java.version@". The page includes a link
-to installation instructions in the section on "Release Information".
-
-There are also open source versions at https://jdk.java.net/@gamma.java.version@.
-These versions don't include installers or even installation instructions.
-
-To verify that Java is installed properly, type: 
-
-`java --version` 
-
-in a cmd.exe or terminal window. The output should include something like: 
-
-`java version "@gamma.java.version@"`.
-
-Make sure that the JAVA_HOME environment variable is set. Using a command or 
-terminal window, enter:
-
-  `echo %JAVA_HOME%` (Windows)
-
-  `echo $JAVA_HOME` (Mac/Linux)
-
-If this does not display path, set JAVA_HOME to the path where Java
-was installed. On Windows, locate the top of the Java installation (usually
-something like C:\Program Files\Java\@gamma.java.version@). Then, in a terminal window,
-type:
-
-`setx JAVA_HOME "C:\Program Files\Java\@gamma.java.version@"`
-
-On Mac/Linux, use the "which" command in a terminal window to find the java
-executable:
-
-`which java`
-
-Remove "/bin" from the path. This should be your JAVA_HOME value. You will need
-to set it in whatever profile file you are using: ~/.bash_profile, ~/.profile,
-or others. In this file, enter:
-
-`JAVA_HOME="<path>"`
-
-You may have to log out/in to make this effective.
-</details>
-
-<details><summary>Install JavaFX</summary>
-
-Download and install JavaFX @gamma.java.version@ [LTS] (or later) from
-
-https://gluonhq.com/products/javafx/
-
-In the Downloads section, select a version matching the Java SDK you installed, 
-and select your OS and architecture. For Type, select "SDK".
-
-The download should be a ZIP file. Inside the ZIP file, you should find a folder
-called javafx-sdk-@gamma.java.version@. Extract the folder and place it anywhere.
-folder anywhere.
-
-You will need to create a JAVAFX_HOME environment variable. The JAVAFX_HOME path
-should point to the top of the unpacked ZIP file.
 </details>
 
 <details><summary>Install Gamma</summary>
 
 Download gamma-@gamma.version@.tar.gz from the GitHub release page. Extract the included
-gamma-1.0.2 folder to any location. If you unpacked the file into <some path>, 
+gamma-@gamma.version@ folder to any location. If you unpacked the file into <some path>, 
 then add `<some path>` to your PATH.
+
+At the top level of the Gamma folder, you will find two files:
+
+- `gamma`
+- `gamma.bat`
+
+The first is for running Gamma on Linux/macOS, the second is for running Gamma 
+on Windows.You will need to edit the file using any text editor so that Gamma 
+can locate the appropriate Java and JavaFX packages. If these environment 
+variables are set globally, you can skip this step.
+
 </details>
 
-<details><summary>Running Gamma</summary>
+<details><summary>Run Gamma</summary>
 
 To run Gamma from a terminal window, enter:
 
@@ -220,6 +186,7 @@ To run Gamma from a terminal window, enter:
 You may be able to link the command to a desktop icon to make it more
 convenient to run. You may still see a brief appearance of a terminal window.
 </details>
+</div>
 </details>
 
 ## Building
