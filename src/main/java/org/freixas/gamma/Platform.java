@@ -22,8 +22,6 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 
-import static java.lang.IO.println;
-
 /**
  * This class handles platform-dependent tasks.
  */
