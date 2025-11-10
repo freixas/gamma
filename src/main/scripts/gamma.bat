@@ -18,29 +18,31 @@ REM along with this program.  If not, see <http://www.gnu.org/licenses/>.
 REM Set the following two variables
 REM You must set the following two environment variables:
 REM Uncomment the following line and set JAVA_HOME to the top folder containing the JAVA SDK
-REM set JAVA_HOME="replace-with-folder-path"
+REM set JAVA_HOME=replace-with-folder-path
 REM Uncomment the following line and set JAVAFX_HOME to the top folder containing JAVAFX
-REM set JAVAFX_HOME="replace-with-folder-path"
+REM set JAVAFX_HOME=replace-with-folder-path
 
 set SCRIPT_DIR=%~dp0
 set GAMMA_HOME=%SCRIPT_DIR%app
 
 if not defined JAVA_HOME (
-  echo "JAVA_HOME is not defined!"
-  pause
+  echo ERROR: JAVA_HOME is not defined!
+  echo Edit %SCRIPT_DIR%\gamma.bat to set JAVA_HOME
   goto :eof
 )
+REM Remove any trailing backslash
 if "%JAVA_HOME:~-1%"=="\" SET JAVA_HOME=%JAVA_HOME:~0,-1%
 
 if not defined JAVAFX_HOME (
-  echo "JAVAFX_HOME is not defined!"
-  pause
+  echo ERROR: JAVAFX_HOME is not defined!
+  echo Edit %SCRIPT_DIR%\gamma.bat to set JAVAFX_HOME
   goto :eof
 )
+REM Remove any trailing backslash
 if "%JAVAFX_HOME:~-1%"=="\" SET JAVAFX_HOME=%JAVAFX_HOME:~0,-1%
 
 start "" /B "%JAVA_HOME%\bin\java.exe" ^
-  -p "%JAVAFX_HOME%\lib" --add-modules=javafx.controls,javafx.fxml,javafx.swing,javafx.web --enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow^
+  -p "%JAVAFX_HOME%\lib" --add-modules=javafx.controls,javafx.fxml,javafx.swing,javafx.web --enable-native-access=ALL-UNNAMED --enable-native-access=javafx.graphics --sun-misc-unsafe-memory-access=allow^
   -cp "%GAMMA_HOME%\gamma.jar;%GAMMA_HOME%\commons-cli.jar" ^
   org.freixas.gamma.Gamma ^
   %*
