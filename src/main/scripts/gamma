@@ -32,7 +32,7 @@ APPDIR="${SCRIPT_DIR}/app"
 if [ -z "${JAVA_HOME+x}" ];
 then
   echo "JAVA_HOME is not defined!"
-  read -n1 -r -p "Edit the 'gamma' script to set it. Press any key to exit..." key
+  echo "Edit ${SCRIPT_DIR}/gamma to set it."
   exit
 fi
 JAVA_HOME="${JAVA_HOME%/}"
@@ -41,7 +41,7 @@ JAVA_HOME="${JAVA_HOME%\\}"
 if [ -z "${JAVAFX_HOME+x}" ];
 then
   echo "JAVAFX_HOME is not defined!"
-  read -n1 -r -p "Edit the 'gamma' script to set it. Press any key to exit..." key
+  echo "Edit ${SCRIPT_DIR}/gamma to set it."
   exit
 fi
 JAVAFX_HOME="${JAVAFX_HOME%\lib}"
@@ -54,8 +54,9 @@ shift 1
   -p "$JAVAFX_HOME/lib" \
   --add-modules=javafx.controls,javafx.fxml,javafx.swing,javafx.web \
   --enable-native-access=ALL-UNNAMED \
+  --enable-native-access=javafx.graphics \
   --sun-misc-unsafe-memory-access=allow \
-  -cp "$APPDIR/gamma.jar;$APPDIR/commons-cli.jar" \
+  -cp "$APPDIR/gamma.jar:$APPDIR/commons-cli.jar" \
   org.freixas.gamma.Gamma \
   "$@" &
 
