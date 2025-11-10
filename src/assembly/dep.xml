@@ -41,9 +41,6 @@
         <fileSet>
             <directory>${project.basedir}/src/main/scripts</directory>
             <outputDirectory>/</outputDirectory>
-            <includes>
-                <include>gamma*</include>
-            </includes>
             <fileMode>0755</fileMode>
             <directoryMode>0755</directoryMode>
         </fileSet>
@@ -51,18 +48,11 @@
         <fileSet>
             <directory>${project.basedir}/src/main/sample_scripts</directory>
             <outputDirectory>/app/sample_scripts</outputDirectory>
-            <includes>
-                <include>*.txt</include>
-                <include>*.css</include>
-            </includes>
         </fileSet>
 
         <fileSet>
             <directory>${project.basedir}/src/main/icons</directory>
             <outputDirectory>/app/icons</outputDirectory>
-            <includes>
-                <include>gamma*</include>
-            </includes>
         </fileSet>
 
         <fileSet>
