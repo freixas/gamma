@@ -143,11 +143,11 @@ let me know what worked.
 
 The universal tar.gz file will allow Gamma to run on any system that supports
 Java, but it requires installed versions of Java and JavaFX. If you don't
-have Java or JavaFX version @project.java.version@ (or later) on your system,
+have Java or JavaFX version @gamma.java.version@ (or later) on your system,
 you will need to install these packages.
 
 On the web, you can find detailed instructions (and videos) for 
-installing Java and JavaFX. Install version @project.java.version@ or
+installing Java and JavaFX. Install version @gamma.java.version@ or
 later of these two packages (the version numbers of the two should match).
 
 Java and JavaFX are available from various vendors. All of these should work, 
