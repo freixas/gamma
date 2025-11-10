@@ -22,6 +22,8 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 
+import static java.lang.IO.println;
+
 /**
  * This class handles platform-dependent tasks.
  */
@@ -40,9 +42,9 @@ public class Platform
      */
     static public void browseHelp(String name, MainWindow mainWindow)
     {
+        File helpFile = new File(Gamma.HELP_LOCATION.getAbsolutePath() + "/" + name);
         try {
-            File helpFile = new File(Gamma.HELP_LOCATION.getAbsolutePath() + "/" + name);
-            if (Desktop.isDesktopSupported() && !IS_LINUX) {
+            if (Desktop.isDesktopSupported() && !System.getenv().containsKey("WSL_DISTRO_NAME")) {
                 Desktop desktop = Desktop.getDesktop();
                 if (desktop.isSupported(Desktop.Action.BROWSE)) {
                     Desktop.getDesktop().browse(helpFile.toURI());
@@ -50,10 +52,12 @@ public class Platform
                 }
             }
 
-            // We were unable to use Desktop, try open
+            // If Desktop is not supported or we're running Linux on Windows
+            // using WSL, try using open
 
             open(helpFile.toString());
         }
+
         catch (Exception e) {
             mainWindow.showTextAreaAlert(
                 Alert.AlertType.ERROR, "Help Error", "Help Error",
@@ -63,7 +67,6 @@ public class Platform
                     " and open it in your browser.",
                 true);
         }
-
     }
 
     /**
@@ -75,17 +78,22 @@ public class Platform
      */
     static public void open(String name) throws IOException
     {
-        String[] openCommand = { };
+        ProcessBuilder builder = null;
         if (IS_WINDOWS) {
-            openCommand = new String[] { "start", "\"\",", "/b", name};
-        }
+            builder = new ProcessBuilder("start", "\"\"", "/b", name);
+         }
         else if (IS_MAC) {
-            openCommand = new String[] { "open", name};
+            builder = new ProcessBuilder("open", name);
         }
         else if (IS_LINUX) {
-            openCommand = new String[] { "xdg-open", name};
+            builder = new ProcessBuilder("xdg-open", name);
         }
-        Runtime.getRuntime().exec(openCommand);
+        if (builder != null) {
+            builder
+                .redirectOutput(ProcessBuilder.Redirect.to(new File("/dev/null")))
+                .redirectError(ProcessBuilder.Redirect.to(new File("/dev/null")))
+                .start();
+        }
     }
 
     /**
