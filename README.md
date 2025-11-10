@@ -76,12 +76,11 @@ scripts (Gamma programs) under **Help / Sample Scripts**.
 
 ## Download and install
 
-This section is being worked on. I may produce more than these three installers, and their names will
-change:
-
 - An [MSI installer](https://github.com/freixas/gamma/releases/download/1.0.3/gamma-1.0.3.msi) for x64-based Windows 11 systems (likely to work on x64 Windows 7-10).
-- A [DEB package](https://github.com/freixas/gamma/releases/download/1.0.3/gamma_1.0.3_amd64.deb) for x64 Debian-based Linux distributions
-- A [DMG package](https://github.com/freixas/gamma/releases/download/1.0.3/gamma-1.0.3.dmg) for x64-based macOS 11 systems (might work on macOS 10.5)
+- A [DEB package](https://github.com/freixas/gamma/releases/download/1.0.3/gamma_1.0.3-ubuntu-22.04-x64.deb) for x64 Debian-based Linux distributions
+- A [DEB package](https://github.com/freixas/gamma/releases/download/1.0.3/gamma_1.0.3-ubuntu-24.04-x64.deb) for x64 Debian-based Linux distributions
+- A [DMG package](https://github.com/freixas/gamma/releases/download/1.0.3/gamma-1.0.3-macos-14-arm64.dmg) for arm64-based macOS 14 systems
+- A [DMG package](https://github.com/freixas/gamma/releases/download/1.0.3/gamma-1.0.3-macos-15-arm64.dmg) for arm64-based macOS 15 systems
 
 There is also a universal [tar.gz file](https://github.com/freixas/gamma/releases/download/1.0.3/gamma-1.0.3.tar.gz) 
 which should work on any system with Java and JavaFX.
@@ -131,7 +130,7 @@ Bring up a terminal window and enter these commands:
 cd /Applications
 sudo xattr -r -d com.apple.quarantine gamma.app
 ```
-These commands might be specific to "Big Sur". If anyone manages to install Gamma on other macOS versions,
+These commands might be specific to "Big Sur". If anyone manages to install Gamma on more recent macOS versions,
 let me know what worked.
 
 </details>
@@ -143,15 +142,15 @@ let me know what worked.
 
 The universal tar.gz file will allow Gamma to run on any system that supports
 Java, but it requires installed versions of Java and JavaFX. If you don't
-have Java or JavaFX version @project.java.version@ (or later) on your system,
+have Java or JavaFX version 25 (or later) on your system,
 you will need to install these packages.
 
 On the web, you can find detailed instructions (and videos) for 
-installing Java and JavaFX. Install version @project.java.version@ or
+installing Java and JavaFX. Install version 25 or
 later of these two packages (the version numbers of the two should match).
 
 Java and JavaFX are available from various vendors. All of these should work, 
-but I used these versions:
+but I used versions from:
 
 - Java: https://www.oracle.com/java/technologies/downloads
 - JavaFX: https://gluonhq.com/products/javafx/
@@ -170,7 +169,7 @@ At the top level of the Gamma folder, you will find two files:
 - `gamma.bat`
 
 The first is for running Gamma on Linux/macOS, the second is for running Gamma 
-on Windows.You will need to edit the file using any text editor so that Gamma 
+on Windows. You will need to edit the file using any text editor so that Gamma 
 can locate the appropriate Java and JavaFX packages. If these environment 
 variables are set globally, you can skip this step.
 
