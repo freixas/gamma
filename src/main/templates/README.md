@@ -76,13 +76,13 @@ scripts (Gamma programs) under **Help / Sample Scripts**.
 
 ## Download and install
 
-- An [MSI installer](https://github.com/freixas/gamma/releases/download/@gamma.fullversion@/gamma-@gamma.fullversion@.msi) for x64-based Windows 11 systems (likely to work on x64 Windows 7-10).
-- A [DEB package](https://github.com/freixas/gamma/releases/download/@gamma.fullversion@/gamma_@gamma.fullversion@-ubuntu-22.04-x64.deb) for x64 Debian-based Linux distributions
-- A [DEB package](https://github.com/freixas/gamma/releases/download/@gamma.fullversion@/gamma_@gamma.fullversion@-ubuntu-24.04-x64.deb) for x64 Debian-based Linux distributions
-- A [DMG package](https://github.com/freixas/gamma/releases/download/@gamma.fullversion@/gamma-@gamma.fullversion@-macos-14-arm64.dmg) for arm64-based macOS 14 systems
-- A [DMG package](https://github.com/freixas/gamma/releases/download/@gamma.fullversion@/gamma-@gamma.fullversion@-macos-15-arm64.dmg) for arm64-based macOS 15 systems
+- An [MSI installer](https://github.com/freixas/gamma/releases/download/v@gamma.fullversion@/gamma-@gamma.fullversion@.msi) for x64-based Windows 11 systems (likely to work on x64 Windows 7-10).
+- A [DEB package](https://github.com/freixas/gamma/releases/download/v@gamma.fullversion@/gamma-@gamma.fullversion@-ubuntu-22.04-x64.deb) for x64 Debian-based Linux distributions
+- A [DEB package](https://github.com/freixas/gamma/releases/download/v@gamma.fullversion@/gamma-@gamma.fullversion@-ubuntu-24.04-x64.deb) for x64 Debian-based Linux distributions
+- A [DMG package](https://github.com/freixas/gamma/releases/download/v@gamma.fullversion@/gamma-@gamma.fullversion@-macos-14-arm64.dmg) for arm64-based macOS 14 systems
+- A [DMG package](https://github.com/freixas/gamma/releases/download/v@gamma.fullversion@/gamma-@gamma.fullversion@-macos-15-arm64.dmg) for arm64-based macOS 15 systems
 
-There is also a universal [tar.gz file](https://github.com/freixas/gamma/releases/download/@gamma.fullversion@/gamma-@gamma.fullversion@.tar.gz) 
+There is also a universal [tar.gz file](https://github.com/freixas/gamma/releases/download/v@gamma.fullversion@/gamma-@gamma.fullversion@.tar.gz) 
 which should work on any system with Java and JavaFX.
 
 Currently, the Windows installer has received the most testing, the Unix installers have received some,
@@ -179,8 +179,8 @@ variables are set globally, you can skip this step.
 
 To run Gamma from a terminal window, enter:
 
-`gamma.bat` (Windows)
-`gamma` (Mac/Linux)
+- `gamma.bat` (Windows)
+- `gamma` (Mac/Linux)
 
 You may be able to link the command to a desktop icon to make it more
 convenient to run. You may still see a brief appearance of a terminal window.
@@ -197,12 +197,10 @@ To build the application from source, you will need to get and install:
 - Git, version @gamma.git.version@ or later
 - For Windows, [the latest WiX toolset](https://wixtoolset.org/releases/).
 
-Using git, clone the branch or tag you are interested in:
+Using git, clone the branch or tag you are interested in. The latest branch is
+the highest numbered one in the form v*n.m.x*.
 
-git clone --single-branch --branch <branchname> https://github.com/freixas/gamma
-
-- The latest branch is the highest numbered on in the form _n_._m_.x.
-- To build version n.m, look for the tag _n_._m_._b_. If there are multiple tags, the one with the largest _b_ value is the latest.
+`git clone --single-branch --branch <branchname> https://github.com/freixas/gamma`
 
 In the top level folder, type `mvn clean package`
 
