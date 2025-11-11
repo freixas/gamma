@@ -133,7 +133,9 @@ public final class Util
 
     /**
      * Get the angle of a line segment (from +180 to -180). The line segment
-     * could potentially have infinite endpoints.
+     * could potentially have infinite endpoints. The angle should be dependent
+     * on the order of the endpoints. (0, 0) to (-10, -10) is -45 degrees, but
+     * (10, 10) to (0, 0) is 135 degrees.
      * <p>
      * Java’s Math.atan2() already copes with most infinities, but there are a
      * few edge cases:
@@ -180,11 +182,7 @@ public final class Util
 
         // Fall back to atan2 which handles infinities correctly
 
-        double angle = Math.toDegrees(Math.atan2(deltaT, deltaX));
-
-        if (deltaX > 0.0) return angle;
-        if (angle <= 0.0) return 180.0 + angle;
-        return angle - 180.0;
+        return Math.toDegrees(Math.atan2(deltaT, deltaX));
     }
 
     static public double asinh(double x)
