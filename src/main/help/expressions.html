@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
     <head>
         <meta charset="utf-8" />
         <link rel="stylesheet" href="styles/help.css" type="text/css" />
@@ -56,7 +56,7 @@
                 <p>A <span class="definition">literal</span> is an entity whose value is expressed in the characters that represent it. For example, <span class="code">24</span> is the literal representation of the value 24, <span class="code">&quot;abc&quot;</span> is the literal representation of the character string 123, and <span class="code">[observer velocity 0.5]</span> is the literal representation of an observer with a specific worldline.</p>
                 <p>Literal values are covered in the section on <a href="values.html">values</a>.</p>
                 <h1><a id="variables"></a>Variables</h1>
-                <p>Variables are named entities that can be thought of as an address to a value. A value can be stored or fetched using the variable's name. Variables receive values through <a href="statements.html#assignment-statements">assignment statements</a> and they can be used in expressions anywhere that a literal is allowed.</p>
+                <p>Variables are named entities that can be thought of as an address to a value. A value can be stored or fetched using the variable's name. Variables receive values through <a href="statements.html#assignment-statements">assignment statements</a>, and they can be used in expressions anywhere that a literal is allowed.</p>
                 <p>A variable starts with an alphabetic character. This character can be followed by any number of letters, digits, or underscores.</p>
                 <p>Variables are created when they are first assigned a value. The type of variable is the same as the type of the value assigned to it. This type could change in a future assignment.</p>
                 <h2><a id="static-variables"></a>Static Variables</h2>
@@ -324,7 +324,7 @@
                     <tbody>
                         <tr>
                             <td>gamma( <span class="non-terminal">frame</span> )</td>
-                            <td>The gamma value for the given frame. The <span class="non-terminal">frame</span> arguement can also be a <span class="non-terminal">float</span> (velocity) or <span class="non-terminal">observer</span>.</td>
+                            <td>The gamma value for the given frame. The <span class="non-terminal">frame</span> argument can also be a <span class="non-terminal">float</span> (velocity) or <span class="non-terminal">observer</span>.</td>
                         </tr>
                         <tr>
                             <td>gammaToV( <span class="non-terminal">float</span> )</td>
@@ -332,11 +332,11 @@
                         </tr>
                         <tr>
                           <td>lengthContraction( float , frame )</td>
-                          <td>The first value is a length as measured in the frame given as the second argument. The <span class="non-terminal">frame</span> arguement can also be a <span class="non-terminal">float</span> (velocity) or <span class="non-terminal">observer</span>. The result is the contracted length measured in the rest frame.</td>
+                          <td>The first value is a length as measured in the frame given as the second argument. The <span class="non-terminal">frame</span> argument can also be a <span class="non-terminal">float</span> (velocity) or <span class="non-terminal">observer</span>. The result is the contracted length measured in the rest frame.</td>
                         </tr>
                         <tr>
                           <td>timeDilation( float , frame )</td>
-                          <td>The first value is a duration as measured in the frame given as the second argument. The <span class="non-terminal">frame</span> arguement can also be a <span class="non-terminal">float</span> (velocity) or <span class="non-terminal">observer</span>. The result is the dilated duration measured in the rest frame.</td>
+                          <td>The first value is a duration as measured in the frame given as the second argument. The <span class="non-terminal">frame</span> argument can also be a <span class="non-terminal">float</span> (velocity) or <span class="non-terminal">observer</span>. The result is the dilated duration measured in the rest frame.</td>
                         </tr>
                         <tr>
                           <td>toRelativeV( float , frame (, frame)* )</td>

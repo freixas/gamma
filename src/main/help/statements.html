@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
     <head>
         <meta charset="utf-8" />
         <link rel="stylesheet" href="styles/help.css" type="text/css" />
@@ -102,7 +102,7 @@
                 <p>An include statement includes the text from another file into this one. The effect is as though those characters had been entered in place of the include statement.</p>
                 <p>The string is a filename. It can be a relative filename, in which case it's relative to the script file's location, or it can be an absolute filename.</p>
                 <h2><a id="stylesheet"></a>stylesheet</h2>
-                <p><span class="literal">stylesheet external</span>l* <span class="non-terminal">string</span></p>
+                <p><span class="literal">stylesheet external</span>* <span class="non-terminal">string</span></p>
                 <p>The stylesheet statement adds a stylesheet to the diagram (see <a href="stylesheets.html">Stylesheets</a>). If <span class="literal">external</span> is used, the stylesheet comes from a file and the string is the file's name.  It can be a relative filename, in which case it's relative to the script file's location, or it can be an absolute filename.</p>
                 <p>If <span class="literal">external</span> is omitted, the entire stylesheet must be contained in the string. Since stylesheets can have values that are strings, you will need to be careful with how the internal strings are specified.</p>
                 <h2><a id="set"></a>set</h2>
@@ -155,7 +155,7 @@
                 <p>The final string is a label displayed with the slider.</p>
                 <h2><a id="toggle"></a>toggle</h2>
                 <p><span class="literal">toggle</span> <span class="non-terminal">leftVariable</span> <span class="literal">=</span><span class="non-terminal"> float</span> <span class="literal">label</span> <span class="non-terminal">string</span> <span class="literal">restart</span>? </p>
-                <p>A toogle  assignment adds a checkbox to the diagram. If the value given is not zero, the variable is set to 1, otherwise it is set to 0.</p>
+                <p>A toggle assignment adds a checkbox to the diagram. If the value given is not zero, the variable is set to 1, otherwise it is set to 0.</p>
                 <p>The diagram is created by executing the script with the variable set to its assigned value. If the end user toggles the checkbox, the script is re-executed. This time, the assignment is ignored and the value of the variable is set to match the slider.</p>
                 <p>Initially, the checkbox is checked if the given value is not zero, unchecked if it is 0. When the end user toggles it, the variable will be set to either 0 or 1, depending on whether the box is unchecked or checked.</p>
                 <p>The final string is a label displayed with the toggle.</p>
@@ -187,7 +187,7 @@
                 <p class="literal">continue</p>
                 <p>The continue statement returns an enclosing while or for statement to return to its conditional test. In the case of the for statement, the loop variable is incremented (or decremented if the step value is negative) before testing. A continue statement outside any loop generates an error.</p>
                 <h1><a id="command-statements"></a>Command Statements</h1>
-                <p>Command statements are things that either control how the diagram is drawn or draw something on the diagram. The have a common syntax:</p>
+                <p>Command statements are things that either control how the diagram is drawn or draw something on the diagram. They have a common syntax:</p>
                 <p><span class="non-terminal">command</span> ( <span class="non-terminal">name</span> <span class="literal">:</span> <span class="non-terminal">expr</span> ( <span class="literal">,</span> <span class="non-terminal">name</span> <span class="literal">:</span> <span class="non-terminal">expr</span> )* )?</p>
                 <p>The name/expression pairs are called properties and the sequence of properties is a property list. Each command has a set of properties that control how it behaves. Almost all properties are optional and have a default value if omitted. The specific properties supported by each command are defined below.</p>
                 <p>For some commands, there is one property that is either required or very common. This property is given without the property name or colon. In the tables below, these special properties are identified by a color: a <span class="red-literal">red</span> property is required and a <span class="green-literal">green</span> property is optional.</p>
@@ -940,7 +940,7 @@
 
                             </td>
                             <td class="description">
-                                Draw the lines parallel to the <span class="non-terminal">x</span> axis.
+                                Draw the lines parallel to the <span class="non-terminal">x</span>-axis.
                             </td>
                         </tr>
                         <tr>
@@ -960,7 +960,7 @@
 
                             </td>
                             <td class="description">
-                                Draw the lines parallel to the <span class="non-terminal">t</span> axis.
+                                Draw the lines parallel to the <span class="non-terminal">t</span>-axis.
                             </td>
                         </tr>
                     </tbody>
