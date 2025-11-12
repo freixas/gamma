@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
     <head>
         <meta charset="utf-8" />
         <link rel="stylesheet" href="styles/help.css" type="text/css" />
@@ -44,7 +44,7 @@
                 <p><span class="non-terminal">scriptStatement</span> → <span class="literal">script</span> string <span class="non-terminal">scriptSettings</span>?<br>
                   <span class="non-terminal">scriptSettings</span> → <span class="literal">pause</span> <span class="non-terminal">float</span><br>
                 </p>
-                <p>The <span class="literal">script</span> statement is folowed by a literal string that refers to a script file. If the file name is relative, it is relative to the location of the slideshow script. If a slideshow  is located on the web, all scripts must come from the same domain. If the slideshow is on the local file system, each script can come from anywhere.</p>
+                <p>The <span class="literal">script</span> statement is followed by a literal string that refers to a script file. If the file name is relative, it is relative to the location of the slideshow script. If a slideshow  is located on the web, all scripts must come from the same domain. If the slideshow is on the local file system, each script can come from anywhere.</p>
                 <p>The optional <span class="literal">pause</span> controls the number of seconds to pause after a slide finishes. Unlike  <span class="literal">defaultPause</span>, it applies to any kind of script. The pause time begins after the diagram is drawn or after the last frame of an animated diagram is drawn. Once the pause timer starts, it will be reset to its full pause time by any user interaction—zooming, panning, manipulating a GUI control, or changing the animation frame.</p>
                 <p>If a script within a slideshow is itself a script, it will be incorporated as though the individual scripts it contains had been entered in its place. The only difference is that the default pause times for scripts without explicit pause times will come from the nested slideshow rather than the top-level one.</p>
             </div>

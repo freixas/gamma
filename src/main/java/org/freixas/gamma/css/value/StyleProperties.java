@@ -123,7 +123,7 @@ public final class StyleProperties
     }
 
     /**
-     * The Arrow types: none, both, start, and end.
+     * The Arrow position types: none, both, start, and end.
      */
     public enum Arrow implements StylePropertyValueEnum
     {
@@ -136,6 +136,22 @@ public final class StyleProperties
         @Override
         public final String getName() { return name; }
         static public Arrow toEnum(String name)  { return map.get(name.toLowerCase()); }
+    }
+
+    /**
+     * The ArrowStyle types: none, both, start, and end.
+     */
+    public enum ArrowStyle implements StylePropertyValueEnum
+    {
+        OPEN("open"), CLOSED("closed"), FILLED("filled"), CHEVRON("chevron");
+
+        static private final HashMap<String, ArrowStyle> map = toMap(ArrowStyle.values());
+        private final String name;
+
+        ArrowStyle(String name) { this.name = name; }
+        @Override
+        public final String getName() { return name; }
+        static public ArrowStyle toEnum(String name)  { return map.get(name.toLowerCase()); }
     }
 
     /**
@@ -212,6 +228,9 @@ public final class StyleProperties
             case ARROW -> {
                 return new StyleProperty(name, toArrow(value), definition);
             }
+            case ARROW_STYLE -> {
+                return new StyleProperty(name, toArrowStyle(value), definition);
+            }
             case EVENT_SHAPE -> {
                 return new StyleProperty(name, toEventShape(value), definition);
             }
@@ -263,16 +282,31 @@ public final class StyleProperties
     }
 
     /**
-     * Convert a token value to an Arrow type.
+     * Convert a token value to an Arrow position.
      *
      * @param value The token value.
      *
-     * @return The corresponding Arrow type.
+     * @return The corresponding Arrow position.
      */
     static public StyleProperties.Arrow toArrow(Token<?> value)
     {
         if (value.isName()) {
             return StyleProperties.Arrow.toEnum(value.getString());
+        }
+        return null;
+    }
+
+    /**
+     * Convert a token value to an Arrow style.
+     *
+     * @param value The token value.
+     *
+     * @return The corresponding Arrow style.
+     */
+    static public StyleProperties.ArrowStyle toArrowStyle(Token<?> value)
+    {
+        if (value.isName()) {
+            return StyleProperties.ArrowStyle.toEnum(value.getString());
         }
         return null;
     }
