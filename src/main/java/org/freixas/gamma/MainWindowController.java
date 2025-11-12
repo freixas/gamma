@@ -172,6 +172,7 @@ public final class MainWindowController implements Initializable
         dialog.setHeaderText("Enter a URL to open");
         dialog.setContentText("URL:");
         dialog.getEditor().setPrefColumnCount(40);
+        dialog.getEditor().setText(mainWindow.getLastURL());
         Optional<String> result = dialog.showAndWait();
 
         if (result.isEmpty() || result.get().length() < 1) return;

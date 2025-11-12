@@ -51,6 +51,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -82,6 +83,7 @@ public final class MainWindow extends Stage
     private Parser mainScriptParser;            // The parser used to parse the main script
 
     private final File[] directoryDefaults;     // The default dirs for each type of file
+    private String lastURL = "https://";
 
     // Various menu items
 
@@ -298,6 +300,26 @@ public final class MainWindow extends Stage
         directoryDefaults[type.getValue()] = dir;
     }
 
+    /**
+     * Set the last URL used to open a script file.
+     *
+     * @param lastURL The last URL used to open a script file.
+     */
+    public void setLastURL(String lastURL)
+    {
+        this.lastURL = lastURL;
+    }
+
+    /**
+     * Get the last URL used to open a script file.
+     *
+     * @return The last URL used to open a script file.
+     */
+    public String getLastURL()
+    {
+        return lastURL;
+    }
+
     public SlideshowEngine getSlideShowEngine()
     {
         return slideshowEngine;
@@ -480,6 +502,21 @@ public final class MainWindow extends Stage
                             e.getLocalizedMessage(),
                         true);
                 }
+            }
+        }
+
+        else {
+
+            // If this is not a local file, save the parent URL
+
+            try {
+                URI uri = mainScript.getURL().toURI();
+                URI parentURI = uri.getPath().endsWith("/") ? uri.resolve("..") : uri.resolve(".");
+                setLastURL(parentURI.toString());
+            }
+            catch (URISyntaxException e) {
+                showTextAreaAlert(Alert.AlertType.ERROR, "Invalid URL", "Invalid URL", e.getLocalizedMessage(), true);
+                return;
             }
         }
 
