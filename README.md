@@ -76,13 +76,13 @@ scripts (Gamma programs) under **Help / Sample Scripts**.
 
 ## Download and install
 
-- An [MSI installer](https://github.com/freixas/gamma/releases/download/v1.0.3/gamma-1.0.3.msi) for x64-based Windows 11 systems (likely to work on x64 Windows 7-10).
-- A [DEB package](https://github.com/freixas/gamma/releases/download/v1.0.3/gamma-1.0.3-ubuntu-22.04-x64.deb) for x64 Debian-based Linux distributions
-- A [DEB package](https://github.com/freixas/gamma/releases/download/v1.0.3/gamma-1.0.3-ubuntu-24.04-x64.deb) for x64 Debian-based Linux distributions
-- A [DMG package](https://github.com/freixas/gamma/releases/download/v1.0.3/gamma-1.0.3-macos-14-arm64.dmg) for arm64-based macOS 14 systems
-- A [DMG package](https://github.com/freixas/gamma/releases/download/v1.0.3/gamma-1.0.3-macos-15-arm64.dmg) for arm64-based macOS 15 systems
+- An [MSI installer](https://github.com/freixas/gamma/releases/download/v1.0.4/gamma-1.0.4.msi) for x64-based Windows 11 systems (likely to work on x64 Windows 7-10).
+- A [DEB package](https://github.com/freixas/gamma/releases/download/v1.0.4/gamma-1.0.4-ubuntu-22.04-x64.deb) for x64 Debian-based Linux distributions
+- A [DEB package](https://github.com/freixas/gamma/releases/download/v1.0.4/gamma-1.0.4-ubuntu-24.04-x64.deb) for x64 Debian-based Linux distributions
+- A [DMG package](https://github.com/freixas/gamma/releases/download/v1.0.4/gamma-1.0.4-macos-14-arm64.dmg) for arm64-based macOS 14 systems
+- A [DMG package](https://github.com/freixas/gamma/releases/download/v1.0.4/gamma-1.0.4-macos-15-arm64.dmg) for arm64-based macOS 15 systems
 
-There is also a universal [tar.gz file](https://github.com/freixas/gamma/releases/download/v1.0.3/gamma-1.0.3.tar.gz) 
+There is also a universal [tar.gz file](https://github.com/freixas/gamma/releases/download/v1.0.4/gamma-1.0.4.tar.gz) 
 which should work on any system with Java and JavaFX.
 
 Currently, the Windows installer has received the most testing, the Unix installers have received some,
@@ -159,8 +159,8 @@ but I used versions from:
 
 <details><summary>Install Gamma</summary>
 
-Download gamma-1.0.3.tar.gz from the GitHub release page. Extract the included
-gamma-1.0.3 folder to any location. If you unpacked the file into <some path>, 
+Download gamma-1.0.4.tar.gz from the GitHub release page. Extract the included
+gamma-1.0.4 folder to any location. If you unpacked the file into <some path>, 
 then add `<some path>` to your PATH.
 
 At the top level of the Gamma folder, you will find two files:
