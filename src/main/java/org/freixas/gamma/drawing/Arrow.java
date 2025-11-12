@@ -16,6 +16,7 @@
  */
 package org.freixas.gamma.drawing;
 
+import javafx.scene.shape.FillRule;
 import org.freixas.gamma.css.value.StyleStruct;
 import org.freixas.gamma.value.Bounds;
 import org.freixas.gamma.value.Coordinate;
@@ -30,9 +31,6 @@ import javafx.scene.transform.Affine;
  */
 public class Arrow
 {
-    public final static double ARROW_WIDTH = 10;
-    public final static double ARROW_HEIGHT = 8;
-
     /**
      * Draw an arrowhead.
      *
@@ -60,8 +58,8 @@ public class Arrow
         // Create a bounding box for the arrow and see if it intersects with the
         // viewport
 
-        double arrowWidth = ARROW_WIDTH * context.invScale;
-        double halfArrowHeight = ARROW_HEIGHT * context.invScale;
+        double arrowWidth = styles.arrowWidth * context.invScale;
+        double halfArrowHeight = styles.arrowHeight * context.invScale;
 
         double minX = location.x - arrowWidth;
         double minT = location.t - halfArrowHeight;
@@ -79,14 +77,52 @@ public class Arrow
             Line.setupLineGc(context, styles);
             gc.setLineJoin(StrokeLineJoin.MITER);
 
-            // Draw the arrow head
+            switch (styles.arrowStyle) {
 
-            gc.beginPath();
-            gc.moveTo(minX, minT);
-            gc.lineTo(location.x, location.t);
-            gc.lineTo(minX, maxT);
+                case OPEN -> {
+                    gc.beginPath();
+                    gc.moveTo(minX, minT);
+                    gc.lineTo(location.x, location.t);
+                    gc.lineTo(minX, maxT);
 
-            gc.stroke();
+                    gc.stroke();
+                }
+
+                case CLOSED -> {
+                    gc.beginPath();
+                    gc.moveTo(minX, minT);
+                    gc.lineTo(location.x, location.t);
+                    gc.lineTo(minX, maxT);
+                    gc.closePath();
+
+                    gc.stroke();
+                }
+
+                case FILLED -> {
+                    gc.beginPath();
+                    gc.moveTo(minX, minT);
+                    gc.lineTo(location.x, location.t);
+                    gc.lineTo(minX, maxT);
+                    gc.closePath();
+
+                    gc.setFillRule(FillRule.EVEN_ODD);
+                    gc.setFill(styles.color);
+                    gc.fill();
+                }
+
+                case CHEVRON -> {
+                    gc.beginPath();
+                    gc.moveTo(minX, minT);
+                    gc.lineTo(location.x, location.t);
+                    gc.lineTo(minX, maxT);
+                    gc.lineTo(minX + (location.x - minX)/3, location.t);
+                    gc.closePath();
+
+                    gc.setFillRule(FillRule.EVEN_ODD);
+                    gc.setFill(styles.color);
+                    gc.fill();
+                }
+            }
         }
 
         // Restore the original graphics context

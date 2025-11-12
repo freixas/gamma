@@ -224,6 +224,7 @@ public final class StylePropertyDefinition
     static final StylePropertyDefinition opacity = new StylePropertyDefinition("opacity", fieldMap.get("opacity"), StyleProperty.Type.FLOAT, Min.EQ0);
 
     static final StylePropertyDefinition arrow = new StylePropertyDefinition("arrow", fieldMap.get("arrow"), StyleProperty.Type.ARROW);
+    static final StylePropertyDefinition arrowStyle = new StylePropertyDefinition("arrow-style", fieldMap.get("arrowStyle"), StyleProperty.Type.ARROW_STYLE);
     static final StylePropertyDefinition arrowWidth = new StylePropertyDefinition("arrow-width", fieldMap.get("arrowWidth"), StyleProperty.Type.FLOAT, Min.GT0);
     static final StylePropertyDefinition arrowHeight = new StylePropertyDefinition("arrow-height", fieldMap.get("arrowHeight"), StyleProperty.Type.FLOAT, Min.GT0);
 
@@ -338,6 +339,7 @@ public final class StylePropertyDefinition
         defMap.put("opacity", opacity);
 
         defMap.put("arrow", arrow);
+        defMap.put("arrow-style", arrowStyle);
         defMap.put("arrow-width", arrowWidth);
         defMap.put("arrow-height", arrowHeight);
 

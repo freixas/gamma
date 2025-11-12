@@ -108,9 +108,9 @@ public class StyleStruct
 
     public double opacity = 1.0;
     public StyleProperties.Arrow arrow = StyleProperties.Arrow.NONE;
-    // Future:
-    // public double arrowWidth = 10.0;
-    // public double arrowHeight = 8.0;
+    public StyleProperties.ArrowStyle arrowStyle = StyleProperties.ArrowStyle.OPEN;
+    public double arrowWidth = 10.0;
+    public double arrowHeight = 8.0;
     public double eventDiameter = 5.0;
     public StyleProperties.EventShape eventShape = StyleProperties.EventShape.CIRCLE;
 }
