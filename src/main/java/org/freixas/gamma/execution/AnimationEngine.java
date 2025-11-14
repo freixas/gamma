@@ -16,6 +16,8 @@
  */
 package org.freixas.gamma.execution;
 
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
 import org.freixas.gamma.MainWindow;
 import org.freixas.gamma.css.value.Stylesheet;
 import org.freixas.gamma.execution.hcode.SetStatement;
@@ -25,8 +27,11 @@ import org.freixas.gamma.value.AnimationVariable;
 import org.freixas.gamma.value.DynamicVariable;
 
 import java.io.InputStream;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Set;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
@@ -52,27 +57,34 @@ public class AnimationEngine
     static class DiagramAnimationTimer extends AnimationTimer
     {
         private final AnimationEngine animationEngine;
-        private double FPS;
         private int direction;
 
-        private long firstCallTime;
-        private long totalFrameCount;
+        private double FPS;
+        private double avgFPS;
+        private boolean firstCallTime;
+        private long lastDrawTime;
 
         DiagramAnimationTimer(AnimationEngine animationEngine, double speed, int direction)
         {
             this.animationEngine = animationEngine;
+            this.FPS = -1;
             this.setSpeed(speed);
             this.setDirection(direction);
         }
 
         public final void setSpeed(double speed)
         {
-            FPS = speed * 30;
+            if (speed * 30 != FPS) {
+                FPS = speed * 30;
+                avgFPS = -1;
+                firstCallTime = true;
+                lastDrawTime = -1;
+            }
         }
 
         public final void setDirection(int direction)
         {
-            this.direction = (int)Util.sign(direction);
+            this.direction = (int) Util.sign(direction);
         }
 
         @Override
@@ -84,54 +96,89 @@ public class AnimationEngine
         @Override
         public final void start()
         {
-            firstCallTime = -1;
-            totalFrameCount = 0;
+            avgFPS = -1;
+            firstCallTime = true;
+            lastDrawTime = -1;
 
             super.start();
         }
 
-        @Override
-        public void handle(long now)
+        public double getAvgFPS()
         {
-            int frameSkipSize;
-            int frameStepSize;
+            return avgFPS;
+        }
 
-            if (firstCallTime == -1) {
-                frameSkipSize = 1;
-                frameStepSize = 1;
-                firstCallTime = now;
-            }
-            else {
-                totalFrameCount++;
-                double totalTime = now - firstCallTime;
-                double avgNsPerFrame = totalTime / totalFrameCount;
-                double avgSecPerFrame = avgNsPerFrame / 1_000_000_000.0;
-                double avgFPS = 1 / avgSecPerFrame;
+        /**
+         * Handle the animation frame updates. Dynamically adjust the frame
+         * execution rate to match the desired frame rate (FPS).
+         *
+         * @param now The current timestamp in nanoseconds.
+         */
+        @Override
+        public void handle(long now) {
 
-                double stepSize = FPS / avgFPS;
-                if (stepSize >= 1.0) {
-                    frameStepSize = Util.toInt(stepSize);
-                    frameSkipSize = 1;
-                }
-                else {
-                    frameStepSize = 1;
-                    frameSkipSize = Util.toInt(1.0 / stepSize);
-                }
+            // We always draw the first frame
+
+            if (firstCallTime) {
+                firstCallTime = false;
+                lastDrawTime = now;
+                drawFrame(1, now);
+                return;
             }
 
-            if (totalFrameCount % frameSkipSize == 0) {
-                int frame = animationEngine.getNextFrame(direction * frameStepSize);
-                if (animationEngine.atEnd()) {
-                    animationEngine.stop();
-                }
+            // We want to draw frames every so many nanoseconds. Translate the
+            // FPS to an interval. Then calculate the interval since the last
+            // time we drew a frame
 
-                try {
-                    animationEngine.executeFrame(frame);
-                }
-                catch (Throwable e) {
-                    animationEngine.stop();
-                    Platform.runLater(() -> animationEngine.window.getDiagramEngine().handleException(e));
-                }
+            double desiredIntervalNs = 1_000_000_000.0 / FPS;
+            long elapsedNsSinceLastDraw = now - lastDrawTime;
+
+            // If the time elapsed is greater than or equal to the desired
+            // interval, then it's time to draw. We may skip some calls to
+            // handle() without doing anything, but the elapsed time will
+            // increase until it exceeds the desired interval
+
+            if (elapsedNsSinceLastDraw >= desiredIntervalNs) {
+                // Calculate how many logical frames we should draw. We only
+                // actually draw the last of these frames
+
+                int numFrames = Util.toInt(elapsedNsSinceLastDraw / desiredIntervalNs);
+
+                // Find out how many nanoseconds we have and haven't accounted for
+
+                double usedNs = (long)(numFrames * desiredIntervalNs);
+                double leftOverNs = elapsedNsSinceLastDraw - usedNs;
+
+                // The logical FPS is the number of logical frames we draw within
+                // the used nanoseconds period
+
+                avgFPS = (numFrames / usedNs) * 1_000_000_000.0;
+
+                drawFrame(numFrames, now - Util.toLong(leftOverNs));
+            }
+        }
+
+        /**
+         * Draw a frame that is a given distance and direction from the current
+         * frame.
+         *
+         * @param numFrames The number of frames to skip from the current frame.
+         * @param now The current time (the time at which the frame begins to
+         * draw).
+         */
+        private void drawFrame(double numFrames, long now) {
+            int intFrameDistance = Util.toInt(numFrames);
+            int frame = animationEngine.getNextFrame(direction * intFrameDistance);
+            if (animationEngine.atEnd()) {
+                animationEngine.stop();
+            }
+
+            try {
+                animationEngine.executeFrame(frame);
+                lastDrawTime = now;
+            } catch (Throwable e) {
+                animationEngine.stop();
+                Platform.runLater(() -> animationEngine.window.getDiagramEngine().handleException(e));
             }
         }
     }
@@ -155,6 +202,7 @@ public class AnimationEngine
 
     private final Canvas canvas;
     private final HBox animationControls;
+    private final ChoiceBox<String> choiceAnimSpeed;
     private final Button buttonAnimStart;
     private final Button buttonAnimEnd;
     private final Button buttonAnimPrevious;
@@ -196,6 +244,10 @@ public class AnimationEngine
         canvas = window.getCanvas();
 
         animationControls   = (HBox)  window.getScene().lookup("#animation-controls");
+
+        //noinspection unchecked
+        choiceAnimSpeed    = (ChoiceBox<String>)window.getScene().lookup("#anim-speed-selector");
+
         buttonAnimStart     = (Button)window.getScene().lookup("#anim-start");
         buttonAnimEnd       = (Button)window.getScene().lookup("#anim-end");
         buttonAnimPrevious  = (Button)window.getScene().lookup("#anim-previous");
@@ -233,6 +285,27 @@ public class AnimationEngine
      */
     private void addListeners()
     {
+        // ************************************************************
+        // *
+        // * CHOICE HANDLER
+        // *
+        // ************************************************************
+
+        choiceAnimSpeed.getSelectionModel().selectedItemProperty().addListener((_, _, newVal) -> {
+            if (newVal == null) return;
+            switch (newVal) {
+                case "0.1X"  -> speed =  0.1;
+                case "0.25X" -> speed =  0.25;
+                case "0.5X"  -> speed =  0.5;
+                case "2X"    -> speed =  2.0;
+                case "4X"    -> speed =  4.0;
+                case "10X"   -> speed = 10.0;
+                default      -> speed =  1.0;
+            }
+            if (timer != null) timer.setSpeed(speed);
+            canvas.requestFocus();
+        });
+
         // ************************************************************
         // *
         // * BUTTON HANDLERS
@@ -373,22 +446,20 @@ public class AnimationEngine
 
     private void playFaster()
     {
-        speed *= 2;
-        if (speed > 10.0) speed = 10.0;
-        if (timer != null) timer.setSpeed(speed);
+        setSpeed(speed * 2);
     }
 
     private void playSlower()
     {
-        speed /= 2;
-        if (speed < .1) speed = .1;
-        if (timer != null) timer.setSpeed(speed);
+        setSpeed(speed / 2);
     }
 
     private void playNormal()
     {
-        if (timer != null) timer.setSpeed(1.0);
+        setSpeed(1.0);
     }
+
+
 
     private void setState(State newState)
     {
@@ -433,6 +504,7 @@ public class AnimationEngine
         if (isClosed) return;
 
         if (firstTime) {
+
             // First execution
 
             hCodeEngine = new HCodeEngine(window, setStatement, stylesheet, program);
@@ -446,6 +518,7 @@ public class AnimationEngine
         }
 
         else {
+
             // Remove all animation variables from the dynamic symbol table
 
             Iterator<String> iter = symbolNames.iterator();
@@ -474,7 +547,7 @@ public class AnimationEngine
             (AnimationStruct)hCodeEngine.getLCodeEngine().getAnimationCommand().cmdStruct();
 
         int reps = animationStruct.reps;
-        speed = animationStruct.speed;
+        setSpeed(animationStruct.speed);
 
         // We calculate the maximum number of frames in a straight repetition by
         // checking the limits of all the animation variables. If an animation
@@ -502,6 +575,39 @@ public class AnimationEngine
         timer.start();
 
         setState(State.RUNNING);
+    }
+
+    private synchronized void setSpeed(double newSpeed)
+    {
+        // The speed has to be adjusted to match what we can display in the
+        // choice box
+
+        if (newSpeed < .126) {
+            speed = 0.1;
+        } else if (newSpeed < .376) {
+            speed = 0.25;
+        } else if (newSpeed < .76) {
+            speed = 0.5;
+        } else if (newSpeed < 1.6) {
+            speed = 1.0;
+        } else if (newSpeed < 3.1) {
+            speed = 2.0;
+        } else if (newSpeed < 7.1) {
+            speed = 4.0;
+        } else {
+            speed = 10.0;
+        }
+
+        // Set the choice box to match the requested (and adjusted) speed
+
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.ENGLISH);
+        DecimalFormat df = new DecimalFormat("0.##", symbols);
+
+        String speedString = df.format(speed) + "X";
+        choiceAnimSpeed.getSelectionModel().select(speedString);
+
+        if (timer != null) timer.setSpeed(speed);
+        canvas.requestFocus();
     }
 
     private synchronized int getNextFrame(int step)
@@ -560,10 +666,21 @@ public class AnimationEngine
         // Execute the h-code and l-code again
 
         hCodeEngine.execute();
+        double avgFPS = timer.getAvgFPS();
+        Label label = (Label)(window.getScene().lookup("#fpsArea"));
+        if (avgFPS == -1) {
+            label.setText("");
+        }
+        else {
+            label.setText(String.format("%.1f FPS", avgFPS));
+        }
 
         // If this is the last frame, report that we're done
 
-        if (atEnd()) window.diagramCompleted();
+        if (atEnd()) {
+            window.diagramCompleted();
+            label.setText("");
+        }
 
         // Try to see if we can keep the focus while the animation is running
 
