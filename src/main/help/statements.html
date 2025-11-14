@@ -131,22 +131,53 @@
                 <p><span class="literal">static</span> <span class="non-terminal">variable</span> = <span class="non-terminal">expr</span></p>
                 <p>When a script is first loaded, there are no variables defined; variables are created as they are assigned their first value. Under some circumstances (for example, animation) a script may be re-executed without being re-loaded. For most variables, there is no difference between the first execution (when the script is loaded) and any subsequent execution—the script begins with a clean slate.</p>
                 <p>Static variables are one exception; once created, they retain their values across script executions (but not across script loads). Once a variable is marked as static, it remains static and can be used like any other variable.</p>
-                <p>To initialize a static variable only when it's undefined, use the <span class="literal">defined()</span> function in a pattern like this:</p>
+                <p>
+                    To initialize a static variable only when it's undefined,
+                    use the <span class="literal">defined()</span> function in a
+                    pattern like this:
+                </p>
                 <p class="code">if (!defined(a)) {</p>
                 <p class="code">    static a = log(5);</p>
                 <p class="code">}</p>
-                <p class>You don't need to limit yourself to assigning a value only once. Nor do you need to mark a variable as static more than once (but it won't hurt if you do). This example shows how a static variable can function as a frame counter in an animation.</p>
+                <p>
+                    You don't need to limit yourself to assigning a value only
+                    once. Nor do you need to mark a variable as static more than
+                    once (but it won't hurt if you do).
+                </p>
+                <p>
+                    If you use a static variable within an animation, you need
+                    to be aware several things:
+                </p>
+                <ul>
+                    <li>
+                        Changes to static variables persist across re-executions of the
+                        script, no matter what caused the script to re-execute, such as
+                        animation cycles and repetitions.
+                    </li>
+                    <li>
+                        When running an animation, some frames may be skipped
+                        to maintain the requested frames-per-second rate. Changes to
+                        static variables won't occur on skipped frames.
+                    </li>
+                </ul>
+                <p>For instance:</p>
+
                 <p class="code">if (!defined(counter)) {</p>
-                <p class="code">  <span class="code">static counter = 0;</span></p>
+                <p class="code"><span class="code">static counter = 0;</span></p>
                 <p class="code">}</p>
                 <p class="code">counter = counter + 1;</p>
-                <p>This counter would  ignore such things as  animation cycles and repetitions—it would increment with each re-execution of the script, no matter what caused the script to re-execute.</p>
+                <p>
+                    This code would appear to create a frame counter for an
+                    animation. But if frames are skipped, the frame count will
+                    be incorrect. A safer way to set a frame counter would be to derive it from
+                    the animation variable.
+                </p>
                 <h2><a id="animate"></a>animate</h2>
                 <p><span class="literal">animate</span> <span class="non-terminal">leftVariable</span><span class="literal"> =</span> <span class="non-terminal">float</span> ( <span class="literal">to</span> <span class="non-terminal">float</span> )? <span class="literal">step</span> <span class="non-terminal">float</span></p>
                 <p>The animate assignment creates an animation variable. When an animation runs, the script is executed once for each animation frame; the assignment, however, is ignored all but the first time. From then on, the value of the variable is controlled by the animation engine.              </p>
                 <p>The value of the  variable is incremented by its step size until its limit (the <span class="literal">to</span> value) is exceeded, if one is specified (if the step value is negative, the variable is decremented until it is less than the limit).</p>
                 <p>The first animation variable to exceed its limit ends a single repetition of an animation. If no animation variable has a limit, then the animation is theoretically infinite, although in practice there is a finite (but large) limit.</p>
-                <p>                Animations only run when the <span class="literal">animation</span> command is present and there is at least one animation variable; otherwise, they operate like any other variable.<br />
+                <p>Animations only run when the <span class="literal">animation</span> command is present and there is at least one animation variable; otherwise, animation variables operate like any other variable.<br />
                 </p>
                 <h2><a id="range"></a>range</h2>
                 <p><span class="literal">range</span> <span class="non-terminal">leftVariable </span><span class="literal">=</span><span class="non-terminal"> float</span> <span class="literal">from</span> <span class="non-terminal">float</span><span class="literal"> to</span><span class="non-terminal"> float</span> <span class="literal">label</span> <span class="non-terminal">string</span></p>
@@ -383,6 +414,15 @@
                         </tr>
                     </tbody>
                 </table>
+                <p>
+                    The animation speed can only be set to the discrete values 0.1, 0.25, 0.5, 1, 2, 4, and 10. If set to
+                    some other value, the nearest discrete value will be chosen. The "normal" speed of 1 is 30 frames per
+                    second. If the animation speed is high, some frames will be skipped in order to achieve the requested
+                    animation frame rate. The frame rate is system dependent. If you request a speed of 4 (120 frames per second),
+                    and your system supports a maximum frame rate of 60 frames per second, then every other frame will be skipped
+                    (the animation variables will advance at twice the step size). Speeds of less than 60 frames per second
+                    would draw every frame.
+                </p>
                 <h3><a id="display"></a>display</h3>
                 <p>The display command controls the overall appearance of the diagram. If no display command is given, a default one will be used. Since the display command's values are only used for the initial display, the values cannot be animated.</p>
                 <table class="command-table">

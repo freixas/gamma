@@ -103,11 +103,16 @@ public final class MainWindowController implements Initializable
     @FXML
     private Button toolbarSlideshowEnd;
 
+    @FXML
+    private ChoiceBox<String> animSpeedSelector;
+
     private MainWindow mainWindow;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle)
     {
+        animSpeedSelector.getItems().addAll("0.1X", "0.25X", "0.5X", "1X", "2X", "4X", "10X");
+        animSpeedSelector.setValue("1X");
     }
 
     /**
