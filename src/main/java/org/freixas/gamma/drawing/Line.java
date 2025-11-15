@@ -225,12 +225,50 @@ public class Line
         // Set the line style
 
         if (lineStyle == StyleProperties.LineStyle.DASHED) {
-            double dashLength = 5.0 * scale;
-            gc.setLineDashes(dashLength, dashLength);
+
+            // For dashed lines, we want the spaces between the dashes to be
+            // slightly bigger for thin lines than for thick ones. The
+            // effect ends once the line thickness is 4 or larger (i.e.
+            // gapScale will be 1.0).
+            //
+            // We also want the dashes to be longer for thinner lines
+
+            double gapScale = Math.max(1.0, -lineThickness + 5);
+            double dashScale = Math.max(1.0, (-lineThickness / 3.0) + (7.0 / 3.0));
+            double dashLength = dashScale * 3.0 * worldLineThickness;
+            double gapLength = gapScale * worldLineThickness;
+            gc.setLineDashes(dashLength, gapLength);
+            gc.setLineCap(StrokeLineCap.BUTT);
         }
+
         else if (lineStyle == StyleProperties.LineStyle.DOTTED) {
+
+            // For dotted lines, we want the spaces between the dots
+            // to be the same width as the dots themselves. However, for thin
+            // lines, we need the dots to be spaced a bit further apart. The
+            // gap scale gives the most extra spacing to lines with a thickness
+            // of 1. The spacing boost ends once the line thickness is 4, at
+            // which point the gap scape is always 1.0 (i.e. no scaling).
+            //
+            // The dot length is minimized since the round caps are in addition
+            // to the dot length. If we don't keep the value small, the dots
+            // turn into lozenges.
+            //
+            // The round caps are also when determining the gap size. Since they
+            // are round, they will consume worldLineThickness space. To keep
+            // the gaps looking visually equal in width to the dots, we must
+            // add an extra worldLineThickness space.
+
+            double gapScale = Math.max(1.0, ((-2.0 * lineThickness) / 3.0) + (11.0 / 3.0));
             gc.setLineCap(StrokeLineCap.ROUND);
-            gc.setLineDashes(worldLineThickness / 10.0, worldLineThickness * 2);
+            double dotLength = worldLineThickness / 10;
+            double gapLength = gapScale * (2 * worldLineThickness);
+            gc.setLineDashes(dotLength, gapLength);
+        }
+
+        else {
+            gc.setLineDashes();
+            gc.setLineCap(StrokeLineCap.BUTT);
         }
     }
 }
