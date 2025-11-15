@@ -17,6 +17,7 @@
 package org.freixas.gamma.drawing;
 
 import javafx.scene.shape.FillRule;
+import org.freixas.gamma.css.value.StyleProperties;
 import org.freixas.gamma.css.value.StyleStruct;
 import org.freixas.gamma.value.Bounds;
 import org.freixas.gamma.value.Coordinate;
@@ -74,7 +75,7 @@ public class Arrow
 
             // Set up the line styles
 
-            Line.setupLineGc(context, styles);
+            Line.setupLineGc(context, styles.color, styles.lineThickness, StyleProperties.LineStyle.SOLID);
             gc.setLineJoin(StrokeLineJoin.MITER);
 
             switch (styles.arrowStyle) {
