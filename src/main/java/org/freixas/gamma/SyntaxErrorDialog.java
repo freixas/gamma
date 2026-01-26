@@ -60,7 +60,6 @@ public final class SyntaxErrorDialog extends ScriptErrorDialog
     public void displayError(ParseException e)
     {
         TokenContext context = e.getToken().getContext();
-        String code = context.getCode();
         String message = e.getLocalizedMessage();
 
         String linesOK1 = getLinesBeforeError(context.getCode(), context.getCharStart() - 1);
