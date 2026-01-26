@@ -507,9 +507,12 @@ public final class Parser
         // On return, we know the current token is a '{'
 
         nextToken();
-        while (!isDelimiter() || getChar() != '}') {
+
+        // Parse the slides. We need at least one slide for a slideshow
+
+        do {
             parseSlide();
-        }
+        } while (!isDelimiter() || getChar() != '}');
 
         // If we exited the loop, we have a '}'
         // The next thing should be an EOF
@@ -2785,7 +2788,7 @@ public final class Parser
                 codes.addAll(parseObject());
             }
 
-            // If we have a  comma, pop operators from the op stack to
+            // If we have a comma, pop operators from the op stack to
             // the codes stack until we reach a "("
 
             else if (isDelimiter() && getChar() == ',') {
