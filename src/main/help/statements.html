@@ -102,7 +102,7 @@
                 <p>An include statement includes the text from another file into this one. The effect is as though those characters had been entered in place of the include statement.</p>
                 <p>The string is a filename. It can be a relative filename, in which case it's relative to the script file's location, or it can be an absolute filename.</p>
                 <h2><a id="stylesheet"></a>stylesheet</h2>
-                <p><span class="literal">stylesheet external</span>* <span class="non-terminal">string</span></p>
+                <p><span class="literal">stylesheet external</span>? <span class="non-terminal">string</span></p>
                 <p>The stylesheet statement adds a stylesheet to the diagram (see <a href="stylesheets.html">Stylesheets</a>). If <span class="literal">external</span> is used, the stylesheet comes from a file and the string is the file's name.  It can be a relative filename, in which case it's relative to the script file's location, or it can be an absolute filename.</p>
                 <p>If <span class="literal">external</span> is omitted, the entire stylesheet must be contained in the string. Since stylesheets can have values that are strings, you will need to be careful with how the internal strings are specified.</p>
                 <h2><a id="set"></a>set</h2>
@@ -127,7 +127,7 @@
                     <span class="non-terminal">leftVariable</span> → <span class="non-terminal">name</span> | <span class="non-terminal">leftVariable</span> <span class="non-terminal">.</span> <span class="non-terminal">name</span></p>
                 <p>This is the normal form. The expression can evaluate to any type of value: a float, a string, or any object. The variable takes on the type of the value.</p>
                 <p>The period (&quot;.&quot;) used to dereference an object allows you to set the value of an object's field. In this case, the value must match whatever types are allowed by the object's field. For example, a frame object has two fields: v and origin. The former accepts a float while the latter accepts a coordinate.</p>
-                <h2><a id="static">static</a></h2>
+                <h2><a id="static"></a>static</h2>
                 <p><span class="literal">static</span> <span class="non-terminal">variable</span> = <span class="non-terminal">expr</span></p>
                 <p>When a script is first loaded, there are no variables defined; variables are created as they are assigned their first value. Under some circumstances (for example, animation) a script may be re-executed without being re-loaded. For most variables, there is no difference between the first execution (when the script is loaded) and any subsequent execution—the script begins with a clean slate.</p>
                 <p>Static variables are one exception; once created, they retain their values across script executions (but not across script loads). Once a variable is marked as static, it remains static and can be used like any other variable.</p>
@@ -221,102 +221,7 @@
                 <p>Command statements are things that either control how the diagram is drawn or draw something on the diagram. They have a common syntax:</p>
                 <p><span class="non-terminal">command</span> ( <span class="non-terminal">name</span> <span class="literal">:</span> <span class="non-terminal">expr</span> ( <span class="literal">,</span> <span class="non-terminal">name</span> <span class="literal">:</span> <span class="non-terminal">expr</span> )* )?</p>
                 <p>The name/expression pairs are called properties and the sequence of properties is a property list. Each command has a set of properties that control how it behaves. Almost all properties are optional and have a default value if omitted. The specific properties supported by each command are defined below.</p>
-                <p>For some commands, there is one property that is either required or very common. This property is given without the property name or colon. In the tables below, these special properties are identified by a color: a <span class="red-literal">red</span> property is required and a <span class="green-literal">green</span> property is optional.</p>
-                <p>All commands have these three common stylesheet-related properties:</p>
-                <table class="command-table">
-                    <colgroup>
-                        <col class="column1" />
-                        <col class="column2" />
-                        <col class="column3" />
-                        <col class="column4" />
-                        <col class="column5" />
-                        <col class="column6" />
-                    </colgroup><thead>
-                        <tr>
-                            <td>
-                                Name
-                            </td>
-                            <td>
-                                Type
-                            </td>
-                            <td>
-                                Default
-                            </td>
-                            <td>
-                                Min
-                            </td>
-                            <td>
-                                Max
-                            </td>
-                            <td>
-                                Description
-                            </td>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="body-style">
-                                <span class="literal">id</span>
-                            </td>
-                            <td class="body-style">
-                                <span class="non-terminal">string</span>
-                            </td>
-                            <td class="body-style">
-                                &quot;&quot;
-                            </td>
-                            <td class="body-style">&nbsp;
-
-                            </td>
-                            <td class="body-style">&nbsp;
-
-                            </td>
-                            <td class="description">
-                                The id for this command.
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="body-style">
-                                <span class="literal">class</span>
-                            </td>
-                            <td class="body-style">
-                                <span class="non-terminal">string</span>
-                            </td>
-                            <td class="body-style">
-                                &quot;&quot;
-                            </td>
-                            <td class="body-style">&nbsp;
-
-                            </td>
-                            <td class="body-style">&nbsp;
-
-                            </td>
-                            <td class="description">
-                                The stylesheet classes for this command. Each class name in the string should be separated by a comma.
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="body-style">
-                                <span class="literal">style</span>
-                            </td>
-                            <td class="body-style">
-                                <span class="non-terminal">string</span>
-                            </td>
-                            <td class="body-style">
-                                &quot;&quot;
-                            </td>
-                            <td class="body-style">&nbsp;
-
-                            </td>
-                            <td class="body-style">&nbsp;
-
-                            </td>
-                            <td class="description">
-                                A set of styles. The braces around the styles are not needed. Within the string, multiple styles should be separated by semicolons.
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <p>For more details on these, see <a href="stylesheets.html">Stylesheets</a>.</p>
+                <p>For some commands, there is one property that is either required or very common. This property is given without the property name or colon. In the tables below, these special properties are identified by a color: a <span class="red-literal">red</span> property is required and a <span class="green-literal">green</span> property is optional.                </p>
                 <h2><a id="control-commands"></a>Control Commands</h2>
                 <p>These commands can appear anywhere in the script, but they are executed before any drawing takes places. If used, each type should only appear once. If the same control command appears twice in a script, the last one is used and all others are ignored.</p>
                 <h3><a id="animation"></a>animation</h3>
@@ -409,8 +314,8 @@
                                 10
                             </td>
                             <td class="description">
-                                A multiplier applied to the “normal” speed (a value of 1 is “normal” speed, a value of 2 is twice as fast, and a value of 0.5 is half as fast).
-                            </td>
+                                A multiplier applied to the &ldquo;normal” speed (a value of 1 is “normal” speed, a value of 2 is twice as fast, and a value of 0.5 is half as fast).
+                          </td>
                         </tr>
                     </tbody>
                 </table>
@@ -422,7 +327,7 @@
                     and your system supports a maximum frame rate of 60 frames per second, then every other frame will be skipped
                     (the animation variables will advance at twice the step size). Speeds of less than 60 frames per second
                     would draw every frame.
-                </p>
+              </p>
                 <h3><a id="display"></a>display</h3>
                 <p>The display command controls the overall appearance of the diagram. If no display command is given, a default one will be used. Since the display command's values are only used for the initial display, the values cannot be animated.</p>
                 <table class="command-table">
@@ -616,7 +521,55 @@
                 </table>
                 <h2><a id="drawing-commands"></a>Drawing Commands</h2>
                 <p>The drawing commands are executed in the order in which they appear in the script. If you want one thing drawn in front of another, the thing in front should appear later in the script.</p>
-                <p>While the properties control <em>what</em> is drawn, the stylesheet and styles control <em>how</em> it is drawn. See <a href="stylesheets.html">Stylesheets</a>.</p>
+                <p>All drawing commands have these three common stylesheet-related properties:</p>
+                <table class="command-table">
+                  <colgroup>
+                    <col class="column1" />
+                    <col class="column2" />
+                    <col class="column3" />
+                    <col class="column4" />
+                    <col class="column5" />
+                    <col class="column6" />
+                  </colgroup>
+                  <thead>
+                    <tr>
+                      <td> Name </td>
+                      <td> Type </td>
+                      <td> Default </td>
+                      <td> Min </td>
+                      <td> Max </td>
+                      <td> Description </td>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="body-style"><span class="literal">id</span></td>
+                      <td class="body-style"><span class="non-terminal">string</span></td>
+                      <td class="body-style">&quot;&quot; </td>
+                      <td class="body-style">&nbsp;</td>
+                      <td class="body-style">&nbsp;</td>
+                      <td class="description"> The id for this command. </td>
+                    </tr>
+                    <tr>
+                      <td class="body-style"><span class="literal">class</span></td>
+                      <td class="body-style"><span class="non-terminal">string</span></td>
+                      <td class="body-style">&quot;&quot; </td>
+                      <td class="body-style">&nbsp;</td>
+                      <td class="body-style">&nbsp;</td>
+                      <td class="description"> The stylesheet classes for this command. Each class name in the string should be separated by a comma. </td>
+                    </tr>
+                    <tr>
+                      <td class="body-style"><span class="literal">style</span></td>
+                      <td class="body-style"><span class="non-terminal">string</span></td>
+                      <td class="body-style">&quot;&quot; </td>
+                      <td class="body-style">&nbsp;</td>
+                      <td class="body-style">&nbsp;</td>
+                      <td class="description"> A set of styles. The braces around the styles are not needed. Within the string, multiple styles should be separated by semicolons. </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <p>For more details on these, see <a href="stylesheets.html">Stylesheets</a>.</p>
+                <p>While the properties control <em>what</em> is drawn, the stylesheet and styles control <em>how</em> it is drawn.</p>
                 <h3><a id="axes"></a>axes</h3>
                 <p><span class="literal">axes</span><span class="non-terminal"> frame propertyList</span></p>
                 <p>The axes command draws the axes for the given inertial frame. An observer may be substituted for a frame, in which case the observer's inertial frame at the observer's tau of 0 is used.</p>
@@ -739,8 +692,8 @@
                                 <span class="non-terminal">string</span>
                             </td>
                             <td class="body-style">
-                                ““
-                            </td>
+                                &ldquo;&rdquo;
+                          </td>
                             <td class="body-style">&nbsp;
 
                             </td>
@@ -759,8 +712,8 @@
                                 <span class="non-terminal">string</span>
                             </td>
                             <td class="body-style">
-                                ““
-                            </td>
+                                &ldquo;&rdquo;
+                          </td>
                             <td class="body-style">&nbsp;
 
                             </td>
@@ -1297,16 +1250,16 @@
                         </tr>
                     </tbody>
                 </table>
-                <h2><a id="other-commands"></a>Other Commands</h2>
-                <p>These commands are executed in the order in which they appear in the script, but they don't draw anything.</p>
+                <h2><a id="other-commands"></a>Other Statements</h2>
+                <p>These statements are executed in the order in which they appear in the script, but they don't draw anything.</p>
                 <h3><a id="print"></a>print</h3>
                 <p><span class="literal">print</span><br/><span class="literal">print</span><span class="non-terminal"> expr</span></p>
                 <p>The print command prints the value of the expression. If no expression is given, it prints a blank line.</p>
                 <p>If the expression evaluates to a float, the floating point value is
                 displayed. If it evaluates to a string, the string is displayed. If it evaluates to an object, some information about the object 
                 will be displayed.</p>
-                <p>To print multiple values of any type, concatenate them with a string: a + &quot; &quot; + b will print the values a and b 
-                separated by a space.</p>
+                <p>To print multiple values of any type, concatenate them with a string: <span class="code">a + &quot; &quot; + b</span> will print the values a and b 
+              separated by a space.</p>
             </div>
         </div>
     </body>
