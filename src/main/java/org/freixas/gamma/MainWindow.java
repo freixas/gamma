@@ -178,6 +178,7 @@ public final class MainWindow extends Stage
         MainWindowController controller = loader.getController();
         controller.setMainWindow(this);
         setScene(new Scene(root));
+        root.setUserData(controller);
 
         // The FXML file has display controls by default. This just means that we have
         // a side panel that comes from the FXML file

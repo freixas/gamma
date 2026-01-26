@@ -108,6 +108,13 @@ public final class MainWindowController implements Initializable
 
     private MainWindow mainWindow;
 
+    // Some accessors
+
+    public ChoiceBox<String> getAnimSpeedSelector()
+    {
+        return animSpeedSelector;
+    }
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle)
     {

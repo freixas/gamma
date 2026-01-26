@@ -16,9 +16,11 @@
  */
 package org.freixas.gamma.execution;
 
+import javafx.scene.Node;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import org.freixas.gamma.MainWindow;
+import org.freixas.gamma.MainWindowController;
 import org.freixas.gamma.css.value.Stylesheet;
 import org.freixas.gamma.execution.hcode.SetStatement;
 import org.freixas.gamma.execution.lcode.AnimationStruct;
@@ -243,10 +245,13 @@ public class AnimationEngine
 
         canvas = window.getCanvas();
 
-        animationControls   = (HBox)  window.getScene().lookup("#animation-controls");
+        animationControls   = (HBox) window.getScene().lookup("#animation-controls");
 
-        //noinspection unchecked
-        choiceAnimSpeed    = (ChoiceBox<String>)window.getScene().lookup("#anim-speed-selector");
+        // The following is the recommended way to access things in the controller
+        // rather than using lookup. I'm using it here to avoid an unchecked
+        // cast exception
+
+        choiceAnimSpeed =  ((MainWindowController) window.getScene().getRoot().getUserData()).getAnimSpeedSelector();
 
         buttonAnimStart     = (Button)window.getScene().lookup("#anim-start");
         buttonAnimEnd       = (Button)window.getScene().lookup("#anim-end");
