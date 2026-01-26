@@ -53,7 +53,7 @@ public final class SyntaxErrorDialog extends ScriptErrorDialog
     // **********************************************************************
 
     /**
-     * Display the SyntaxError  dialog.
+     * Display the SyntaxError dialog.
      *
      * @param e The Parse exception with all the error information.
      */
@@ -86,7 +86,7 @@ public final class SyntaxErrorDialog extends ScriptErrorDialog
         // Display it
 
         ((SyntaxErrorDialogController)getController()).setHTML(html);
-        showAndWait();
+        if (!isShowing()) showAndWait();
     }
 
     /**

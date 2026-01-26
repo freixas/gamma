@@ -114,6 +114,8 @@ public final class MainWindow extends Stage
     private VBox displayControlArea;
 
     private ScriptPrintDialog scriptPrintDialog = null;
+    private SyntaxErrorDialog syntaxErrorDialog = null;
+    private RuntimeErrorDialog runtimeErrorDialog = null;
 
     private Screen screen;                      // The screen the window originated on
 
@@ -653,6 +655,19 @@ public final class MainWindow extends Stage
         mainScriptParser = new Parser(mainScript, content);
         try {
             mainScriptParser.parse();
+
+            // If we didn't get a ParseException, remove any
+            // syntax error display
+
+            if (syntaxErrorDialog != null && syntaxErrorDialog.isShowing()) {
+                syntaxErrorDialog.close();
+            }
+
+            // We also want to remove any existing runtime error dialog
+
+            if (runtimeErrorDialog != null && runtimeErrorDialog.isShowing()) {
+                runtimeErrorDialog.close();
+            }
         }
         catch (ParseException e) {
             parseException = e;
@@ -1138,8 +1153,8 @@ public final class MainWindow extends Stage
     public void showParseException(ParseException e)
     {
         try {
-            SyntaxErrorDialog dialog = new SyntaxErrorDialog(this);
-            dialog.displayError(e);
+            if (syntaxErrorDialog == null) syntaxErrorDialog = new SyntaxErrorDialog(this);
+            syntaxErrorDialog.displayError(e);
         }
 
         // If our SyntaxError dialog fails, use a plain Alert dialog
@@ -1158,8 +1173,8 @@ public final class MainWindow extends Stage
     public void showRuntimeException(GammaRuntimeException e)
     {
         try {
-            RuntimeErrorDialog dialog = new RuntimeErrorDialog(this);
-            dialog.displayError(e);
+            if (runtimeErrorDialog == null) runtimeErrorDialog = new RuntimeErrorDialog(this);
+            runtimeErrorDialog.displayError(e);
         }
 
         // If our RuntimeError dialog fails, use a plain Alert dialog
@@ -1208,6 +1223,7 @@ public final class MainWindow extends Stage
             double width = Math.max(400, Math.min(bounds.getWidth() + 40, 800));
             alert.getDialogPane().setMinWidth(width);
         });
+
         if (block) {
             alert.showAndWait();
         }
