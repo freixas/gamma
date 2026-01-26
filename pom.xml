@@ -29,7 +29,7 @@
         <gamma.version>${parsedVersion.majorVersion}.${parsedVersion.minorVersion}.${parsedVersion.incrementalVersion}</gamma.version>
         <gamma.fullversion>${project.version}</gamma.fullversion>
         <!-- Reset to -RC1 after a release and increment it if testing on the release candidate fails -->
-        <gamma.release.tag>v${project.version}-RC1</gamma.release.tag>
+        <gamma.release.tag>v${project.version}-RC2</gamma.release.tag>
         <gamma.java.version>25</gamma.java.version>
         <gamma.maven.version>3.9.11</gamma.maven.version>
         <gamma.git.version>2.51.1</gamma.git.version>
