@@ -325,7 +325,6 @@ public class OffsetAcceleration implements ExecutionImmutable
 
     // **********************************************************
     // *
-    // *
     // * Source is v
     // *
     // **********************************************************
