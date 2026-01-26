@@ -644,7 +644,6 @@
                             <failOnError>true</failOnError>
                             <removeDirectories>${project.build.directory}/installer-work</removeDirectories>
                             <args>
-                                <arg>${project.build.directory}/jpackage-temp</arg>
                                 <arg>--file-associations</arg>
                                 <arg>${project.basedir}/src/packaging/gam.properties</arg>
                                 <arg>--name</arg>
