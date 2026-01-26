@@ -588,7 +588,7 @@ public final class Relativity
      *
      * @param sourceFrequency The frequency of the signal sent by the source.
      * @param v The relative velocity of the source to the receiver as measured
-     * in the co-moving frame * of the receiver at the instant the signal is
+     * in the co-moving frame of the receiver at the instant the signal is
      * received.
      *
      * @return The frequency of the signal received by the receiver.
