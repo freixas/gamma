@@ -619,7 +619,6 @@
                                 <arg>--no-header-files</arg>
                                 <arg>--strip-debug</arg>
                                 <arg>--no-man-pages</arg>
-                                <arg>--file-associations gam.properties</arg>
                                 <!-- <arg> - -compress=2</arg> -->
                             </args>
                         </configuration>
@@ -645,6 +644,9 @@
                             <failOnError>true</failOnError>
                             <removeDirectories>${project.build.directory}/installer-work</removeDirectories>
                             <args>
+                                <arg>${project.build.directory}/jpackage-temp</arg>
+                                <arg>--file-associations</arg>
+                                <arg>${project.basedir}/src/packaging/gam.properties</arg>
                                 <arg>--name</arg>
                                 <!--suppress UnresolvedMavenProperty -->
                                 <arg>gamma-${project.version}-${os.detected.name}-${os.detected.arch}</arg>
