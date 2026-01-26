@@ -53,14 +53,13 @@ public final class SyntaxErrorDialog extends ScriptErrorDialog
     // **********************************************************************
 
     /**
-     * Display the SyntaxError  dialog.
+     * Display the SyntaxError dialog.
      *
      * @param e The Parse exception with all the error information.
      */
     public void displayError(ParseException e)
     {
         TokenContext context = e.getToken().getContext();
-        String code = context.getCode();
         String message = e.getLocalizedMessage();
 
         String linesOK1 = getLinesBeforeError(context.getCode(), context.getCharStart() - 1);
@@ -86,7 +85,7 @@ public final class SyntaxErrorDialog extends ScriptErrorDialog
         // Display it
 
         ((SyntaxErrorDialogController)getController()).setHTML(html);
-        showAndWait();
+        if (!isShowing()) showAndWait();
     }
 
     /**

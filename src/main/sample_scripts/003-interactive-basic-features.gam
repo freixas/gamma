@@ -148,7 +148,7 @@ if (!defined(path)) {
     static path = [path (10, 10), (10, 20), (20, 20), (20, 10)];
 }
 if (showPath) {
-    path path closed: pathClosed, stroke: strokePath, fill: fillPath;
+    path path, closed: pathClosed, stroke: strokePath, fill: fillPath;
 }
 
 // Add a label

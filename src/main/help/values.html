@@ -67,7 +67,7 @@
           <p><span class="literal">(</span> <span class="non-terminal">float</span> <span class="literal">,</span> <span class="non-terminal">float</span> <span class="literal">)</span></p>
           <p>A <span class="definition">coordinate</span> stores two numbers. The meaning of the numbers depends on the context. When use with a drawing command, the values are interpreted as (x, t) values relative to the rest frame.</p>
           <p>Coordinates have two fields: x and t. These can be accessed or modified directly (for example, <span class="code">a = c.x;</span> or <span class="code">c.t = 5;</span>).</p>
-          <h2><a id="frame"></a>Frame          </h2>
+          <h2><a id="frame"></a>Frame</h2>
           <p><span class="literal">[ frame</span> ( ( <span class="literal">velocity</span> <span class="non-terminal">float</span> ) | ( <span class="literal">origin</span> <span class="non-terminal">coordinate</span> ) )* <span class="literal">]</span><br>
             <span class="literal">[ frame</span> <span class="literal">observer</span><span class="non-terminal"> observer</span> ( <span class="literal">at</span> ( <span class="literal">time</span> <span class="non-terminal">float</span> | <span class="literal">tau</span> <span class="non-terminal">float</span> | <span class="literal">distance</span> <span class="non-terminal">float</span> | <span class="literal">velocity</span> <span class="non-terminal">float</span> ) )? ) <span class="literal">]</span><br>
           </p>
@@ -92,26 +92,34 @@
           <p>Line are infinite, but can be bounded with a bounds object using the setBounds() function.</p>
           <h2><a id="observer"></a>Observer</h2>
           <p><span class="literal">[ observer</span> <span class="non-terminal">worldlineList</span>? <span class="literal">]</span></p>
-          <p><span class="definition">Observers</span> are the most complex of the objects in Gamma, so we'll go through their definition one step at a time. An observer is an object moving through spacetime. If the worldlineList is omitted, the observer created is equivalent to [observer origin(0, 0) distance 0 tau 0, velocity 0].</p>
-          <p><span class="non-terminal">worldlineList</span> → <span class="non-terminal">worldlineInitializer</span> | <span class="non-terminal">worldlineSegmentList</span> | ( <span class="non-terminal">worldlineInitializer</span> <span class="literal">,</span> <span class="non-terminal">worldlineSegmentList</span> )</p>
+          <p>An observer is an object moving through spacetime. The path traced by the observer's movement is called a worldline. Every point on the observer's worldline has five values:</p>
+          <ul>
+            <li>x: the worldline's x coordinate .</li>
+            <li>t: the worldline's t coordinate.</li>
+            <li>tau: the observer's local time.</li>
+            <li>d: The distance (in rest frame units) traveled by the observer since d's 0 point.. Typically, the 0 point is at the origin, but it can be placed anywhere on the worldline. Distances prior to the 0 point are negative.</li>
+            <li>v: The observer's velocity.</li>
+          </ul>
+          <p>If the worldlineList is omitted, the observer created is equivalent to [observer origin(0, 0) distance 0 tau 0, velocity 0].</p>
+          <p><span class="non-terminal">worldlineList</span> &rarr; <span class="non-terminal">worldlineInitializer</span> | <span class="non-terminal">worldlineSegmentList</span> | ( <span class="non-terminal">worldlineInitializer</span> <span class="literal">,</span> <span class="non-terminal">worldlineSegmentList</span> )</p>
           <p>The observer begins with an  initializer, a list of worldline segments, or both.</p>
-          <p><span class="non-terminal">worldlineInitializer</span> → ( <span class="literal">origin</span> <span class="non-terminal">coordinate</span> | <span class="literal">distance</span> <span class="non-terminal">float</span> | <span class="literal">tau</span> <span class="non-terminal">expr</span> )*</p>
-          <p>The initializer identifies a point that we will consider the worldline's origin. All parts are optional and the entire initializer can be omitted.</p>
+          <p><span class="non-terminal">worldlineInitializer</span> &rarr; ( <span class="literal">origin</span> <span class="non-terminal">coordinate</span> | <span class="literal">distance</span> <span class="non-terminal">float</span> | <span class="literal">tau</span> <span class="non-terminal">expr</span> )*</p>
+          <p>The initializer identifies the worldline's origin. All parts are optional.</p>
           <ul>
             <li>Origin identifies the location of the worldline's origin relative to the rest frame. If omitted, it is (0, 0).</li>
             <li>Distance gives the distance value at the worldline's origin. If omitted, it is 0.</li>
             <li>Tau gives the observer's local time at the origin point. If omitted, it is 0.</li>
           </ul>
-          <p><span class="non-terminal">worldlineSegmentList</span> →  <span class="non-terminal">worldlineSegment</span> ( <span class="literal">,</span> <span class="non-terminal">worldlineSegment</span> )* </p>
+          <p><span class="non-terminal">worldlineSegmentList</span> &rarr;  <span class="non-terminal">worldlineSegment</span> ( <span class="literal">,</span> <span class="non-terminal">worldlineSegment</span> )* </p>
           <p>The worldline segments consist of one or more segments separate by commas.</p>
-          <p><span class="non-terminal">worldlineSegment</span> → ( <span class="literal">velocity</span> <span class="non-terminal">float</span> | <span class="literal">acceleration</span> <span class="non-terminal">float</span> | <span class="literal">velocity</span> <span class="non-terminal">float</span> <span class="literal">acceleration</span> <span class="non-terminal">float</span> ) <span class="non-terminal">segmentLimit</span>?</p>
+          <p><span class="non-terminal">worldlineSegment</span> &rarr; ( <span class="literal">velocity</span> <span class="non-terminal">float</span> | <span class="literal">acceleration</span> <span class="non-terminal">float</span> | <span class="literal">velocity</span> <span class="non-terminal">float</span> <span class="literal">acceleration</span> <span class="non-terminal">float</span> ) <span class="non-terminal">segmentLimit</span>?</p>
           <p>Each segment has a velocity, an acceleration, or both. Every segment except the last must have a segment limit. The last segment can have a limit, but it is ignored.</p>
           <ul>
-            <li>The velocity is the velocity at the first point of the segment. For the first segment, it is the velocity at the origin. Specifying a velocity for a segment other than the first creates an unphysical, instantaneous acceleration. If omitted, the velocity at the start of a segment is equal to the velocity at the end of the last segment (or 0 for the first segment.</li>
+            <li>The velocity is the velocity at the first point of the segment. For the first segment, it is the velocity at the origin. Specifying a velocity for a segment other than the first creates an unphysical, instantaneous acceleration, but is allowed. If omitted, the velocity at the start of a segment is equal to the velocity at the end of the last segment (or 0 for the first segment).</li>
             <li>Acceleration is specified in g's and is constant for the entire segment. </li>
           </ul>
-          <p><span class="non-terminal">segmentLimit</span> → <span class="literal">time</span> <span class="non-terminal">float</span> | <span class="literal">tau</span> <span class="non-terminal">float</span> | <span class="literal">distance</span> <span class="non-terminal">float</span> | <span class="literal">velocity</span> <span class="non-terminal">float</span></p>
-          <p>The segment limit specifies the end of the segment. Except for velocity, all values are relative.</p>
+          <p><span class="non-terminal">segmentLimit</span> &rarr; <span class="literal">time</span> <span class="non-terminal">float</span> | <span class="literal">tau</span> <span class="non-terminal">float</span> | <span class="literal">distance</span> <span class="non-terminal">float</span> | <span class="literal">velocity</span> <span class="non-terminal">float</span></p>
+          <p>The segment limit specifies the end of the segment. Except for velocity, all values are relative to the start of the segment.</p>
           <ul>
             <li>Time specifies how much rest frame time will pass before the segment ends.</li>
             <li>Tau specifies how much observer time will pass before the segment ends.</li>

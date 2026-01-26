@@ -124,19 +124,19 @@ a:hover, a:active{
 }
 
 .literal {
-  font-family: 'Nunito Sans', sans-serif;
-  font-weight: bold;
-  color: #0178bf;
+	font-family: 'Nunito Sans', sans-serif;
+	font-weight: bold;
+	color: #0178bf;
 }
 .green-literal {
-  font-family: 'Nunito Sans', sans-serif;
-  font-weight: bold;
-  color: forestgreen;
+	font-family: 'Nunito Sans', sans-serif;
+	font-weight: bold;
+	color: forestgreen;
 }
 .red-literal {
-  font-family: 'Nunito Sans', sans-serif;
-  font-weight: bold;
-  color: crimson;
+	font-family: 'Nunito Sans', sans-serif;
+	font-weight: bold;
+	color: crimson;
 }
 
 .non-terminal {
@@ -315,5 +315,3 @@ td {
   width: calc(100vw - 200px);
   z-index: 0;
 }
-
-

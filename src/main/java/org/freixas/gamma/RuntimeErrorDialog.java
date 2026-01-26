@@ -122,7 +122,7 @@ public final class RuntimeErrorDialog extends ScriptErrorDialog
         // Display it
 
         ((RuntimeErrorDialogController)getController()).setHTML(html);
-        showAndWait();
+        if (!isShowing()) showAndWait();
     }
 
 }
