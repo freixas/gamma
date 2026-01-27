@@ -74,6 +74,13 @@ scripts (Gamma programs) under **Help / Sample Scripts**.
 - Specify a problem relative to one inertial frame and draw it relative to another
 - Completely customize the appearance of the diagram (color, line thickness, line style, fonts, etc.)
 
+## IDE Support
+
+If you'd like to code Gamma programs using an Interactive Development Environment
+(IDE), you can use any of JetBrains's IDEs along with the Gamma plugin 
+available at https://github.com/freixas/gamma-language-support. Both are free,
+although JetBrains offers more features with an Ultimate subscription. 
+
 ## Download and install
 
 The release page includes installers for:
