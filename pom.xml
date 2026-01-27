@@ -453,6 +453,7 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
+                            <propertiesEncoding>UTF-8</propertiesEncoding>
                             <outputDirectory>${basedir}/target/dependency/icons</outputDirectory>
                             <resources>
                                 <resource>
@@ -530,7 +531,9 @@
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
+                            <overwrite>true</overwrite>
                             <outputDirectory>${basedir}/.github/workflows</outputDirectory>
+                            <addDefaultExcludes>false</addDefaultExcludes>
                             <resources>
                                 <resource>
                                     <directory>src/main/templates</directory>
