@@ -12,7 +12,7 @@ jobs:
     steps:
     - uses: actions/checkout@v5
       with:
-        ref: refs/tags/v1.0.4-RC1
+        ref: refs/tags/v1.0.4-RC2
     - name: Set up JDK 25
       uses: actions/setup-java@v5
       with:
